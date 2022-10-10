@@ -1,24 +1,24 @@
 //
-//  ContentView.swift
+//  OrderAPI.swift
 //  Coin
 //
-//  Created by Илья on 07.10.2022.
+//  Created by Илья on 10.10.2022.
 //
 
 import SwiftUI
 
 /// Нужно создать класс, соответствующий протоколу ObservableObject. Соответствуя нашему классу ObservableObject, изменения в классе будут автоматически отражены в нашем представлении. Давайте создадим файл Network.swift, в котором мы будем вызывать API.
-class Network: ObservableObject {
+class AccountAPI: ObservableObject {
     
     /// Нужно создать переменную пользователей @Published внутри класса. Тип переменной будет массивом пользователей. Для начала мы инициализируем переменную пустым массивом.
-    @Published var transactions: [Transaction] = []
+    @Published var accounts: [Account] = []
     
     /// Теперь нам нужно создать функцию getUsers, чтобы получить пользователей из API. Создайте функцию внутри класса Network.
-    func getTransaction() {
+    func getAccounts() {
         
         /// Убедимся, что у нас есть URL-адрес, прежде чем запускать следующую строку кода.
-        guard let url = URL(string: "https://berubox.com/coin/transaction") else { fatalError("Missing URL") }
-
+        guard let url = URL(string: "https://berubox.com/coin/account?visible=true") else { fatalError("Missing URL") }
+        
         /// С помощью этого URL-адреса мы создаем URLRequest и передаем его в нашу dataTask.
         var urlRequest = URLRequest(url: url)
         urlRequest.setValue("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjUyNTg5ODMyMTEsInN1YiI6IjEifQ.TneMNueJU3VT0XVGb8EGK8zyyObrmPk_x9kdh-aJDwQ", forHTTPHeaderField: "Authorization")
@@ -41,10 +41,10 @@ class Network: ObservableObject {
                     do {
                         
                         /// Декодируем получаемые данные в формате JSON, используя JSONDecoder, и декодируем данные в массив пользователей.
-                        let decodedTransaction = try JSONDecoder().decode([Transaction].self, from: data)
+                        let decodedAccount = try JSONDecoder().decode([Account].self, from: data)
 
                         /// После завершения декодирования мы присваиваем его пользовательской переменной, которую мы определили в верхней части класса.
-                        self.transactions = decodedTransaction
+                        self.accounts = decodedAccount
                     } catch let error {
                         print("Error decoding: ", error)
                     }

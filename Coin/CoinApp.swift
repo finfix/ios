@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct CoinApp: App {
+    
+    var trAPI = TransactionAPI()
+    var acAPI = AccountAPI()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(trAPI)
+                .environmentObject(acAPI)
         }
     }
 }
