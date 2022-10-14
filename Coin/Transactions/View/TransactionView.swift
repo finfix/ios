@@ -10,35 +10,46 @@ import SwiftUI
 struct TransactionView: View {
     
     /// Добавляем Network в качестве EnvironmentObject
-    @EnvironmentObject var network: TransactionAPI
+    @StateObject var vm = TransactionViewModel()
+    @State var showFilters = false
     
     var body: some View {
         NavigationView {
-            List(network.transactions, id: \.id) { transaction in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text(transaction.dateTransaction)
-                        Text("\(transaction.accountFromID) -> \(transaction.accountToID)")
-                            .font(.footnote)
-                        
-                        if transaction.amountTo == transaction.amountFrom {
-                            Text(String(format: "%.2f", transaction.amountTo))
+            VStack {
+                List(vm.transactionsFiltered, id: \.id) { transaction in
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(transaction.dateTransaction)
+                            Text("\(transaction.accountFromID) -> \(transaction.accountToID)")
                                 .font(.footnote)
-                        } else {
-                            Text(String(format: "%.2f", transaction.amountFrom) + " -> " + String(format: "%.2f", transaction.amountTo))
+                            
+                            if transaction.amountTo == transaction.amountFrom {
+                                Text(String(format: "%.2f", transaction.amountTo))
+                                    .font(.footnote)
+                            } else {
+                                Text(String(format: "%.2f", transaction.amountFrom) + " -> " + String(format: "%.2f", transaction.amountTo))
+                                    .font(.footnote)
+                            }
+                        }
+                        Spacer()
+                        if let note = transaction.note {
+                            Text(note)
                                 .font(.footnote)
                         }
                     }
-                    Spacer()
-                    if let note = transaction.note {
-                        Text(note)
-                            .font(.footnote)
-                    }
+                    .padding()
                 }
-                .padding()
-            }
-            .onAppear {
-                network.getTransaction()
+                .onAppear {
+                    vm.getTransaction()
+                }
+                .navigationBarTitle(Text("Транзакции"))
+                .navigationBarItems(trailing: NavigationLink {
+                    FilterView(withoutBalancing: self.$vm.withoutBalancing, transactionType: self.$vm.transactionType)
+                } label: {
+                    Text("Фильтры")
+                }
+                )
+                    
             }
         }
     }

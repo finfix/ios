@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B5D57EE728F94774009605CF /* FilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EE628F94774009605CF /* FilterView.swift */; };
+		B5D57EE928F95AE2009605CF /* ViewModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EE828F95AE2009605CF /* ViewModal.swift */; };
 		B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC6228F01CA80037A21A /* CoinApp.swift */; };
-		B5F9CC6528F01CA80037A21A /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC6428F01CA80037A21A /* TransactionAPI.swift */; };
 		B5F9CC6728F01CA90037A21A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6628F01CA90037A21A /* Assets.xcassets */; };
 		B5F9CC6A28F01CA90037A21A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6928F01CA90037A21A /* Preview Assets.xcassets */; };
 		B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC7028F01E1A0037A21A /* ContentView.swift */; };
@@ -20,9 +21,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B5D57EE628F94774009605CF /* FilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterView.swift; sourceTree = "<group>"; };
+		B5D57EE828F95AE2009605CF /* ViewModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModal.swift; sourceTree = "<group>"; };
 		B5F9CC5F28F01CA80037A21A /* Coin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Coin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5F9CC6228F01CA80037A21A /* CoinApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinApp.swift; sourceTree = "<group>"; };
-		B5F9CC6428F01CA80037A21A /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
 		B5F9CC6628F01CA90037A21A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B5F9CC6928F01CA90037A21A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B5F9CC7028F01E1A0037A21A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -44,6 +46,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B5D57EE528F94709009605CF /* Subview */ = {
+			isa = PBXGroup;
+			children = (
+				B5D57EE628F94774009605CF /* FilterView.swift */,
+			);
+			path = Subview;
+			sourceTree = "<group>";
+		};
 		B5F9CC5628F01CA80037A21A = {
 			isa = PBXGroup;
 			children = (
@@ -89,20 +99,12 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
-		B5FB6AA028F3D5D300C2A2AC /* Network */ = {
-			isa = PBXGroup;
-			children = (
-				B5F9CC6428F01CA80037A21A /* TransactionAPI.swift */,
-			);
-			path = Network;
-			sourceTree = "<group>";
-		};
 		B5FB6AA128F3D5EF00C2A2AC /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
 				B5FB6AA228F3D5FC00C2A2AC /* View */,
 				B5FB6A9F28F3D5C000C2A2AC /* Model */,
-				B5FB6AA028F3D5D300C2A2AC /* Network */,
+				B5D57EE828F95AE2009605CF /* ViewModal.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -110,6 +112,7 @@
 		B5FB6AA228F3D5FC00C2A2AC /* View */ = {
 			isa = PBXGroup;
 			children = (
+				B5D57EE528F94709009605CF /* Subview */,
 				B5FB6AA328F3D62D00C2A2AC /* TransactionView.swift */,
 			);
 			path = View;
@@ -222,8 +225,9 @@
 				B5FB6AAA28F3D72300C2A2AC /* Account.swift in Sources */,
 				B5FB6AAE28F3D86000C2A2AC /* AccountView.swift in Sources */,
 				B5FB6AAC28F3D80B00C2A2AC /* AccountAPI.swift in Sources */,
-				B5F9CC6528F01CA80037A21A /* TransactionAPI.swift in Sources */,
+				B5D57EE928F95AE2009605CF /* ViewModal.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
+				B5D57EE728F94774009605CF /* FilterView.swift in Sources */,
 				B5F9CC7328F01E4D0037A21A /* Transaction.swift in Sources */,
 				B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */,
 				B5FB6AA428F3D62D00C2A2AC /* TransactionView.swift in Sources */,
