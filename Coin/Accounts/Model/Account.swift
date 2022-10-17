@@ -14,7 +14,7 @@ struct Account: Decodable {
     var accounting: Bool
     var budget: Double?
     var currencySignatura: String
-    var icon_id: Int
+    var iconID: Int
     var id: Int
     var name: String
     var remainder: Double

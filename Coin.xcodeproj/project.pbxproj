@@ -7,8 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B5D57EE728F94774009605CF /* FilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EE628F94774009605CF /* FilterView.swift */; };
-		B5D57EE928F95AE2009605CF /* ViewModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EE828F95AE2009605CF /* ViewModal.swift */; };
+		B5610EF928FC88FE0063AFEB /* CreateTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */; };
+		B5610EFD28FC98B50063AFEB /* CreateTransactionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* CreateTransactionModel.swift */; };
+		B5610F0128FC98D70063AFEB /* CreateTransactionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0028FC98D70063AFEB /* CreateTransactionViewModel.swift */; };
+		B5610F0428FC9A420063AFEB /* APIs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* APIs.swift */; };
+		B5610F0628FD24D70063AFEB /* UpdateTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0528FD24D70063AFEB /* UpdateTransactionView.swift */; };
+		B5D57EE728F94774009605CF /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EE628F94774009605CF /* TransactionFilterView.swift */; };
+		B5D57EE928F95AE2009605CF /* TransactionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EE828F95AE2009605CF /* TransactionViewModel.swift */; };
+		B5D57EED28F95E35009605CF /* AccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EEC28F95E35009605CF /* AccountViewModel.swift */; };
+		B5D57EF028F95F96009605CF /* AccountFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EEF28F95F96009605CF /* AccountFilterView.swift */; };
 		B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC6228F01CA80037A21A /* CoinApp.swift */; };
 		B5F9CC6728F01CA90037A21A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6628F01CA90037A21A /* Assets.xcassets */; };
 		B5F9CC6A28F01CA90037A21A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6928F01CA90037A21A /* Preview Assets.xcassets */; };
@@ -16,13 +23,19 @@
 		B5F9CC7328F01E4D0037A21A /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC7228F01E4D0037A21A /* Transaction.swift */; };
 		B5FB6AA428F3D62D00C2A2AC /* TransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA328F3D62D00C2A2AC /* TransactionView.swift */; };
 		B5FB6AAA28F3D72300C2A2AC /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA928F3D72300C2A2AC /* Account.swift */; };
-		B5FB6AAC28F3D80B00C2A2AC /* AccountAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AAB28F3D80B00C2A2AC /* AccountAPI.swift */; };
 		B5FB6AAE28F3D86000C2A2AC /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AAD28F3D86000C2A2AC /* AccountView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B5D57EE628F94774009605CF /* FilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterView.swift; sourceTree = "<group>"; };
-		B5D57EE828F95AE2009605CF /* ViewModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModal.swift; sourceTree = "<group>"; };
+		B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTransactionView.swift; sourceTree = "<group>"; };
+		B5610EFC28FC98B50063AFEB /* CreateTransactionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTransactionModel.swift; sourceTree = "<group>"; };
+		B5610F0028FC98D70063AFEB /* CreateTransactionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTransactionViewModel.swift; sourceTree = "<group>"; };
+		B5610F0328FC9A420063AFEB /* APIs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIs.swift; sourceTree = "<group>"; };
+		B5610F0528FD24D70063AFEB /* UpdateTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateTransactionView.swift; sourceTree = "<group>"; };
+		B5D57EE628F94774009605CF /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
+		B5D57EE828F95AE2009605CF /* TransactionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionViewModel.swift; sourceTree = "<group>"; };
+		B5D57EEC28F95E35009605CF /* AccountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountViewModel.swift; sourceTree = "<group>"; };
+		B5D57EEF28F95F96009605CF /* AccountFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountFilterView.swift; sourceTree = "<group>"; };
 		B5F9CC5F28F01CA80037A21A /* Coin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Coin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5F9CC6228F01CA80037A21A /* CoinApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinApp.swift; sourceTree = "<group>"; };
 		B5F9CC6628F01CA90037A21A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -31,7 +44,6 @@
 		B5F9CC7228F01E4D0037A21A /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		B5FB6AA328F3D62D00C2A2AC /* TransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionView.swift; sourceTree = "<group>"; };
 		B5FB6AA928F3D72300C2A2AC /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
-		B5FB6AAB28F3D80B00C2A2AC /* AccountAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAPI.swift; sourceTree = "<group>"; };
 		B5FB6AAD28F3D86000C2A2AC /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -46,10 +58,78 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B5610EFA28FC98920063AFEB /* CreateTransaction */ = {
+			isa = PBXGroup;
+			children = (
+				B5610EFF28FC98C40063AFEB /* ViewModel */,
+				B5610EFE28FC98BA0063AFEB /* Model */,
+				B5610EFB28FC989E0063AFEB /* View */,
+			);
+			path = CreateTransaction;
+			sourceTree = "<group>";
+		};
+		B5610EFB28FC989E0063AFEB /* View */ = {
+			isa = PBXGroup;
+			children = (
+				B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		B5610EFE28FC98BA0063AFEB /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				B5610EFC28FC98B50063AFEB /* CreateTransactionModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		B5610EFF28FC98C40063AFEB /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				B5610F0028FC98D70063AFEB /* CreateTransactionViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		B5610F0228FC9A270063AFEB /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				B5610F0328FC9A420063AFEB /* APIs.swift */,
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
 		B5D57EE528F94709009605CF /* Subview */ = {
 			isa = PBXGroup;
 			children = (
-				B5D57EE628F94774009605CF /* FilterView.swift */,
+				B5D57EE628F94774009605CF /* TransactionFilterView.swift */,
+				B5610EFA28FC98920063AFEB /* CreateTransaction */,
+				B5610F0528FD24D70063AFEB /* UpdateTransactionView.swift */,
+			);
+			path = Subview;
+			sourceTree = "<group>";
+		};
+		B5D57EEA28F95DDF009605CF /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				B5D57EE828F95AE2009605CF /* TransactionViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		B5D57EEB28F95E28009605CF /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				B5D57EEC28F95E35009605CF /* AccountViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		B5D57EEE28F95F86009605CF /* Subview */ = {
+			isa = PBXGroup;
+			children = (
+				B5D57EEF28F95F96009605CF /* AccountFilterView.swift */,
 			);
 			path = Subview;
 			sourceTree = "<group>";
@@ -73,6 +153,7 @@
 		B5F9CC6128F01CA80037A21A /* Coin */ = {
 			isa = PBXGroup;
 			children = (
+				B5610F0228FC9A270063AFEB /* Network */,
 				B5F9CC7028F01E1A0037A21A /* ContentView.swift */,
 				B5F9CC6228F01CA80037A21A /* CoinApp.swift */,
 				B5FB6AA528F3D67800C2A2AC /* Accounts */,
@@ -102,9 +183,9 @@
 		B5FB6AA128F3D5EF00C2A2AC /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				B5D57EEA28F95DDF009605CF /* ViewModel */,
 				B5FB6AA228F3D5FC00C2A2AC /* View */,
 				B5FB6A9F28F3D5C000C2A2AC /* Model */,
-				B5D57EE828F95AE2009605CF /* ViewModal.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -121,8 +202,8 @@
 		B5FB6AA528F3D67800C2A2AC /* Accounts */ = {
 			isa = PBXGroup;
 			children = (
+				B5D57EEB28F95E28009605CF /* ViewModel */,
 				B5FB6AA828F3D6D800C2A2AC /* Model */,
-				B5FB6AA728F3D6D000C2A2AC /* Network */,
 				B5FB6AA628F3D6CC00C2A2AC /* View */,
 			);
 			path = Accounts;
@@ -131,17 +212,10 @@
 		B5FB6AA628F3D6CC00C2A2AC /* View */ = {
 			isa = PBXGroup;
 			children = (
+				B5D57EEE28F95F86009605CF /* Subview */,
 				B5FB6AAD28F3D86000C2A2AC /* AccountView.swift */,
 			);
 			path = View;
-			sourceTree = "<group>";
-		};
-		B5FB6AA728F3D6D000C2A2AC /* Network */ = {
-			isa = PBXGroup;
-			children = (
-				B5FB6AAB28F3D80B00C2A2AC /* AccountAPI.swift */,
-			);
-			path = Network;
 			sourceTree = "<group>";
 		};
 		B5FB6AA828F3D6D800C2A2AC /* Model */ = {
@@ -223,11 +297,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5FB6AAA28F3D72300C2A2AC /* Account.swift in Sources */,
+				B5610F0128FC98D70063AFEB /* CreateTransactionViewModel.swift in Sources */,
+				B5610F0628FD24D70063AFEB /* UpdateTransactionView.swift in Sources */,
+				B5D57EED28F95E35009605CF /* AccountViewModel.swift in Sources */,
 				B5FB6AAE28F3D86000C2A2AC /* AccountView.swift in Sources */,
-				B5FB6AAC28F3D80B00C2A2AC /* AccountAPI.swift in Sources */,
-				B5D57EE928F95AE2009605CF /* ViewModal.swift in Sources */,
+				B5610EF928FC88FE0063AFEB /* CreateTransactionView.swift in Sources */,
+				B5D57EE928F95AE2009605CF /* TransactionViewModel.swift in Sources */,
+				B5D57EF028F95F96009605CF /* AccountFilterView.swift in Sources */,
+				B5610EFD28FC98B50063AFEB /* CreateTransactionModel.swift in Sources */,
+				B5610F0428FC9A420063AFEB /* APIs.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
-				B5D57EE728F94774009605CF /* FilterView.swift in Sources */,
+				B5D57EE728F94774009605CF /* TransactionFilterView.swift in Sources */,
 				B5F9CC7328F01E4D0037A21A /* Transaction.swift in Sources */,
 				B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */,
 				B5FB6AA428F3D62D00C2A2AC /* TransactionView.swift in Sources */,

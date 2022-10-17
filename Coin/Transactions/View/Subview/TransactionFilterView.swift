@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct FilterView: View {
+struct TransactionFilterView: View {
     
     @ObservedObject var vm = TransactionViewModel()
     @Binding var withoutBalancing: Bool
@@ -31,7 +31,9 @@ struct FilterView: View {
 }
 
 struct FilterView_Previews: PreviewProvider {
+    @StateObject var vm = TransactionViewModel()
+    
     static var previews: some View {
-        Text("")
+        TransactionFilterView(withoutBalancing: .constant(false), transactionType: .constant(0))
     }
 }

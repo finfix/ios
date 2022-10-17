@@ -12,18 +12,18 @@ struct ContentView: View {
     var body: some View {
         TabView {
             TransactionView()
-            .tabItem{
-                Image(systemName: "1.circle")
-                Text("Транзакции")
-            }
-            .tag(1)
+                .tabItem{
+                    Image(systemName: "1.circle")
+                    Text("Транзакции")
+                }
+                .tag(1)
             
             AccountView()
-            .tag(2)
-            .tabItem {
-                Image(systemName: "2.circle")
-                Text("Счета")
-            }
+                .tag(2)
+                .tabItem {
+                    Image(systemName: "2.circle")
+                    Text("Счета")
+                }
         }
     }
 }

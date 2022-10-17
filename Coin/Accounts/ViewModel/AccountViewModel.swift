@@ -1,5 +1,5 @@
 //
-//  ViewModal.swift
+//  ViewModel.swift
 //  Coin
 //
 //  Created by Илья on 14.10.2022.
@@ -7,36 +7,78 @@
 
 import SwiftUI
 
-class TransactionViewModel: ObservableObject {
-    @Published var transactions = [Transaction]()
+class AccountViewModel: ObservableObject {
+    @Published var accounts = [Account]()
     
-    @Published var withoutBalancing = false
-    @Published var transactionType = 0
+    @Published var visible = true
+    @Published var accounting = true
+    @Published var accountType = 1
+    @Published var withoutZeroRemainder = true
     
-    var types = ["consumption", "income", "balancing", "transfer"]
-    
-    
-    
-    
-    var transactionsFiltered: [Transaction]  {
+    var todayRemainder: Int {
         
-        var subfiltered = transactions
-        
-        if withoutBalancing {
-            subfiltered = subfiltered.filter { !($0.accountFromID == 0) }
-        }
-        
-        if transactionType != 0 {
-            subfiltered = subfiltered.filter { $0.typeSignatura == types[transactionType] }
-        }
-        
-        return subfiltered
+        return getTodayRemainder(sumBudget) - sum
     }
     
-    func getTransaction() {
+    func getTodayRemainder(_ remainder: Int) -> Int {
+        
+        let numDays = Calendar.current.range(of: .day, in: .month, for: Date())!.count
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd"
+        let day = formatter.string(from: Date())
+        
+        return (remainder / numDays) * Int(day)!
+    }
+    
+    var monthRemainder: Int {
+        return sumBudget - sum
+    }
+
+    var sum: Int {
+        var sum = 0.0
+        accountsFiltered.forEach { account in
+            sum += account.remainder
+        }
+        return Int(sum)
+    }
+    
+    var sumBudget: Int {
+        var sum = 0.0
+        accountsFiltered.forEach { account in
+            sum += account.budget ?? 0
+        }
+        return Int(sum)
+    }
+    
+    var types = ["earnings", "expense", "regular", "credit", "investment", "debt"]
+    
+    var accountsFiltered: [Account]  {
+        
+        var subfiltered = accounts
+        
+        if visible {
+            subfiltered = subfiltered.filter { $0.visible }
+        }
+        
+        if accounting {
+            subfiltered = subfiltered.filter { $0.accounting }
+        }
+        
+        if accountType != 0 {
+            subfiltered = subfiltered.filter { $0.typeSignatura == types[accountType] }
+        }
+        
+        if withoutZeroRemainder {
+            subfiltered = subfiltered.filter { $0.remainder != 0 }
+        }
+        
+       return subfiltered.sorted { $0.remainder > $1.remainder }
+    }
+    
+    func getAccount() {
         
         /// Убедимся, что у нас есть URL-адрес, прежде чем запускать следующую строку кода.
-        guard let url = URL(string: "https://berubox.com/coin/transaction") else { fatalError("Missing URL") }
+        guard let url = URL(string: "https://berubox.com/coin/account?period=month") else { fatalError("Missing URL") }
         
         /// С помощью этого URL-адреса мы создаем URLRequest и передаем его в нашу dataTask.
         var urlRequest = URLRequest(url: url)
@@ -60,10 +102,10 @@ class TransactionViewModel: ObservableObject {
                     do {
                         
                         /// Декодируем получаемые данные в формате JSON, используя JSONDecoder, и декодируем данные в массив пользователей.
-                        let decodedTransaction = try JSONDecoder().decode([Transaction].self, from: data)
+                        let decodedAccount = try JSONDecoder().decode([Account].self, from: data)
                         
                         /// После завершения декодирования мы присваиваем его пользовательской переменной, которую мы определили в верхней части класса.
-                        self.transactions = decodedTransaction
+                        self.accounts = decodedAccount
                     } catch let error {
                         print("Error decoding: ", error)
                     }
@@ -90,11 +132,6 @@ class TransactionViewModel: ObservableObject {
         /// Возобновляем dataTask с помощью dataTask.resume().
         dataTask.resume()
     }
-    
-    func filtered() {
-        transactions = transactions.filter({ transaction in
-            transaction.id == 5
-        })
-    }
 }
+
 
