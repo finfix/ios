@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "06E34354-483F-4B27-8564-B33ADC856257"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A519A29E-E3E2-430D-94DC-48EE5F58A4EC"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Coin/Views/Login/LoginView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "25"
+            endingLineNumber = "25"
+            landmarkName = "body"
+            landmarkType = "24">
+            <Locations>
+               <Location
+                  uuid = "A519A29E-E3E2-430D-94DC-48EE5F58A4EC - a73b47af809edfaa"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; () in closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.ModifiedContent&lt;SwiftUI.TextField&lt;SwiftUI.Text&gt;, Coin.CustomTextField&gt;, SwiftUI.ModifiedContent&lt;SwiftUI.TextField&lt;SwiftUI.Text&gt;, Coin.CustomTextField&gt;, SwiftUI.ModifiedContent&lt;SwiftUI.Button&lt;SwiftUI.Text&gt;, Coin.CustomButton&gt;)&gt; in Coin.LoginView.body.getter : some"
+                  moduleName = "Coin"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/Views/Login/LoginView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "25"
+                  endingLineNumber = "25"
+                  offsetFromSymbolStart = "32">
+               </Location>
+               <Location
+                  uuid = "A519A29E-E3E2-430D-94DC-48EE5F58A4EC - 90e7ff7fe9e74a18"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Coin.LoginResponse) -&gt; () in closure #1 () -&gt; () in closure #1 () -&gt; SwiftUI.TupleView&lt;(SwiftUI.ModifiedContent&lt;SwiftUI.TextField&lt;SwiftUI.Text&gt;, Coin.CustomTextField&gt;, SwiftUI.ModifiedContent&lt;SwiftUI.TextField&lt;SwiftUI.Text&gt;, Coin.CustomTextField&gt;, SwiftUI.ModifiedContent&lt;SwiftUI.Button&lt;SwiftUI.Text&gt;, Coin.CustomButton&gt;)&gt; in Coin.LoginView.body.getter : some"
+                  moduleName = "Coin"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/Views/Login/LoginView.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "26"
+                  endingLineNumber = "26"
+                  offsetFromSymbolStart = "68">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "21BB7FD1-6DC3-4F89-88BD-7ED8F5E79516"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Coin/Network/APIs.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "114"
+            endingLineNumber = "114"
+            landmarkName = "UserAPI"
+            landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
