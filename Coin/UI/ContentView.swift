@@ -6,17 +6,21 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct ContentView: View {
     
     @EnvironmentObject var auth: AppSettings
     
     var body: some View {
-        if auth.isLogin {
-            MainView()
-        } else {
-            LoginView()
+        Group {
+            if auth.isLogin {
+                MainView()
+            } else {
+                LoginView()
+            }
         }
+        .onAppear { print("База данных реалм лежит тут: " + (Realm.Configuration.defaultConfiguration.fileURL!.path)) }
     }
 }
 
@@ -27,9 +31,6 @@ struct MainView: View {
     var body: some View {
         TabView {
             AccountView()
-                .onAppear {
-                    print(vm.isLogin)
-                }
                 .tag(1)
                 .tabItem {
                     Image(systemName: "1.circle")

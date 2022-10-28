@@ -29,7 +29,7 @@ class ApiHelper {
                     // Если не парсится, обрабатываем ошибку
                 } catch {
                     print("print. Мы не смогли распарсить ответ в структуру. Ошибка: \(error)")
-                    return (nil, ErrorModel(developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
+                    return (nil, ErrorModel(path:"", developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
                 }
                 
                 // Если код не успешный
@@ -42,8 +42,9 @@ class ApiHelper {
                     
                     // Если не парсится, обрабатываем ошибку
                 } catch {
-                    print("print. Мы не смогли распарсить ошибку в структуру. Ошибка: \(error)")
-                    return(nil, ErrorModel(developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
+                    print("Мы не смогли распарсить ошибку в структуру. Проблема: \(error)")
+                    print("Ошибка: \(String(decoding: data, as: UTF8.self))")
+                    return(nil, ErrorModel(path:"", developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
                 }
             }
             
@@ -51,7 +52,7 @@ class ApiHelper {
         case .failure(let error):
             
             // Обрабатываем ошибку
-            return(nil, ErrorModel(developerTextError: "\(error)", humanTextError: "Что-то пошло не так"), false)
+            return(nil, ErrorModel(path:"", developerTextError: "\(error)", humanTextError: "Что-то пошло не так"), false)
         }
     }
     
@@ -79,8 +80,8 @@ class ApiHelper {
                     
                     // Если не парсится, обрабатываем ошибку
                 } catch {
-                    print("print. Мы не смогли распарсить ошибку в структуру. Ошибка: \(error)")
-                    return(ErrorModel(developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
+                    print("Мы не смогли распарсить ошибку в структуру. Ошибка: \(error)")
+                    return(ErrorModel(path:"", developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
                 }
             }
             
@@ -88,7 +89,7 @@ class ApiHelper {
         case .failure(let error):
             
             // Обрабатываем ошибку
-            return(ErrorModel(developerTextError: "\(error)", humanTextError: "Что-то пошло не так"), false)
+            return(ErrorModel(path:"", developerTextError: "\(error)", humanTextError: "Что-то пошло не так"), false)
         }
     }
 }

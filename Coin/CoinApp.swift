@@ -32,6 +32,7 @@ class AppSettings: ObservableObject {
     func showErrorAlert(error: ErrorModel) {
         alertErrorShowing = true
         alertErrorMessage = error.humanTextError
+        print(error.path)
         print(error.developerTextError)
         print(error.context ?? "")
     }

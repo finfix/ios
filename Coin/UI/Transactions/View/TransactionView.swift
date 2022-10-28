@@ -6,12 +6,18 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct TransactionView: View {
     
     /// Добавляем Network в качестве EnvironmentObject
     @StateObject var vm = TransactionViewModel()
+    
     @EnvironmentObject var appSettings: AppSettings
+    
+    @ObservedResults (
+        Transaction.self
+      ) var transactions
     
     @State var showFilters = false
     @State var showCreate = false
@@ -23,7 +29,7 @@ struct TransactionView: View {
             VStack {
                 SearchBar(searchText: $vm.searchText)
                 List {
-                    ForEach (vm.transactionsFiltered, id: \.id) { transaction in
+                    ForEach (transactions, id: \.id) { transaction in
                         NavigationLink(isActive: $showUpdate) {
                             UpdateTransactionView(isOpeningFrame: $showUpdate, t: transaction)
                         } label: {

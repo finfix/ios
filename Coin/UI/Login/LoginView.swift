@@ -22,7 +22,6 @@ struct LoginView: View {
                     .modifier(CustomTextField())
                 Button {
                     vm.auth(appSettings)
-                    print(appSettings.isLogin)
                 } label: {
                     Text("Sign In")
                 }

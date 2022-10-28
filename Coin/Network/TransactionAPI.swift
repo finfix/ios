@@ -7,6 +7,7 @@
 
 import Foundation
 import Alamofire
+import SwiftUI
 
 let basePath = "https://berubox.com/coin"
 
@@ -17,12 +18,12 @@ class TransactionAPI {
         
         // Проверяем наличие accessToken
         guard let token = Defaults.accessToken else {
-            completionHandler(nil, ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
+            completionHandler(nil, ErrorModel(path: "", developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
             return
         }
         
         // Добавляем accessToken
-        let header: HTTPHeaders = ["Authorization": token]
+        let header: HTTPHeaders = ["Authorization": token, "DeviceID": UIDevice.current.identifierForVendor!.uuidString]
         
         // Делаем запрос на сервер
         AF.request(basePath + "/transaction", method: .get, headers: header).responseData { response in
@@ -43,12 +44,12 @@ class TransactionAPI {
         
         // Проверяем наличие accessToken
         guard let token = Defaults.accessToken else {
-            completionHandler(ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
+            completionHandler(ErrorModel(path:"", developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
             return
         }
         
         // Добавляем accessToken
-        let header: HTTPHeaders = ["Authorization": token]
+        let header: HTTPHeaders = ["Authorization": token, "DeviceID": UIDevice.current.identifierForVendor!.uuidString]
         
         // Делаем запрос на сервер
         AF.request(basePath + "/transaction", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: header).responseData { response in
@@ -66,12 +67,12 @@ class TransactionAPI {
         
         // Проверяем наличие accessToken
         guard let token = Defaults.accessToken else {
-            completionHandler(ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
+            completionHandler(ErrorModel(path:"", developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
             return
         }
         
         // Добавляем accessToken
-        let header: HTTPHeaders = ["Authorization": token]
+        let header: HTTPHeaders = ["Authorization": token, "DeviceID": UIDevice.current.identifierForVendor!.uuidString]
         
         // Делаем запрос на сервер
         AF.request(basePath + "/transaction", method: .patch, headers: header).responseData { response in
@@ -89,12 +90,12 @@ class TransactionAPI {
         
         // Проверяем наличие accessToken
         guard let token = Defaults.accessToken else {
-            completionHandler(ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
+            completionHandler(ErrorModel(path:"", developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
             return
         }
         
         // Добавляем accessToken
-        let header: HTTPHeaders = ["Authorization": token]
+        let header: HTTPHeaders = ["Authorization": token, "DeviceID": UIDevice.current.identifierForVendor!.uuidString]
         
         // Делаем запрос на сервер
         AF.request(basePath + "/transaction?id=\(id)", method: .delete, headers: header).responseData { response in

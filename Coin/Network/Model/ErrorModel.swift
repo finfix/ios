@@ -8,6 +8,7 @@
 import Foundation
 
 struct ErrorModel: Decodable {
+    var path: String
     var developerTextError: String
     var humanTextError: String
     var statusCode: Int?

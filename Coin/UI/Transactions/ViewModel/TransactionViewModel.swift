@@ -10,8 +10,9 @@ import Combine
 
 class TransactionViewModel: ObservableObject {
     
+    @Environment(\.realm) var realm
+    
     //MARK: - Vars
-    @Published var transactions = [Transaction]()
     @Published var withoutBalancing = false
     @Published var transactionType = 0
     @Published var searchText = ""
@@ -29,35 +30,35 @@ class TransactionViewModel: ObservableObject {
     
     var types = ["consumption", "income", "balancing", "transfer"]
     
-    var transactionsFiltered: [Transaction]  {
-        
-        var subfiltered = transactions
-        
-        if searchText != "" {
-            subfiltered = subfiltered.filter { ($0.note ?? "").hasPrefix(searchText) }
-        }
-        
-        if withoutBalancing {
-            subfiltered = subfiltered.filter { !($0.accountFromID == 0) }
-        }
-        
-        if transactionType != 0 {
-            subfiltered = subfiltered.filter { $0.typeSignatura == types[transactionType] }
-        }
-        
-        return subfiltered
-    }
+    // var transactionsFiltered: [Transaction]  {
+    //
+    //     var subfiltered = transactions
+    //
+    //     if searchText != "" {
+    //         subfiltered = subfiltered.filter { ($0.note ?? "").hasPrefix(searchText) }
+    //     }
+    //
+    //     if withoutBalancing {
+    //         subfiltered = subfiltered.filter { !($0.accountFromID == 0) }
+    //     }
+    //
+    //     if transactionType != 0 {
+    //         subfiltered = subfiltered.filter { $0.typeSignatura == types[transactionType] }
+    //     }
+    //
+    //     return subfiltered
+    // }
     
     //MARK: - Methods
     func getTransaction(_ settings: AppSettings) {
         
         TransactionAPI().GetTransactions() { response, error in
-            
-            
             if let err = error {
                 settings.showErrorAlert(error: err)
             } else if let response = response {
-                self.transactions = response
+                try? self.realm.write {
+                    self.realm.add(response)
+                }
             }
         }
     }
@@ -66,16 +67,18 @@ class TransactionViewModel: ObservableObject {
         
         var id = 0
         
-        for i in offsets.makeIterator() {
-            id = transactionsFiltered[i].id
-        }
+        // for i in offsets.makeIterator() {
+        //     id = transactionsFiltered[i].id
+        // }
         
         TransactionAPI().DeleteTransaction(id: id) { error in
             
             if let err = error {
                 settings.showErrorAlert(error: err)
             } else {
-                self.transactions.remove(atOffsets: offsets)
+                // try? self.realm.delete {
+                //     self.realm.add(response)
+                // }
             }
         }
     }
