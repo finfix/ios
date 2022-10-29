@@ -21,7 +21,7 @@ struct AccountCircleView: View {
     // Расход на текущий день
         var todayExpense: Int {
             var sum = 0.0
-            let expenses = vm.accounts.filter { $0.typeSignatura == "expense" }
+            let expenses = vm.accounts.filter { $0.typeSignatura == "expense" && $0.accounting }
             expenses.forEach { expense in
                 sum += expense.remainder
             }
@@ -31,7 +31,7 @@ struct AccountCircleView: View {
         // Баланс
         var balance: Int {
             var sum = 0.0
-            let regulars = vm.accounts.filter { $0.typeSignatura == "regular" }
+            let regulars = vm.accounts.filter { $0.typeSignatura == "regular" && $0.accounting }
             regulars.forEach { regular in
                 sum += regular.remainder
             }
@@ -41,7 +41,7 @@ struct AccountCircleView: View {
         // Остаток до конца месяца
         var mountRemainder: Int {
             var sum = 0.0
-            let expenses = vm.accounts.filter { $0.typeSignatura == "expense" }
+            let expenses = vm.accounts.filter { $0.typeSignatura == "expense" && $0.accounting }
             expenses.forEach { expense in
                 sum += expense.budget ?? 0
             }

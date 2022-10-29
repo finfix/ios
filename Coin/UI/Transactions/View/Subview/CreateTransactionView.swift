@@ -26,7 +26,9 @@ struct CreateTransactionView: View {
                 
                 Section {
                     TextField("Счет списания", text: $vm.accountFromID)
+                        .keyboardType(.numberPad)
                     TextField("Счет начисления", text: $vm.accountToID)
+                        .keyboardType(.numberPad)
                     if d {
                         TextField("Cумма списания", text: $vm.amountFrom)
                         TextField("Сумма начисления", text: $vm.amountTo)

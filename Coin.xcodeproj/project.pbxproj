@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B5251A21290232F300EFCAB0 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5251A20290232F300EFCAB0 /* UserDefaults.swift */; };
 		B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5251A2229025F3800EFCAB0 /* APIHelper.swift */; };
+		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
 		B5610EF928FC88FE0063AFEB /* CreateTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
@@ -47,6 +48,8 @@
 /* Begin PBXFileReference section */
 		B5251A20290232F300EFCAB0 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		B5251A2229025F3800EFCAB0 /* APIHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIHelper.swift; sourceTree = "<group>"; };
+		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+		B557AA0F290D9A4600631421 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTransactionView.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
@@ -101,6 +104,7 @@
 				B5610F0328FC9A420063AFEB /* TransactionAPI.swift */,
 				B5D143B52906B4EC00875037 /* UserAPI.swift */,
 				B5D143B72906B4F800875037 /* AccountAPI.swift */,
+				B557AA0D290D959F00631421 /* API.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -212,6 +216,7 @@
 		B5F9CC6128F01CA80037A21A /* Coin */ = {
 			isa = PBXGroup;
 			children = (
+				B557AA0F290D9A4600631421 /* Info.plist */,
 				B5E8933829007C53002AC30C /* UI */,
 				B59F0F1C28FDC74000AA33A9 /* Pkg */,
 				B5610F0228FC9A270063AFEB /* Network */,
@@ -369,6 +374,7 @@
 				B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */,
 				B59F0F1F28FDC75A00AA33A9 /* Header.swift in Sources */,
 				B5E89337290074F4002AC30C /* Modifiers.swift in Sources */,
+				B557AA0E290D959F00631421 /* API.swift in Sources */,
 				B5E89335290073E1002AC30C /* LoginViewModel.swift in Sources */,
 				B5FB6AAA28F3D72300C2A2AC /* Account.swift in Sources */,
 				B5610F0628FD24D70063AFEB /* UpdateTransactionView.swift in Sources */,
@@ -525,6 +531,7 @@
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Coin/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -555,6 +562,7 @@
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Coin/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
