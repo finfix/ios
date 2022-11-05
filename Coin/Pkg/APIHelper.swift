@@ -29,6 +29,7 @@ class ApiHelper {
                     // Если не парсится, обрабатываем ошибку
                 } catch {
                     print("print. Мы не смогли распарсить ответ в структуру. Ошибка: \(error)")
+                    print(String(decoding: data, as: UTF8.self))
                     return (nil, ErrorModel(path:"", developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
                 }
                 

@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import RealmSwift
 
-struct SnapCarouselView<Content: View, T: Identifiable>: View {
+struct SnapCarouselView<Content: View, T: ObjectKeyIdentifiable>: View {
     var content: (T) -> Content
     var list: [T]
     

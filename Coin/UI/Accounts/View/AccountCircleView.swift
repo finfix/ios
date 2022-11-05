@@ -6,12 +6,17 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct AccountCircleView: View {
     
     @StateObject var vm = AccountViewModel()
     @EnvironmentObject var appSettings: AppSettings
     
+    @ObservedResults (
+            Account.self
+        ) var accounts
+
     let rows = [
         GridItem(.flexible()),
         GridItem(.flexible()),
@@ -21,60 +26,71 @@ struct AccountCircleView: View {
     // Расход на текущий день
         var todayExpense: Int {
             var sum = 0.0
-            let expenses = vm.accounts.filter { $0.typeSignatura == "expense" }
+            let expenses = accounts
             expenses.forEach { expense in
                 sum += expense.remainder
             }
             return Int(sum)
         }
         
-        // Баланс
-        var balance: Int {
-            var sum = 0.0
-            let regulars = vm.accounts.filter { $0.typeSignatura == "regular" }
-            regulars.forEach { regular in
-                sum += regular.remainder
-            }
-            return Int(sum)
+    // Баланс
+    var balance: Int {
+        var sum = 0.0
+        let regulars = accounts
+        regulars.forEach { regular in
+            sum += regular.remainder
         }
-        
-        // Остаток до конца месяца
-        var mountRemainder: Int {
-            var sum = 0.0
-            let expenses = vm.accounts.filter { $0.typeSignatura == "expense" }
-            expenses.forEach { expense in
-                sum += expense.budget ?? 0
-            }
-            return Int(sum) - todayExpense
+        return Int(sum)
+    }
+    
+    // Бюджет
+    var budget: Int {
+        var sum = 0.0
+        let expenses = accounts
+        expenses.forEach { expense in
+            sum += expense.budget ?? 0
+        }
+        return Int(sum)
+    }
+    
+    // Остаток до конца месяца
+    var mountRemainder: Int {
+        return budget - todayExpense
         }
     
     var body: some View {
         VStack(spacing: 10) {
             HStack(spacing: 35) {
-                        VStack {
-                            Text("Расход")
-                            Text("\(todayExpense)")
-                        }
-                        RoundedRectangle(cornerRadius: 0)
-                            .frame(width: 1, height: 44)
-                        VStack {
-                            Text("Баланс")
-                            Text("\(balance)")
-                        }
-                        RoundedRectangle(cornerRadius: 0)
-                            .frame(width: 1, height: 44)
-                        VStack {
-                            Text("Бюджет")
-                            Text("\(mountRemainder)")
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 60)
-                    .background(Color("Gray"))
+                VStack {
+                    Text("Расход")
+                    Text("\(todayExpense)")
+                }
+                // RoundedRectangle(cornerRadius: 0)
+                //     .frame(width: 1, height: 44)
+                // VStack {
+                //     Text("Баланс")
+                //     Text("\(balance)")
+                // }
+                RoundedRectangle(cornerRadius: 0)
+                    .frame(width: 1, height: 44)
+                VStack {
+                    Text("Бюджет")
+                    Text("\(budget)")
+                }
+                RoundedRectangle(cornerRadius: 0)
+                    .frame(width: 1, height: 44)
+                VStack {
+                    Text("Остаток")
+                    Text("\(mountRemainder)")
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 60)
+            .background(Color("Gray"))
             // SelectAccountGroup()
             ScrollView(.horizontal) {
                 HStack {
-                    CirclesArrayView(accounts: $vm.accounts.filterB { ($0.typeSignatura == "earnings") && $0.visible })
+                    CirclesArrayView(accounts: accounts)
                 }
             }.frame(maxHeight: 100)
             
@@ -82,7 +98,7 @@ struct AccountCircleView: View {
             
             ScrollView(.horizontal) {
                 HStack {
-                    CirclesArrayView(accounts: $vm.accounts.filterB { ($0.typeSignatura != "earnings") && ($0.typeSignatura != "expense") && $0.visible })
+                    CirclesArrayView(accounts: accounts)
                 }
             }.frame(maxHeight: 100)
             
@@ -90,7 +106,7 @@ struct AccountCircleView: View {
             
             ScrollView(.horizontal) {
                     LazyHGrid(rows: rows) {
-                        CirclesArrayView(accounts: $vm.accounts.filterB {($0.typeSignatura == "expense") && $0.visible })
+                        CirclesArrayView(accounts: accounts)
                     }
             }
             .frame(maxHeight: .infinity)
@@ -102,7 +118,7 @@ struct AccountCircleView: View {
 
 struct CirclesArrayView: View {
     
-    @Binding var accounts: [Account]
+    @ObservedRealmObject var accounts: Account
     
     var body: some View {
         ForEach(accounts, id: \.id) { account in

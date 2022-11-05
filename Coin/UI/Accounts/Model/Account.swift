@@ -6,19 +6,18 @@
 //
 
 import Foundation
+import RealmSwift
 
-/// Эта модель соответствует идентифицируемым и декодируемым протоколам. Идентифицируемый означает, что каждый элемент имеет уникальный идентификатор. Декодируемый означает, что его можно декодировать - например, мы можем преобразовать объект JSON в эту модель данных.
-
-struct Account: Decodable, Identifiable {
-    var accountGroupID: Int
-    var accounting: Bool
-    var budget: Double?
-    var currencySignatura: String
-    var iconID: Int
-    var id: Int
-    var name: String
-    var remainder: Double
-    var typeSignatura: String
-    var userID: Int
-    var visible: Bool
+class Account: Object, ObjectKeyIdentifiable, Decodable {
+    @Persisted(primaryKey: true) var id: Int
+    @Persisted var accountGroupID: Int
+    @Persisted var accounting: Bool
+    @Persisted var budget: Double?
+    @Persisted var currencySignatura: String
+    @Persisted var iconID: Int
+    @Persisted var name: String
+    @Persisted var remainder: Double
+    @Persisted var typeSignatura: String
+    @Persisted var userID: Int
+    @Persisted var visible: Bool
 }

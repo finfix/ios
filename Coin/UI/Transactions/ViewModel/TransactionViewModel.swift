@@ -30,55 +30,97 @@ class TransactionViewModel: ObservableObject {
     
     var types = ["consumption", "income", "balancing", "transfer"]
     
-    // var transactionsFiltered: [Transaction]  {
-    //
-    //     var subfiltered = transactions
-    //
-    //     if searchText != "" {
-    //         subfiltered = subfiltered.filter { ($0.note ?? "").hasPrefix(searchText) }
-    //     }
-    //
-    //     if withoutBalancing {
-    //         subfiltered = subfiltered.filter { !($0.accountFromID == 0) }
-    //     }
-    //
-    //     if transactionType != 0 {
-    //         subfiltered = subfiltered.filter { $0.typeSignatura == types[transactionType] }
-    //     }
-    //
-    //     return subfiltered
-    // }
-    
     //MARK: - Methods
+    
     func getTransaction(_ settings: AppSettings) {
         
-        TransactionAPI().GetTransactions() { response, error in
-            if let err = error {
-                settings.showErrorAlert(error: err)
-            } else if let response = response {
-                try? self.realm.write {
-                    self.realm.add(response)
+        // Если в базе данных нет транзакций
+        if self.realm.objects(Transaction.self).isEmpty {
+            
+            // Делаем запрос на сервер
+            TransactionAPI().GetTransactions() { response, error in
+                if let err = error {
+                    settings.showErrorAlert(error: err)
+                } else if let response = response {
+                    
+                    // Добавляем все транзакции с сервера в базу данных
+                    try? self.realm.write {
+                        self.realm.add(response)
+                    }
+                }
+            }
+            
+            // Если в базе данных есть транзакции
+        } else {
+            
+            // Запрашиваем с сервера последние изменения
+            UserAPI().GetChanges() { response, error in
+                if let err = error {
+                    settings.showErrorAlert(error: err)
+                    
+                    // И добавляем изменения в бд
+                } else if let response = response {
+                    
+                    // Добавляем транзакции
+                    if let transactions = response.created?.transactions {
+                        try? self.realm.write {
+                            self.realm.add(transactions)
+                        }
+                    }
+                    
+                    // Изменяем транзакции
+                    if let transactions = response.updated?.transactions {
+                        for transaction in transactions {
+                            try? self.realm.write({
+                                self.realm.add(transaction, update: .modified)
+                            })
+                        }
+                    }
+                    
+                    // Удаляем транзакции
+                    if let ids = response.deleted?.transactionsID {
+                        try? self.realm.write {
+                            self.realm.delete(self.realm.objects(Transaction.self).filter("id in (%@)", ids))
+                        }
+                    }
+                    
+                    // Добавляем счета
+                    if let accounts = response.created?.accounts {
+                        try? self.realm.write {
+                            self.realm.add(accounts)
+                        }
+                    }
+                    
+                    // Изменяем счета
+                    if let accounts = response.updated?.accounts {
+                        for account in accounts {
+                            try? self.realm.write({
+                                self.realm.add(account, update: .modified)
+                            })
+                        }
+                    }
+                    
+                    // Удаляем счета
+                    if let ids = response.deleted?.accoutnsID {
+                        try? self.realm.write {
+                            self.realm.delete(self.realm.objects(Account.self).filter("id in (%@)", ids))
+                        }
+                    }
                 }
             }
         }
     }
     
-    func deleteTransaction(at offsets: IndexSet, _ settings: AppSettings) {
-        
-        var id = 0
-        
-        // for i in offsets.makeIterator() {
-        //     id = transactionsFiltered[i].id
-        // }
+    func deleteTransaction(id: Int, _ settings: AppSettings) {
         
         TransactionAPI().DeleteTransaction(id: id) { error in
             
             if let err = error {
                 settings.showErrorAlert(error: err)
             } else {
-                // try? self.realm.delete {
-                //     self.realm.add(response)
-                // }
+                try? self.realm.write {
+                    self.realm.delete(self.realm.objects(Transaction.self).filter("id = %@", id))
+                }
             }
         }
     }
@@ -94,4 +136,4 @@ class TransactionViewModel: ObservableObject {
         }
     }
 }
-    
+

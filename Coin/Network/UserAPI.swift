@@ -52,4 +52,31 @@ class UserAPI {
             }
         }
     }
+    
+    func GetChanges(completionHandler: @escaping (Changes?, ErrorModel?) -> Void) {
+            
+            // Проверяем наличие accessToken
+            guard let token = Defaults.accessToken else {
+                completionHandler(nil, ErrorModel(path: "", developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
+                return
+            }
+            
+            // Добавляем accessToken
+            let header: HTTPHeaders = ["Authorization": token, "DeviceID": UIDevice.current.identifierForVendor!.uuidString]
+            
+            // Делаем запрос на сервер
+            AF.request(basePath + "/user/checkChanges", method: .get, headers: header).responseData { response in
+                
+                let (model, error, _) = ApiHelper().dataProcessing(data: response, model: Changes.self)
+                if error != nil {
+                    completionHandler(nil, error)
+                    return
+                }
+                if model != nil {
+                    completionHandler(model, nil)
+                    return
+                }
+            }
+        }
+
 }

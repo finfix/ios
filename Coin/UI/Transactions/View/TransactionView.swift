@@ -10,14 +10,16 @@ import RealmSwift
 
 struct TransactionView: View {
     
-    /// Добавляем Network в качестве EnvironmentObject
+    @Environment(\.realm) var realm
+    
     @StateObject var vm = TransactionViewModel()
     
     @EnvironmentObject var appSettings: AppSettings
     
     @ObservedResults (
-        Transaction.self
-      ) var transactions
+        Transaction.self,
+        sortDescriptor: SortDescriptor(keyPath: "dateTransaction", ascending: false)
+    ) var transactions
     
     @State var showFilters = false
     @State var showCreate = false
@@ -25,7 +27,6 @@ struct TransactionView: View {
     
     var body: some View {
         NavigationView {
-            
             VStack {
                 SearchBar(searchText: $vm.searchText)
                 List {
@@ -56,14 +57,28 @@ struct TransactionView: View {
                             .padding()
                         }
                     }
-                    .onDelete { vm.deleteTransaction(at: $0, appSettings) }
+                    .onDelete {
+                        for i in $0 {
+                            vm.deleteTransaction(id: transactions[i].id, appSettings)
+                        }
+                    }
                 }
                 .navigationBarItems(leading: NavigationLink {
                     TransactionFilterView(withoutBalancing: self.$vm.withoutBalancing, transactionType: self.$vm.transactionType)
                 } label: {
                     Text("Фильтры")
                 }, trailing: Button(action: {
-                    vm.getTransaction(appSettings)
+
+                    TransactionAPI().GetTransactions() { response, error in
+                                    if let err = error {
+                                        appSettings.showErrorAlert(error: err)
+                                    } else if let response = response {
+                                        try? self.realm.write {
+                                            self.realm.delete(self.realm.objects(Transaction.self))
+                                            self.realm.add(response)
+                                        }
+                                    }
+                                }
                 }, label: {
                     Image(systemName: "arrow.clockwise")
                 }))

@@ -8,8 +8,9 @@
 import SwiftUI
 
 class AccountViewModel: ObservableObject {
-    @Published var accounts = [Account]()
     
+    @Environment(\.realm) var realm
+
     @Published var visible = true
     @Published var accounting = true
     @Published var accountType = 1
@@ -19,40 +20,84 @@ class AccountViewModel: ObservableObject {
     // Возможные типы счетов
     var types = ["earnings", "expense", "regular", "credit", "investment", "debt"]
     
-    var accountsFiltered: [Account] {
-        
-        var subfiltered = accounts
-        
-        subfiltered = subfiltered.filter { $0.accountGroupID == selectedAccountGroupID }
-        
-        if visible {
-            subfiltered = subfiltered.filter { $0.visible }
-        }
-        
-        if accounting {
-            subfiltered = subfiltered.filter { $0.accounting }
-        }
-        
-        if accountType != 0 {
-            subfiltered = subfiltered.filter { $0.typeSignatura == types[accountType] }
-        }
-        
-        if withoutZeroRemainder {
-            subfiltered = subfiltered.filter { $0.remainder != 0 }
-        }
-        
-        return subfiltered.sorted { $0.remainder > $1.remainder }
-    }
-    
     func getAccount(_ settings: AppSettings) {
-        AccountAPI().GetAccounts { model, error in
-            if let err = error {
-                settings.showErrorAlert(error: err)
-            } else if let response = model {
-                self.accounts = response
+            
+            // Если в базе данных нет транзакций
+            if self.realm.objects(Account.self).isEmpty {
+                
+                // Делаем запрос на сервер
+                AccountAPI().GetAccounts() { response, error in
+                    if let err = error {
+                        settings.showErrorAlert(error: err)
+                    } else if let response = response {
+                        
+                        // Добавляем все транзакции с сервера в базу данных
+                        try? self.realm.write {
+                            self.realm.add(response)
+                        }
+                    }
+                }
+                
+                // Если в базе данных есть транзакции
+            } else {
+                
+                // Запрашиваем с сервера последние изменения
+                UserAPI().GetChanges() { response, error in
+                    if let err = error {
+                        settings.showErrorAlert(error: err)
+                        
+                        // И добавляем изменения в бд
+                    } else if let response = response {
+                        
+                        // Добавляем транзакции
+                        if let Accounts = response.created?.transactions {
+                            try? self.realm.write {
+                                self.realm.add(Accounts)
+                            }
+                        }
+                        
+                        // Изменяем транзакции
+                        if let Accounts = response.updated?.transactions {
+                            for Account in Accounts {
+                                try? self.realm.write({
+                                    self.realm.add(Account, update: .modified)
+                                })
+                            }
+                        }
+                        
+                        // Удаляем транзакции
+                        if let ids = response.deleted?.transactionsID {
+                            try? self.realm.write {
+                                self.realm.delete(self.realm.objects(Account.self).filter("id in (%@)", ids))
+                            }
+                        }
+                        
+                        // Добавляем счета
+                        if let accounts = response.created?.accounts {
+                            try? self.realm.write {
+                                self.realm.add(accounts)
+                            }
+                        }
+                        
+                        // Изменяем счета
+                        if let accounts = response.updated?.accounts {
+                            for account in accounts {
+                                try? self.realm.write({
+                                    self.realm.add(account, update: .modified)
+                                })
+                            }
+                        }
+                        
+                        // Удаляем счета
+                        if let ids = response.deleted?.accoutnsID {
+                            try? self.realm.write {
+                                self.realm.delete(self.realm.objects(Account.self).filter("id in (%@)", ids))
+                            }
+                        }
+                    }
+                }
             }
         }
-    }
 }
 
 

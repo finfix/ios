@@ -20,4 +20,21 @@ struct AuthResponse: Decodable {
 struct Tokens: Decodable {
         var accessToken: String
         var refreshToken: String
+}
+
+struct Changes: Decodable {
+    
+    var created: Changes?
+    var updated: Changes?
+    var deleted: Deleted?
+    
+    struct Changes: Decodable {
+        var transactions: [Transaction]?
+        var accounts: [Account]?
     }
+    
+    struct Deleted: Decodable {
+        var transactionsID: [Int]?
+        var accoutnsID: [Int]?
+    }
+}

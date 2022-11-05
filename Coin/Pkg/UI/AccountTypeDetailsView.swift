@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct AccountTypeDetailsView: View {
     
     @State var header: String
     @State var showingList = false
-    @Binding var accounts: [Account]
+    
+    @ObservedResults (
+           Account.self
+       ) var accounts
     
     var body: some View {
         VStack {
@@ -27,7 +31,7 @@ struct AccountTypeDetailsView: View {
             })
             .padding()
             if showingList {
-                ForEach(accounts, id: \.id) { account in
+                ForEach (accounts, id: \.id) { account in
                     HStack {
                         Circle()
                             .frame(width: 25, height: 25)
@@ -50,6 +54,6 @@ struct AccountTypeDetailsView: View {
 
 struct AccountTypeDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountTypeDetailsView(header: "Заголовок", accounts: .constant([Account(accountGroupID: 1, accounting: true, currencySignatura: "USD", iconID: 0, id: 0, name: "Название счета", remainder: 123.456, typeSignatura: "debt", userID: 1, visible: true)]))
+        AccountTypeDetailsView(header: "Header")
     }
 }
