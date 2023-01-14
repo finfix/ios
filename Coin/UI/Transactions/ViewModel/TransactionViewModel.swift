@@ -8,17 +8,34 @@
 import SwiftUI
 import Combine
 
+struct ForChart {
+    var date: Date
+    var sum: Double
+}
+
 class TransactionViewModel: ObservableObject {
     
     //MARK: - Vars
     @Published var transactions = [Transaction]()
+    
+    var accountsMap: [Int: Account] {
+        var accountsMap = Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
+        return accountsMap
+    }
+    
+    @Published var accounts = [Account]()
+    
+    var transactionByDate: [Date : [Transaction]] {
+        Dictionary(grouping: transactionsFiltered, by: { $0.dateTransaction })
+    }
+    
     @Published var withoutBalancing = false
     @Published var transactionType = 0
     @Published var searchText = ""
     
     @Published var d = false
-    @Published var accountFromID = ""
-    @Published var accountToID: String = ""
+    @Published var accountFromID = 0
+    @Published var accountToID = 0
     @Published var amountFrom: String = ""
     @Published var amountTo: String = ""
     @Published var selectedType: Int = 0
@@ -34,7 +51,7 @@ class TransactionViewModel: ObservableObject {
         var subfiltered = transactions
         
         if searchText != "" {
-            subfiltered = subfiltered.filter { ($0.note ?? "").hasPrefix(searchText) }
+            subfiltered = subfiltered.filter { ($0.note ?? "").contains(searchText) }
         }
         
         if withoutBalancing {
@@ -49,15 +66,24 @@ class TransactionViewModel: ObservableObject {
     }
     
     //MARK: - Methods
+    // Получаем транзакции
     func getTransaction(_ settings: AppSettings) {
-        
         TransactionAPI().GetTransactions() { response, error in
-            
-            
             if let err = error {
                 settings.showErrorAlert(error: err)
             } else if let response = response {
                 self.transactions = response
+            }
+        }
+    }
+    
+    // Получаем счета
+    func getAccount(_ settings: AppSettings) {
+        AccountAPI().GetAccounts { model, error in
+            if let err = error {
+                settings.showErrorAlert(error: err)
+            } else if let response = model {
+                self.accounts = response
             }
         }
     }
@@ -91,4 +117,4 @@ class TransactionViewModel: ObservableObject {
         }
     }
 }
-    
+

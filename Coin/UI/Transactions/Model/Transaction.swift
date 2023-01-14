@@ -15,7 +15,7 @@ struct Transaction: Decodable {
     var accounting: Bool
     var amountFrom: Double
     var amountTo: Double
-    var dateTransaction: String
+    var dateTransaction: Date
     var id: Int
     var isExecuted: Bool
     var note: String?
@@ -26,7 +26,6 @@ struct Transaction: Decodable {
         var id: Int
         var tagID: Int
         var transactionID: Int
-
     }
 }
 

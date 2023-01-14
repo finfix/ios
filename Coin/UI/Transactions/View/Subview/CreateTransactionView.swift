@@ -25,10 +25,26 @@ struct CreateTransactionView: View {
                 }
                 
                 Section {
-                    TextField("Счет списания", text: $vm.accountFromID)
-                        .keyboardType(.numberPad)
-                    TextField("Счет начисления", text: $vm.accountToID)
-                        .keyboardType(.numberPad)
+                    
+                    // Пикер счета списания
+                    Picker(selection: $vm.accountFromID) {
+                        ForEach (vm.accounts.filter { $0.visible }) { account in
+                            Text(account.name).tag(account.id)
+                        }
+                    } label: {
+                        Text("Выберите счет списания")
+                    }
+                    
+                    // Пикер счета получения
+                    Picker(selection: $vm.accountToID) {
+                        ForEach (vm.accounts.filter { $0.visible }) { account in
+                            Text(account.name).tag(account.id)
+                        }
+                    } label: {
+                        Text("Выберите счет списания")
+                    }
+                    
+                    
                     if d {
                         TextField("Cумма списания", text: $vm.amountFrom)
                         TextField("Сумма начисления", text: $vm.amountTo)
@@ -66,6 +82,7 @@ struct CreateTransactionView: View {
                 Text("Сохранить")
             }
             .padding()
+            .onAppear { vm.getAccount(appSettings) }
         }
     }
 }

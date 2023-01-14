@@ -9,6 +9,14 @@ import Foundation
 import Alamofire
 
 class ApiHelper {
+    
+    private let dateFormatter: DateFormatter = {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            df.locale = Locale(identifier: "en_US_POSIX")
+            return df
+        }()
+    
     func dataProcessing<T: Decodable>(data response: AFDataResponse<Data>, model: T.Type = T.self) -> (T?, ErrorModel?, Bool) {
         // Проверяем результат
         switch response.result {
@@ -23,7 +31,9 @@ class ApiHelper {
                 
                 // Парсим в структуру
                 do {
-                    let model = try JSONDecoder().decode(model.self, from: data)
+                    let decoder = JSONDecoder()
+                    decoder.dateDecodingStrategy = .formatted(self.dateFormatter)
+                    let model = try decoder.decode(model.self, from: data)
                     return (model, nil, false)
                     
                     // Если не парсится, обрабатываем ошибку

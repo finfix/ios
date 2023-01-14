@@ -64,6 +64,6 @@ struct UpdateTransactionView: View {
 
 struct UpdateTransactionView_Previews: PreviewProvider {
     static var previews: some View {
-        UpdateTransactionView(isOpeningFrame: .constant(true), t: Transaction(accountFromID: 1, accountToID: 100, accounting: true, amountFrom: 100, amountTo: 100, dateTransaction: "2022-10-17", id: 1700, isExecuted: true, typeSignatura: "consuption"))
+        UpdateTransactionView(isOpeningFrame: .constant(true), t: Transaction(accountFromID: 1, accountToID: 100, accounting: true, amountFrom: 100, amountTo: 100, dateTransaction: Date(), id: 1700, isExecuted: true, typeSignatura: "consuption"))
     }
 }
