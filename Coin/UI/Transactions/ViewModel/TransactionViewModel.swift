@@ -17,34 +17,34 @@ class TransactionViewModel: ObservableObject {
     
     //MARK: - Vars
     @Published var transactions = [Transaction]()
+    @Published var accounts = [Account]()
     
     var accountsMap: [Int: Account] {
-        var accountsMap = Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
+        let accountsMap = Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
         return accountsMap
     }
-    
-    @Published var accounts = [Account]()
     
     var transactionByDate: [Date : [Transaction]] {
         Dictionary(grouping: transactionsFiltered, by: { $0.dateTransaction })
     }
     
-    @Published var withoutBalancing = false
-    @Published var transactionType = 0
-    @Published var searchText = ""
+    var intercurrency: Bool {
+        return accountFrom?.currencySignatura != accountTo?.currencySignatura
+    }
     
-    @Published var d = false
-    @Published var accountFromID = 0
-    @Published var accountToID = 0
+    @Published var transactionType: TransactionTypes?
+    @Published var accountFrom: Account?
+    @Published var accountTo: Account?
+    
     @Published var amountFrom: String = ""
     @Published var amountTo: String = ""
     @Published var selectedType: Int = 0
     @Published var note = ""
     @Published var date = Date()
     
-    @Published var appSettings = AppSettings()
+    @Published var searchText = ""
     
-    var types = ["consumption", "income", "balancing", "transfer"]
+    @Published var appSettings = AppSettings()
     
     var transactionsFiltered: [Transaction]  {
         
@@ -52,14 +52,6 @@ class TransactionViewModel: ObservableObject {
         
         if searchText != "" {
             subfiltered = subfiltered.filter { ($0.note ?? "").contains(searchText) }
-        }
-        
-        if withoutBalancing {
-            subfiltered = subfiltered.filter { !($0.accountFromID == 0) }
-        }
-        
-        if transactionType != 0 {
-            subfiltered = subfiltered.filter { $0.typeSignatura == types[transactionType] }
         }
         
         return subfiltered
@@ -78,10 +70,10 @@ class TransactionViewModel: ObservableObject {
     }
     
     // Получаем счета
-    func getAccount(_ settings: AppSettings) {
+    func getAccount() {
         AccountAPI().GetAccounts { model, error in
             if let err = error {
-                settings.showErrorAlert(error: err)
+                self.appSettings.showErrorAlert(error: err)
             } else if let response = model {
                 self.accounts = response
             }
@@ -109,8 +101,8 @@ class TransactionViewModel: ObservableObject {
     func createTransaction(_ settings: AppSettings, isOpeningFrame: Binding<Bool>) {
         let format = DateFormatter()
         format.dateFormat = "YYYY-MM-dd"
-        
-        TransactionAPI().CreateTransaction(req: CreateTransactionRequest(accountFromID: Int(accountFromID) ?? 0, accountToID: Int(accountToID) ?? 0, amountFrom: Double(amountFrom) ?? 0, amountTo: (d ? Double(amountTo) : Double(amountFrom)) ?? 0, dateTransaction: format.string(from: date), note: note, type: types[selectedType], isExecuted: true)) { error in
+                
+        TransactionAPI().CreateTransaction(req: CreateTransactionRequest(accountFromID: accountFrom!.id, accountToID: accountTo!.id, amountFrom: Double(amountFrom.replacingOccurrences(of: ",", with: ".")) ?? 0, amountTo: (intercurrency ? Double(amountTo.replacingOccurrences(of: ",", with: ".")) : Double(amountFrom.replacingOccurrences(of: ",", with: "."))) ?? 0, dateTransaction: format.string(from: date), note: note, type: transactionType!.description, isExecuted: true)) { error in
             if let err = error {
                 settings.showErrorAlert(error: err)
             }

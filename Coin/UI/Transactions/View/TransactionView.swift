@@ -37,30 +37,30 @@ struct TransactionView: View {
                                         Text(String(format: "%.2f", transaction.amountTo))
                                     }.padding()
                                 default:
-                                    NavigationLink(isActive: $showUpdate) {
-                                        UpdateTransactionView(isOpeningFrame: $showUpdate, t: transaction)
-                                    } label: {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                // Счета
-                                                Text(vm.accountsMap[transaction.accountFromID]?.name ?? "Нет счета")
-                                                    .font(.footnote)
-                                                Text(vm.accountsMap[transaction.accountToID]?.name ?? "Нет счета")
-                                            }
-                                            Spacer()
+                                    
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            // Счета
+                                            Text(vm.accountsMap[transaction.accountFromID]?.name ?? "Нет счета")
+                                                .font(.footnote)
+                                            Text(vm.accountsMap[transaction.accountToID]?.name ?? "Нет счета")
+                                        }
+                                        Spacer()
+                                        
+                                        VStack(alignment: .trailing) {
+                                            // Сумма
+                                            Text(String(format: "%.2f", transaction.amountTo))
                                             
-                                            VStack(alignment: .trailing) {
-                                                // Сумма
-                                                Text(String(format: "%.2f", transaction.amountTo))
-                                                
-                                                // Заметка
-                                                if let note = transaction.note {
-                                                    Text(note)
-                                                        .font(.footnote)
-                                                }
+                                            // Заметка
+                                            if let note = transaction.note {
+                                                Text(note)
+                                                    .font(.footnote)
                                             }
                                         }
-                                        .padding()
+                                    }
+                                    .padding()
+                                    .navigationDestination(isPresented: $showUpdate) {
+                                        UpdateTransactionView(isOpeningFrame: $showUpdate, t: transaction)
                                     }
                                 }
                             }
@@ -69,19 +69,15 @@ struct TransactionView: View {
                     }
                 }
             }
-                
-                // Верхняя панель
-                .navigationBarItems(leading: NavigationLink {
-                    TransactionFilterView(withoutBalancing: self.$vm.withoutBalancing, transactionType: self.$vm.transactionType)
-                } label: {
-                    Text("Фильтры")
-                }, trailing: Button(action: {
-                    vm.getTransaction(appSettings)
-                }, label: {
-                    Image(systemName: "arrow.clockwise")
-                }))
+            
+            // Верхняя панель
+            .navigationBarItems(trailing: Button(action: {
+                vm.getTransaction(appSettings)
+            }, label: {
+                Image(systemName: "arrow.clockwise")
+            }))
             .onAppear { vm.getTransaction(appSettings) }
-            .onAppear { vm.getAccount(appSettings) }
+            .onAppear { vm.getAccount() }
             .navigationBarTitle("Транзакции")
             .navigationBarBackButtonHidden(true)
         }

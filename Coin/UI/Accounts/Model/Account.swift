@@ -9,7 +9,7 @@ import Foundation
 
 /// Эта модель соответствует идентифицируемым и декодируемым протоколам. Идентифицируемый означает, что каждый элемент имеет уникальный идентификатор. Декодируемый означает, что его можно декодировать - например, мы можем преобразовать объект JSON в эту модель данных.
 
-struct Account: Decodable, Identifiable {
+struct Account: Decodable, Identifiable, Hashable {
     var accountGroupID: Int
     var accounting: Bool
     var budget: Double?

@@ -10,57 +10,59 @@ import SwiftUI
 struct CreateTransactionView: View {
     
     @EnvironmentObject var appSettings: AppSettings
+    
     @StateObject var vm = TransactionViewModel()
-    
+        
     @Binding var isOpeningFrame: Bool
-    @State private var d = false
-    
+    @State var transactionType: TransactionTypes
+        
     var body: some View {
         VStack {
             Form {
                 Section {
-                    Toggle(isOn: $d) {
-                        Text("Межвалютная транзакция")
-                    }
-                }
-                
-                Section {
                     
-                    // Пикер счета списания
-                    Picker(selection: $vm.accountFromID) {
-                        ForEach (vm.accounts.filter { $0.visible }) { account in
-                            Text(account.name).tag(account.id)
+                    Picker("Выберите счет списания", selection: $vm.accountFrom) {
+                        ForEach (vm.accounts.filter {
+                            switch transactionType {
+                            case .consumption:
+                                return $0.typeSignatura != "expense" && $0.typeSignatura != "earnings" && $0.visible
+                            case .income:
+                                return $0.typeSignatura == "earnings" && $0.visible
+                            case .transfer:
+                                return $0.typeSignatura != "expense" && $0.typeSignatura != "earnings" && $0.visible
+                            }
+                            
+                        }, id: \.self) {
+                            Text($0.name).tag($0 as Account?)
                         }
-                    } label: {
-                        Text("Выберите счет списания")
                     }
                     
                     // Пикер счета получения
-                    Picker(selection: $vm.accountToID) {
-                        ForEach (vm.accounts.filter { $0.visible }) { account in
-                            Text(account.name).tag(account.id)
+                    Picker("Выберите счет получения", selection: $vm.accountTo) {
+                        ForEach (vm.accounts.filter {
+                            switch transactionType {
+                            case .consumption:
+                                return $0.typeSignatura == "expense" && $0.visible
+                            case .income:
+                                return $0.typeSignatura != "expense" && $0.typeSignatura != "earnings" && $0.visible
+                            case .transfer:
+                                return $0.typeSignatura != "expense" && $0.typeSignatura != "earnings" && $0.visible && $0.id != vm.accountFrom?.id
+                            }
+                        }, id: \.self) {
+                            Text($0.name).tag($0 as Account?)
                         }
-                    } label: {
-                        Text("Выберите счет списания")
                     }
                     
-                    
-                    if d {
+                    if vm.intercurrency {
                         TextField("Cумма списания", text: $vm.amountFrom)
                         TextField("Сумма начисления", text: $vm.amountTo)
                     } else {
                         TextField("Сумма", text: $vm.amountFrom)
+                            .keyboardType(.decimalPad)
                     }
                     DatePicker(selection: $vm.date, displayedComponents: .date) {
                         Text("Дата транзакции")
-                    }
-                    Picker(selection: $vm.selectedType) {
-                        ForEach(0..<$vm.types.count, id: \.self) { Text(self.vm.types[$0]) }
-                    } label: {
-                        Text("Тип транзакции")
-                    }
-                    .pickerStyle(.segmented)
-                
+                    }                
                 }
                 Section {
                     ZStack(alignment: .topLeading) {
@@ -76,20 +78,22 @@ struct CreateTransactionView: View {
             }
             Spacer()
             Button {
+                vm.transactionType = transactionType
                 vm.createTransaction(appSettings, isOpeningFrame: $isOpeningFrame)
                 isOpeningFrame = false
             } label: {
                 Text("Сохранить")
             }
             .padding()
-            .onAppear { vm.getAccount(appSettings) }
+            .onAppear{ vm.getAccount() }
         }
     }
 }
 
 struct CreateTransactionView_Previews: PreviewProvider {
     static var previews: some View {
-        CreateTransactionView(isOpeningFrame: .constant(true))
+        CreateTransactionView(isOpeningFrame: .constant(true), transactionType: .transfer)
+            .environmentObject(AppSettings())
     }
 }
 

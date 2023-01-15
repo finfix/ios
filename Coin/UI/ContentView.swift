@@ -82,9 +82,11 @@ struct ProfileView: View {
 
 /// Чтобы предварительный просмотр работал, не забудьте добавить environmentObject в предварительный просмотр ContentView, так как предварительный просмотр отличается от приложения:
 struct ContentView_Previews: PreviewProvider {
+    
     static var previews: some View {
         ContentView()
-            .previewDevice(PreviewDevice(rawValue: "iPhone 8"))
+            .environmentObject(AppSettings())
+            // .previewDevice(PreviewDevice(rawValue: "iPhone 8"))
     }
     
 }

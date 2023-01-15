@@ -16,7 +16,6 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appSettings)
-                // .environmentObject(UserData())
                 .alert(isPresented: $appSettings.alertErrorShowing) {
                     Alert(title: Text(appSettings.alertErrorMessage), message: Text(appSettings.alertErrorDetails), dismissButton: .cancel(Text("OK")))
                 }

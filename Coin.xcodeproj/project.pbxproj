@@ -27,11 +27,11 @@
 		B59F0F2628FDD30F00AA33A9 /* AccountCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2528FDD30F00AA33A9 /* AccountCircleView.swift */; };
 		B59F0F2928FDD4C200AA33A9 /* SelectAccountGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2828FDD4C200AA33A9 /* SelectAccountGroup.swift */; };
 		B5B413C8294C12A300FD5612 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B413C7294C12A300FD5612 /* Model.swift */; };
+		B5C8028E2972F88200B6806D /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C8028D2972F88200B6806D /* Enums.swift */; };
 		B5D143B22906A64000875037 /* ErrorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B12906A64000875037 /* ErrorModel.swift */; };
 		B5D143B42906A66400875037 /* UserModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B32906A66400875037 /* UserModels.swift */; };
 		B5D143B62906B4EC00875037 /* UserAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B52906B4EC00875037 /* UserAPI.swift */; };
 		B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B72906B4F800875037 /* AccountAPI.swift */; };
-		B5D57EE728F94774009605CF /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EE628F94774009605CF /* TransactionFilterView.swift */; };
 		B5D57EE928F95AE2009605CF /* TransactionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EE828F95AE2009605CF /* TransactionViewModel.swift */; };
 		B5D57EED28F95E35009605CF /* AccountViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EEC28F95E35009605CF /* AccountViewModel.swift */; };
 		B5D57EF028F95F96009605CF /* AccountFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D57EEF28F95F96009605CF /* AccountFilterView.swift */; };
@@ -67,11 +67,11 @@
 		B59F0F2528FDD30F00AA33A9 /* AccountCircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCircleView.swift; sourceTree = "<group>"; };
 		B59F0F2828FDD4C200AA33A9 /* SelectAccountGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAccountGroup.swift; sourceTree = "<group>"; };
 		B5B413C7294C12A300FD5612 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		B5C8028D2972F88200B6806D /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		B5D143B12906A64000875037 /* ErrorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorModel.swift; sourceTree = "<group>"; };
 		B5D143B32906A66400875037 /* UserModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModels.swift; sourceTree = "<group>"; };
 		B5D143B52906B4EC00875037 /* UserAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAPI.swift; sourceTree = "<group>"; };
 		B5D143B72906B4F800875037 /* AccountAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAPI.swift; sourceTree = "<group>"; };
-		B5D57EE628F94774009605CF /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
 		B5D57EE828F95AE2009605CF /* TransactionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionViewModel.swift; sourceTree = "<group>"; };
 		B5D57EEC28F95E35009605CF /* AccountViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountViewModel.swift; sourceTree = "<group>"; };
 		B5D57EEF28F95F96009605CF /* AccountFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountFilterView.swift; sourceTree = "<group>"; };
@@ -104,6 +104,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B5139176297461DA003423C2 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				B5D57EE828F95AE2009605CF /* TransactionViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		B5139177297461ED003423C2 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				B5D57EE528F94709009605CF /* Subview */,
+				B5FB6AA328F3D62D00C2A2AC /* TransactionView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
 		B5610F0228FC9A270063AFEB /* Network */ = {
 			isa = PBXGroup;
 			children = (
@@ -149,6 +166,7 @@
 				B59F0F1D28FDC74C00AA33A9 /* UI */,
 				B5251A20290232F300EFCAB0 /* UserDefaults.swift */,
 				B5251A2229025F3800EFCAB0 /* APIHelper.swift */,
+				B5C8028D2972F88200B6806D /* Enums.swift */,
 			);
 			path = Pkg;
 			sourceTree = "<group>";
@@ -178,18 +196,9 @@
 			isa = PBXGroup;
 			children = (
 				B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */,
-				B5D57EE628F94774009605CF /* TransactionFilterView.swift */,
 				B5610F0528FD24D70063AFEB /* UpdateTransactionView.swift */,
 			);
 			path = Subview;
-			sourceTree = "<group>";
-		};
-		B5D57EEA28F95DDF009605CF /* ViewModel */ = {
-			isa = PBXGroup;
-			children = (
-				B5D57EE828F95AE2009605CF /* TransactionViewModel.swift */,
-			);
-			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		B5D57EEB28F95E28009605CF /* ViewModel */ = {
@@ -280,20 +289,11 @@
 		B5FB6AA128F3D5EF00C2A2AC /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
-				B5D57EEA28F95DDF009605CF /* ViewModel */,
-				B5FB6AA228F3D5FC00C2A2AC /* View */,
+				B5139177297461ED003423C2 /* View */,
+				B5139176297461DA003423C2 /* ViewModel */,
 				B5FB6A9F28F3D5C000C2A2AC /* Model */,
 			);
 			path = Transactions;
-			sourceTree = "<group>";
-		};
-		B5FB6AA228F3D5FC00C2A2AC /* View */ = {
-			isa = PBXGroup;
-			children = (
-				B5D57EE528F94709009605CF /* Subview */,
-				B5FB6AA328F3D62D00C2A2AC /* TransactionView.swift */,
-			);
-			path = View;
 			sourceTree = "<group>";
 		};
 		B5FB6AA528F3D67800C2A2AC /* Accounts */ = {
@@ -427,7 +427,7 @@
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
 				B5D143B42906A66400875037 /* UserModels.swift in Sources */,
-				B5D57EE728F94774009605CF /* TransactionFilterView.swift in Sources */,
+				B5C8028E2972F88200B6806D /* Enums.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
 				B59A5F6D294C51F000461C96 /* Chart.swift in Sources */,
