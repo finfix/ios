@@ -51,30 +51,46 @@ struct MainView: View {
                     Text("Транзакции")
                 }
             
-            LogoutView()
+            ProfileView()
                 .tag(4)
                 .tabItem {
                     Image(systemName: "4.circle")
-                    Text("Выход")
+                    Text("Профиль")
                 }
-                .onAppear {
-                    vm.isLogin = false
-                }
+            
+            // GraphView(rangeTime: 0..<(myLine.points.count - 1),
+            //           line: myLine, lineWidth: 2)
+            //     .border(.black)
+            //     .tag(5)
+            //     .tabItem {
+            //         Image(systemName: "5.circle")
+            //         Text("График")
+            //     }
         }
     }
 }
 
-struct LogoutView: View {
+struct ProfileView: View {
+    
+    @EnvironmentObject var vm: AppSettings
+    
     var body: some View {
-        Text("HELLO")
+        Button {
+            vm.isLogin = false
+        } label: {
+            Text("Выйти")
+        }
+
     }
 }
 
 /// Чтобы предварительный просмотр работал, не забудьте добавить environmentObject в предварительный просмотр ContentView, так как предварительный просмотр отличается от приложения:
 struct ContentView_Previews: PreviewProvider {
+    
     static var previews: some View {
         ContentView()
-            .previewDevice(PreviewDevice(rawValue: "iPhone 8"))
+            .environmentObject(AppSettings())
+            // .previewDevice(PreviewDevice(rawValue: "iPhone 8"))
     }
     
 }

@@ -24,7 +24,7 @@ struct UpdateTransactionRequest: Encodable {
     var accountToID: Int
     var amountFrom: Double
     var amountTo: Double
-    var dateTransaction: String
+    var dateTransaction: Date
     var note: String
     var id: Int
     var isExecuted: Bool

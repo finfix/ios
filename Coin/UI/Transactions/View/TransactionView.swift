@@ -27,64 +27,64 @@ struct TransactionView: View {
     
     var body: some View {
         NavigationView {
+            // Строка поиска
             VStack {
                 SearchBar(searchText: $vm.searchText)
+                
+                // Список транзакций
                 List {
-                    ForEach (transactions, id: \.id) { transaction in
-                        NavigationLink(isActive: $showUpdate) {
-                            UpdateTransactionView(isOpeningFrame: $showUpdate, t: transaction)
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(transaction.dateTransaction)
-                                    Text("\(transaction.accountFromID) -> \(transaction.accountToID)")
-                                        .font(.footnote)
+                    ForEach(vm.transactionByDate.keys.sorted(by: >), id: \.self) { date in
+                        Section(header: Text(date, style: .date).font(.headline)) {
+                            ForEach (vm.transactionsFiltered.filter{ $0.dateTransaction == date }, id: \.id) { transaction in
+                                switch transaction.typeSignatura {
+                                case "balancing":
                                     
-                                    if transaction.amountTo == transaction.amountFrom {
+                                    HStack {
+                                        Text(vm.accountsMap[transaction.accountToID]?.name ?? "")
                                         Text(String(format: "%.2f", transaction.amountTo))
-                                            .font(.footnote)
-                                    } else {
-                                        Text(String(format: "%.2f", transaction.amountFrom) + " -> " + String(format: "%.2f", transaction.amountTo))
-                                            .font(.footnote)
+                                    }.padding()
+                                default:
+                                    
+                                    HStack {
+                                        VStack(alignment: .leading) {
+                                            // Счета
+                                            Text(vm.accountsMap[transaction.accountFromID]?.name ?? "Нет счета")
+                                                .font(.footnote)
+                                            Text(vm.accountsMap[transaction.accountToID]?.name ?? "Нет счета")
+                                        }
+                                        Spacer()
+                                        
+                                        VStack(alignment: .trailing) {
+                                            // Сумма
+                                            Text(String(format: "%.2f", transaction.amountTo))
+                                            
+                                            // Заметка
+                                            if let note = transaction.note {
+                                                Text(note)
+                                                    .font(.footnote)
+                                            }
+                                        }
+                                    }
+                                    .padding()
+                                    .navigationDestination(isPresented: $showUpdate) {
+                                        UpdateTransactionView(isOpeningFrame: $showUpdate, t: transaction)
                                     }
                                 }
-                                Spacer()
-                                if let note = transaction.note {
-                                    Text(note)
-                                        .font(.footnote)
-                                }
                             }
-                            .padding()
-                        }
-                    }
-                    .onDelete {
-                        for i in $0 {
-                            vm.deleteTransaction(id: transactions[i].id, appSettings)
+                            .onDelete { vm.deleteTransaction(at: $0, appSettings) }
                         }
                     }
                 }
-                .navigationBarItems(leading: NavigationLink {
-                    TransactionFilterView(withoutBalancing: self.$vm.withoutBalancing, transactionType: self.$vm.transactionType)
-                } label: {
-                    Text("Фильтры")
-                }, trailing: Button(action: {
-
-                    TransactionAPI().GetTransactions() { response, error in
-                                    if let err = error {
-                                        appSettings.showErrorAlert(error: err)
-                                    } else if let response = response {
-                                        try? self.realm.write {
-                                            self.realm.delete(self.realm.objects(Transaction.self))
-                                            self.realm.add(response)
-                                        }
-                                    }
-                                }
-                }, label: {
-                    Image(systemName: "arrow.clockwise")
-                }))
-                
             }
+            
+            // Верхняя панель
+            .navigationBarItems(trailing: Button(action: {
+                vm.getTransaction(appSettings)
+            }, label: {
+                Image(systemName: "arrow.clockwise")
+            }))
             .onAppear { vm.getTransaction(appSettings) }
+            .onAppear { vm.getAccount() }
             .navigationBarTitle("Транзакции")
             .navigationBarBackButtonHidden(true)
         }
@@ -94,5 +94,41 @@ struct TransactionView: View {
 struct Transaction_Previews: PreviewProvider {
     static var previews: some View {
         TransactionView()
+    }
+}
+
+struct transactionRowView: View {
+    
+    @State var accounts: [Int: Account]
+    @State var transaction: Transaction
+    @Binding var showUpdate: Bool
+    
+    var body: some View {
+        // Переход на редактирование
+        NavigationLink(isActive: $showUpdate) {
+            UpdateTransactionView(isOpeningFrame: $showUpdate, t: transaction)
+        } label: {
+            HStack {
+                VStack(alignment: .leading) {
+                    // Счета
+                    Text(accounts[transaction.accountFromID]?.name ?? "Нет счета")
+                        .font(.footnote)
+                    Text(accounts[transaction.accountToID]?.name ?? "Нет счета")
+                }
+                Spacer()
+                
+                VStack(alignment: .trailing) {
+                    // Сумма
+                    Text(String(format: "%.2f", transaction.amountTo))
+                    
+                    // Заметка
+                    if let note = transaction.note {
+                        Text(note)
+                            .font(.footnote)
+                    }
+                }
+            }
+            .padding()
+        }
     }
 }

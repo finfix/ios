@@ -26,7 +26,7 @@ struct AccountCircleView: View {
     // Расход на текущий день
         var todayExpense: Int {
             var sum = 0.0
-            let expenses = accounts
+            let expenses = accounts.filter { $0.typeSignatura == "expense" && $0.accounting }
             expenses.forEach { expense in
                 sum += expense.remainder
             }
