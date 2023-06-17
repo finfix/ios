@@ -51,7 +51,7 @@ struct UpdateTransactionView: View {
             }
             Spacer()
             Button {
-                TransactionAPI().UpdateTransaction(req: UpdateTransactionRequest(accountFromID: Int(t.accountFromID) , accountToID: Int(t.accountToID) , amountFrom: Double(t.amountFrom) , amountTo: Double(t.amountTo) , dateTransaction: t.dateTransaction, note: t.note ?? "", id: t.id, isExecuted: t.isExecuted)) { _ in
+                TransactionAPI().UpdateTransaction(req: UpdateTransactionRequest(accountFromID: UInt32(t.accountFromID) , accountToID: UInt32(t.accountToID) , amountFrom: Double(t.amountFrom) , amountTo: Double(t.amountTo) , dateTransaction: t.dateTransaction, note: t.note, id: t.id, isExecuted: t.isExecuted)) { _ in
                 }
                 isOpeningFrame = false
             } label: {
@@ -64,6 +64,6 @@ struct UpdateTransactionView: View {
 
 struct UpdateTransactionView_Previews: PreviewProvider {
     static var previews: some View {
-        UpdateTransactionView(isOpeningFrame: .constant(true), t: Transaction(accountFromID: 1, accountToID: 100, accounting: true, amountFrom: 100, amountTo: 100, dateTransaction: Date(), id: 1700, isExecuted: true, typeSignatura: "consuption"))
+        UpdateTransactionView(isOpeningFrame: .constant(true), t: Transaction(accountFromID: 1, accountToID: 100, accounting: true, amountFrom: 100, amountTo: 100, dateTransaction: Date(), id: 1700, isExecuted: true, note: "note", type: "consuption"))
     }
 }

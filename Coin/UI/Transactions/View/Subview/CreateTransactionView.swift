@@ -25,11 +25,11 @@ struct CreateTransactionView: View {
                         ForEach (vm.accounts.filter {
                             switch transactionType {
                             case .consumption:
-                                return $0.typeSignatura != "expense" && $0.typeSignatura != "earnings" && $0.visible
+                                return $0.type != "expense" && $0.type != "earnings" && $0.visible
                             case .income:
-                                return $0.typeSignatura == "earnings" && $0.visible
+                                return $0.type == "earnings" && $0.visible
                             case .transfer:
-                                return $0.typeSignatura != "expense" && $0.typeSignatura != "earnings" && $0.visible
+                                return $0.type != "expense" && $0.type != "earnings" && $0.visible
                             }
                             
                         }, id: \.self) {
@@ -42,11 +42,11 @@ struct CreateTransactionView: View {
                         ForEach (vm.accounts.filter {
                             switch transactionType {
                             case .consumption:
-                                return $0.typeSignatura == "expense" && $0.visible
+                                return $0.type == "expense" && $0.visible
                             case .income:
-                                return $0.typeSignatura != "expense" && $0.typeSignatura != "earnings" && $0.visible
+                                return $0.type != "expense" && $0.type != "earnings" && $0.visible
                             case .transfer:
-                                return $0.typeSignatura != "expense" && $0.typeSignatura != "earnings" && $0.visible && $0.id != vm.accountFrom?.id
+                                return $0.type != "expense" && $0.type != "earnings" && $0.visible && $0.id != vm.accountFrom?.id
                             }
                         }, id: \.self) {
                             Text($0.name).tag($0 as Account?)

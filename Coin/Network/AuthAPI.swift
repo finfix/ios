@@ -1,5 +1,5 @@
 //
-//  UserAPI.swift
+//  AuthAPI.swift
 //  Coin
 //
 //  Created by Илья on 24.10.2022.
@@ -9,14 +9,14 @@ import Foundation
 import Alamofire
 import SwiftUI
 
+let authBasePath = "/auth"
+
 class UserAPI {
     
     func Auth(req: AuthRequest, completionHandler: @escaping (AuthResponse?, ErrorModel?) -> Void) {
         
-        let header: HTTPHeaders = ["DeviceID": UIDevice.current.identifierForVendor!.uuidString]
-        
         // Делаем запрос на сервер
-        AF.request(basePath + "/user/auth", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: header).responseData { response in
+        AF.request(basePath + authBasePath + "/signIn", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: baseHeaders).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: AuthResponse.self)
             if error != nil {
@@ -30,18 +30,18 @@ class UserAPI {
         }
     }
     
-    func RefreshToken(completionHandler: @escaping (Tokens?, ErrorModel?) -> Void) {
+    func RefreshToken(req: RefreshTokensRequest, completionHandler: @escaping (RefreshTokensResponse?, ErrorModel?) -> Void) {
         
-        // Проверяем наличие accessToken
+        // Проверяем наличие refreshToken
         guard let token = Defaults.refreshToken else {
             completionHandler(nil, ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
             return
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + "/user/refreshTokens?token=\(token)", method: .get).responseData { response in
+        AF.request(basePath + authBasePath + "/refreshTokens", method: .get, parameters: req, encoder: JSONParameterEncoder(), headers: baseHeaders).responseData { response in
             
-            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: Tokens.self)
+            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: RefreshTokensResponse.self)
             if error != nil {
                 completionHandler(nil, error)
                 return

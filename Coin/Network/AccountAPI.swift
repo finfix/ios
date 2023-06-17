@@ -9,18 +9,19 @@ import Foundation
 import Alamofire
 import SwiftUI
 
+let accountBasePath = "/account"
+
 class AccountAPI {
     
-    func GetAccounts(completionHandler: @escaping ([Account]?, ErrorModel?) -> Void) {
+    func GetAccounts(req: GetAccountsRequest, completionHandler: @escaping ([Account]?, ErrorModel?) -> Void) {
         
-        guard let token = Defaults.accessToken else {
-            completionHandler(nil, ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
+        let err = checkToken()
+        if err != nil {
+            completionHandler(nil, err)
             return
         }
         
-        let header: HTTPHeaders = ["Authorization": token, "DeviceID": UIDevice.current.identifierForVendor!.uuidString]
-        
-        AF.request(basePath + "/account?period=month", method: .get, headers: header).responseData { response in
+        AF.request(basePath + accountBasePath, method: .get, parameters: req, headers: baseHeaders).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Account].self)
             if error != nil {

@@ -7,10 +7,9 @@
 
 import Foundation
 
-
 struct CreateTransactionRequest: Encodable {
-    var accountFromID: Int
-    var accountToID: Int
+    var accountFromID: UInt32
+    var accountToID: UInt32
     var amountFrom: Double
     var amountTo: Double
     var dateTransaction: String
@@ -20,12 +19,24 @@ struct CreateTransactionRequest: Encodable {
 }
 
 struct UpdateTransactionRequest: Encodable {
-    var accountFromID: Int
-    var accountToID: Int
+    var accountFromID: UInt32
+    var accountToID: UInt32
     var amountFrom: Double
     var amountTo: Double
     var dateTransaction: Date
     var note: String
-    var id: Int
+    var id: UInt32
     var isExecuted: Bool
+}
+
+struct GetTransactionRequest: Encodable {
+    var accountID: UInt32?
+    var dateFrom: Date?
+    var dateTo: Date?
+    var list: UInt8?
+    var type: String?
+}
+
+struct DeleteTransactionRequest: Encodable {
+    var id: UInt32
 }

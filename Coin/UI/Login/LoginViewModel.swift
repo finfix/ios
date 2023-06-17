@@ -24,8 +24,8 @@ class LoginViewModel: ObservableObject {
                 settings.showErrorAlert(error: err)
                 
             } else if let response = response {
-                Defaults.accessToken = response.tokens.accessToken
-                Defaults.refreshToken = response.tokens.refreshToken
+                Defaults.accessToken = response.accessToken
+                Defaults.refreshToken = response.refreshToken
                 settings.isLogin = true
             }
         }

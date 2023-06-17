@@ -36,7 +36,7 @@ struct AccountView: View {
                     ScrollView {
         
                         Text("Карты и счета")
-                        SnapCarouselView(spacing: 30, index: $currentIndex, items: vm.accounts.filter { $0.visible && ($0.typeSignatura == "regular")}) { account in
+                        SnapCarouselView(spacing: 30, index: $currentIndex, items: vm.accounts.filter { $0.visible && ($0.type == "regular")}) { account in
                             GeometryReader { proxy in
         
                                 let size = proxy.size
@@ -61,7 +61,7 @@ struct AccountView: View {
                         .frame(height: 150)
         
                         HStack(spacing: 10) {
-                            ForEach(vm.accounts.filter { $0.visible && ($0.typeSignatura == "regular")}.indices, id: \.self) { index in
+                            ForEach(vm.accounts.filter { $0.visible && ($0.type == "regular")}.indices, id: \.self) { index in
                                 Circle()
                                     .fill(Color.black.opacity(currentIndex == index ? 0.5 : 0.1))
                                     .frame(width: 5)
@@ -71,11 +71,11 @@ struct AccountView: View {
                         }
         
         
-                        AccountTypeDetailsView(header: "Инвестиции", accounts: $vm.accounts.filterB { ($0.typeSignatura == "investment") && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Инвестиции", accounts: $vm.accounts.filterB { ($0.type == "investment") && ($0.visible) } )
         
-                        AccountTypeDetailsView(header: "Долги", accounts: $vm.accounts.filterB { ($0.typeSignatura == "debt") && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Долги", accounts: $vm.accounts.filterB { ($0.type == "debt") && ($0.visible) } )
         
-                        AccountTypeDetailsView(header: "Кредиты", accounts: $vm.accounts.filterB { ($0.typeSignatura == "credit") && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Кредиты", accounts: $vm.accounts.filterB { ($0.type == "credit") && ($0.visible) } )
         
                     }
                 }

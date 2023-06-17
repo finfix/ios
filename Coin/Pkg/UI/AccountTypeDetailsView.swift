@@ -50,6 +50,6 @@ struct AccountTypeDetailsView: View {
 
 struct AccountTypeDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountTypeDetailsView(header: "Заголовок", accounts: .constant([Account(accountGroupID: 1, accounting: true, currencySignatura: "USD", iconID: 0, id: 0, name: "Название счета", remainder: 123.456, typeSignatura: "debt", userID: 1, visible: true)]))
+        AccountTypeDetailsView(header: "Заголовок", accounts: .constant([Account(accountGroupID: 1, accounting: true, budget: 12, currency: "USD", iconID: 0, id: 0, name: "Название счета", remainder: 123.456, type: "debt", visible: true)]))
     }
 }

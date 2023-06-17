@@ -21,7 +21,7 @@ struct AccountCircleView: View {
     // Расход на текущий день
         var todayExpense: Int {
             var sum = 0.0
-            let expenses = vm.accounts.filter { $0.typeSignatura == "expense" && $0.accounting }
+            let expenses = vm.accounts.filter { $0.type == "expense" && $0.accounting }
             expenses.forEach { expense in
                 sum += expense.remainder
             }
@@ -31,7 +31,7 @@ struct AccountCircleView: View {
         // Баланс
         var balance: Int {
             var sum = 0.0
-            let regulars = vm.accounts.filter { $0.typeSignatura == "regular" && $0.accounting }
+            let regulars = vm.accounts.filter { $0.type == "regular" && $0.accounting }
             regulars.forEach { regular in
                 sum += regular.remainder
             }
@@ -41,9 +41,9 @@ struct AccountCircleView: View {
         // Остаток до конца месяца
         var mountRemainder: Int {
             var sum = 0.0
-            let expenses = vm.accounts.filter { $0.typeSignatura == "expense" && $0.accounting }
+            let expenses = vm.accounts.filter { $0.type == "expense" && $0.accounting }
             expenses.forEach { expense in
-                sum += expense.budget ?? 0
+                sum += expense.budget
             }
             return Int(sum) - todayExpense
         }
@@ -74,7 +74,7 @@ struct AccountCircleView: View {
             // SelectAccountGroup()
             ScrollView(.horizontal) {
                 HStack {
-                    CirclesArrayView(accounts: $vm.accounts.filterB { ($0.typeSignatura == "earnings") && $0.visible })
+                    CirclesArrayView(accounts: $vm.accounts.filterB { ($0.type == "earnings") && $0.visible })
                 }
             }.frame(maxHeight: 100)
             
@@ -82,7 +82,7 @@ struct AccountCircleView: View {
             
             ScrollView(.horizontal) {
                 HStack {
-                    CirclesArrayView(accounts: $vm.accounts.filterB { ($0.typeSignatura != "earnings") && ($0.typeSignatura != "expense") && $0.visible })
+                    CirclesArrayView(accounts: $vm.accounts.filterB { ($0.type != "earnings") && ($0.type != "expense") && $0.visible })
                 }
             }.frame(maxHeight: 100)
             
@@ -90,7 +90,7 @@ struct AccountCircleView: View {
             
             ScrollView(.horizontal) {
                     LazyHGrid(rows: rows) {
-                        CirclesArrayView(accounts: $vm.accounts.filterB {($0.typeSignatura == "expense") && $0.visible })
+                        CirclesArrayView(accounts: $vm.accounts.filterB {($0.type == "expense") && $0.visible })
                     }
             }
             .frame(maxHeight: .infinity)
@@ -111,29 +111,35 @@ struct CirclesArrayView: View {
                     .lineLimit(1)
                     .font(.footnote)
                 
-                if account.budget == nil {
+                // Если бюджет нулевой, показываем серый круг
+                if account.budget == 0 {
                     Circle()
                         .frame(width: 30)
                         .foregroundColor(.gray)
-                }
-                if let budget = account.budget {
-                    if budget > account.remainder {
+                } else {
+                    
+                    // Если не нулевой и расход меньше или равен бюджету, зеленый
+                    if account.budget >= account.remainder {
                         Circle()
                             .frame(width: 30)
                             .foregroundColor(.green)
                     } else {
+                        
+                        // Если расход больше бюджета, красный
                         Circle()
                             .frame(width: 30)
                             .foregroundColor(.red)
                     }
                 }
                 
+                // Остаток
                 Text(String(format: "%.2f", account.remainder))
                     .lineLimit(1)
                     .font(.footnote)
                 
-                if let budget = account.budget {
-                    Text(String(format: "%.2f", budget))
+                // Бюджет
+                if account.budget != 0 {
+                    Text(String(format: "%.0f", account.budget))
                         .lineLimit(1)
                         .font(.footnote)
                         .foregroundColor(.secondary)

@@ -11,11 +11,11 @@ import Alamofire
 class ApiHelper {
     
     private let dateFormatter: DateFormatter = {
-            let df = DateFormatter()
-            df.dateFormat = "yyyy-MM-dd"
-            df.locale = Locale(identifier: "en_US_POSIX")
-            return df
-        }()
+        let df = DateFormatter()
+        df.dateFormat = "yyyy-MM-dd"
+        df.locale = Locale(identifier: "en_US_POSIX")
+        return df
+    }()
     
     func dataProcessing<T: Decodable>(data response: AFDataResponse<Data>, model: T.Type = T.self) -> (T?, ErrorModel?, Bool) {
         // Проверяем результат

@@ -29,7 +29,7 @@ struct TransactionView: View {
                     ForEach(vm.transactionByDate.keys.sorted(by: >), id: \.self) { date in
                         Section(header: Text(date, style: .date).font(.headline)) {
                             ForEach (vm.transactionsFiltered.filter{ $0.dateTransaction == date }, id: \.id) { transaction in
-                                switch transaction.typeSignatura {
+                                switch transaction.type {
                                 case "balancing":
                                     
                                     HStack {
@@ -52,8 +52,8 @@ struct TransactionView: View {
                                             Text(String(format: "%.2f", transaction.amountTo))
                                             
                                             // Заметка
-                                            if let note = transaction.note {
-                                                Text(note)
+                                            if transaction.note != "" {
+                                                Text(transaction.note)
                                                     .font(.footnote)
                                             }
                                         }
@@ -92,7 +92,7 @@ struct Transaction_Previews: PreviewProvider {
 
 struct transactionRowView: View {
     
-    @State var accounts: [Int: Account]
+    @State var accounts: [UInt32: Account]
     @State var transaction: Transaction
     @Binding var showUpdate: Bool
     
@@ -115,8 +115,8 @@ struct transactionRowView: View {
                     Text(String(format: "%.2f", transaction.amountTo))
                     
                     // Заметка
-                    if let note = transaction.note {
-                        Text(note)
+                    if transaction.note != "" {
+                        Text(transaction.note)
                             .font(.footnote)
                     }
                 }

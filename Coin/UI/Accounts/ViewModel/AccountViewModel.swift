@@ -10,6 +10,64 @@ import SwiftUI
 class AccountViewModel: ObservableObject {
     @Published var accounts = [Account]()
     
+    var accountsGrouped: [Account] {
+        var accountsMap = [UInt32: Account]()
+        for account in accounts {
+            accountsMap[account.id] = account
+        }
+        
+        for (id, account) in accountsMap {
+
+            // Если счет не имеет родителя
+            if let parentAccountID = account.parentAccountID {
+
+                guard var parent = accountsMap[parentAccountID] else {
+                    continue
+                }
+
+                // Добавляем дочерний счет к родителю
+                let childAccount = ChildAccount(
+                    accounting: account.accounting,
+                    budget: account.budget,
+                    currency: account.currency,
+                    iconID: account.iconID,
+                    id: account.id,
+                    name: account.name,
+                    remainder: account.remainder,
+                    visible: account.visible
+                )
+
+                parent.childrenAccounts?.append(childAccount)
+                
+                // Получаем отношение валюты пользователя к валюте дочернего счета
+                guard let userCurrencyRate = rates[user.defaultCurrency],
+                      let accountCurrencyRate = rates[account.currency] else {
+                    continue
+                }
+
+                let relation = userCurrencyRate / accountCurrencyRate
+
+                // Считаем остаток счета и бюджет в валюте пользователя и добавляем к остатку родителя
+                parent.remainder += relation * account.remainder
+                parent.budget += relation * account.budget
+
+                // Обновляем родительский счет в словаре
+                accountsMap[parentAccountID] = parent
+
+                // Удаляем дочерний счет из словаря
+                accountsMap.removeValue(forKey: id)
+            }
+        }
+
+        // Заменяем счета в исходном массиве счетов, чтобы порядок счетов не менялся
+        var accountsWithoutChildren = [Account]()
+        for account in accounts {
+            if let newAccount = accountsMap[account.id] {
+                accountsWithoutChildren.append(newAccount)
+            }
+        }
+    }
+    
     @Published var visible = true
     @Published var accounting = true
     @Published var accountType = 1
@@ -19,33 +77,8 @@ class AccountViewModel: ObservableObject {
     // Возможные типы счетов
     var types = ["earnings", "expense", "regular", "credit", "investment", "debt"]
     
-    var accountsFiltered: [Account] {
-        
-        var subfiltered = accounts
-        
-        subfiltered = subfiltered.filter { $0.accountGroupID == selectedAccountGroupID }
-        
-        if visible {
-            subfiltered = subfiltered.filter { $0.visible }
-        }
-        
-        if accounting {
-            subfiltered = subfiltered.filter { $0.accounting }
-        }
-        
-        if accountType != 0 {
-            subfiltered = subfiltered.filter { $0.typeSignatura == types[accountType] }
-        }
-        
-        if withoutZeroRemainder {
-            subfiltered = subfiltered.filter { $0.remainder != 0 }
-        }
-        
-        return subfiltered.sorted { $0.remainder > $1.remainder }
-    }
-    
     func getAccount(_ settings: AppSettings) {
-        AccountAPI().GetAccounts { model, error in
+        AccountAPI().GetAccounts(req: GetAccountsRequest(period: "month")) { model, error in
             if let err = error {
                 settings.showErrorAlert(error: err)
             } else if let response = model {

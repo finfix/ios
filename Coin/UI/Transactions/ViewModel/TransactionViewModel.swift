@@ -19,7 +19,7 @@ class TransactionViewModel: ObservableObject {
     @Published var transactions = [Transaction]()
     @Published var accounts = [Account]()
     
-    var accountsMap: [Int: Account] {
+    var accountsMap: [UInt32: Account] {
         let accountsMap = Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
         return accountsMap
     }
@@ -29,7 +29,7 @@ class TransactionViewModel: ObservableObject {
     }
     
     var intercurrency: Bool {
-        return accountFrom?.currencySignatura != accountTo?.currencySignatura
+        return accountFrom?.currency != accountTo?.currency
     }
     
     @Published var transactionType: TransactionTypes?
@@ -51,7 +51,7 @@ class TransactionViewModel: ObservableObject {
         var subfiltered = transactions
         
         if searchText != "" {
-            subfiltered = subfiltered.filter { ($0.note ?? "").contains(searchText) }
+            subfiltered = subfiltered.filter { ($0.note ?? "").contains(searchText) || $0.accountFromID == UInt32(searchText) || $0.accountToID == UInt32(searchText) }
         }
         
         return subfiltered
@@ -60,7 +60,7 @@ class TransactionViewModel: ObservableObject {
     //MARK: - Methods
     // Получаем транзакции
     func getTransaction(_ settings: AppSettings) {
-        TransactionAPI().GetTransactions() { response, error in
+        TransactionAPI().GetTransactions(req: GetTransactionRequest(list: 0)) { response, error in
             if let err = error {
                 settings.showErrorAlert(error: err)
             } else if let response = response {
@@ -71,7 +71,7 @@ class TransactionViewModel: ObservableObject {
     
     // Получаем счета
     func getAccount() {
-        AccountAPI().GetAccounts { model, error in
+        AccountAPI().GetAccounts(req: GetAccountsRequest(period: "month")) { model, error in
             if let err = error {
                 self.appSettings.showErrorAlert(error: err)
             } else if let response = model {
@@ -82,13 +82,13 @@ class TransactionViewModel: ObservableObject {
     
     func deleteTransaction(at offsets: IndexSet, _ settings: AppSettings) {
         
-        var id = 0
+        var id: UInt32 = 0
         
         for i in offsets.makeIterator() {
             id = transactionsFiltered[i].id
         }
         
-        TransactionAPI().DeleteTransaction(id: id) { error in
+        TransactionAPI().DeleteTransaction(req: DeleteTransactionRequest(id: id)) { error in
             
             if let err = error {
                 settings.showErrorAlert(error: err)
@@ -102,7 +102,11 @@ class TransactionViewModel: ObservableObject {
         let format = DateFormatter()
         format.dateFormat = "YYYY-MM-dd"
                 
-        TransactionAPI().CreateTransaction(req: CreateTransactionRequest(accountFromID: accountFrom!.id, accountToID: accountTo!.id, amountFrom: Double(amountFrom.replacingOccurrences(of: ",", with: ".")) ?? 0, amountTo: (intercurrency ? Double(amountTo.replacingOccurrences(of: ",", with: ".")) : Double(amountFrom.replacingOccurrences(of: ",", with: "."))) ?? 0, dateTransaction: format.string(from: date), note: note, type: transactionType!.description, isExecuted: true)) { error in
+        TransactionAPI().CreateTransaction(req: CreateTransactionRequest(
+            accountFromID: accountFrom!.id,
+            accountToID: accountTo!.id,
+            amountFrom: Double(amountFrom.replacingOccurrences(of: ",", with: ".")) ?? 0,
+            amountTo: (intercurrency ? Double(amountTo.replacingOccurrences(of: ",", with: ".")) : Double(amountFrom.replacingOccurrences(of: ",", with: "."))) ?? 0, dateTransaction: format.string(from: date), note: note, type: transactionType!.description, isExecuted: true)) { error in
             if let err = error {
                 settings.showErrorAlert(error: err)
             }
