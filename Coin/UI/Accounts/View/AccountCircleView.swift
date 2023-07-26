@@ -21,7 +21,7 @@ struct AccountCircleView: View {
     // Расход на текущий день
         var todayExpense: Int {
             var sum = 0.0
-            let expenses = vm.accounts.filter { $0.type == "expense" && $0.accounting }
+            let expenses = vm.accountsGrouped.filter { $0.type == "expense" && $0.accounting }
             expenses.forEach { expense in
                 sum += expense.remainder
             }
@@ -31,7 +31,7 @@ struct AccountCircleView: View {
         // Баланс
         var balance: Int {
             var sum = 0.0
-            let regulars = vm.accounts.filter { $0.type == "regular" && $0.accounting }
+            let regulars = vm.accountsGrouped.filter { $0.type == "regular" && $0.accounting }
             regulars.forEach { regular in
                 sum += regular.remainder
             }
@@ -41,7 +41,7 @@ struct AccountCircleView: View {
         // Остаток до конца месяца
         var mountRemainder: Int {
             var sum = 0.0
-            let expenses = vm.accounts.filter { $0.type == "expense" && $0.accounting }
+            let expenses = vm.accountsGrouped.filter { $0.type == "expense" && $0.accounting }
             expenses.forEach { expense in
                 sum += expense.budget
             }
@@ -74,7 +74,7 @@ struct AccountCircleView: View {
             // SelectAccountGroup()
             ScrollView(.horizontal) {
                 HStack {
-                    CirclesArrayView(accounts: $vm.accounts.filterB { ($0.type == "earnings") && $0.visible })
+                    CirclesArrayView(accounts: $vm.accountsGrouped.filterB { ($0.type == "earnings") && $0.visible })
                 }
             }.frame(maxHeight: 100)
             
@@ -82,7 +82,7 @@ struct AccountCircleView: View {
             
             ScrollView(.horizontal) {
                 HStack {
-                    CirclesArrayView(accounts: $vm.accounts.filterB { ($0.type != "earnings") && ($0.type != "expense") && $0.visible })
+                    CirclesArrayView(accounts: $vm.accountsGrouped.filterB { ($0.type != "earnings") && ($0.type != "expense") && $0.visible })
                 }
             }.frame(maxHeight: 100)
             
@@ -90,13 +90,13 @@ struct AccountCircleView: View {
             
             ScrollView(.horizontal) {
                     LazyHGrid(rows: rows) {
-                        CirclesArrayView(accounts: $vm.accounts.filterB {($0.type == "expense") && $0.visible })
+                        CirclesArrayView(accounts: $vm.accountsGrouped.filterB {($0.type == "expense") && $0.visible })
                     }
             }
             .frame(maxHeight: .infinity)
             Spacer()
         }
-        .onAppear { vm.getAccount(appSettings) }
+        .onAppear { vm.getAccountGrouped(appSettings) }
     }
 }
 

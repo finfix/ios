@@ -18,7 +18,7 @@ struct Account: Decodable, Identifiable, Hashable {
     var remainder: Double
     var type: String
     var visible: Bool
-    var parentAccountID: UInt32
+    var parentAccountID: UInt32?
     var childrenAccounts: [ChildAccount]?
 }
 

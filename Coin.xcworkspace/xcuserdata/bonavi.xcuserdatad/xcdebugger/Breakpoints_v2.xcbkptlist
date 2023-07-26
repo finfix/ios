@@ -362,5 +362,117 @@
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "42C95308-2A7B-4649-BE9B-164ACDF6385F"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Coin/Network/TransactionAPI.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "86"
+            endingLineNumber = "86"
+            landmarkName = "DeleteTransaction(req:completionHandler:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "42C95308-2A7B-4649-BE9B-164ACDF6385F - b7f8ca54aea64d7c"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Coin.TransactionAPI.DeleteTransaction(req: Coin.DeleteTransactionRequest, completionHandler: (Swift.Optional&lt;Coin.ErrorModel&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "Coin"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/Network/TransactionAPI.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "86"
+                  endingLineNumber = "86"
+                  offsetFromSymbolStart = "117">
+               </Location>
+               <Location
+                  uuid = "42C95308-2A7B-4649-BE9B-164ACDF6385F - b7f8ca54aea64d7c"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Coin.TransactionAPI.DeleteTransaction(req: Coin.DeleteTransactionRequest, completionHandler: (Swift.Optional&lt;Coin.ErrorModel&gt;) -&gt; ()) -&gt; ()"
+                  moduleName = "Coin"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/Network/TransactionAPI.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "86"
+                  endingLineNumber = "86"
+                  offsetFromSymbolStart = "68">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "466EDC50-7FAE-430C-8B82-23E8829CCD09"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "deleteTransaction(at:_:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "466EDC50-7FAE-430C-8B82-23E8829CCD09 - 5088500436d8d1a2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Coin.TransactionViewModel.deleteTransaction(at: Foundation.IndexSet, _: Coin.AppSettings) -&gt; ()"
+                  moduleName = "Coin"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "85"
+                  endingLineNumber = "85"
+                  offsetFromSymbolStart = "368">
+               </Location>
+               <Location
+                  uuid = "466EDC50-7FAE-430C-8B82-23E8829CCD09 - 5088500436d8d1a2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Coin.TransactionViewModel.deleteTransaction(at: Foundation.IndexSet, _: Coin.AppSettings) -&gt; ()"
+                  moduleName = "Coin"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "85"
+                  endingLineNumber = "85"
+                  offsetFromSymbolStart = "616">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "64F2D202-C56D-4598-95E8-8AA19F503553"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
+            landmarkName = "deleteTransaction(at:_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

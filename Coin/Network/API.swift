@@ -9,7 +9,7 @@ import Foundation
 import Alamofire
 import SwiftUI
 
-let basePath = "https://berubox.com"
+let basePath = "https://bonavii.com"
 let baseHeaders: HTTPHeaders = ["DeviceID": UIDevice.current.identifierForVendor!.uuidString, "Authorization": Defaults.accessToken ?? ""]
 
 func checkToken() -> (ErrorModel?){

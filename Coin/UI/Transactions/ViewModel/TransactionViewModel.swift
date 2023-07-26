@@ -71,7 +71,7 @@ class TransactionViewModel: ObservableObject {
     
     // Получаем счета
     func getAccount() {
-        AccountAPI().GetAccounts(req: GetAccountsRequest(period: "month")) { model, error in
+        AccountAPI().GetAccounts(req: GetAccountsRequest(period: "month"), grouped: false) { model, error in
             if let err = error {
                 self.appSettings.showErrorAlert(error: err)
             } else if let response = model {
