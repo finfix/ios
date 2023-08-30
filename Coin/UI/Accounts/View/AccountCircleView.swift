@@ -18,59 +18,31 @@ struct AccountCircleView: View {
         GridItem(.flexible())
     ]
     
-    // Расход на текущий день
-        var todayExpense: Int {
-            var sum = 0.0
-            let expenses = vm.accountsGrouped.filter { $0.type == "expense" && $0.accounting }
-            expenses.forEach { expense in
-                sum += expense.remainder
-            }
-            return Int(sum)
-        }
-        
-        // Баланс
-        var balance: Int {
-            var sum = 0.0
-            let regulars = vm.accountsGrouped.filter { $0.type == "regular" && $0.accounting }
-            regulars.forEach { regular in
-                sum += regular.remainder
-            }
-            return Int(sum)
-        }
-        
-        // Остаток до конца месяца
-        var mountRemainder: Int {
-            var sum = 0.0
-            let expenses = vm.accountsGrouped.filter { $0.type == "expense" && $0.accounting }
-            expenses.forEach { expense in
-                sum += expense.budget
-            }
-            return Int(sum) - todayExpense
-        }
-    
     var body: some View {
         VStack(spacing: 10) {
             HStack(spacing: 35) {
-                        VStack {
-                            Text("Расход")
-                            Text("\(todayExpense)")
-                        }
-                        RoundedRectangle(cornerRadius: 0)
-                            .frame(width: 1, height: 44)
-                        VStack {
-                            Text("Баланс")
-                            Text("\(balance)")
-                        }
-                        RoundedRectangle(cornerRadius: 0)
-                            .frame(width: 1, height: 44)
-                        VStack {
-                            Text("Бюджет")
-                            Text("\(mountRemainder)")
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 60)
-                    .background(Color("Gray"))
+                VStack {
+                    Text("Расход")
+                    Text("\(vm.quickStatistic.TotalExpense, specifier: "%.0f")")
+                }
+                RoundedRectangle(cornerRadius: 0)
+                    .frame(width: 1, height: 44)
+                VStack {
+                    Text("Баланс")
+                    Text("\(vm.quickStatistic.TotalRemainder, specifier: "%.0f")")
+                }
+                RoundedRectangle(cornerRadius: 0)
+                    .frame(width: 1, height: 44)
+                VStack {
+                    Text("Бюджет")
+                    Text("\(vm.quickStatistic.LeftToSpend, specifier: "%.0f")")
+                    Text("\(vm.quickStatistic.TotalBudget, specifier: "%.0f")")
+                        .font(.footnote)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 60)
+            .background(Color("Gray"))
             // SelectAccountGroup()
             ScrollView(.horizontal) {
                 HStack {
@@ -89,14 +61,15 @@ struct AccountCircleView: View {
             Divider()
             
             ScrollView(.horizontal) {
-                    LazyHGrid(rows: rows) {
-                        CirclesArrayView(accounts: $vm.accountsGrouped.filterB {($0.type == "expense") && $0.visible })
-                    }
+                LazyHGrid(rows: rows) {
+                    CirclesArrayView(accounts: $vm.accountsGrouped.filterB {($0.type == "expense") && $0.visible })
+                }
             }
             .frame(maxHeight: .infinity)
             Spacer()
         }
         .onAppear { vm.getAccountGrouped(appSettings) }
+        .onAppear{ vm.getQuickStatistic(appSettings) }
     }
 }
 

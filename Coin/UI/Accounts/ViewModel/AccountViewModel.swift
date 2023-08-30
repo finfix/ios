@@ -10,6 +10,7 @@ import SwiftUI
 class AccountViewModel: ObservableObject {
     @Published var accounts = [Account]()
     @Published var accountsGrouped = [Account]()
+    @Published var quickStatistic = QuickStatisticRes(TotalRemainder: 0, TotalExpense: 0, LeftToSpend: 0, TotalBudget: 0)
     
     // var accountsGrouped: [Account] {
     //     var accountsMap = [UInt32: Account]()
@@ -94,6 +95,16 @@ class AccountViewModel: ObservableObject {
                 settings.showErrorAlert(error: err)
             } else if let response = model {
                 self.accountsGrouped = response
+            }
+        }
+    }
+    
+    func getQuickStatistic(_ settings: AppSettings) {
+        AccountAPI().QuickStatistic { model, error in
+            if let err = error {
+                settings.showErrorAlert(error: err)
+            } else if let response = model {
+                self.quickStatistic = response
             }
         }
     }

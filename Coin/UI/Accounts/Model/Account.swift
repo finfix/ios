@@ -32,3 +32,10 @@ struct ChildAccount: Decodable, Hashable, Identifiable {
     var remainder: Double
     var visible: Bool
 }
+
+struct QuickStatisticRes: Decodable {
+    var TotalRemainder: Double
+    var TotalExpense: Double
+    var LeftToSpend: Double
+    var TotalBudget: Double
+}

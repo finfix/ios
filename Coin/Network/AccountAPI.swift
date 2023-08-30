@@ -39,4 +39,28 @@ class AccountAPI {
             }
         }
     }
+    
+    func QuickStatistic(completionHandler: @escaping (QuickStatisticRes?, ErrorModel?) -> Void) {
+        
+        let err = checkToken()
+        if err != nil {
+            completionHandler(nil, err)
+            return
+        }
+        
+        var path = accountBasePath + "/quickStatistic"
+        
+        AF.request(basePath + path, method: .get, headers: baseHeaders).responseData { response in
+            
+            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: QuickStatisticRes.self)
+            if error != nil {
+                completionHandler(nil, error)
+                return
+            }
+            if model != nil {
+                completionHandler(model, nil)
+                return
+            }
+        }
+    }
 }
