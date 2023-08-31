@@ -32,9 +32,13 @@ class TransactionViewModel: ObservableObject {
         return accountFrom?.currency != accountTo?.currency
     }
     
-    @Published var transactionType: TransactionTypes?
+    @Published var transactionType: TransactionType?
     @Published var accountFrom: Account?
     @Published var accountTo: Account?
+    
+    var groupedTransactionByDate: [Date : [Transaction]] {
+         Dictionary(grouping: transactionsFiltered, by: { $0.dateTransaction })
+     }
     
     @Published var amountFrom: String = ""
     @Published var amountTo: String = ""
@@ -51,7 +55,7 @@ class TransactionViewModel: ObservableObject {
         var subfiltered = transactions
         
         if searchText != "" {
-            subfiltered = subfiltered.filter { ($0.note ?? "").contains(searchText) || $0.accountFromID == UInt32(searchText) || $0.accountToID == UInt32(searchText) }
+            subfiltered = subfiltered.filter { $0.note.contains(searchText) || $0.accountFromID == UInt32(searchText) || $0.accountToID == UInt32(searchText) }
         }
         
         return subfiltered
@@ -80,20 +84,18 @@ class TransactionViewModel: ObservableObject {
         }
     }
     
-    func deleteTransaction(at offsets: IndexSet, _ settings: AppSettings) {
+    func deleteTransaction(at offsets: IndexSet, date: Date, _ settings: AppSettings) {
         
         var id: UInt32 = 0
         
         for i in offsets.makeIterator() {
-            id = transactionsFiltered[i].id
+            id = groupedTransactionByDate[date]![i].id
         }
         
         TransactionAPI().DeleteTransaction(req: DeleteTransactionRequest(id: id)) { error in
             
             if let err = error {
                 settings.showErrorAlert(error: err)
-            } else {
-                self.transactions.remove(atOffsets: offsets)
             }
         }
     }
