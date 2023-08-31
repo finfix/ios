@@ -8,7 +8,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "248200B2-5B26-43FE-A52A-4335EF4D4460"
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Coin/Pkg/APIHelper.swift"
@@ -24,7 +24,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "B2379449-8CF8-4071-AF6A-5F9EDA45D9A8"
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Coin/Pkg/APIHelper.swift"
@@ -40,7 +40,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "A99AF895-40FC-4626-9F1B-3D9CB24E3ACE"
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Coin/Pkg/APIHelper.swift"
@@ -55,423 +55,64 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "D34531A2-39B7-4C2A-87AF-85CBB923D8DC"
+            uuid = "F0689C26-390D-4343-9FEB-A4EF9D0A8A0D"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "20"
-            endingLineNumber = "20"
-            landmarkName = "TransactionViewModel"
-            landmarkType = "3">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "13B0E568-3DA2-42B0-B383-7743030EE18E"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Coin/UI/Transactions/View/TransactionView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "103"
-            endingLineNumber = "103"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "D23D074D-7481-4FF4-A658-8B37FA7C783B"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Coin/UI/Transactions/View/Subview/CreateTransactionView.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "32"
-            endingLineNumber = "32"
-            landmarkName = "body"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "7087026B-277D-4C4F-97C5-719F6B2FB56F"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Coin/UI/Transactions/TransactionViewModel.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "32"
-            endingLineNumber = "32"
-            landmarkName = "intercurrency"
-            landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "90AE6AC8-0AA9-4726-A30B-88BAE2F3FD2D"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Coin/UI/Transactions/TransactionViewModel.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "36"
-            endingLineNumber = "36"
-            landmarkName = "TransactionViewModel"
-            landmarkType = "3">
-            <Locations>
-               <Location
-                  uuid = "90AE6AC8-0AA9-4726-A30B-88BAE2F3FD2D - 8bed13542f55d19d"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "property wrapper backing initializer of Coin.TransactionViewModel.accountFrom : Swift.Optional&lt;Coin.Account&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "37"
-                  endingLineNumber = "37"
-                  offsetFromSymbolStart = "64">
-               </Location>
-               <Location
-                  uuid = "90AE6AC8-0AA9-4726-A30B-88BAE2F3FD2D - c3f6d10c6926026c"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.accountFrom.getter : Swift.Optional&lt;Coin.Account&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "37"
-                  endingLineNumber = "37"
-                  offsetFromSymbolStart = "820">
-               </Location>
-               <Location
-                  uuid = "90AE6AC8-0AA9-4726-A30B-88BAE2F3FD2D - 3fd9f0854c181298"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.accountFrom.setter : Swift.Optional&lt;Coin.Account&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "37"
-                  endingLineNumber = "37"
-                  offsetFromSymbolStart = "448">
-               </Location>
-               <Location
-                  uuid = "90AE6AC8-0AA9-4726-A30B-88BAE2F3FD2D - f530e58e4c1e8e6b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.accountFrom.modify : Swift.Optional&lt;Coin.Account&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "37"
-                  endingLineNumber = "37"
-                  offsetFromSymbolStart = "0">
-               </Location>
-               <Location
-                  uuid = "90AE6AC8-0AA9-4726-A30B-88BAE2F3FD2D - 2d9b83883ae9ba9"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.accountFrom.modify : Swift.Optional&lt;Coin.Account&gt; with unmangled suffix &quot;.resume.0&quot;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "37"
-                  endingLineNumber = "37"
-                  offsetFromSymbolStart = "56">
-               </Location>
-               <Location
-                  uuid = "90AE6AC8-0AA9-4726-A30B-88BAE2F3FD2D - fd13ad96a58c1ca0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.$accountFrom.getter : SwiftUI.Binding&lt;Swift.Optional&lt;Coin.Account&gt;&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "37"
-                  endingLineNumber = "37"
-                  offsetFromSymbolStart = "844">
-               </Location>
-               <Location
-                  uuid = "90AE6AC8-0AA9-4726-A30B-88BAE2F3FD2D - 71077da69ea5f2b4"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.init() -&gt; Coin.TransactionViewModel"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "37"
-                  endingLineNumber = "37"
-                  offsetFromSymbolStart = "816">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "7F39A708-7D26-4CE0-9319-D5DDFA0FC3F1"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Coin/UI/Transactions/TransactionViewModel.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "37"
-            endingLineNumber = "37"
-            landmarkName = "TransactionViewModel"
-            landmarkType = "3">
-            <Locations>
-               <Location
-                  uuid = "7F39A708-7D26-4CE0-9319-D5DDFA0FC3F1 - f9632f151231eabc"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "property wrapper backing initializer of Coin.TransactionViewModel.accountTo : Swift.Optional&lt;Coin.Account&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "38"
-                  endingLineNumber = "38"
-                  offsetFromSymbolStart = "64">
-               </Location>
-               <Location
-                  uuid = "7F39A708-7D26-4CE0-9319-D5DDFA0FC3F1 - 757ed38056a6569a"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.accountTo.getter : Swift.Optional&lt;Coin.Account&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "38"
-                  endingLineNumber = "38"
-                  offsetFromSymbolStart = "820">
-               </Location>
-               <Location
-                  uuid = "7F39A708-7D26-4CE0-9319-D5DDFA0FC3F1 - 34a553ca77b99e96"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.accountTo.setter : Swift.Optional&lt;Coin.Account&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "38"
-                  endingLineNumber = "38"
-                  offsetFromSymbolStart = "448">
-               </Location>
-               <Location
-                  uuid = "7F39A708-7D26-4CE0-9319-D5DDFA0FC3F1 - db83602a31f6f4a7"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.accountTo.modify : Swift.Optional&lt;Coin.Account&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "38"
-                  endingLineNumber = "38"
-                  offsetFromSymbolStart = "0">
-               </Location>
-               <Location
-                  uuid = "7F39A708-7D26-4CE0-9319-D5DDFA0FC3F1 - a8bd9f4f5f03f688"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.accountTo.modify : Swift.Optional&lt;Coin.Account&gt; with unmangled suffix &quot;.resume.0&quot;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "38"
-                  endingLineNumber = "38"
-                  offsetFromSymbolStart = "56">
-               </Location>
-               <Location
-                  uuid = "7F39A708-7D26-4CE0-9319-D5DDFA0FC3F1 - 49efc92500f365de"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.$accountTo.getter : SwiftUI.Binding&lt;Swift.Optional&lt;Coin.Account&gt;&gt;"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "38"
-                  endingLineNumber = "38"
-                  offsetFromSymbolStart = "844">
-               </Location>
-               <Location
-                  uuid = "7F39A708-7D26-4CE0-9319-D5DDFA0FC3F1 - 71077da69ea5f295"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.init() -&gt; Coin.TransactionViewModel"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/TransactionViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "38"
-                  endingLineNumber = "38"
-                  offsetFromSymbolStart = "932">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "42C95308-2A7B-4649-BE9B-164ACDF6385F"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Coin/Network/TransactionAPI.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "86"
-            endingLineNumber = "86"
-            landmarkName = "DeleteTransaction(req:completionHandler:)"
+            startingLineNumber = "92"
+            endingLineNumber = "92"
+            landmarkName = "deleteTransaction(at:date:_:)"
             landmarkType = "7">
             <Locations>
                <Location
-                  uuid = "42C95308-2A7B-4649-BE9B-164ACDF6385F - b7f8ca54aea64d7c"
+                  uuid = "F0689C26-390D-4343-9FEB-A4EF9D0A8A0D - 24277305a3ea86aa"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionAPI.DeleteTransaction(req: Coin.DeleteTransactionRequest, completionHandler: (Swift.Optional&lt;Coin.ErrorModel&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/Network/TransactionAPI.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "86"
-                  endingLineNumber = "86"
-                  offsetFromSymbolStart = "117">
-               </Location>
-               <Location
-                  uuid = "42C95308-2A7B-4649-BE9B-164ACDF6385F - b7f8ca54aea64d7c"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionAPI.DeleteTransaction(req: Coin.DeleteTransactionRequest, completionHandler: (Swift.Optional&lt;Coin.ErrorModel&gt;) -&gt; ()) -&gt; ()"
-                  moduleName = "Coin"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/Network/TransactionAPI.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "86"
-                  endingLineNumber = "86"
-                  offsetFromSymbolStart = "68">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "466EDC50-7FAE-430C-8B82-23E8829CCD09"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "85"
-            endingLineNumber = "85"
-            landmarkName = "deleteTransaction(at:_:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "466EDC50-7FAE-430C-8B82-23E8829CCD09 - 5088500436d8d1a2"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.deleteTransaction(at: Foundation.IndexSet, _: Coin.AppSettings) -&gt; ()"
+                  symbolName = "Coin.TransactionViewModel.deleteTransaction(at: Foundation.IndexSet, date: Foundation.Date, _: Coin.AppSettings) -&gt; ()"
                   moduleName = "Coin"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "85"
-                  endingLineNumber = "85"
-                  offsetFromSymbolStart = "368">
+                  startingLineNumber = "90"
+                  endingLineNumber = "90"
+                  offsetFromSymbolStart = "476">
                </Location>
                <Location
-                  uuid = "466EDC50-7FAE-430C-8B82-23E8829CCD09 - 5088500436d8d1a2"
+                  uuid = "F0689C26-390D-4343-9FEB-A4EF9D0A8A0D - 24277305a3ea86e8"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "Coin.TransactionViewModel.deleteTransaction(at: Foundation.IndexSet, _: Coin.AppSettings) -&gt; ()"
+                  symbolName = "Coin.TransactionViewModel.deleteTransaction(at: Foundation.IndexSet, date: Foundation.Date, _: Coin.AppSettings) -&gt; ()"
                   moduleName = "Coin"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "85"
-                  endingLineNumber = "85"
-                  offsetFromSymbolStart = "616">
+                  startingLineNumber = "88"
+                  endingLineNumber = "88"
+                  offsetFromSymbolStart = "640">
+               </Location>
+               <Location
+                  uuid = "F0689C26-390D-4343-9FEB-A4EF9D0A8A0D - 24277305a3ea86e8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Coin.TransactionViewModel.deleteTransaction(at: Foundation.IndexSet, date: Foundation.Date, _: Coin.AppSettings) -&gt; ()"
+                  moduleName = "Coin"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bonavi/Documents/Projects/Coin/coin-iOS/Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "88"
+                  endingLineNumber = "88"
+                  offsetFromSymbolStart = "536">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "64F2D202-C56D-4598-95E8-8AA19F503553"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Coin/UI/Transactions/ViewModel/TransactionViewModel.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "87"
-            endingLineNumber = "87"
-            landmarkName = "deleteTransaction(at:_:)"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

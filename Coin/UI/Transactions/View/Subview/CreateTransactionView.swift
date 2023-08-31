@@ -14,7 +14,7 @@ struct CreateTransactionView: View {
     @StateObject var vm = TransactionViewModel()
         
     @Binding var isOpeningFrame: Bool
-    @State var transactionType: TransactionTypes
+    @State var transactionType: TransactionType
         
     var body: some View {
         VStack {

@@ -20,7 +20,7 @@ struct AccountView: View {
     @State var currentIndex = 0
     
     @State var chooseBlurIsOpened = false
-    @State var transactionType: TransactionTypes = .consumption
+    @State var transactionType: TransactionType = .consumption
         
     var body: some View {
         NavigationView {
