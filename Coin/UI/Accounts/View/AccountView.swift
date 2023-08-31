@@ -50,7 +50,7 @@ struct AccountView: View {
                                         Text(account.name)
                                     }
                                     
-                                    Text("\(account.remainder)")
+                                    Text("\(String(format: "%.0f", account.remainder)) \(account.currencySymbol)")
                                 }
                                 .frame(width: size.width, height: 150)
                                 .background(Color("Gray"))

@@ -35,7 +35,7 @@ struct AccountTypeDetailsView: View {
                         Text(account.name)
                             .lineLimit(1)
                         Spacer()
-                        Text(String(format: "%.2f", account.remainder))
+                        Text("\(String(format: "%.2f", account.remainder)) \(account.currencySymbol)")
                     }
                     .padding()
                     .frame(width: 340, height: 60)
@@ -50,6 +50,6 @@ struct AccountTypeDetailsView: View {
 
 struct AccountTypeDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountTypeDetailsView(header: "Заголовок", accounts: .constant([Account(accountGroupID: 1, accounting: true, budget: 12, currency: "USD", iconID: 0, id: 0, name: "Название счета", remainder: 123.456, type: "debt", visible: true, parentAccountID: 0)]))
+        AccountTypeDetailsView(header: "Заголовок", accounts: .constant([Account(accountGroupID: 1, accounting: true, budget: 12, currency: "USD", iconID: 0, id: 0, name: "Название счета", remainder: 123.456, type: "debt", visible: true, parentAccountID: 0, currencySymbol: "$")]))
     }
 }

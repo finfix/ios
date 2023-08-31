@@ -23,20 +23,20 @@ struct AccountCircleView: View {
             HStack(spacing: 35) {
                 VStack {
                     Text("Расход")
-                    Text("\(vm.quickStatistic.TotalExpense, specifier: "%.0f")")
+                    Text("\(vm.quickStatistic.TotalExpense, specifier: "%.0f") ₽")
                 }
                 RoundedRectangle(cornerRadius: 0)
                     .frame(width: 1, height: 44)
                 VStack {
                     Text("Баланс")
-                    Text("\(vm.quickStatistic.TotalRemainder, specifier: "%.0f")")
+                    Text("\(vm.quickStatistic.TotalRemainder, specifier: "%.0f") ₽")
                 }
                 RoundedRectangle(cornerRadius: 0)
                     .frame(width: 1, height: 44)
                 VStack {
                     Text("Бюджет")
-                    Text("\(vm.quickStatistic.LeftToSpend, specifier: "%.0f")")
-                    Text("\(vm.quickStatistic.TotalBudget, specifier: "%.0f")")
+                    Text("\(vm.quickStatistic.LeftToSpend, specifier: "%.0f") ₽")
+                    Text("\(vm.quickStatistic.TotalBudget, specifier: "%.0f") ₽")
                         .font(.footnote)
                 }
             }
@@ -106,13 +106,13 @@ struct CirclesArrayView: View {
                 }
                 
                 // Остаток
-                Text(String(format: "%.2f", account.remainder))
+                Text("\(String(format: "%.2f", account.remainder)) \(account.currencySymbol)")
                     .lineLimit(1)
                     .font(.footnote)
                 
                 // Бюджет
                 if account.budget != 0 {
-                    Text(String(format: "%.0f", account.budget))
+                    Text("\(String(format: "%.0f", account.budget)) \(account.currencySymbol)")
                         .lineLimit(1)
                         .font(.footnote)
                         .foregroundColor(.secondary)

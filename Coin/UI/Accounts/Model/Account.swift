@@ -20,6 +20,7 @@ struct Account: Decodable, Identifiable, Hashable {
     var visible: Bool
     var parentAccountID: UInt32?
     var childrenAccounts: [ChildAccount]?
+    var currencySymbol: String
 }
 
 struct ChildAccount: Decodable, Hashable, Identifiable {
