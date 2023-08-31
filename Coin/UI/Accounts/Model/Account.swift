@@ -18,7 +18,7 @@ struct Account: Decodable, Identifiable, Hashable {
     var remainder: Double
     var type: String
     var visible: Bool
-    var parentAccountID: UInt32
+    var parentAccountID: UInt32?
     var childrenAccounts: [ChildAccount]?
 }
 
@@ -31,4 +31,11 @@ struct ChildAccount: Decodable, Hashable, Identifiable {
     var name: String
     var remainder: Double
     var visible: Bool
+}
+
+struct QuickStatisticRes: Decodable {
+    var TotalRemainder: Double
+    var TotalExpense: Double
+    var LeftToSpend: Double
+    var TotalBudget: Double
 }

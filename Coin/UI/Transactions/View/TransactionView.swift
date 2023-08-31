@@ -26,9 +26,9 @@ struct TransactionView: View {
                 
                 // Список транзакций
                 List {
-                    ForEach(vm.transactionByDate.keys.sorted(by: >), id: \.self) { date in
+                    ForEach(vm.groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                         Section(header: Text(date, style: .date).font(.headline)) {
-                            ForEach (vm.transactionsFiltered.filter{ $0.dateTransaction == date }, id: \.id) { transaction in
+                            ForEach (vm.groupedTransactionByDate[date] ?? [], id: \.id) { transaction in
                                 switch transaction.type {
                                 case "balancing":
                                     
@@ -48,15 +48,24 @@ struct TransactionView: View {
                                         Spacer()
                                         
                                         VStack(alignment: .trailing) {
-                                            // Сумма
-                                            Text(String(format: "%.2f", transaction.amountTo))
                                             
-                                            // Заметка
-                                            if transaction.note != "" {
-                                                Text(transaction.note)
-                                                    .font(.footnote)
+                                            
+                                            switch transaction.type {
+                                            case "consumption":
+                                                Text(String(format: "- %.2f", transaction.amountTo))
+                                            case "income":
+                                                Text(String(format: "+ %.2f", transaction.amountTo))
+                                            default:
+                                                Text(String(format: "%.2f", transaction.amountTo))
                                             }
-                                        }
+                                            
+
+                                                // Заметка
+                                                if transaction.note != "" {
+                                                    Text(transaction.note)
+                                                        .font(.footnote)
+                                                }
+                                            }
                                     }
                                     .padding()
                                     .navigationDestination(isPresented: $showUpdate) {
@@ -64,7 +73,7 @@ struct TransactionView: View {
                                     }
                                 }
                             }
-                            .onDelete { vm.deleteTransaction(at: $0, appSettings) }
+                            .onDelete { vm.deleteTransaction(at: $0, date: date, appSettings) }
                         }
                     }
                 }

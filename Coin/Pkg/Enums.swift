@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum TransactionTypes {
+enum TransactionType {
     case consumption, income, transfer
     
     var description : String {
@@ -17,4 +17,8 @@ enum TransactionTypes {
         case .transfer: return "transfer"
         }
     }
+}
+
+enum AccountPick {
+    case from, to
 }
