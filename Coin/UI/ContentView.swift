@@ -47,10 +47,17 @@ struct MainView: View {
                     Text("Транзакции")
                 }
             
-            ProfileView()
+            BudgetsView()
                 .tag(4)
                 .tabItem {
                     Image(systemName: "4.circle")
+                    Text("Бюджеты")
+                }
+            
+            ProfileView()
+                .tag(5)
+                .tabItem {
+                    Image(systemName: "5.circle")
                     Text("Профиль")
                 }
             
