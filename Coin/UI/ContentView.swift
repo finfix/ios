@@ -9,10 +9,10 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @EnvironmentObject var auth: AppSettings
+    @Environment(AppSettings.self) var appSettings
     
     var body: some View {
-        if auth.isLogin {
+        if appSettings.isLogin {
             MainView()
         } else {
             LoginView()
@@ -22,39 +22,40 @@ struct ContentView: View {
 
 struct MainView: View {
     
-    @EnvironmentObject var vm: AppSettings
+    @Environment(AppSettings.self) var appSettings
+    @Environment(ModelData.self) var modelData
     
     var body: some View {
         TabView {
-            AccountView()
+            Accounts()
                 .tag(1)
                 .tabItem {
                     Image(systemName: "1.circle")
                     Text("Счета")
                 }
             
-            AccountCircleView()
+            AccountCircleList()
                 .tag(2)
                 .tabItem {
                     Image(systemName: "2.circle")
                     Text("Счета 2")
                 }
             
-            TransactionView()
+            TransactionsList()
                 .tag(3)
                 .tabItem {
                     Image(systemName: "3.circle")
                     Text("Транзакции")
                 }
             
-            BudgetsView()
+            BudgetsList()
                 .tag(4)
                 .tabItem {
                     Image(systemName: "4.circle")
                     Text("Бюджеты")
                 }
             
-            ProfileView()
+            Profile()
                 .tag(5)
                 .tabItem {
                     Image(systemName: "5.circle")
@@ -73,27 +74,8 @@ struct MainView: View {
     }
 }
 
-struct ProfileView: View {
-    
-    @EnvironmentObject var vm: AppSettings
-    
-    var body: some View {
-        Button {
-            vm.isLogin = false
-        } label: {
-            Text("Выйти")
-        }
-
-    }
-}
-
-/// Чтобы предварительный просмотр работал, не забудьте добавить environmentObject в предварительный просмотр ContentView, так как предварительный просмотр отличается от приложения:
-struct ContentView_Previews: PreviewProvider {
-    
-    static var previews: some View {
-        ContentView()
-            .environmentObject(AppSettings())
-            // .previewDevice(PreviewDevice(rawValue: "iPhone 8"))
-    }
-    
+#Preview {
+    ContentView()
+        .environment(AppSettings())
+        .environment(ModelData())
 }

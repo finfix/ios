@@ -7,10 +7,9 @@
 
 import SwiftUI
 
-struct AccountView: View {
+struct Accounts: View {
     
-    @ObservedObject var vm = AccountViewModel()
-    @EnvironmentObject var appSettings: AppSettings
+    @Environment(ModelData.self) var modelData
     
     @State var showFilters = false
     @State var showDebts = false
@@ -27,41 +26,20 @@ struct AccountView: View {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
         
-                    // Шапка
                     Header()
-        
-                    // Выбор группы счетов
-                    SelectAccountGroup(name: $vm.selectedAccountGroupID)
         
                     ScrollView {
         
                         Text("Карты и счета")
-                        SnapCarouselView(spacing: 30, index: $currentIndex, items: vm.accounts.filter { $0.visible && ($0.type == "regular")}) { account in
+                        SnapCarouselView(spacing: 30, index: $currentIndex, items: modelData.accounts.filter { $0.visible && ($0.type == "regular")}) { account in
                             GeometryReader { proxy in
-        
-                                let size = proxy.size
-        
-        
-                                VStack(alignment: .leading) {
-                                    HStack {
-                                        Circle()
-                                            .frame(width: 30, height: 30)
-                                            .foregroundColor(.gray)
-                                        Text(account.name)
-                                    }
-                                    
-                                    Text("\(String(format: "%.0f", account.remainder)) \(account.currencySymbol)")
-                                }
-                                .frame(width: size.width, height: 150)
-                                .background(Color("Gray"))
-                                .cornerRadius(17)
-        
+                                AccountCard(size: proxy.size, account: account)
                             }
                         }
                         .frame(height: 150)
         
                         HStack(spacing: 10) {
-                            ForEach(vm.accounts.filter { $0.visible && ($0.type == "regular")}.indices, id: \.self) { index in
+                            ForEach(modelData.accounts.filter { $0.visible && ($0.type == "regular")}.indices, id: \.self) { index in
                                 Circle()
                                     .fill(Color.black.opacity(currentIndex == index ? 0.5 : 0.1))
                                     .frame(width: 5)
@@ -71,11 +49,11 @@ struct AccountView: View {
                         }
         
         
-                        AccountTypeDetailsView(header: "Инвестиции", accounts: $vm.accounts.filterB { ($0.type == "investment") && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Инвестиции", accounts: modelData.accounts.filter { ($0.type == "investment") && ($0.visible) } )
         
-                        AccountTypeDetailsView(header: "Долги", accounts: $vm.accounts.filterB { ($0.type == "debt") && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Долги", accounts: modelData.accounts.filter { ($0.type == "debt") && ($0.visible) } )
         
-                        AccountTypeDetailsView(header: "Кредиты", accounts: $vm.accounts.filterB { ($0.type == "credit") && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Кредиты", accounts: modelData.accounts.filter { ($0.type == "credit") && ($0.visible) } )
         
                     }
                 }
@@ -125,7 +103,7 @@ struct AccountView: View {
                     }
                 }
             }
-            .onAppear { vm.getAccount(appSettings) }
+            .onAppear(perform: modelData.getAccounts)
             .onDisappear { chooseBlurIsOpened = false }
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden(true)
@@ -150,9 +128,6 @@ struct AccountView: View {
         }
     }
     
-    struct AccountView_Previews: PreviewProvider {
-        static var previews: some View {
-            AccountView()
-                .environmentObject(AppSettings())
-        }
-    }
+#Preview {
+    Accounts()
+}

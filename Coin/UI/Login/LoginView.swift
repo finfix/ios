@@ -8,21 +8,21 @@
 import SwiftUI
 
 struct LoginView: View {
+        
+    @State var login = ""
+    @State var password = ""
     
-    @StateObject var vm = LoginViewModel()
-    
-    @EnvironmentObject var appSettings: AppSettings
+    @Environment(AppSettings.self) var appSettings
     
     var body: some View {
         NavigationView {
             VStack {
-                TextField("Email", text: $vm.login)
+                TextField("Email", text: $login)
                     .modifier(CustomTextField())
-                TextField("Password", text: $vm.password)
+                TextField("Password", text: $password)
                     .modifier(CustomTextField())
                 Button {
-                    vm.auth(appSettings)
-                    print("isLogin: \(appSettings.isLogin)")
+                    auth(login: login, password: password)
                 } label: {
                     Text("Sign In")
                 }
@@ -30,11 +30,23 @@ struct LoginView: View {
             }
         }
     }
+    
+    func auth(login: String, password: String) {
+        
+        UserAPI().Auth(req: AuthRequest(email: login, password: password)) { response, error in
+            
+            if let err = error {
+                appSettings.showErrorAlert(error: err)
+                
+            } else if let response = response {
+                Defaults.accessToken = response.accessToken
+                Defaults.refreshToken = response.refreshToken
+                appSettings.isLogin = true
+            }
+        }
+    }
 }
 
-struct LoginView_Previews: PreviewProvider {
-    
-    static var previews: some View {
-        LoginView()
-    }
+#Preview {
+    LoginView()
 }

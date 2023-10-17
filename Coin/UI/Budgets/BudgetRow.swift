@@ -1,30 +1,13 @@
 //
-//  Budgets.swift
+//  Budget.swift
 //  Coin
 //
-//  Created by Илья on 16.10.2023.
+//  Created by Илья on 18.10.2023.
 //
 
 import SwiftUI
 
-struct BudgetsView: View {
-    
-    var accounts: [Account] = [
-            Account(accountGroupID: 1, accounting: true, budget: 800, currency: "RUB", iconID: 5, id: 1, name: "Еда вне дома", remainder: 500, type: "", visible: true, currencySymbol: "₽"),
-            Account(accountGroupID: 1, accounting: true, budget: 8000, currency: "RUB", iconID: 5, id: 2, name: "Трнспорт", remainder: 500, type: "", visible: true, currencySymbol: "$"),
-            Account(accountGroupID: 1, accounting: true, budget: 800, currency: "RUB", iconID: 5, id: 3, name: "Развлечения", remainder: 5000, type: "", visible: true, currencySymbol: "₽"),
-        ]
-    
-    var body: some View {
-        VStack {
-            ForEach(accounts) { account in
-                BudgetBar(account: account)
-            }
-        }
-    }
-}
-
-struct BudgetBar: View {
+struct BudgetRow: View {
     var account: Account
     
     let cornerRadius: CGFloat = 10
@@ -73,27 +56,10 @@ struct BudgetBar: View {
                     .padding(.leading)
                 }
                 .cornerRadius(cornerRadius)
-                
-//                VStack(alignment: .trailing) {
-//                    Text("\(String(format: "%.0f", budget)) \(currencySymbol)")
-//                        .foregroundColor(Color.primary)
-//                    Text("\(String(format: "%.0f", expense)) \(currencySymbol)")
-//                        .foregroundColor(Color.gray)
-//                }
-//                .padding(.trailing)
         }
     }
 }
 
 #Preview {
-    BudgetsView()
-}
-
-struct Line: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: 0, y: 0))
-        path.addLine(to: CGPoint(x: 0, y: rect.height))
-        return path
-    }
+    BudgetRow(account: ModelData().accounts[0])
 }

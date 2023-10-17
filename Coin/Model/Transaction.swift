@@ -8,7 +8,7 @@
 import Foundation
 
 
-struct Transaction: Decodable {
+struct Transaction: Decodable, Identifiable {
     var accountFromID: UInt32
     var accountToID: UInt32
     var accounting: Bool

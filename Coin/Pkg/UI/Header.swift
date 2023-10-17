@@ -2,42 +2,43 @@
 //  Header.swift
 //  Coin
 //
-//  Created by Илья on 18.10.2022.
+//  Created by Илья on 18.10.2023.
 //
 
 import SwiftUI
 
 struct Header: View {
     
-    @StateObject var vm = AccountViewModel()
+    @Environment(ModelData.self) var modelData
     
     var body: some View {
         HStack(spacing: 35) {
             VStack {
                 Text("Расход")
-                // Text("\(vm.todayExpense)")
+                Text("\(modelData.quickStatistic.totalExpense, specifier: "%.0f") ₽")
             }
             RoundedRectangle(cornerRadius: 0)
                 .frame(width: 1, height: 44)
             VStack {
                 Text("Баланс")
-                // Text("\(vm.balance)")
+                Text("\(modelData.quickStatistic.totalRemainder, specifier: "%.0f") ₽")
             }
             RoundedRectangle(cornerRadius: 0)
                 .frame(width: 1, height: 44)
             VStack {
                 Text("Бюджет")
-                // Text("\(vm.mountRemainder)")
+                Text("\(modelData.quickStatistic.leftToSpend, specifier: "%.0f") ₽")
+                Text("\(modelData.quickStatistic.totalBudget, specifier: "%.0f") ₽")
+                    .font(.footnote)
             }
         }
         .frame(maxWidth: .infinity)
         .frame(height: 60)
         .background(Color("Gray"))
+        .onAppear(perform: modelData.getQuickStatistic)
     }
 }
 
-struct Header_Previews: PreviewProvider {
-    static var previews: some View {
-        Header()
-    }
+#Preview {
+    Header()
 }

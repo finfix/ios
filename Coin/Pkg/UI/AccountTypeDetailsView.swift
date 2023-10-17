@@ -11,7 +11,7 @@ struct AccountTypeDetailsView: View {
     
     @State var header: String
     @State var showingList = false
-    @Binding var accounts: [Account]
+    var accounts: [Account]
     
     var body: some View {
         VStack {
@@ -50,6 +50,6 @@ struct AccountTypeDetailsView: View {
 
 struct AccountTypeDetailsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountTypeDetailsView(header: "Заголовок", accounts: .constant([Account(accountGroupID: 1, accounting: true, budget: 12, currency: "USD", iconID: 0, id: 0, name: "Название счета", remainder: 123.456, type: "debt", visible: true, parentAccountID: 0, currencySymbol: "$")]))
+        AccountTypeDetailsView(header: "Заголовок", accounts: ModelData().accounts)
     }
 }
