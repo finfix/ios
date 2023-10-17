@@ -10,56 +10,59 @@ import SwiftUI
 struct BudgetRow: View {
     var account: Account
     
-    let cornerRadius: CGFloat = 10
-    let daysInMonths = 30
-    
-    let width: CGFloat = UIScreen.main.bounds.width * 0.8
+    let daysInMonth = Calendar.current.range(of: .day, in: .month, for: Date())!.count
+    let width: CGFloat = UIScreen.main.bounds.width * 0.9
     let height: CGFloat = 60
     let today = Calendar.current.component(.day, from: Date())
     
     var fillingCoef: CGFloat {
-        return account.remainder / account.budget
+        account.remainder / account.budget
     }
     
     var avaliablleToExpense: Double {
-        return account.budget/Double(daysInMonths)*Double(today)
+        account.budget/Double(daysInMonth)*Double(today)
     }
 
     var body: some View {
             ZStack(alignment: .trailing) {
                 // Прямоугольник
                 ZStack(alignment: .leading) {
-                    // 30 частей - бюджет
+                    // Бюджет
                     HStack(spacing: 0) {
-                        ForEach(0..<daysInMonths, id: \.self) { index in
+                        ForEach(0..<daysInMonth, id: \.self) { index in
                             Rectangle()
                                 .fill(index % 2 == 0 ? .white : Color("LightGray"))
-                                .frame(width: width/CGFloat(daysInMonths), height: height)
+                                .frame(width: width/CGFloat(daysInMonth), height: height)
                         }
                     }
-                    // Текущий расход
+                    // Уже потрачено
                     Rectangle()
                         .fill(account.remainder <= avaliablleToExpense ? Color.green : Color.red)
                         .frame(width: fillingCoef < 1 ? width * fillingCoef : width, height: height)
+                        .opacity(0.5)
                     // Текущий день
                         Line()
                             .stroke(Color.gray, style: StrokeStyle(lineWidth: 2, dash: [2]))
                             .frame(width: 1, height: height)
-                            .offset(x: width * (CGFloat(today) / CGFloat(daysInMonths)), y: 0)
+                            .offset(x: width * (CGFloat(today) / CGFloat(daysInMonth)), y: 0)
                     VStack(alignment: .leading) {
+                        // Название счета
                         Text(account.name)
                             .font(.headline)
                             .fontWeight(.semibold)
+                            .foregroundColor(Color.black)
+                        // Остаток
                         Text("Остаток: \(String(format: "%.0f", avaliablleToExpense-account.remainder)) \(account.currencySymbol)")
                             .font(.footnote)
+                            .foregroundColor(Color.black)
                     }
                     .padding(.leading)
                 }
-                .cornerRadius(cornerRadius)
+                .cornerRadius(10)
         }
     }
 }
 
 #Preview {
-    BudgetRow(account: ModelData().accounts[0])
+    BudgetRow(account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 900, currency: "rub", iconID: 2, name: "Example", remainder: 600, type: "", visible: true, currencySymbol: "$"))
 }
