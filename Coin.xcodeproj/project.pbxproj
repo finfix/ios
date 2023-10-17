@@ -23,6 +23,7 @@
 		B59F0F2128FDC7C000AA33A9 /* AccountTypeDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */; };
 		B59F0F2628FDD30F00AA33A9 /* AccountCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2528FDD30F00AA33A9 /* AccountCircleView.swift */; };
 		B59F0F2928FDD4C200AA33A9 /* SelectAccountGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2828FDD4C200AA33A9 /* SelectAccountGroup.swift */; };
+		B5B950402ADF04DB00798F8C /* ModelData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B9503F2ADF04DB00798F8C /* ModelData.swift */; };
 		B5C8028E2972F88200B6806D /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C8028D2972F88200B6806D /* Enums.swift */; };
 		B5D143B22906A64000875037 /* ErrorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B12906A64000875037 /* ErrorModel.swift */; };
 		B5D143B42906A66400875037 /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B32906A66400875037 /* AuthModels.swift */; };
@@ -61,6 +62,7 @@
 		B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeDetailsView.swift; sourceTree = "<group>"; };
 		B59F0F2528FDD30F00AA33A9 /* AccountCircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCircleView.swift; sourceTree = "<group>"; };
 		B59F0F2828FDD4C200AA33A9 /* SelectAccountGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAccountGroup.swift; sourceTree = "<group>"; };
+		B5B9503F2ADF04DB00798F8C /* ModelData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelData.swift; sourceTree = "<group>"; };
 		B5C8028D2972F88200B6806D /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		B5D143B12906A64000875037 /* ErrorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorModel.swift; sourceTree = "<group>"; };
 		B5D143B32906A66400875037 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
@@ -231,6 +233,7 @@
 				B5F9CC6228F01CA80037A21A /* CoinApp.swift */,
 				B5F9CC6628F01CA90037A21A /* Assets.xcassets */,
 				B5F9CC6828F01CA90037A21A /* Preview Content */,
+				B5B9503F2ADF04DB00798F8C /* ModelData.swift */,
 			);
 			path = Coin;
 			sourceTree = "<group>";
@@ -396,6 +399,7 @@
 				B59D458B28FE77D400773D46 /* SearchBar.swift in Sources */,
 				B5251A21290232F300EFCAB0 /* UserDefaults.swift in Sources */,
 				B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */,
+				B5B950402ADF04DB00798F8C /* ModelData.swift in Sources */,
 				B59F0F2628FDD30F00AA33A9 /* AccountCircleView.swift in Sources */,
 				B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */,
 				B5FB6AA428F3D62D00C2A2AC /* TransactionView.swift in Sources */,
@@ -455,7 +459,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -509,7 +513,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
