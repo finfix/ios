@@ -7,42 +7,25 @@
 
 import SwiftUI
 
-struct Example: Identifiable {
-    var id = UUID()
-    var budget: Double
-    var expense: Double
-    var name: String
-    var currencySymbol: String
-}
-
 struct BudgetsView: View {
     
-    let example: [Example] = [
-        Example(budget: 1753715, expense: 1625535, name: "Транспорт", currencySymbol: "₫"),
-        Example(budget: 901911, expense: 0, name: "Развлечения", currencySymbol: "₫"),
-        Example(budget: 6413588, expense: 3117854, name: "Еда", currencySymbol: "₫"),
-    ]
+    var accounts: [Account] = [
+            Account(accountGroupID: 1, accounting: true, budget: 800, currency: "RUB", iconID: 5, id: 1, name: "Еда вне дома", remainder: 500, type: "", visible: true, currencySymbol: "₽"),
+            Account(accountGroupID: 1, accounting: true, budget: 8000, currency: "RUB", iconID: 5, id: 2, name: "Трнспорт", remainder: 500, type: "", visible: true, currencySymbol: "$"),
+            Account(accountGroupID: 1, accounting: true, budget: 800, currency: "RUB", iconID: 5, id: 3, name: "Развлечения", remainder: 5000, type: "", visible: true, currencySymbol: "₽"),
+        ]
     
     var body: some View {
         VStack {
-            ForEach(example) { exampleItem in
-                BudgetBar(
-                    budget: exampleItem.budget,
-                    expense: exampleItem.expense,
-                    name: exampleItem.name,
-                    currencySymbol: exampleItem.currencySymbol)
-                .padding()
+            ForEach(accounts) { account in
+                BudgetBar(account: account)
             }
         }
     }
 }
 
 struct BudgetBar: View {
-    let budget: Double
-    let expense: Double
-    
-    let name: String
-    let currencySymbol: String
+    var account: Account
     
     let cornerRadius: CGFloat = 10
     let daysInMonths = 30
@@ -50,6 +33,14 @@ struct BudgetBar: View {
     let width: CGFloat = UIScreen.main.bounds.width * 0.8
     let height: CGFloat = 60
     let today = Calendar.current.component(.day, from: Date())
+    
+    var fillingCoef: CGFloat {
+        return account.remainder / account.budget
+    }
+    
+    var avaliablleToExpense: Double {
+        return account.budget/Double(daysInMonths)*Double(today)
+    }
 
     var body: some View {
             ZStack(alignment: .trailing) {
@@ -65,18 +56,18 @@ struct BudgetBar: View {
                     }
                     // Текущий расход
                     Rectangle()
-                        .fill(expense <= budget/Double(daysInMonths)*Double(today) ? Color.green : Color.red)
-                        .frame(width: width*(expense/budget), height: height)
+                        .fill(account.remainder <= avaliablleToExpense ? Color.green : Color.red)
+                        .frame(width: fillingCoef < 1 ? width * fillingCoef : width, height: height)
                     // Текущий день
                         Line()
                             .stroke(Color.gray, style: StrokeStyle(lineWidth: 2, dash: [2]))
                             .frame(width: 1, height: height)
                             .offset(x: width * (CGFloat(today) / CGFloat(daysInMonths)), y: 0)
                     VStack(alignment: .leading) {
-                        Text(name)
+                        Text(account.name)
                             .font(.headline)
                             .fontWeight(.semibold)
-                        Text("Остаток: \(String(format: "%.0f", budget/Double(daysInMonths)*Double(today)-expense)) \(currencySymbol)")
+                        Text("Остаток: \(String(format: "%.0f", avaliablleToExpense-account.remainder)) \(account.currencySymbol)")
                             .font(.footnote)
                     }
                     .padding(.leading)
