@@ -35,8 +35,8 @@ struct ChildAccount: Decodable, Hashable, Identifiable {
 }
 
 struct QuickStatisticRes: Decodable {
-    var TotalRemainder: Double
-    var TotalExpense: Double
-    var LeftToSpend: Double
-    var TotalBudget: Double
+    var totalRemainder: Double
+    var totalExpense: Double
+    var leftToSpend: Double
+    var totalBudget: Double
 }

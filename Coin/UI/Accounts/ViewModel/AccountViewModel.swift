@@ -10,7 +10,7 @@ import SwiftUI
 class AccountViewModel: ObservableObject {
     @Published var accounts = [Account]()
     @Published var accountsGrouped = [Account]()
-    @Published var quickStatistic = QuickStatisticRes(TotalRemainder: 0, TotalExpense: 0, LeftToSpend: 0, TotalBudget: 0)
+    @Published var quickStatistic = QuickStatisticRes(totalRemainder: 0, totalExpense: 0, leftToSpend: 0, totalBudget: 0)
     
     // var accountsGrouped: [Account] {
     //     var accountsMap = [UInt32: Account]()

@@ -23,20 +23,20 @@ struct AccountCircleView: View {
             HStack(spacing: 35) {
                 VStack {
                     Text("Расход")
-                    Text("\(vm.quickStatistic.TotalExpense, specifier: "%.0f") ₽")
+                    Text("\(vm.quickStatistic.totalExpense, specifier: "%.0f") ₽")
                 }
                 RoundedRectangle(cornerRadius: 0)
                     .frame(width: 1, height: 44)
                 VStack {
                     Text("Баланс")
-                    Text("\(vm.quickStatistic.TotalRemainder, specifier: "%.0f") ₽")
+                    Text("\(vm.quickStatistic.totalRemainder, specifier: "%.0f") ₽")
                 }
                 RoundedRectangle(cornerRadius: 0)
                     .frame(width: 1, height: 44)
                 VStack {
                     Text("Бюджет")
-                    Text("\(vm.quickStatistic.LeftToSpend, specifier: "%.0f") ₽")
-                    Text("\(vm.quickStatistic.TotalBudget, specifier: "%.0f") ₽")
+                    Text("\(vm.quickStatistic.leftToSpend, specifier: "%.0f") ₽")
+                    Text("\(vm.quickStatistic.totalBudget, specifier: "%.0f") ₽")
                         .font(.footnote)
                 }
             }
