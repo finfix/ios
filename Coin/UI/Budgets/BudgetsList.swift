@@ -13,7 +13,7 @@ struct BudgetsList: View {
     
     var filteredAccounts: [Account] {
         modelData.accountsGrouped.filter { account in
-            account.type == "expense"
+            account.type == .expense && account.budget != 0
         }
     }
     
