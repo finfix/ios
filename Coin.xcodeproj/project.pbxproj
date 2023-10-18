@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */; };
+		B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */; };
 		B5251A21290232F300EFCAB0 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5251A20290232F300EFCAB0 /* UserDefaults.swift */; };
 		B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5251A2229025F3800EFCAB0 /* APIHelper.swift */; };
 		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
@@ -31,7 +33,6 @@
 		B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950542ADF258700798F8C /* TransactionRow.swift */; };
 		B5B950572ADF261700798F8C /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950562ADF261700798F8C /* Header.swift */; };
 		B5B950592ADF274E00798F8C /* AccountCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950582ADF274E00798F8C /* AccountCard.swift */; };
-		B5C8028E2972F88200B6806D /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C8028D2972F88200B6806D /* Enums.swift */; };
 		B5D143B22906A64000875037 /* ErrorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B12906A64000875037 /* ErrorModel.swift */; };
 		B5D143B42906A66400875037 /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B32906A66400875037 /* AuthModels.swift */; };
 		B5D143B62906B4EC00875037 /* AuthAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B52906B4EC00875037 /* AuthAPI.swift */; };
@@ -50,6 +51,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetBar.swift; sourceTree = "<group>"; };
+		B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetDetails.swift; sourceTree = "<group>"; };
 		B5251A20290232F300EFCAB0 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		B5251A2229025F3800EFCAB0 /* APIHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIHelper.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
@@ -73,7 +76,6 @@
 		B5B950542ADF258700798F8C /* TransactionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRow.swift; sourceTree = "<group>"; };
 		B5B950562ADF261700798F8C /* Header.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Header.swift; sourceTree = "<group>"; };
 		B5B950582ADF274E00798F8C /* AccountCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCard.swift; sourceTree = "<group>"; };
-		B5C8028D2972F88200B6806D /* Enums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
 		B5D143B12906A64000875037 /* ErrorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorModel.swift; sourceTree = "<group>"; };
 		B5D143B32906A66400875037 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
 		B5D143B52906B4EC00875037 /* AuthAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthAPI.swift; sourceTree = "<group>"; };
@@ -133,7 +135,6 @@
 				B59F0F1D28FDC74C00AA33A9 /* UI */,
 				B5251A20290232F300EFCAB0 /* UserDefaults.swift */,
 				B5251A2229025F3800EFCAB0 /* APIHelper.swift */,
-				B5C8028D2972F88200B6806D /* Enums.swift */,
 			);
 			path = Pkg;
 			sourceTree = "<group>";
@@ -156,6 +157,8 @@
 			children = (
 				B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */,
 				B5B950422ADF16B300798F8C /* BudgetRow.swift */,
+				B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */,
+				B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */,
 			);
 			path = Budgets;
 			sourceTree = "<group>";
@@ -355,6 +358,7 @@
 				B557AA0E290D959F00631421 /* API.swift in Sources */,
 				B5FB6AAA28F3D72300C2A2AC /* Account.swift in Sources */,
 				B5FB6AAE28F3D86000C2A2AC /* Accounts.swift in Sources */,
+				B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */,
 				B5610EF928FC88FE0063AFEB /* CreateTransactionView.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* SelectAccountGroup.swift in Sources */,
 				B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */,
@@ -363,10 +367,10 @@
 				B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */,
 				B5B950452ADF16FF00798F8C /* Line.swift in Sources */,
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
+				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
 				B5B950512ADF239A00798F8C /* CirclesArray.swift in Sources */,
 				B5D143B42906A66400875037 /* AuthModels.swift in Sources */,
-				B5C8028E2972F88200B6806D /* Enums.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
 				B5F9CC7328F01E4D0037A21A /* Transaction.swift in Sources */,
@@ -508,6 +512,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Coin/Preview Content\"";
@@ -527,6 +532,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ilyaivanov.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -538,6 +544,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Coin/Preview Content\"";
@@ -557,6 +564,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ilyaivanov.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

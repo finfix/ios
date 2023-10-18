@@ -16,7 +16,7 @@ struct TransactionRow: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
-                if transaction.type != "balancing" {
+                if transaction.type != .balancing {
                     Text(modelData.accountsMap[transaction.accountFromID]?.name ?? "Нет счета")
                         .font(.footnote)
                 }
@@ -24,8 +24,8 @@ struct TransactionRow: View {
             }
             Spacer()
             VStack(alignment: .trailing) {
-                Text(String(format: transaction.type == "consumption" ? "- %.2f" :
-                                transaction.type == "income" ? "+ %.2f" :
+                Text(String(format: transaction.type == .consumption ? "- %.2f" :
+                                transaction.type == .income ? "+ %.2f" :
                                 "%.2f",
                                 transaction.amountTo))
                 if transaction.note != "" {

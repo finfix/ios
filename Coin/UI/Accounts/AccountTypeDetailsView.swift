@@ -26,7 +26,7 @@ struct AccountTypeDetailsView: View {
         VStack {
             // Заголовок с общей суммой
             Button {
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation {
                     showingList.toggle()
                 }
             } label: {
@@ -62,6 +62,6 @@ struct AccountTypeDetailsView: View {
 }
 
 #Preview {
-    AccountTypeDetailsView(header: "Заголовок", accounts: [Account(id: 1, accountGroupID: 1, accounting: true, budget: 0, currency: "Rub", iconID: 3, name: "Some", remainder: 3, type: "", visible: true, parentAccountID: nil, childrenAccounts: nil, currencySymbol: "")])
+    AccountTypeDetailsView(header: "Заголовок", accounts: [Account(id: 1, accountGroupID: 1, accounting: true, budget: 0, currency: "Rub", iconID: 3, name: "Some", remainder: 3, type: .expense, visible: true, parentAccountID: nil, childrenAccounts: nil, currencySymbol: "")])
         .onAppear(perform: ModelData().getAccounts)
 }
