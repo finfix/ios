@@ -10,7 +10,10 @@ import Alamofire
 import SwiftUI
 
 let basePath = "https://bonavii.com"
-let baseHeaders: HTTPHeaders = ["DeviceID": UIDevice.current.identifierForVendor!.uuidString, "Authorization": Defaults.accessToken ?? ""]
+
+func getBaseHeaders() -> HTTPHeaders {
+    return HTTPHeaders(["Authorization": Defaults.accessToken ?? ""])
+}
 
 func checkToken() -> (ErrorModel?){
     if Defaults.accessToken == nil {

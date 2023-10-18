@@ -15,8 +15,11 @@ class UserAPI {
     
     func Auth(req: AuthRequest, completionHandler: @escaping (AuthResponse?, ErrorModel?) -> Void) {
         
+        var headers = getBaseHeaders()
+        headers.add(HTTPHeader(name: "DeviceID", value: UIDevice.current.identifierForVendor!.uuidString))
+        
         // Делаем запрос на сервер
-        AF.request(basePath + authBasePath + "/signIn", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: baseHeaders).responseData { response in
+        AF.request(basePath + authBasePath + "/signIn", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: AuthResponse.self)
             if error != nil {
@@ -32,6 +35,9 @@ class UserAPI {
     
     func RefreshToken(req: RefreshTokensRequest, completionHandler: @escaping (RefreshTokensResponse?, ErrorModel?) -> Void) {
         
+        var headers = getBaseHeaders()
+        headers.add(HTTPHeader(name: "DeviceID", value: UIDevice.current.identifierForVendor!.uuidString))
+        
         // Проверяем наличие refreshToken
         guard let token = Defaults.refreshToken else {
             completionHandler(nil, ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
@@ -39,7 +45,7 @@ class UserAPI {
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + authBasePath + "/refreshTokens", method: .get, parameters: req, encoder: JSONParameterEncoder(), headers: baseHeaders).responseData { response in
+        AF.request(basePath + authBasePath + "/refreshTokens", method: .get, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: RefreshTokensResponse.self)
             if error != nil {

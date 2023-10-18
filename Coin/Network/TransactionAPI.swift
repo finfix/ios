@@ -24,7 +24,7 @@ class TransactionAPI {
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + transactionBasePath, method: .get, parameters: req, headers: baseHeaders).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .get, parameters: req, headers: getBaseHeaders()).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Transaction].self)
             if error != nil {
@@ -48,7 +48,7 @@ class TransactionAPI {
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + transactionBasePath, method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: baseHeaders).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: getBaseHeaders()).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {
@@ -69,7 +69,7 @@ class TransactionAPI {
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + transactionBasePath, method: .patch, parameters: req, encoder: JSONParameterEncoder(), headers: baseHeaders).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .patch, parameters: req, encoder: JSONParameterEncoder(), headers: getBaseHeaders()).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {
@@ -90,7 +90,7 @@ class TransactionAPI {
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, encoder: JSONParameterEncoder(), headers: baseHeaders).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, encoder: JSONParameterEncoder(), headers: getBaseHeaders()).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {
