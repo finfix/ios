@@ -11,21 +11,34 @@ struct AccountTypeDetailsView: View {
     
     @State var header: String
     @State var showingList = false
+    
+    var totalSum: Double {
+        var total = 0.0
+        for account in accounts {
+            total += account.remainder
+        }
+        return total
+    }
+    
     var accounts: [Account]
     
     var body: some View {
         VStack {
-            // Заголовок
-            HStack {
+            // Заголовок с общей суммой
+            Button {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showingList.toggle()
+                }
+            } label: {
                 Image(systemName: "chevron.right")
+                    .rotationEffect(.degrees(showingList ? 90 : 0))
                 Text(header)
                 Spacer()
-                Text("29 323Р")
+                Text("\(String(format: "%.0f", totalSum))")
             }
-            .onTapGesture(perform: {
-                showingList.toggle()
-            })
+            .foregroundColor(.primary)
             .padding()
+            // Список счетов
             if showingList {
                 ForEach(accounts, id: \.id) { account in
                     HStack {
@@ -48,8 +61,7 @@ struct AccountTypeDetailsView: View {
     }
 }
 
-struct AccountTypeDetailsView_Previews: PreviewProvider {
-    static var previews: some View {
-        AccountTypeDetailsView(header: "Заголовок", accounts: ModelData().accounts)
-    }
+#Preview {
+    AccountTypeDetailsView(header: "Заголовок", accounts: [Account(id: 1, accountGroupID: 1, accounting: true, budget: 0, currency: "Rub", iconID: 3, name: "Some", remainder: 3, type: "", visible: true, parentAccountID: nil, childrenAccounts: nil, currencySymbol: "")])
+        .onAppear(perform: ModelData().getAccounts)
 }

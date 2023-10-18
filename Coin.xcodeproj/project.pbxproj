@@ -141,7 +141,6 @@
 		B59F0F1D28FDC74C00AA33A9 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */,
 				B59F0F2828FDD4C200AA33A9 /* SelectAccountGroup.swift */,
 				B59D458A28FE77D400773D46 /* SearchBar.swift */,
 				B5E8932F28FF090B002AC30C /* SnapCarousel.swift */,
@@ -265,6 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FB6AAD28F3D86000C2A2AC /* Accounts.swift */,
+				B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */,
 				B5B950582ADF274E00798F8C /* AccountCard.swift */,
 			);
 			path = Accounts;
