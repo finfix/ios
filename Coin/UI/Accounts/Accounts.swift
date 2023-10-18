@@ -11,10 +11,11 @@ struct Accounts: View {
     
     @Environment(ModelData.self) var modelData
     
-    @State var showFilters = false
+    // TODO: Сделать универсальными
     @State var showDebts = false
     @State var showInvestment = false
     @State var showCredit = false
+    
     @State var showCreate = false
     @State var currentIndex = 0
     
@@ -25,11 +26,9 @@ struct Accounts: View {
         NavigationView {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
-        
+                    // Быстрая статистика
                     Header()
-        
                     ScrollView {
-        
                         Text("Карты и счета")
                         SnapCarouselView(spacing: 30, index: $currentIndex, items: modelData.accounts.filter { $0.visible && ($0.type == "regular")}) { account in
                             GeometryReader { proxy in
@@ -38,23 +37,9 @@ struct Accounts: View {
                         }
                         .frame(height: 150)
         
-                        HStack(spacing: 10) {
-                            ForEach(modelData.accounts.filter { $0.visible && ($0.type == "regular")}.indices, id: \.self) { index in
-                                Circle()
-                                    .fill(Color.black.opacity(currentIndex == index ? 0.5 : 0.1))
-                                    .frame(width: 5)
-                                    .scaleEffect(currentIndex == index ? 1.4 : 1)
-                                    .animation(.spring(), value: currentIndex == index )
-                            }
-                        }
-        
-        
                         AccountTypeDetailsView(header: "Инвестиции", accounts: modelData.accounts.filter { ($0.type == "investment") && ($0.visible) } )
-        
                         AccountTypeDetailsView(header: "Долги", accounts: modelData.accounts.filter { ($0.type == "debt") && ($0.visible) } )
-        
                         AccountTypeDetailsView(header: "Кредиты", accounts: modelData.accounts.filter { ($0.type == "credit") && ($0.visible) } )
-        
                     }
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)
@@ -63,7 +48,9 @@ struct Accounts: View {
                 Group {
                     
                     Button {
-                        chooseBlurIsOpened.toggle()
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            chooseBlurIsOpened.toggle()
+                        }
                     } label: {
                         CircleTypeTransaction(imageName: chooseBlurIsOpened ? "arrow.uturn.backward" : "plus")
                     }
@@ -73,8 +60,6 @@ struct Accounts: View {
                     } label: {}
 
                     if chooseBlurIsOpened {
-                        
-                        
                         Button {
                             transactionType = .consumption
                             showCreate = true
@@ -82,7 +67,6 @@ struct Accounts: View {
                             CircleTypeTransaction(imageName: "minus")
                         }
                         .padding(.bottom, 90)
-                        
                         
                         Button {
                             transactionType = .income
@@ -111,22 +95,22 @@ struct Accounts: View {
     }
 }
     
-    struct CircleTypeTransaction: View {
-        
-        var imageName: String
-        
-        var body: some View {
-            ZStack {
-                Circle()
-                    .frame(width: 50, height: 50)
-                    .padding(20)
-                    .foregroundColor(.gray)
-                Image(systemName: imageName)
-                    .foregroundColor(.black)
-                    .font(.system(size: 20))
-            }
+struct CircleTypeTransaction: View {
+    
+    var imageName: String
+    
+    var body: some View {
+        ZStack {
+            Circle()
+                .frame(width: 50, height: 50)
+                .padding(20)
+                .foregroundColor(.gray)
+            Image(systemName: imageName)
+                .foregroundColor(.black)
+                .font(.system(size: 20))
         }
     }
+}
     
 #Preview {
     Accounts()

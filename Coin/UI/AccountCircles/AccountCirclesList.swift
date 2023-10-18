@@ -10,7 +10,6 @@ import SwiftUI
 struct AccountCircleList: View {
     
     @Environment(ModelData.self) var modelData
-    @Environment(AppSettings.self) var appSettings
     
     let rows = [
         GridItem(.flexible()),
