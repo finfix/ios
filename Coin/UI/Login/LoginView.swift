@@ -39,8 +39,8 @@ struct LoginView: View {
                 appSettings.showErrorAlert(error: err)
                 
             } else if let response = response {
-                Defaults.accessToken = response.accessToken
-                Defaults.refreshToken = response.refreshToken
+                Defaults.accessToken = response.token.accessToken
+                Defaults.refreshToken = response.token.refreshToken
                 appSettings.isLogin = true
             }
         }

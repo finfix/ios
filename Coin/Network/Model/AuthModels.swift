@@ -14,6 +14,10 @@ struct AuthRequest: Encodable {
 
 struct AuthResponse: Decodable {
     var id: Int
+    var token: Token
+}
+
+struct Token: Decodable {
     var accessToken: String
     var refreshToken: String
 }
