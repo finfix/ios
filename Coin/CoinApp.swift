@@ -10,12 +10,14 @@ import SwiftUI
 @main
 struct MyApp: App {
     
-    @StateObject var appSettings = AppSettings()
-    
+    @State private var appSettings = AppSettings()
+    @State private var modelData = ModelData()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(appSettings)
+                .environment(appSettings)
+                .environment(modelData)
                 .alert(isPresented: $appSettings.alertErrorShowing) {
                     Alert(title: Text(appSettings.alertErrorMessage), message: Text(appSettings.alertErrorDetails), dismissButton: .cancel(Text("OK")))
                 }
@@ -23,12 +25,13 @@ struct MyApp: App {
     }
 }
 
-class AppSettings: ObservableObject {
-    @Published var isLogin = true
+@Observable
+class AppSettings {
+    var isLogin = true
     
-    @Published fileprivate var alertErrorShowing = false
-    @Published fileprivate var alertErrorMessage = ""
-    @Published fileprivate var alertErrorDetails = ""
+    fileprivate var alertErrorShowing = false
+    fileprivate var alertErrorMessage = ""
+    fileprivate var alertErrorDetails = ""
     
     func showErrorAlert(error: ErrorModel) {
         alertErrorShowing = true
