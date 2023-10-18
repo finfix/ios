@@ -26,7 +26,7 @@ class AccountAPI {
         if grouped {
             path += "/grouped"
         }
-        AF.request(basePath + path, method: .get, parameters: req, headers: baseHeaders).responseData { response in
+        AF.request(basePath + path, method: .get, parameters: req, headers: getBaseHeaders()).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Account].self)
             if error != nil {
@@ -50,7 +50,7 @@ class AccountAPI {
         
         var path = accountBasePath + "/quickStatistic"
         
-        AF.request(basePath + path, method: .get, headers: baseHeaders).responseData { response in
+        AF.request(basePath + path, method: .get, headers: getBaseHeaders()).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: QuickStatisticRes.self)
             if error != nil {

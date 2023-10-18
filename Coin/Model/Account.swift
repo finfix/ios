@@ -16,9 +16,22 @@ struct Account: Decodable, Identifiable, Hashable {
     var iconID: UInt32
     var name: String
     var remainder: Double
-    var type: String
+    var type: AccountType
     var visible: Bool
     var parentAccountID: UInt32?
     var childrenAccounts: [Account]?
     var currencySymbol: String
+}
+
+enum AccountType: String, Decodable {
+    case expense, earnings, debt, investments, credit, regular
+    
+//    var description : String {
+//        switch self {
+//        case .consumption: return "consumption"
+//        case .income: return "income"
+//        case .transfer: return "transfer"
+//        case .balancing: return "balancing"
+//        }
+//    }
 }

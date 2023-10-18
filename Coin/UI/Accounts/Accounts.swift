@@ -30,16 +30,16 @@ struct Accounts: View {
                     Header()
                     ScrollView {
                         Text("Карты и счета")
-                        SnapCarouselView(spacing: 30, index: $currentIndex, items: modelData.accounts.filter { $0.visible && ($0.type == "regular")}) { account in
+                        SnapCarouselView(spacing: 30, index: $currentIndex, items: modelData.accounts.filter { $0.visible && ($0.type == .regular)}) { account in
                             GeometryReader { proxy in
                                 AccountCard(size: proxy.size, account: account)
                             }
                         }
                         .frame(height: 150)
         
-                        AccountTypeDetailsView(header: "Инвестиции", accounts: modelData.accounts.filter { ($0.type == "investment") && ($0.visible) } )
-                        AccountTypeDetailsView(header: "Долги", accounts: modelData.accounts.filter { ($0.type == "debt") && ($0.visible) } )
-                        AccountTypeDetailsView(header: "Кредиты", accounts: modelData.accounts.filter { ($0.type == "credit") && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Инвестиции", accounts: modelData.accounts.filter { ($0.type == .investments) && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Долги", accounts: modelData.accounts.filter { ($0.type == .debt) && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Кредиты", accounts: modelData.accounts.filter { ($0.type == .credit) && ($0.visible) } )
                     }
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)

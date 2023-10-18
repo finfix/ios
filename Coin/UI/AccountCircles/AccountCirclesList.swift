@@ -22,7 +22,7 @@ struct AccountCircleList: View {
             Header()
             ScrollView(.horizontal) {
                 HStack {
-                    CirclesArray(accounts: modelData.accountsGrouped.filter { ($0.type == "earnings") && $0.visible })
+                    CirclesArray(accounts: modelData.accountsGrouped.filter { ($0.type == .earnings) && $0.visible })
                 }
             }.frame(maxHeight: 100)
             
@@ -30,7 +30,7 @@ struct AccountCircleList: View {
             
             ScrollView(.horizontal) {
                 HStack {
-                    CirclesArray(accounts: modelData.accountsGrouped.filter { ($0.type != "earnings") && ($0.type != "expense") && $0.visible })
+                    CirclesArray(accounts: modelData.accountsGrouped.filter { ($0.type != .earnings) && ($0.type != .expense) && $0.visible })
                 }
             }.frame(maxHeight: 100)
             
@@ -38,7 +38,7 @@ struct AccountCircleList: View {
             
             ScrollView(.horizontal) {
                 LazyHGrid(rows: rows) {
-                    CirclesArray(accounts: modelData.accountsGrouped.filter {($0.type == "expense") && $0.visible })
+                    CirclesArray(accounts: modelData.accountsGrouped.filter {($0.type == .expense) && $0.visible })
                 }
             }
             .frame(maxHeight: .infinity)

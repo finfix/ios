@@ -34,11 +34,13 @@ struct CreateTransactionView: View {
                         ForEach (modelData.accounts.filter {
                             switch transactionType {
                             case .consumption:
-                                return $0.type != "expense" && $0.type != "earnings" && $0.visible
+                                return $0.type != .expense && $0.type != .earnings && $0.visible
                             case .income:
-                                return $0.type == "earnings" && $0.visible
+                                return $0.type == .earnings && $0.visible
                             case .transfer:
-                                return $0.type != "expense" && $0.type != "earnings" && $0.visible
+                                return $0.type != .expense && $0.type != .earnings && $0.visible
+                            default:
+                                return true
                             }
                             
                         }, id: \.self) {
@@ -51,11 +53,13 @@ struct CreateTransactionView: View {
                         ForEach (modelData.accounts.filter {
                             switch transactionType {
                             case .consumption:
-                                return $0.type == "expense" && $0.visible
+                                return $0.type == .expense && $0.visible
                             case .income:
-                                return $0.type != "expense" && $0.type != "earnings" && $0.visible
+                                return $0.type != .expense && $0.type != .earnings && $0.visible
                             case .transfer:
-                                return $0.type != "expense" && $0.type != "earnings" && $0.visible && $0.id != accountFrom?.id
+                                return $0.type != .expense && $0.type != .earnings && $0.visible && $0.id != accountFrom?.id
+                            default:
+                                return true
                             }
                         }, id: \.self) {
                             Text($0.name).tag($0 as Account?)
@@ -112,7 +116,7 @@ struct CreateTransactionView: View {
             amountTo: Double(amountTo.replacingOccurrences(of: ",", with: ".")) ?? 0,
             dateTransaction: format.string(from: date),
             note: note,
-            type: transactionType.description,
+            type: transactionType.rawValue,
             isExecuted: true)) { error in
                 if let err = error {
                     appSettings.showErrorAlert(error: err)

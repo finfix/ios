@@ -19,10 +19,15 @@ struct LoginView: View {
             VStack {
                 TextField("Email", text: $login)
                     .modifier(CustomTextField())
-                TextField("Password", text: $password)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .textContentType(.username)
+                SecureField("Password", text: $password)
                     .modifier(CustomTextField())
+                    .textContentType(.password)
                 Button {
-                    auth(login: login, password: password)
+                    auth()
                 } label: {
                     Text("Sign In")
                 }
@@ -31,7 +36,7 @@ struct LoginView: View {
         }
     }
     
-    func auth(login: String, password: String) {
+    func auth() {
         
         UserAPI().Auth(req: AuthRequest(email: login, password: password)) { response, error in
             
@@ -49,4 +54,5 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
+        .environment(AppSettings())
 }

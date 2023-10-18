@@ -18,14 +18,11 @@ struct Transaction: Decodable, Identifiable {
     var id: UInt32
     var isExecuted: Bool
     var note: String
-    var type: String
-    var tagName: [Tag]?
+    var type: TransactionType
+}
 
-    struct Tag: Decodable {
-        var id: UInt32
-        var tagID: UInt32
-        var transactionID: UInt32
-    }
+enum TransactionType: String, Decodable {
+    case consumption, income, transfer, balancing
 }
 
 struct ModelError: Decodable {
