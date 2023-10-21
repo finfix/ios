@@ -72,7 +72,7 @@ class ModelData {
     }
     
     func getTransactions() {
-        TransactionAPI().GetTransactions(req: GetTransactionRequest()) { model, error in
+        TransactionAPI().GetTransactions(req: GetTransactionRequest(list: 0)) { model, error in
             if let err = error {
                 self.appSettings.showErrorAlert(error: err)
             } else if let response = model {

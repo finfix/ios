@@ -35,7 +35,6 @@ struct Header: View {
         .frame(maxWidth: .infinity)
         .frame(height: 60)
         .background(Color("Gray"))
-        .onAppear(perform: modelData.getQuickStatistic)
     }
 }
 

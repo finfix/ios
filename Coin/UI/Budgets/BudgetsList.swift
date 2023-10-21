@@ -25,7 +25,6 @@ struct BudgetsList: View {
                 }
             }
         }
-        .onAppear(perform: modelData.getAccountsGrouped)
     }
 }
 

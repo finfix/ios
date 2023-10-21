@@ -24,14 +24,5 @@ struct Account: Decodable, Identifiable, Hashable {
 }
 
 enum AccountType: String, Decodable {
-    case expense, earnings, debt, investments, credit, regular
-    
-//    var description : String {
-//        switch self {
-//        case .consumption: return "consumption"
-//        case .income: return "income"
-//        case .transfer: return "transfer"
-//        case .balancing: return "balancing"
-//        }
-//    }
+    case expense, earnings, debt, investment, credit, regular
 }

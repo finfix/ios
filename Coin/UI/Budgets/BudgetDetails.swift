@@ -26,10 +26,11 @@ struct BudgetDetails: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Остаток: \(String(format: "%.0f", availableExpense)) \(account.currencySymbol)")
-            Text("Дневной бюджет: \(String(format: "%.0f", dailyBudget)) \(account.currencySymbol)")
             Text("Бюджет на месяц: \(String(format: "%.0f", account.budget)) \(account.currencySymbol)")
             Text("Текущий расход: \(String(format: "%.0f", account.remainder)) \(account.currencySymbol)")
+            Text("Остаток до конца месяца: \(String(format: "%.0f", account.budget - account.remainder)) \(account.currencySymbol)")
+            Text("Остаток на текущий день: \(String(format: "%.0f", availableExpense)) \(account.currencySymbol)")
+            Text("Дневной бюджет: \(String(format: "%.0f", dailyBudget)) \(account.currencySymbol)")
         }
     }
 }
