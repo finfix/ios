@@ -7,21 +7,46 @@
 
 import SwiftUI
 
-struct SelectAccountGroup: View {
+struct AccountsGroupSelector: View {
     
-    @Binding var name: Int
+    @Environment(ModelData.self) var modelData
+    
+    var canForward: Bool {
+        modelData.selectedAccountsGroupIndex + 1 < modelData.accountGroups.count
+    }
+    
+    var canBackward: Bool {
+        modelData.selectedAccountsGroupIndex > 0
+    }
     
     var body: some View {
         HStack(spacing: 80) {
-            Image(systemName: "chevron.left")
-            Text("\(name)")
-            Image(systemName: "chevron.right")
+            Button {
+                if canBackward {
+                    modelData.selectedAccountsGroupIndex -= 1
+                }
+            } label: {
+                Image(systemName: "chevron.left")
+                    .foregroundColor(canBackward ? .primary : .gray)
+            }
+            
+            Text("\(modelData.accountGroups.count > 0 ? modelData.accountGroups[modelData.selectedAccountsGroupIndex].name : "")")
+                .frame(width: 100)
+            
+            Button {
+                if canForward {
+                    modelData.selectedAccountsGroupIndex += 1
+                }
+            } label: {
+                Image(systemName: "chevron.right")
+                    .foregroundColor(canForward ? .primary : .gray)
+            }
         }
+        .padding()
     }
 }
 
-struct SelectAccountGroup_Previews: PreviewProvider {
-    static var previews: some View {
-        SelectAccountGroup(name: .constant(1))
-    }
+#Preview {
+    AccountsGroupSelector()
+        .environment(ModelData())
 }
