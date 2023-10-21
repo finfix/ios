@@ -27,7 +27,7 @@ struct MainView: View {
     
     var body: some View {
         TabView {
-            Accounts()
+            AccountsHome()
                 .tag(1)
                 .tabItem {
                     Image(systemName: "1.circle")
