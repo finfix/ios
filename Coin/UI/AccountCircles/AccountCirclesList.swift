@@ -18,33 +18,37 @@ struct AccountCircleList: View {
     ]
     
     var body: some View {
-        VStack(spacing: 10) {
-            Header()
-            ScrollView(.horizontal) {
-                HStack {
-                    CirclesArray(accounts: modelData.accountsGrouped.filter { ($0.type == .earnings) && $0.visible })
+        NavigationStack {
+            VStack(spacing: 10) {
+                Header()
+                if modelData.accountGroups.count > 1 {
+                    AccountsGroupSelector()
                 }
-            }.frame(maxHeight: 100)
-            
-            Divider()
-            
-            ScrollView(.horizontal) {
-                HStack {
-                    CirclesArray(accounts: modelData.accountsGrouped.filter { ($0.type != .earnings) && ($0.type != .expense) && $0.visible })
+                ScrollView(.horizontal) {
+                    HStack {
+                        CirclesArray(accounts: modelData.filteredGroupedAccounts, accountsType: .earnings)
+                    }
+                }.frame(maxHeight: 100)
+                
+                Divider()
+                
+                ScrollView(.horizontal) {
+                    HStack {
+                        CirclesArray(accounts: modelData.filteredGroupedAccounts, accountsType: .regular)
+                    }
+                }.frame(maxHeight: 100)
+                
+                Divider()
+                
+                ScrollView(.horizontal) {
+                    LazyHGrid(rows: rows) {
+                        CirclesArray(accounts: modelData.filteredGroupedAccounts, accountsType: .expense)
+                    }
                 }
-            }.frame(maxHeight: 100)
-            
-            Divider()
-            
-            ScrollView(.horizontal) {
-                LazyHGrid(rows: rows) {
-                    CirclesArray(accounts: modelData.accountsGrouped.filter {($0.type == .expense) && $0.visible })
-                }
+                .frame(maxHeight: .infinity)
+                Spacer()
             }
-            .frame(maxHeight: .infinity)
-            Spacer()
         }
-        .onAppear(perform: modelData.getAccountsGrouped)
     }
 }
 
