@@ -18,15 +18,15 @@ struct CreateTransactionRequest: Encodable {
     var isExecuted: Bool
 }
 
-struct UpdateTransactionRequest: Encodable {
-    var accountFromID: UInt32
-    var accountToID: UInt32
-    var amountFrom: Double
-    var amountTo: Double
-    var dateTransaction: Date
-    var note: String
+struct UpdateTransactionReq: Encodable {
+    var accountFromID: UInt32?
+    var accountToID: UInt32?
+    var amountFrom: Double?
+    var amountTo: Double?
+    var dateTransaction: Date?
+    var note: String?
     var id: UInt32
-    var isExecuted: Bool
+//    var isExecuted: Bool
 }
 
 struct GetTransactionRequest: Encodable {

@@ -7,10 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B5024EB02AE1914300F60449 /* AccountChildren.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5024EAF2AE1914300F60449 /* AccountChildren.swift */; };
+		B5024EB22AE1A20F00F60449 /* CreateAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5024EB12AE1A20F00F60449 /* CreateAccount.swift */; };
 		B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */; };
 		B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */; };
+		B510BE942AE06273002CDB54 /* AccountGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE932AE06273002CDB54 /* AccountGroup.swift */; };
 		B5251A21290232F300EFCAB0 /* UserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5251A20290232F300EFCAB0 /* UserDefaults.swift */; };
 		B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5251A2229025F3800EFCAB0 /* APIHelper.swift */; };
+		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
 		B5610EF928FC88FE0063AFEB /* CreateTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
@@ -18,6 +22,8 @@
 		B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
 		B57A8485290900D700F883C3 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = B57A8484290900D700F883C3 /* Alamofire */; };
 		B58705762900956D004C77DD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
+		B593F9532AE1BF6600378E17 /* UpdateAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B593F9522AE1BF6600378E17 /* UpdateAccount.swift */; };
+		B593F9552AE1CCB000378E17 /* UpdateTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B593F9542AE1CCB000378E17 /* UpdateTransaction.swift */; };
 		B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B596E6092A278CC1007D7E6D /* AccountModels.swift */; };
 		B59D458B28FE77D400773D46 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D458A28FE77D400773D46 /* SearchBar.swift */; };
 		B59F0F2128FDC7C000AA33A9 /* AccountTypeDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */; };
@@ -47,20 +53,26 @@
 		B5F9CC7328F01E4D0037A21A /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC7228F01E4D0037A21A /* Transaction.swift */; };
 		B5FB6AA428F3D62D00C2A2AC /* TransactionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */; };
 		B5FB6AAA28F3D72300C2A2AC /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA928F3D72300C2A2AC /* Account.swift */; };
-		B5FB6AAE28F3D86000C2A2AC /* Accounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AAD28F3D86000C2A2AC /* Accounts.swift */; };
+		B5FB6AAE28F3D86000C2A2AC /* AccountsHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AAD28F3D86000C2A2AC /* AccountsHome.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B5024EAF2AE1914300F60449 /* AccountChildren.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountChildren.swift; sourceTree = "<group>"; };
+		B5024EB12AE1A20F00F60449 /* CreateAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccount.swift; sourceTree = "<group>"; };
 		B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetBar.swift; sourceTree = "<group>"; };
 		B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetDetails.swift; sourceTree = "<group>"; };
+		B510BE932AE06273002CDB54 /* AccountGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroup.swift; sourceTree = "<group>"; };
 		B5251A20290232F300EFCAB0 /* UserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaults.swift; sourceTree = "<group>"; };
 		B5251A2229025F3800EFCAB0 /* APIHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIHelper.swift; sourceTree = "<group>"; };
+		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTransactionView.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
 		B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsList.swift; sourceTree = "<group>"; };
 		B58705752900956D004C77DD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		B593F9522AE1BF6600378E17 /* UpdateAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateAccount.swift; sourceTree = "<group>"; };
+		B593F9542AE1CCB000378E17 /* UpdateTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateTransaction.swift; sourceTree = "<group>"; };
 		B596E6092A278CC1007D7E6D /* AccountModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountModels.swift; sourceTree = "<group>"; };
 		B59D458A28FE77D400773D46 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeDetailsView.swift; sourceTree = "<group>"; };
@@ -91,7 +103,7 @@
 		B5F9CC7228F01E4D0037A21A /* Transaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsList.swift; sourceTree = "<group>"; };
 		B5FB6AA928F3D72300C2A2AC /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
-		B5FB6AAD28F3D86000C2A2AC /* Accounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Accounts.swift; sourceTree = "<group>"; };
+		B5FB6AAD28F3D86000C2A2AC /* AccountsHome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsHome.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +181,9 @@
 				B59F0F2528FDD30F00AA33A9 /* AccountCirclesList.swift */,
 				B5B950502ADF239A00798F8C /* CirclesArray.swift */,
 				B5B950522ADF24A900798F8C /* AccountCircleItem.swift */,
+				B5024EAF2AE1914300F60449 /* AccountChildren.swift */,
+				B5024EB12AE1A20F00F60449 /* CreateAccount.swift */,
+				B593F9522AE1BF6600378E17 /* UpdateAccount.swift */,
 			);
 			path = AccountCircles;
 			sourceTree = "<group>";
@@ -180,6 +195,7 @@
 				B5F9CC7228F01E4D0037A21A /* Transaction.swift */,
 				B5FB6AA928F3D72300C2A2AC /* Account.swift */,
 				B5B9504B2ADF18BC00798F8C /* QuickStatistic.swift */,
+				B510BE932AE06273002CDB54 /* AccountGroup.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -208,7 +224,7 @@
 				B5B950412ADF161900798F8C /* Budgets */,
 				B5E89333290073D0002AC30C /* Login */,
 				B5F9CC7028F01E1A0037A21A /* ContentView.swift */,
-				B5FB6AA528F3D67800C2A2AC /* Accounts */,
+				B5FB6AA528F3D67800C2A2AC /* AccountsHome */,
 				B5FB6AA128F3D5EF00C2A2AC /* Transactions */,
 			);
 			path = UI;
@@ -234,6 +250,7 @@
 		B5F9CC6128F01CA80037A21A /* Coin */ = {
 			isa = PBXGroup;
 			children = (
+				B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */,
 				B5B9504A2ADF182100798F8C /* Model */,
 				B5E8933829007C53002AC30C /* UI */,
 				B59F0F1C28FDC74000AA33A9 /* Pkg */,
@@ -259,18 +276,19 @@
 				B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */,
 				B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */,
 				B5B950542ADF258700798F8C /* TransactionRow.swift */,
+				B593F9542AE1CCB000378E17 /* UpdateTransaction.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
 		};
-		B5FB6AA528F3D67800C2A2AC /* Accounts */ = {
+		B5FB6AA528F3D67800C2A2AC /* AccountsHome */ = {
 			isa = PBXGroup;
 			children = (
-				B5FB6AAD28F3D86000C2A2AC /* Accounts.swift */,
+				B5FB6AAD28F3D86000C2A2AC /* AccountsHome.swift */,
 				B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */,
 				B5B950582ADF274E00798F8C /* AccountCard.swift */,
 			);
-			path = Accounts;
+			path = AccountsHome;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -339,6 +357,7 @@
 			files = (
 				B58705762900956D004C77DD /* README.md in Resources */,
 				B5F9CC6A28F01CA90037A21A /* Preview Assets.xcassets in Resources */,
+				B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */,
 				B5F9CC6728F01CA90037A21A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -353,23 +372,27 @@
 				B59F0F2128FDC7C000AA33A9 /* AccountTypeDetailsView.swift in Sources */,
 				B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */,
 				B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */,
+				B5024EB02AE1914300F60449 /* AccountChildren.swift in Sources */,
 				B5E89337290074F4002AC30C /* Modifiers.swift in Sources */,
 				B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */,
 				B557AA0E290D959F00631421 /* API.swift in Sources */,
+				B5024EB22AE1A20F00F60449 /* CreateAccount.swift in Sources */,
 				B5FB6AAA28F3D72300C2A2AC /* Account.swift in Sources */,
-				B5FB6AAE28F3D86000C2A2AC /* Accounts.swift in Sources */,
+				B5FB6AAE28F3D86000C2A2AC /* AccountsHome.swift in Sources */,
 				B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */,
 				B5610EF928FC88FE0063AFEB /* CreateTransactionView.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* SelectAccountGroup.swift in Sources */,
 				B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */,
 				B5B9504C2ADF18BC00798F8C /* QuickStatistic.swift in Sources */,
 				B5D143B62906B4EC00875037 /* AuthAPI.swift in Sources */,
+				B593F9532AE1BF6600378E17 /* UpdateAccount.swift in Sources */,
 				B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */,
 				B5B950452ADF16FF00798F8C /* Line.swift in Sources */,
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
 				B5B950512ADF239A00798F8C /* CirclesArray.swift in Sources */,
+				B593F9552AE1CCB000378E17 /* UpdateTransaction.swift in Sources */,
 				B5D143B42906A66400875037 /* AuthModels.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
@@ -383,6 +406,7 @@
 				B5B950432ADF16B300798F8C /* BudgetRow.swift in Sources */,
 				B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */,
 				B5B950402ADF04DB00798F8C /* ModelData.swift in Sources */,
+				B510BE942AE06273002CDB54 /* AccountGroup.swift in Sources */,
 				B59F0F2628FDD30F00AA33A9 /* AccountCirclesList.swift in Sources */,
 				B5B950532ADF24A900798F8C /* AccountCircleItem.swift in Sources */,
 				B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */,
@@ -519,9 +543,12 @@
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Coin;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -551,9 +578,12 @@
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Coin;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
