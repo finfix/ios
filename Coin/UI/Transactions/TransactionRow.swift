@@ -11,6 +11,7 @@ struct TransactionRow: View {
     
     @Environment(ModelData.self) var modelData
     
+    @State var showUpdate = false
     @State var transaction: Transaction
     
     var body: some View {
@@ -34,7 +35,13 @@ struct TransactionRow: View {
                 }
             }
         }
+        .onTapGesture {
+            showUpdate = true
+        }
         .padding()
+        .navigationDestination(isPresented: $showUpdate) {
+            UpdateTransaction(isUpdateOpen: $showUpdate, transaction: transaction)
+        }
     }
 }
 

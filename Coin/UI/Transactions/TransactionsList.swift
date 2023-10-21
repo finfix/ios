@@ -20,12 +20,12 @@ struct TransactionsList: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
                 // Список транзакций
                 List {
                     ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                         Section(header: Text(date, style: .date).font(.headline)) {
-                            ForEach (groupedTransactionByDate[date] ?? [], id: \.id) { transaction in
+                            ForEach (groupedTransactionByDate[date] ?? []) { transaction in
                                 TransactionRow(transaction: transaction)
                             }
                             .onDelete {
@@ -37,13 +37,14 @@ struct TransactionsList: View {
                     }
                 }
             // Верхняя панель
-            .navigationBarItems(trailing: Button(action: modelData.getTransactions, label: {
-                Image(systemName: "arrow.clockwise")
-            }))
+                .navigationBarItems(trailing: Button{
+                    modelData.getTransactions()
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                })
             .navigationBarTitle("Транзакции")
             .navigationBarBackButtonHidden(true)
         }
-        .onAppear(perform: modelData.getTransactions)
     }
     
     func deleteTransaction(id: UInt32) {

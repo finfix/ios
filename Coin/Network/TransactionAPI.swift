@@ -59,7 +59,7 @@ class TransactionAPI {
         }
     }
     
-    func UpdateTransaction(req: UpdateTransactionRequest, completionHandler: @escaping (ErrorModel?) -> Void) {
+    func UpdateTransaction(req: UpdateTransactionReq, completionHandler: @escaping (ErrorModel?) -> Void) {
         
         // Проверяем наличие accessToken
         let err = checkToken()

@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Accounts: View {
+struct AccountsHome: View {
     
     @Environment(ModelData.self) var modelData
     
@@ -23,27 +23,29 @@ struct Accounts: View {
     @State var transactionType: TransactionType = .consumption
         
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
                     // Быстрая статистика
                     Header()
+                    if modelData.accountGroups.count > 1 {
+                        AccountsGroupSelector()
+                    }
                     ScrollView {
                         Text("Карты и счета")
-                        SnapCarouselView(spacing: 30, index: $currentIndex, items: modelData.accounts.filter { $0.visible && ($0.type == .regular)}) { account in
+                        SnapCarouselView(spacing: 30, index: $currentIndex, items: modelData.filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
                             GeometryReader { proxy in
                                 AccountCard(size: proxy.size, account: account)
                             }
                         }
                         .frame(height: 150)
         
-                        AccountTypeDetailsView(header: "Инвестиции", accounts: modelData.accounts.filter { ($0.type == .investments) && ($0.visible) } )
-                        AccountTypeDetailsView(header: "Долги", accounts: modelData.accounts.filter { ($0.type == .debt) && ($0.visible) } )
-                        AccountTypeDetailsView(header: "Кредиты", accounts: modelData.accounts.filter { ($0.type == .credit) && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Инвестиции", accounts: modelData.filteredAccounts.filter { ($0.type == .investment) && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Долги", accounts: modelData.filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Кредиты", accounts: modelData.filteredAccounts.filter { ($0.type == .credit) && ($0.visible) } )
                     }
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)
-        
         
                 Group {
                     
@@ -54,10 +56,6 @@ struct Accounts: View {
                     } label: {
                         CircleTypeTransaction(imageName: chooseBlurIsOpened ? "arrow.uturn.backward" : "plus")
                     }
-                    
-                    NavigationLink(isActive: $showCreate) {
-                        CreateTransactionView(isOpeningFrame: $showCreate, transactionType: transactionType)
-                    } label: {}
 
                     if chooseBlurIsOpened {
                         Button {
@@ -85,12 +83,13 @@ struct Accounts: View {
                         .padding(.trailing, 75)
                         .padding(.bottom, 75)
                     }
+                    
                 }
+                .onDisappear { chooseBlurIsOpened = false }
             }
-            .onAppear(perform: modelData.getAccounts)
-            .onDisappear { chooseBlurIsOpened = false }
-            .navigationBarHidden(true)
-            .navigationBarBackButtonHidden(true)
+            .navigationDestination(isPresented: $showCreate) {
+                CreateTransactionView(isOpeningFrame: $showCreate, transactionType: transactionType)
+            }
         }
     }
 }
@@ -113,5 +112,5 @@ struct CircleTypeTransaction: View {
 }
     
 #Preview {
-    Accounts()
+    AccountsHome()
 }

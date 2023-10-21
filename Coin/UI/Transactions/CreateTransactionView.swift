@@ -13,6 +13,41 @@ struct CreateTransactionView: View {
     @Environment(ModelData.self) var modelData
     @Environment(AppSettings.self) var appSettings
     
+    init(isOpeningFrame: Binding<Bool>, transactionType: TransactionType) {
+        self._isOpeningFrame = isOpeningFrame
+        self.transactionType = transactionType
+    }
+    
+    var accountsFrom: [Account] {
+        modelData.accounts.filter {
+            switch transactionType {
+            case .consumption:
+                return $0.type != .expense && $0.type != .earnings && $0.visible
+            case .income:
+                return $0.type == .earnings && $0.visible
+            case .transfer:
+                return $0.type != .expense && $0.type != .earnings && $0.visible
+            default:
+                return true
+            }
+        }
+    }
+    
+    var accountsTo: [Account] {
+        modelData.accounts.filter {
+            switch transactionType {
+            case .consumption:
+                return $0.type == .expense && $0.visible
+            case .income:
+                return $0.type != .expense && $0.type != .earnings && $0.visible
+            case .transfer:
+                return $0.type != .expense && $0.type != .earnings && $0.visible && $0.id != accountFrom?.id
+            default:
+                return true
+            }
+        }
+    }
+    
     var transactionType: TransactionType
     @State var accountFrom: Account?
     @State var accountTo: Account?
@@ -31,37 +66,14 @@ struct CreateTransactionView: View {
             Form {
 //                Section {
                     Picker("Выберите счет списания", selection: $accountFrom) {
-                        ForEach (modelData.accounts.filter {
-                            switch transactionType {
-                            case .consumption:
-                                return $0.type != .expense && $0.type != .earnings && $0.visible
-                            case .income:
-                                return $0.type == .earnings && $0.visible
-                            case .transfer:
-                                return $0.type != .expense && $0.type != .earnings && $0.visible
-                            default:
-                                return true
-                            }
-                            
-                        }, id: \.self) {
+                        ForEach (accountsFrom) {
                             Text($0.name).tag($0 as Account?)
                         }
                     }
                     
                     // Пикер счета получения
                     Picker("Выберите счет получения", selection: $accountTo) {
-                        ForEach (modelData.accounts.filter {
-                            switch transactionType {
-                            case .consumption:
-                                return $0.type == .expense && $0.visible
-                            case .income:
-                                return $0.type != .expense && $0.type != .earnings && $0.visible
-                            case .transfer:
-                                return $0.type != .expense && $0.type != .earnings && $0.visible && $0.id != accountFrom?.id
-                            default:
-                                return true
-                            }
-                        }, id: \.self) {
+                        ForEach (accountsTo) {
                             Text($0.name).tag($0 as Account?)
                         }
                     }
@@ -87,8 +99,8 @@ struct CreateTransactionView: View {
                         TextEditor(text: $note)
                             .lineLimit(5)
                     }
-//                }
-            }
+                }
+//            }
             Spacer()
             Button {
                 createTransaction()
@@ -97,7 +109,10 @@ struct CreateTransactionView: View {
                 Text("Сохранить")
             }
             .padding()
-            .onAppear(perform: modelData.getAccounts)
+            .onAppear {
+                self.accountFrom = accountsFrom.first
+                self.accountTo = accountsTo.first
+            }
         }
     }
     

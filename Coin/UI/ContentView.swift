@@ -27,7 +27,7 @@ struct MainView: View {
     
     var body: some View {
         TabView {
-            Accounts()
+            AccountsHome()
                 .tag(1)
                 .tabItem {
                     Image(systemName: "1.circle")
@@ -61,16 +61,8 @@ struct MainView: View {
                     Image(systemName: "5.circle")
                     Text("Профиль")
                 }
-            
-            // GraphView(rangeTime: 0..<(myLine.points.count - 1),
-            //           line: myLine, lineWidth: 2)
-            //     .border(.black)
-            //     .tag(5)
-            //     .tabItem {
-            //         Image(systemName: "5.circle")
-            //         Text("График")
-            //     }
         }
+        .onAppear(perform: modelData.sync)
     }
 }
 

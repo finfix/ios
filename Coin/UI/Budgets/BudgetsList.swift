@@ -12,7 +12,7 @@ struct BudgetsList: View {
     @Environment(ModelData.self) var modelData
     
     var filteredAccounts: [Account] {
-        modelData.accountsGrouped.filter { account in
+        modelData.filteredGroupedAccounts.filter { account in
             account.type == .expense && account.budget != 0
         }
     }
@@ -25,7 +25,6 @@ struct BudgetsList: View {
                 }
             }
         }
-        .onAppear(perform: modelData.getAccountsGrouped)
     }
 }
 

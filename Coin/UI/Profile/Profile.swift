@@ -10,14 +10,21 @@ import SwiftUI
 struct Profile: View {
     
     @Environment(AppSettings.self) var appSettings
+    @Environment(ModelData.self) var modelData
     
     var body: some View {
-        Button {
-            appSettings.isLogin = false
-        } label: {
-            Text("Выйти")
+        VStack(spacing: 10) {
+            Button {
+                appSettings.isLogin = false
+            } label: {
+                Text("Выйти")
+            }
+            Button {
+                modelData.sync()
+            } label: {
+                Text("Синхронизировать")
+            }
         }
-
     }
 }
 

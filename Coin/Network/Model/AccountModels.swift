@@ -19,3 +19,24 @@ struct GetAccountsRequest: Encodable {
         }
     }
 }
+
+struct CreateAccountReq: Encodable {
+    var accountGroupID: UInt32
+    var accounting: Bool
+    var budget: Double?
+    var currency: String
+    var iconID: UInt32
+    var name: String
+    var remainder: Double?
+    var type: String
+}
+
+struct UpdateAccountReq: Encodable {
+    var id: UInt32
+    var accounting: Bool?
+    var budget: Double?
+//    var iconID: UInt32?
+    var name: String?
+    var remainder: Double?
+    var visible: Bool?
+}
