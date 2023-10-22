@@ -10,9 +10,10 @@ import SwiftUI
 struct ContentView: View {
     
     @Environment(AppSettings.self) var appSettings
+    @AppStorage("isLogin") var isLogin: Bool = false
     
     var body: some View {
-        if appSettings.isLogin {
+        if isLogin {
             MainView()
         } else {
             LoginView()

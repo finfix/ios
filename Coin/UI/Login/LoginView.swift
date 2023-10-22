@@ -8,7 +8,11 @@
 import SwiftUI
 
 struct LoginView: View {
-        
+    
+    @AppStorage("isLogin") var isLogin: Bool = false
+    @AppStorage("accessToken") var accessToken: String?
+    @AppStorage("refreshToken") var refreshToken: String?
+    
     @State var login = ""
     @State var password = ""
     
@@ -38,15 +42,15 @@ struct LoginView: View {
     
     func auth() {
         
-        UserAPI().Auth(req: AuthRequest(email: login, password: password)) { response, error in
+        AuthAPI().Auth(req: AuthRequest(email: login, password: password)) { response, error in
             
             if let err = error {
                 appSettings.showErrorAlert(error: err)
                 
             } else if let response = response {
-                Defaults.accessToken = response.token.accessToken
-                Defaults.refreshToken = response.token.refreshToken
-                appSettings.isLogin = true
+                accessToken = response.token.accessToken
+                refreshToken = response.token.refreshToken
+                isLogin = true
             }
         }
     }
