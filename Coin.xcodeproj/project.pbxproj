@@ -41,6 +41,11 @@
 		B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950542ADF258700798F8C /* TransactionRow.swift */; };
 		B5B950572ADF261700798F8C /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950562ADF261700798F8C /* Header.swift */; };
 		B5B950592ADF274E00798F8C /* AccountCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950582ADF274E00798F8C /* AccountCard.swift */; };
+		B5C207A22AE5B6BD005D8B08 /* Destination.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C207A12AE5B6BD005D8B08 /* Destination.swift */; };
+		B5C207A42AE5B77F005D8B08 /* DestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C207A32AE5B77F005D8B08 /* DestinationView.swift */; };
+		B5C207A72AE5BB87005D8B08 /* EditDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C207A62AE5BB87005D8B08 /* EditDestinationView.swift */; };
+		B5C207A92AE5C110005D8B08 /* DestinationListingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C207A82AE5C110005D8B08 /* DestinationListingView.swift */; };
+		B5C207AB2AE5C500005D8B08 /* Sight.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C207AA2AE5C500005D8B08 /* Sight.swift */; };
 		B5CF7D322AE578CC0086C0B6 /* CurrencySymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CF7D312AE578CC0086C0B6 /* CurrencySymbols.swift */; };
 		B5CF7D342AE57A9B0086C0B6 /* CurrencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */; };
 		B5D143B22906A64000875037 /* ErrorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B12906A64000875037 /* ErrorModel.swift */; };
@@ -94,6 +99,11 @@
 		B5B950542ADF258700798F8C /* TransactionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRow.swift; sourceTree = "<group>"; };
 		B5B950562ADF261700798F8C /* Header.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Header.swift; sourceTree = "<group>"; };
 		B5B950582ADF274E00798F8C /* AccountCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCard.swift; sourceTree = "<group>"; };
+		B5C207A12AE5B6BD005D8B08 /* Destination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Destination.swift; sourceTree = "<group>"; };
+		B5C207A32AE5B77F005D8B08 /* DestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationView.swift; sourceTree = "<group>"; };
+		B5C207A62AE5BB87005D8B08 /* EditDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDestinationView.swift; sourceTree = "<group>"; };
+		B5C207A82AE5C110005D8B08 /* DestinationListingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationListingView.swift; sourceTree = "<group>"; };
+		B5C207AA2AE5C500005D8B08 /* Sight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sight.swift; sourceTree = "<group>"; };
 		B5CF7D312AE578CC0086C0B6 /* CurrencySymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencySymbols.swift; sourceTree = "<group>"; };
 		B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatter.swift; sourceTree = "<group>"; };
 		B5D143B12906A64000875037 /* ErrorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorModel.swift; sourceTree = "<group>"; };
@@ -220,6 +230,18 @@
 			path = Profile;
 			sourceTree = "<group>";
 		};
+		B5C207A52AE5BB76005D8B08 /* Destinations */ = {
+			isa = PBXGroup;
+			children = (
+				B5C207A12AE5B6BD005D8B08 /* Destination.swift */,
+				B5C207A32AE5B77F005D8B08 /* DestinationView.swift */,
+				B5C207A82AE5C110005D8B08 /* DestinationListingView.swift */,
+				B5C207A62AE5BB87005D8B08 /* EditDestinationView.swift */,
+				B5C207AA2AE5C500005D8B08 /* Sight.swift */,
+			);
+			path = Destinations;
+			sourceTree = "<group>";
+		};
 		B5E89333290073D0002AC30C /* Login */ = {
 			isa = PBXGroup;
 			children = (
@@ -231,6 +253,7 @@
 		B5E8933829007C53002AC30C /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				B5C207A52AE5BB76005D8B08 /* Destinations */,
 				B5B9504D2ADF234F00798F8C /* Profile */,
 				B5B950482ADF17C400798F8C /* AccountCircles */,
 				B5B950412ADF161900798F8C /* Budgets */,
@@ -395,14 +418,18 @@
 				B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */,
 				B5610EF928FC88FE0063AFEB /* CreateTransactionView.swift in Sources */,
 				B5CF7D342AE57A9B0086C0B6 /* CurrencyFormatter.swift in Sources */,
+				B5C207A92AE5C110005D8B08 /* DestinationListingView.swift in Sources */,
+				B5C207A72AE5BB87005D8B08 /* EditDestinationView.swift in Sources */,
 				B504B7E52AE46EEB0078643A /* UserAPI.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* SelectAccountGroup.swift in Sources */,
+				B5C207A22AE5B6BD005D8B08 /* Destination.swift in Sources */,
 				B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */,
 				B5B9504C2ADF18BC00798F8C /* QuickStatistic.swift in Sources */,
 				B5D143B62906B4EC00875037 /* AuthAPI.swift in Sources */,
 				B5CF7D322AE578CC0086C0B6 /* CurrencySymbols.swift in Sources */,
 				B593F9532AE1BF6600378E17 /* UpdateAccount.swift in Sources */,
 				B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */,
+				B5C207AB2AE5C500005D8B08 /* Sight.swift in Sources */,
 				B5B950452ADF16FF00798F8C /* Line.swift in Sources */,
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
@@ -425,6 +452,7 @@
 				B510BE942AE06273002CDB54 /* AccountGroup.swift in Sources */,
 				B59F0F2628FDD30F00AA33A9 /* AccountCirclesList.swift in Sources */,
 				B5B950532ADF24A900798F8C /* AccountCircleItem.swift in Sources */,
+				B5C207A42AE5B77F005D8B08 /* DestinationView.swift in Sources */,
 				B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */,
 				B5FB6AA428F3D62D00C2A2AC /* TransactionsList.swift in Sources */,
 			);

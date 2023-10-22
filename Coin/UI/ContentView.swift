@@ -62,6 +62,13 @@ struct MainView: View {
                     Image(systemName: "5.circle")
                     Text("Профиль")
                 }
+            
+            DestinationView()
+                .tag(6)
+                .tabItem {
+                    Image(systemName: "5.circle")
+                    Text("Destination")
+                }
         }
         .onAppear(perform: modelData.sync)
     }

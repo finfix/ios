@@ -5,6 +5,7 @@
 //  Created by Илья on 07.10.2022.
 //
 
+import SwiftData
 import SwiftUI
 
 @main
@@ -24,6 +25,7 @@ struct MyApp: App {
                     Alert(title: Text(appSettings.alertErrorMessage), message: Text(appSettings.alertErrorDetails), dismissButton: .cancel(Text("OK")))
                 }
         }
+        .modelContainer(for: Destination.self)
     }
 }
 
