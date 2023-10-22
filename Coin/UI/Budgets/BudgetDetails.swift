@@ -24,13 +24,20 @@ struct BudgetDetails: View {
         dailyBudget * Double(today) - account.remainder
     }
     
+    var currencyFormatter: CurrencyFormatter
+    
+    init(account: Account) {
+        self.currencyFormatter = CurrencyFormatter(currency: account.currency)
+        self.account = account
+    }
+    
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Бюджет на месяц: " + currencyFormat(amount: account.budget, currencyCode: account.currency))
-            Text("Текущий расход: " + currencyFormat(amount: account.remainder, currencyCode: account.currency))
-            Text("Остаток до конца месяца: " + currencyFormat(amount: account.budget - account.remainder, currencyCode: account.currency))
-            Text("Остаток на текущий день: " + currencyFormat(amount: availableExpense, currencyCode: account.currency))
-            Text("Дневной бюджет: " + currencyFormat(amount: dailyBudget, currencyCode: account.currency))
+            Text("Бюджет на месяц: " + currencyFormatter.string(number: account.budget))
+            Text("Текущий расход: " + currencyFormatter.string(number: account.remainder))
+            Text("Остаток до конца месяца: " + currencyFormatter.string(number: account.budget - account.remainder))
+            Text("Остаток на текущий день: " + currencyFormatter.string(number: availableExpense))
+            Text("Дневной бюджет: " + currencyFormatter.string(number: dailyBudget))
         }
     }
 }

@@ -20,8 +20,7 @@ struct AccountCard: View {
                     .foregroundColor(.gray)
                 Text(account.name)
             }
-            
-            Text(currencyFormat(amount: account.remainder, currencyCode: account.currency))
+            Text(CurrencyFormatter().string(number: account.remainder, currency: account.currency))
         }
         .frame(width: size.width, height: 150)
         .background(Color("Gray"))

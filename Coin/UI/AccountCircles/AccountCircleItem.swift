@@ -20,6 +20,14 @@ struct AccountCircleItem: View {
         modelData.currencies[account.currency]?.symbol ?? ""
     }
     
+    var formatter: CurrencyFormatter
+    
+    init(account: Account, alreadyOpened: Bool = false) {
+        self.formatter = CurrencyFormatter(currency: account.currency)
+        self.account = account
+        self.alreadyOpened = alreadyOpened
+    }
+    
     var body: some View {
         
         VStack {
@@ -36,11 +44,11 @@ struct AccountCircleItem: View {
                     isUpdateOpen = true
                 }
             
-            Text(currencyFormat(amount: account.remainder, currencyCode: currencySymbol))
+            Text(formatter.string(number: account.remainder))
                 .lineLimit(1)
             
             if account.budget != 0 {
-                Text(currencyFormat(amount: account.budget, currencyCode: currencySymbol))
+                Text(formatter.string(number: account.budget))
                     .lineLimit(1)
                     .foregroundColor(.secondary)
             }
@@ -57,28 +65,10 @@ struct AccountCircleItem: View {
         .navigationDestination(isPresented: $isUpdateOpen) {
             UpdateAccount(isUpdateOpen: $isUpdateOpen, account: account)
         }
-        
+        .navigationDestination(isPresented: $isTransactionListOpen) {
+            TransactionsList(filteredAccountID: account.id)
+        }
     }
-}
-
-func currencyFormat(amount: Double, currencyCode: String) -> String {
-    var num = amount
-    
-    let sign = ((num < 0) ? "-" : "" );
-    
-    num = fabs(num)
-    
-    if (num < 1000000.0){
-        return "\(sign)\(round(num)) \(currencyCode)"
-    }
-    
-    let exp:Int = Int(log10(num) / 6.0 )
-    
-    let units:[String] = ["k","M","G","T","P","E"]
-    
-    let roundedNum:Double = round(10 * num / pow(1000.0,Double(exp))) / 10
-    
-    return "\(sign)\(roundedNum)\(units[exp-1]) \(currencyCode)"
 }
 
 #Preview {

@@ -48,7 +48,7 @@ struct AccountTypeDetailsView: View {
                         Text(account.name)
                             .lineLimit(1)
                         Spacer()
-                        Text(currencyFormat(amount: account.remainder, currencyCode: account.currency))
+                        Text(CurrencyFormatter().string(number: account.remainder, currency: account.currency))
                     }
                     .padding()
                     .frame(width: 340, height: 60)
