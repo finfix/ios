@@ -21,7 +21,7 @@ struct AccountCard: View {
                 Text(account.name)
             }
             
-            Text("\(String(format: "%.0f", account.remainder)) \(account.currencySymbol)")
+            Text(currencyFormat(amount: account.remainder, currencyCode: account.currency))
         }
         .frame(width: size.width, height: 150)
         .background(Color("Gray"))

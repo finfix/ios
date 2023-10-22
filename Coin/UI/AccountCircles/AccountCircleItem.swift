@@ -88,9 +88,7 @@ struct AccountCircleItem: View {
                 remainder: 43,
                 type: .expense,
                 visible: true,
-                parentAccountID: nil,
-                childrenAccounts: nil,
-                currencySymbol: "$"),
+                parentAccountID: nil),
             Account(
                 id: 3,
                 accountGroupID: 1,
@@ -102,9 +100,7 @@ struct AccountCircleItem: View {
                 remainder: 43,
                 type: .expense,
                 visible: true,
-                parentAccountID: nil,
-                childrenAccounts: nil,
-                currencySymbol: "$"),
+                parentAccountID: nil),
             Account(
                 id: 4,
                 accountGroupID: 1,
@@ -116,8 +112,5 @@ struct AccountCircleItem: View {
                 remainder: 43,
                 type: .expense,
                 visible: true,
-                parentAccountID: nil,
-                childrenAccounts: nil,
-                currencySymbol: "$")],
-        currencySymbol: "$"))
+                parentAccountID: nil)]))
 }

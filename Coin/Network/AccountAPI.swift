@@ -15,10 +15,9 @@ class AccountAPI {
     
     func GetAccounts(req: GetAccountsRequest, grouped: Bool, completionHandler: @escaping ([Account]?, ErrorModel?) -> Void) {
         
-        let err = checkToken()
+        var (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(nil, err)
-            return
         }
         
         var path = accountBasePath
@@ -26,7 +25,7 @@ class AccountAPI {
         if grouped {
             path += "/grouped"
         }
-        AF.request(basePath + path, method: .get, parameters: req, headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + path, method: .get, parameters: req, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Account].self)
             if error != nil {
@@ -42,15 +41,14 @@ class AccountAPI {
     
     func QuickStatistic(completionHandler: @escaping (QuickStatisticRes?, ErrorModel?) -> Void) {
         
-        let err = checkToken()
+        var (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(nil, err)
-            return
         }
         
         var path = accountBasePath + "/quickStatistic"
         
-        AF.request(basePath + path, method: .get, headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + path, method: .get, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: QuickStatisticRes.self)
             if error != nil {
@@ -66,15 +64,14 @@ class AccountAPI {
     
     func GetAccountGroups(completionHandler: @escaping ([AccountGroup]?, ErrorModel?) -> Void) {
         
-        let err = checkToken()
+        var (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(nil, err)
-            return
         }
         
         var path = accountBasePath + "/accountGroups"
         
-        AF.request(basePath + path, method: .get, headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + path, method: .get, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [AccountGroup].self)
             if error != nil {
@@ -88,38 +85,36 @@ class AccountAPI {
         }
     }
     
-    func CreateAccount(req: CreateAccountReq, completionHandler: @escaping (ErrorModel?) -> Void) {
+    func CreateAccount(req: CreateAccountReq, completionHandler: @escaping (CreateAccountRes?, ErrorModel?) -> Void) {
         
-        // Проверяем наличие accessToken
-        let err = checkToken()
+        var (headers, err) = getBaseHeaders()
         if err != nil {
-            completionHandler(err)
-            return
+            completionHandler(nil, err)
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + accountBasePath, method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + accountBasePath, method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
-            let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
+            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: CreateAccountRes.self)
             if error != nil {
-                completionHandler(error)
+                completionHandler(nil, error)
                 return
             }
-            completionHandler(nil)
+            if model != nil {
+                completionHandler(model, nil)
+            }
         }
     }
     
     func UpdateAccount(req: UpdateAccountReq, completionHandler: @escaping (ErrorModel?) -> Void) {
         
-        // Проверяем наличие accessToken
-        let err = checkToken()
+        let (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(err)
-            return
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + accountBasePath, method: .patch, parameters: req, encoder: JSONParameterEncoder(), headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + accountBasePath, method: .patch, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {

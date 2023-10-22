@@ -16,15 +16,13 @@ class TransactionAPI {
     // Получение транзакций
     func GetTransactions(req: GetTransactionRequest, completionHandler: @escaping ([Transaction]?, ErrorModel?) -> Void) {
         
-        // Проверяем наличие accessToken
-        let err = checkToken()
+        var (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(nil, err)
-            return
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + transactionBasePath, method: .get, parameters: req, headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .get, parameters: req, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Transaction].self)
             if error != nil {
@@ -40,15 +38,13 @@ class TransactionAPI {
     
     func CreateTransaction(req: CreateTransactionRequest, completionHandler: @escaping (ErrorModel?) -> Void) {
         
-        // Проверяем наличие accessToken
-        let err = checkToken()
+        var (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(err)
-            return
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + transactionBasePath, method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {
@@ -61,15 +57,13 @@ class TransactionAPI {
     
     func UpdateTransaction(req: UpdateTransactionReq, completionHandler: @escaping (ErrorModel?) -> Void) {
         
-        // Проверяем наличие accessToken
-        let err = checkToken()
+        var (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(err)
-            return
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + transactionBasePath, method: .patch, parameters: req, encoder: JSONParameterEncoder(), headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .patch, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {
@@ -82,15 +76,13 @@ class TransactionAPI {
     
     func DeleteTransaction(req: DeleteTransactionRequest, completionHandler: @escaping (ErrorModel?) -> Void) {
         
-        // Проверяем наличие accessToken
-        let err = checkToken()
+        var (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(err)
-            return
         }
         
         // Делаем запрос на сервер
-        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, encoder: JSONParameterEncoder(), headers: getBaseHeaders()).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {

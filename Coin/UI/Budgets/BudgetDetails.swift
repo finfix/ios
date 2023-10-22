@@ -26,15 +26,15 @@ struct BudgetDetails: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Бюджет на месяц: \(String(format: "%.0f", account.budget)) \(account.currencySymbol)")
-            Text("Текущий расход: \(String(format: "%.0f", account.remainder)) \(account.currencySymbol)")
-            Text("Остаток до конца месяца: \(String(format: "%.0f", account.budget - account.remainder)) \(account.currencySymbol)")
-            Text("Остаток на текущий день: \(String(format: "%.0f", availableExpense)) \(account.currencySymbol)")
-            Text("Дневной бюджет: \(String(format: "%.0f", dailyBudget)) \(account.currencySymbol)")
+            Text("Бюджет на месяц: " + currencyFormat(amount: account.budget, currencyCode: account.currency))
+            Text("Текущий расход: " + currencyFormat(amount: account.remainder, currencyCode: account.currency))
+            Text("Остаток до конца месяца: " + currencyFormat(amount: account.budget - account.remainder, currencyCode: account.currency))
+            Text("Остаток на текущий день: " + currencyFormat(amount: availableExpense, currencyCode: account.currency))
+            Text("Дневной бюджет: " + currencyFormat(amount: dailyBudget, currencyCode: account.currency))
         }
     }
 }
 
 #Preview {
-    BudgetDetails(account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 900, currency: "rub", iconID: 2, name: "Example", remainder: 600, type: .expense, visible: true, currencySymbol: "$"))
+    BudgetDetails(account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 900, currency: "rub", iconID: 2, name: "Example", remainder: 600, type: .expense, visible: true))
 }
