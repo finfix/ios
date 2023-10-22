@@ -19,8 +19,13 @@ struct Account: Decodable, Identifiable, Hashable {
     var type: AccountType
     var visible: Bool
     var parentAccountID: UInt32?
-    var childrenAccounts: [Account]?
-    var currencySymbol: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, accountGroupID, accounting, budget, currency, iconID, name, remainder, type, visible, parentAccountID
+    }
+    
+    var childrenAccounts: [Account] = []
+    var isChild: Bool = false
 }
 
 enum AccountType: String, Decodable {

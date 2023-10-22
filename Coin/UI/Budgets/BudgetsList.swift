@@ -12,9 +12,12 @@ struct BudgetsList: View {
     @Environment(ModelData.self) var modelData
     
     var filteredAccounts: [Account] {
-        modelData.filteredGroupedAccounts.filter { account in
-            account.type == .expense && account.budget != 0
-        }
+        modelData.accounts.filter {
+            ($0.accountGroupID == modelData.selectedAccountsGroupID) &&
+            $0.visible &&
+            !$0.isChild &&
+            $0.type == .expense &&
+            $0.budget != 0 }
     }
     
     var body: some View {

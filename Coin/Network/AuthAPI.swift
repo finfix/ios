@@ -11,12 +11,12 @@ import SwiftUI
 
 let authBasePath = "/auth"
 
-class UserAPI {
+class AuthAPI {
     
     func Auth(req: AuthRequest, completionHandler: @escaping (AuthResponse?, ErrorModel?) -> Void) {
         
-        var headers = getBaseHeaders()
-        headers.add(HTTPHeader(name: "DeviceID", value: UIDevice.current.identifierForVendor!.uuidString))
+        var headers = HTTPHeaders(
+            ["DeviceID": UIDevice.current.identifierForVendor!.uuidString])
         
         // Делаем запрос на сервер
         AF.request(basePath + authBasePath + "/signIn", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
@@ -35,14 +35,8 @@ class UserAPI {
     
     func RefreshToken(req: RefreshTokensRequest, completionHandler: @escaping (RefreshTokensResponse?, ErrorModel?) -> Void) {
         
-        var headers = getBaseHeaders()
-        headers.add(HTTPHeader(name: "DeviceID", value: UIDevice.current.identifierForVendor!.uuidString))
-        
-        // Проверяем наличие refreshToken
-        guard let token = Defaults.refreshToken else {
-            completionHandler(nil, ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8))
-            return
-        }
+        var headers = HTTPHeaders(
+            ["DeviceID": UIDevice.current.identifierForVendor!.uuidString])
         
         // Делаем запрос на сервер
         AF.request(basePath + authBasePath + "/refreshTokens", method: .get, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in

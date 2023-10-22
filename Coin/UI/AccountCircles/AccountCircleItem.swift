@@ -11,52 +11,59 @@ struct AccountCircleItem: View {
     
     var account: Account
     
+    @Environment(ModelData.self) var modelData
+    
     @State var isChildrenOpen = false
     @State var isUpdateOpen = false
     
+    var alreadyOpened = false
+    
+    var currencySymbol: String {
+        modelData.currencies[account.currency]?.symbol ?? ""
+    }
+    
+    var formatter: CurrencyFormatter
+    
+    init(account: Account, alreadyOpened: Bool = false) {
+        self.formatter = CurrencyFormatter(currency: account.currency)
+        self.account = account
+        self.alreadyOpened = alreadyOpened
+    }
+    
     var body: some View {
-        ZStack {
-            VStack {
-                Text(account.name)
-                    .lineLimit(1)
-                    .font(.footnote)
-                
-                Circle()
-                    .frame(width: 30)
-                    .foregroundColor(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red)
-                    .onTapGesture {
+        
+        VStack {
+            Text(account.name)
+                .lineLimit(1)
+            
+            Circle()
+                .frame(width: 30)
+                .foregroundColor(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red)
+                .onTapGesture(count: 2) {
+                    if !alreadyOpened {
                         isChildrenOpen = true
                     }
-                    .onLongPressGesture(minimumDuration: 1.0) {
-                        isUpdateOpen = true
-                    }
-                
-                Text("\(String(format: "%.2f", account.remainder)) \(account.currencySymbol)")
-                    .lineLimit(1)
-                    .font(.footnote)
-                
-                if account.budget != 0 {
-                    Text("\(String(format: "%.0f", account.budget)) \(account.currencySymbol)")
-                        .lineLimit(1)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
                 }
-            }
+                .onLongPressGesture(minimumDuration: 1.0) {
+                    isUpdateOpen = true
+                }
             
-            if isChildrenOpen && account.childrenAccounts != nil {
-                RoundedRectangle(cornerRadius: 10)
-                    .foregroundColor(Color("StrongGray"))
-                HStack {
-                    ForEach(account.childrenAccounts!) { childAccount in
-                        AccountCircleItem(account: childAccount)
-                    }
-                }
-                .onTapGesture {
-                    isChildrenOpen = false
-                }
+            Text(formatter.string(number: account.remainder))
+                .lineLimit(1)
+            
+            if account.budget != 0 {
+                Text(formatter.string(number: account.budget))
+                    .lineLimit(1)
+                    .foregroundColor(.secondary)
             }
         }
-        .frame(width: 70, height: 110)
+        .font(.caption)
+        .frame(width: 80, height: 100)
+        .popover(isPresented: $isChildrenOpen) {
+            AccountChildren(parentAccount: account)
+                .padding()
+                .presentationCompactAdaptation(.popover)
+        }
         .navigationDestination(isPresented: $isUpdateOpen) {
             UpdateAccount(isUpdateOpen: $isUpdateOpen, account: account)
         }
@@ -88,9 +95,7 @@ struct AccountCircleItem: View {
                 remainder: 43,
                 type: .expense,
                 visible: true,
-                parentAccountID: nil,
-                childrenAccounts: nil,
-                currencySymbol: "$"),
+                parentAccountID: nil),
             Account(
                 id: 3,
                 accountGroupID: 1,
@@ -102,9 +107,7 @@ struct AccountCircleItem: View {
                 remainder: 43,
                 type: .expense,
                 visible: true,
-                parentAccountID: nil,
-                childrenAccounts: nil,
-                currencySymbol: "$"),
+                parentAccountID: nil),
             Account(
                 id: 4,
                 accountGroupID: 1,
@@ -116,8 +119,6 @@ struct AccountCircleItem: View {
                 remainder: 43,
                 type: .expense,
                 visible: true,
-                parentAccountID: nil,
-                childrenAccounts: nil,
-                currencySymbol: "$")],
-        currencySymbol: "$"))
+                parentAccountID: nil)]))
+    .environment(ModelData())
 }

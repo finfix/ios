@@ -57,5 +57,5 @@ struct BudgetBar: View {
 }
 
 #Preview {
-    BudgetBar(account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 900, currency: "rub", iconID: 2, name: "Example", remainder: 600, type: .expense, visible: true, currencySymbol: "$"))
+    BudgetBar(account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 900, currency: "rub", iconID: 2, name: "Example", remainder: 600, type: .expense, visible: true))
 }

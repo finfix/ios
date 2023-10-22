@@ -9,20 +9,33 @@ import SwiftUI
 
 struct Profile: View {
     
+    @AppStorage("isDarkMode") private var isDarkMode = true
+    @AppStorage("accessToken") private var accessToken: String?
+    @AppStorage("refreshToken") private var refreshToken: String?
+    @AppStorage("isLogin") private var isLogin: Bool = false
     @Environment(AppSettings.self) var appSettings
     @Environment(ModelData.self) var modelData
     
     var body: some View {
-        VStack(spacing: 10) {
-            Button {
-                appSettings.isLogin = false
-            } label: {
-                Text("Выйти")
+        Form {
+            Toggle(isOn: $isDarkMode) {
+                HStack {
+                    Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
+                    Text("Темная тема")
+                }
             }
-            Button {
-                modelData.sync()
-            } label: {
-                Text("Синхронизировать")
+            Section {
+                Button("Синхронизировать") {
+                    modelData.sync()
+                }
+            }
+            Section {
+                Button("Выйти") {
+                    isLogin = false
+                    accessToken = nil
+                    refreshToken = nil
+                }
+                .foregroundColor(.red)
             }
         }
     }
@@ -30,4 +43,6 @@ struct Profile: View {
 
 #Preview {
     Profile()
+        .environment(ModelData())
+        .environment(AppSettings())
 }

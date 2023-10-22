@@ -11,13 +11,18 @@ import SwiftUI
 
 let basePath = "https://bonavii.com"
 
-func getBaseHeaders() -> HTTPHeaders {
-    return HTTPHeaders(["Authorization": Defaults.accessToken ?? ""])
-}
-
-func checkToken() -> (ErrorModel?){
-    if Defaults.accessToken == nil {
-        return ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8)
+func getBaseHeaders() -> (HTTPHeaders, ErrorModel?) {
+    
+    @AppStorage("accessToken") var accessToken: String?
+    
+    var headers = HTTPHeaders()
+    var err: ErrorModel?
+    
+    if let accessToken = accessToken {
+        headers.add(HTTPHeader(name: "Authorization", value: accessToken))
+    } else {
+       err = ErrorModel(developerTextError: "", humanTextError: "Пользователь не авторизован", statusCode: 8)
     }
-    return nil
+    
+    return (headers, err)
 }

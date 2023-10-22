@@ -14,6 +14,14 @@ struct TransactionRow: View {
     @State var showUpdate = false
     @State var transaction: Transaction
     
+    var prefix: String {
+        switch transaction.type {
+        case .income: return "+ "
+        case .consumption: return "- "
+        default: return ""
+        }
+    }
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -25,10 +33,7 @@ struct TransactionRow: View {
             }
             Spacer()
             VStack(alignment: .trailing) {
-                Text(String(format: transaction.type == .consumption ? "- %.2f" :
-                                transaction.type == .income ? "+ %.2f" :
-                                "%.2f",
-                                transaction.amountTo))
+                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: modelData.accountsMap[transaction.accountToID]?.currency))
                 if transaction.note != "" {
                     Text(transaction.note)
                         .font(.footnote)

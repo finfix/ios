@@ -12,10 +12,12 @@ struct MyApp: App {
     
     @State private var appSettings = AppSettings()
     @State private var modelData = ModelData()
+    @AppStorage("isDarkMode") var isDarkMode = false
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(isDarkMode ? .dark : .light)
                 .environment(appSettings)
                 .environment(modelData)
                 .alert(isPresented: $appSettings.alertErrorShowing) {

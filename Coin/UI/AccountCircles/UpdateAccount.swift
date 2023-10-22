@@ -90,5 +90,5 @@ struct UpdateAccount: View {
 }
 
 #Preview {
-    UpdateAccount(isUpdateOpen: .constant(true), account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 1000.4, currency: "RUB", iconID: 1, name: "Надо поменять", remainder: 23, type: .regular, visible: false, parentAccountID: nil, childrenAccounts: nil, currencySymbol: "$"))
+    UpdateAccount(isUpdateOpen: .constant(true), account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 1000.4, currency: "RUB", iconID: 1, name: "Надо поменять", remainder: 23, type: .regular, visible: false, parentAccountID: nil))
 }

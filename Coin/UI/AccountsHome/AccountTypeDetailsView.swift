@@ -48,7 +48,7 @@ struct AccountTypeDetailsView: View {
                         Text(account.name)
                             .lineLimit(1)
                         Spacer()
-                        Text("\(String(format: "%.2f", account.remainder)) \(account.currencySymbol)")
+                        Text(CurrencyFormatter().string(number: account.remainder, currency: account.currency))
                     }
                     .padding()
                     .frame(width: 340, height: 60)
@@ -62,5 +62,5 @@ struct AccountTypeDetailsView: View {
 }
 
 #Preview {
-    AccountTypeDetailsView(header: "Заголовок", accounts: [Account(id: 1, accountGroupID: 1, accounting: true, budget: 0, currency: "Rub", iconID: 3, name: "Some", remainder: 3, type: .expense, visible: true, parentAccountID: nil, childrenAccounts: nil, currencySymbol: "")])
+    AccountTypeDetailsView(header: "Заголовок", accounts: [Account(id: 1, accountGroupID: 1, accounting: true, budget: 0, currency: "Rub", iconID: 3, name: "Some", remainder: 3, type: .expense, visible: true, parentAccountID: nil)])
 }
