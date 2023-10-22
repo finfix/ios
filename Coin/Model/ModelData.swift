@@ -59,9 +59,7 @@ class ModelData {
     var quickStatistic = QuickStatisticRes()
     var transactions = [Transaction]()
     var accountGroups = [AccountGroup]()
-    var currencies: [CurrencyEnum: Currency] {
-        Dictionary(uniqueKeysWithValues: currenciesArr.map{ ($0.isoCode, $0) })
-    }
+    var currencies = [String: Currency]()
     
     var accountsMap: [UInt32: Account] {
         Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
@@ -130,6 +128,17 @@ class ModelData {
                 self.appSettings.showErrorAlert(error: err)
             } else if let response = model {
                 self.accountGroups = response
+            }
+        }
+    }
+    
+    func getCurrencies() {
+        UserAPI().GetCurrencies() { model, error in
+            if let err = error {
+                self.appSettings.showErrorAlert(error: err)
+            } else if let response = model {
+                self.currencies = Dictionary(uniqueKeysWithValues: response.map{ ($0.isoCode, $0) })
+//                self.accountGroups = response
             }
         }
     }

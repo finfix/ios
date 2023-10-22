@@ -11,56 +11,74 @@ struct AccountCircleItem: View {
     
     var account: Account
     
+    @Environment(ModelData.self) var modelData
+    
     @State var isChildrenOpen = false
     @State var isUpdateOpen = false
     
+    var currencySymbol: String {
+        modelData.currencies[account.currency]?.symbol ?? ""
+    }
+    
     var body: some View {
-        ZStack {
-            VStack {
-                Text(account.name)
-                    .lineLimit(1)
-                    .font(.footnote)
-                
-                Circle()
-                    .frame(width: 30)
-                    .foregroundColor(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red)
-                    .onTapGesture {
-                        isChildrenOpen = true
-                    }
-                    .onLongPressGesture(minimumDuration: 1.0) {
-                        isUpdateOpen = true
-                    }
-                
-                Text("\(String(format: "%.2f", account.remainder)) \(account.currencySymbol)")
-                    .lineLimit(1)
-                    .font(.footnote)
-                
-                if account.budget != 0 {
-                    Text("\(String(format: "%.0f", account.budget)) \(account.currencySymbol)")
-                        .lineLimit(1)
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                }
-            }
+        
+        VStack {
+            Text(account.name)
+                .lineLimit(1)
             
-            if isChildrenOpen && account.childrenAccounts != nil {
-                RoundedRectangle(cornerRadius: 10)
-                    .foregroundColor(Color("StrongGray"))
-                HStack {
-                    ForEach(account.childrenAccounts!) { childAccount in
-                        AccountCircleItem(account: childAccount)
-                    }
-                }
+            Circle()
+                .frame(width: 30)
+                .foregroundColor(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red)
                 .onTapGesture {
-                    isChildrenOpen = false
+                    isChildrenOpen = true
                 }
+                .onLongPressGesture(minimumDuration: 1.0) {
+                    isUpdateOpen = true
+                }
+            
+            Text(currencyFormat(amount: account.remainder, currencyCode: currencySymbol))
+                .lineLimit(1)
+            
+            if account.budget != 0 {
+                Text(currencyFormat(amount: account.budget, currencyCode: currencySymbol))
+                    .lineLimit(1)
+                    .foregroundColor(.secondary)
             }
         }
-        .frame(width: 70, height: 110)
+        .font(.caption)
+        .frame(width: 80, height: 100)
+        .popover(isPresented: $isChildrenOpen) {
+            if account.childrenAccounts.count > 0 {
+                AccountChildren(children: account.childrenAccounts)
+                .padding()
+                .presentationCompactAdaptation(.popover)
+            }
+        }
         .navigationDestination(isPresented: $isUpdateOpen) {
             UpdateAccount(isUpdateOpen: $isUpdateOpen, account: account)
         }
+        
     }
+}
+
+func currencyFormat(amount: Double, currencyCode: String) -> String {
+    var num = amount
+    
+    let sign = ((num < 0) ? "-" : "" );
+    
+    num = fabs(num)
+    
+    if (num < 1000000.0){
+        return "\(sign)\(round(num)) \(currencyCode)"
+    }
+    
+    let exp:Int = Int(log10(num) / 6.0 )
+    
+    let units:[String] = ["k","M","G","T","P","E"]
+    
+    let roundedNum:Double = round(10 * num / pow(1000.0,Double(exp))) / 10
+    
+    return "\(sign)\(roundedNum)\(units[exp-1]) \(currencyCode)"
 }
 
 #Preview {
