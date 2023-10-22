@@ -16,6 +16,8 @@ struct AccountCircleItem: View {
     @State var isChildrenOpen = false
     @State var isUpdateOpen = false
     
+    var alreadyOpened = false
+    
     var currencySymbol: String {
         modelData.currencies[account.currency]?.symbol ?? ""
     }
@@ -37,8 +39,10 @@ struct AccountCircleItem: View {
             Circle()
                 .frame(width: 30)
                 .foregroundColor(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red)
-                .onTapGesture {
-                    isChildrenOpen = true
+                .onTapGesture(count: 2) {
+                    if !alreadyOpened {
+                        isChildrenOpen = true
+                    }
                 }
                 .onLongPressGesture(minimumDuration: 1.0) {
                     isUpdateOpen = true
@@ -56,17 +60,12 @@ struct AccountCircleItem: View {
         .font(.caption)
         .frame(width: 80, height: 100)
         .popover(isPresented: $isChildrenOpen) {
-            if account.childrenAccounts.count > 0 {
-                AccountChildren(children: account.childrenAccounts)
+            AccountChildren(parentAccount: account)
                 .padding()
                 .presentationCompactAdaptation(.popover)
-            }
         }
         .navigationDestination(isPresented: $isUpdateOpen) {
             UpdateAccount(isUpdateOpen: $isUpdateOpen, account: account)
-        }
-        .navigationDestination(isPresented: $isTransactionListOpen) {
-            TransactionsList(filteredAccountID: account.id)
         }
     }
 }
@@ -121,4 +120,5 @@ struct AccountCircleItem: View {
                 type: .expense,
                 visible: true,
                 parentAccountID: nil)]))
+    .environment(ModelData())
 }

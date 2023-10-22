@@ -9,20 +9,21 @@ import SwiftUI
 
 struct AccountChildren: View {
     
-    var children: [Account]
+    var parentAccount: Account
     
     var body: some View {
         ScrollView(.horizontal) {
             HStack {
-                ForEach(children) { childAccount in
-                    AccountCircleItem(account: childAccount)
+                ForEach(parentAccount.childrenAccounts) { childAccount in
+                    AccountCircleItem(account: childAccount, alreadyOpened: true)
                 }
+                PlusNewAccount(accountType: parentAccount.type)
             }
         }
     }
 }
 
 #Preview {
-    AccountChildren(children: ModelData().accounts)
+    AccountChildren(parentAccount: ModelData().accounts[0])
         .environment(ModelData())
 }
