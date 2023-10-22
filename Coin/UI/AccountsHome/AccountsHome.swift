@@ -26,10 +26,11 @@ struct AccountsHome: View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
-                    // Быстрая статистика
-                    Header()
-                    if modelData.accountGroups.count > 1 {
-                        AccountsGroupSelector()
+                    VStack(spacing: 0) {
+                        Header()
+                        if modelData.accountGroups.count > 1 {
+                            AccountsGroupSelector()
+                        }
                     }
                     ScrollView {
                         Text("Карты и счета")

@@ -11,33 +11,42 @@ struct Header: View {
     
     @Environment(ModelData.self) var modelData
     
+    let height: CGFloat = 40
+    
     var body: some View {
-        HStack(spacing: 35) {
+        HStack {
+            Spacer()
             VStack {
                 Text("Расход")
+                    .bold()
                 Text("\(modelData.quickStatistic.totalExpense, specifier: "%.0f") ₽")
             }
-            RoundedRectangle(cornerRadius: 0)
-                .frame(width: 1, height: 44)
+            Spacer()
             VStack {
                 Text("Баланс")
+                    .bold()
                 Text("\(modelData.quickStatistic.totalRemainder, specifier: "%.0f") ₽")
             }
-            RoundedRectangle(cornerRadius: 0)
-                .frame(width: 1, height: 44)
+            Spacer()
             VStack {
                 Text("Бюджет")
+                    .bold()
                 Text("\(modelData.quickStatistic.leftToSpend, specifier: "%.0f") ₽")
-                Text("\(modelData.quickStatistic.totalBudget, specifier: "%.0f") ₽")
-                    .font(.footnote)
+//                Text("\(modelData.quickStatistic.totalBudget, specifier: "%.0f") ₽")
             }
+            Spacer()
         }
+        .font(.caption2)
         .frame(maxWidth: .infinity)
-        .frame(height: 60)
-        .background(Color("Gray"))
+        .frame(height: height)
+//        .background(Color("StrongGray"))
     }
 }
 
 #Preview {
-    Header()
+    Group {
+        Header()
+        Spacer()
+    }
+    .environment(ModelData())
 }
