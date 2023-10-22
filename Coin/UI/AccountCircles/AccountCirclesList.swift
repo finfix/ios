@@ -21,31 +21,35 @@ struct AccountCircleList: View {
         GridItem(.flexible())
     ]
     
+    let horizontalSpacing: CGFloat = 20
+    
     var body: some View {
         NavigationStack {
-            VStack(spacing: 10) {
+            VStack(spacing: 5) {
                 Header()
                 if modelData.accountGroups.count > 1 {
                     AccountsGroupSelector()
                 }
                 ScrollView(.horizontal) {
-                    HStack {
+                    HStack(spacing: horizontalSpacing) {
                         CirclesArray(accounts: modelData.filteredAccounts, accountsType: .earnings)
                     }
-                }.frame(maxHeight: 100)
+                }
+//                .frame(maxHeight: 100)
                 
                 Divider()
                 
                 ScrollView(.horizontal) {
-                    HStack {
+                    HStack(spacing: horizontalSpacing) {
                         CirclesArray(accounts: filteredAccounts, accountsType: .regular)
                     }
-                }.frame(maxHeight: 100)
+                }
+//                .frame(maxHeight: 100)
                 
                 Divider()
                 
                 ScrollView(.horizontal) {
-                    LazyHGrid(rows: rows) {
+                    LazyHGrid(rows: rows, alignment: .top, spacing: horizontalSpacing) {
                         CirclesArray(accounts: filteredAccounts, accountsType: .expense)
                     }
                 }
@@ -58,4 +62,5 @@ struct AccountCircleList: View {
 
 #Preview {
     AccountCircleList()
+        .environment(ModelData())
 }

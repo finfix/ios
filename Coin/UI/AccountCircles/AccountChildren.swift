@@ -12,9 +12,11 @@ struct AccountChildren: View {
     var children: [Account]
     
     var body: some View {
-        HStack {
-            ForEach(children) { childAccount in
-                AccountCircleItem(account: childAccount)
+        ScrollView(.horizontal) {
+            HStack {
+                ForEach(children) { childAccount in
+                    AccountCircleItem(account: childAccount)
+                }
             }
         }
     }
