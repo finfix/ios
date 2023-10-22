@@ -31,6 +31,10 @@ struct CreateAccountReq: Encodable {
     var type: String
 }
 
+struct CreateAccountRes: Decodable {
+    var id: UInt32
+}
+
 struct UpdateAccountReq: Encodable {
     var id: UInt32
     var accounting: Bool?

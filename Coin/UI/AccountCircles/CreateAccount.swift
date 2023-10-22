@@ -59,18 +59,31 @@ struct CreateAccount: View {
         if self.remainder != "" {
             remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
         }
-        
+                
         AccountAPI().CreateAccount(req: CreateAccountReq(
-            accountGroupID: modelData.accountGroups[modelData.selectedAccountsGroupIndex].id,
+            accountGroupID: modelData.selectedAccountsGroupID,
             accounting: true,
             budget: budget,
             currency: currency,
             iconID: 1,
             name: name,
             remainder: remainder,
-            type: accountType.rawValue)) { error in
+            type: accountType.rawValue)) { model, error in
                 if let err = error {
                     appSettings.showErrorAlert(error: err)
+                }
+                if let response = model {
+                    modelData.accounts.append(Account(
+                        id: response.id,
+                        accountGroupID: modelData.selectedAccountsGroupID,
+                        accounting: true,
+                        budget: budget ?? 0,
+                        currency: currency,
+                        iconID: 1,
+                        name: name,
+                        remainder: remainder ?? 0,
+                        type: accountType,
+                        visible: true))
                 }
             }
     }
