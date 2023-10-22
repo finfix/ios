@@ -13,7 +13,7 @@ let accountBasePath = "/account"
 
 class AccountAPI {
     
-    func GetAccounts(req: GetAccountsRequest, grouped: Bool, completionHandler: @escaping ([Account]?, ErrorModel?) -> Void) {
+    func GetAccounts(req: GetAccountsRequest, completionHandler: @escaping ([Account]?, ErrorModel?) -> Void) {
         
         var (headers, err) = getBaseHeaders()
         if err != nil {
@@ -22,9 +22,6 @@ class AccountAPI {
         
         var path = accountBasePath
         
-        if grouped {
-            path += "/grouped"
-        }
         AF.request(basePath + path, method: .get, parameters: req, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Account].self)

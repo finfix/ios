@@ -18,15 +18,21 @@ struct CreateTransactionView: View {
         self.transactionType = transactionType
     }
     
-    var accountsFrom: [Account] {
+    var filteredAccounts: [Account] {
         modelData.accounts.filter {
+            $0.visible && $0.isChild
+        }
+    }
+    
+    var accountsFrom: [Account] {
+        filteredAccounts.filter {
             switch transactionType {
             case .consumption:
-                return $0.type != .expense && $0.type != .earnings && $0.visible
+                return $0.type != .expense && $0.type != .earnings
             case .income:
-                return $0.type == .earnings && $0.visible
+                return $0.type == .earnings
             case .transfer:
-                return $0.type != .expense && $0.type != .earnings && $0.visible
+                return $0.type != .expense && $0.type != .earnings
             default:
                 return true
             }
@@ -37,11 +43,11 @@ struct CreateTransactionView: View {
         modelData.accounts.filter {
             switch transactionType {
             case .consumption:
-                return $0.type == .expense && $0.visible
+                return $0.type == .expense
             case .income:
-                return $0.type != .expense && $0.type != .earnings && $0.visible
+                return $0.type != .expense && $0.type != .earnings
             case .transfer:
-                return $0.type != .expense && $0.type != .earnings && $0.visible && $0.id != accountFrom?.id
+                return $0.type != .expense && $0.type != .earnings && $0.id != accountFrom?.id
             default:
                 return true
             }
