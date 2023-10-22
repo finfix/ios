@@ -21,21 +21,22 @@ struct AccountCircleList: View {
         GridItem(.flexible())
     ]
     
-    let horizontalSpacing: CGFloat = 20
+    let horizontalSpacing: CGFloat = 10
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 5) {
-                Header()
-                if modelData.accountGroups.count > 1 {
-                    AccountsGroupSelector()
+                VStack(spacing: 0) {
+                    Header()
+                    if modelData.accountGroups.count > 1 {
+                        AccountsGroupSelector()
+                    }
                 }
                 ScrollView(.horizontal) {
                     HStack(spacing: horizontalSpacing) {
                         CirclesArray(accounts: modelData.filteredAccounts, accountsType: .earnings)
                     }
                 }
-//                .frame(maxHeight: 100)
                 
                 Divider()
                 
@@ -44,7 +45,6 @@ struct AccountCircleList: View {
                         CirclesArray(accounts: filteredAccounts, accountsType: .regular)
                     }
                 }
-//                .frame(maxHeight: 100)
                 
                 Divider()
                 

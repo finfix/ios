@@ -25,22 +25,16 @@ struct Profile: View {
                 }
             }
             Section {
-                Button {
+                Button("Синхронизировать") {
                     modelData.sync()
-                } label: {
-                    Text("Синхронизировать")
                 }
-                .frame(maxWidth: .infinity)
             }
             Section {
-                Button {
+                Button("Выйти") {
                     isLogin = false
                     accessToken = nil
                     refreshToken = nil
-                } label: {
-                    Text("Выйти")
                 }
-                .frame(maxWidth: .infinity)
                 .foregroundColor(.red)
             }
         }

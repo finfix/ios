@@ -20,7 +20,7 @@ struct CreateTransactionView: View {
     
     var filteredAccounts: [Account] {
         modelData.accounts.filter {
-            $0.visible && $0.isChild
+            $0.visible && $0.childrenAccounts.count == 0
         }
     }
     
@@ -40,7 +40,7 @@ struct CreateTransactionView: View {
     }
     
     var accountsTo: [Account] {
-        modelData.accounts.filter {
+        filteredAccounts.filter {
             switch transactionType {
             case .consumption:
                 return $0.type == .expense

@@ -21,29 +21,21 @@ struct TransactionsList: View {
     
     var body: some View {
         NavigationStack {
-                // Список транзакций
-                List {
-                    ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
-                        Section(header: Text(date, style: .date).font(.headline)) {
-                            ForEach (groupedTransactionByDate[date] ?? []) { transaction in
-                                TransactionRow(transaction: transaction)
-                            }
-                            .onDelete {
-                                for i in $0.makeIterator() {
-                                    deleteTransaction(id: groupedTransactionByDate[date]![i].id)
-                                }
+            List {
+                ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
+                    Section(header: Text(date, style: .date).font(.headline)) {
+                        ForEach (groupedTransactionByDate[date] ?? []) { transaction in
+                            TransactionRow(transaction: transaction)
+                        }
+                        .onDelete {
+                            for i in $0.makeIterator() {
+                                deleteTransaction(id: groupedTransactionByDate[date]![i].id)
                             }
                         }
                     }
                 }
-            // Верхняя панель
-                .navigationBarItems(trailing: Button{
-                    modelData.getTransactions()
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                })
-            .navigationBarTitle("Транзакции")
-            .navigationBarBackButtonHidden(true)
+            }
+            .listStyle(.grouped)
         }
     }
     

@@ -107,7 +107,6 @@ class ModelData {
                 self.appSettings.showErrorAlert(error: err)
             } else if let response = model {
                 self.currencies = Dictionary(uniqueKeysWithValues: response.map{ ($0.isoCode, $0) })
-//                self.accountGroups = response
             }
         }
     }
