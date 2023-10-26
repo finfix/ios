@@ -11,7 +11,6 @@ struct CreateTransactionView: View {
     
     @Binding var isOpeningFrame: Bool
     @Environment(ModelData.self) var modelData
-    @Environment(AppSettings.self) var appSettings
     
     init(isOpeningFrame: Binding<Bool>, transactionType: TransactionType) {
         self._isOpeningFrame = isOpeningFrame
@@ -140,7 +139,7 @@ struct CreateTransactionView: View {
             type: transactionType.rawValue,
             isExecuted: true)) { error in
                 if let err = error {
-                    appSettings.showErrorAlert(error: err)
+                    Alerter().showErrorAlert(error: err)
                 }
             }
     }

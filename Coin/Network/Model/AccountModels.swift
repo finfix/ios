@@ -10,14 +10,9 @@ import Foundation
 struct GetAccountsRequest: Encodable {
     var accountGroupID: UInt32?
     var accounting: Bool?
-    var period: String?
+    var dateFrom: Date?
+    var dateTo: Date?
     var type: String?
-    
-    var queryParameters:[String: Any] {
-        get {
-            return ["period": "month"] as [String : Any]
-        }
-    }
 }
 
 struct CreateAccountReq: Encodable {

@@ -13,7 +13,6 @@ struct Profile: View {
     @AppStorage("accessToken") private var accessToken: String?
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
-    @Environment(AppSettings.self) var appSettings
     @Environment(ModelData.self) var modelData
     
     var body: some View {
@@ -44,5 +43,4 @@ struct Profile: View {
 #Preview {
     Profile()
         .environment(ModelData())
-        .environment(AppSettings())
 }

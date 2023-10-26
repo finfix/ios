@@ -12,6 +12,12 @@ struct AuthRequest: Encodable {
     var password: String
 }
 
+struct RegisterReq: Encodable {
+    var email: String
+    var password: String
+    var name: String
+}
+
 struct AuthResponse: Decodable {
     var id: Int
     var token: Token

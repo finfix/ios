@@ -15,28 +15,39 @@ struct LoginView: View {
     
     @State var login = ""
     @State var password = ""
-    
-    @Environment(AppSettings.self) var appSettings
+    @State var isSignUpOpen = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 TextField("Email", text: $login)
                     .modifier(CustomTextField())
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
-                    .textContentType(.username)
+                    .textContentType(.emailAddress)
+                
                 SecureField("Password", text: $password)
                     .modifier(CustomTextField())
                     .textContentType(.password)
-                Button {
+                
+                HStack {
+                    Text("Нет аккаунта?")
+                    Button("Зарегистрироваться") {
+                        isSignUpOpen = true
+                    }
+                    .buttonStyle(.borderless)
+                    .navigationDestination(isPresented: $isSignUpOpen) {
+                        RegisterView(isSignUpOpen: $isSignUpOpen, login: login, password: password)
+                    }
+                }
+                
+                Button("Войти") {
                     auth()
-                } label: {
-                    Text("Sign In")
                 }
                 .modifier(CustomButton())
             }
+            .navigationTitle("Вход")
         }
     }
     
@@ -45,7 +56,7 @@ struct LoginView: View {
         AuthAPI().Auth(req: AuthRequest(email: login, password: password)) { response, error in
             
             if let err = error {
-                appSettings.showErrorAlert(error: err)
+                Alerter().showErrorAlert(error: err)
                 
             } else if let response = response {
                 accessToken = response.token.accessToken
@@ -58,5 +69,4 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
-        .environment(AppSettings())
 }

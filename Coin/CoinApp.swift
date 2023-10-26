@@ -10,35 +10,43 @@ import SwiftUI
 @main
 struct MyApp: App {
     
-    @State private var appSettings = AppSettings()
     @State private var modelData = ModelData()
+    
     @AppStorage("isDarkMode") var isDarkMode = false
+    
+    @AppStorage("isErrorShowing") var isErrorShowing = false
+    @AppStorage("errorText") var errorText: String = ""
+    @AppStorage("errorDescription") var errorDescription: String = ""
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(isDarkMode ? .dark : .light)
-                .environment(appSettings)
                 .environment(modelData)
-                .alert(isPresented: $appSettings.alertErrorShowing) {
-                    Alert(title: Text(appSettings.alertErrorMessage), message: Text(appSettings.alertErrorDetails), dismissButton: .cancel(Text("OK")))
+                .alert(isPresented: $isErrorShowing) {
+                    Alert(title: 
+                            Text(errorText),
+                          message:
+                            Text(errorDescription),
+                          dismissButton:
+                            .cancel(Text("OK")) {
+                            }
+                    )
                 }
         }
     }
 }
 
-@Observable
-class AppSettings {
-    var isLogin = true
+class Alerter {
     
-    fileprivate var alertErrorShowing = false
-    fileprivate var alertErrorMessage = ""
-    fileprivate var alertErrorDetails = ""
+    @AppStorage("isErrorShowing") var isErrorShowing = false
+    @AppStorage("errorText") var errorText: String?
+    @AppStorage("errorDescription") var errorDescription: String?
     
     func showErrorAlert(error: ErrorModel) {
-        alertErrorShowing = true
-        alertErrorMessage = error.humanTextError
-        alertErrorDetails = error.developerTextError
+        isErrorShowing = true
+        errorText = error.humanTextError
+        errorDescription = error.developerTextError
         print(error.developerTextError)
         print(error.context ?? "")
     }

@@ -10,11 +10,8 @@ import SwiftUI
 struct UpdateAccount: View {
     
     @Binding var isUpdateOpen: Bool
-    @Environment(AppSettings.self) var appSettings
     @Environment(ModelData.self) var modelData
-    
-//    var accountIndex: Int { modelData.accountsGrouped.firstIndex { oldAccount.id == $0.id } ?? modelData.accounts.firstIndex { oldAccount.id == $0.id }! }
-    
+        
     var oldAccount: Account
     var id: UInt32
     @State var accounting: Bool
@@ -37,7 +34,7 @@ struct UpdateAccount: View {
     var body: some View {
         Form {
             TextField("Название", text: $name)
-            if oldAccount.childrenAccounts == nil {
+            if oldAccount.childrenAccounts.isEmpty {
                 TextField("Бюджет", text: $budget)
                 TextField("Остаток", text: $remainder)
                     .keyboardType(.decimalPad)
@@ -83,7 +80,7 @@ struct UpdateAccount: View {
         
         AccountAPI().UpdateAccount(req: req) { error in
             if let err = error {
-                appSettings.showErrorAlert(error: err)
+                Alerter().showErrorAlert(error: err)
             }
         }
     }

@@ -9,10 +9,10 @@ import Foundation
 
 @Observable
 class ModelData {
-    private var appSettings = AppSettings()
+    private var alerter = Alerter()
     
     var accounts = [Account]() {
-        didSet {
+        willSet {
             if childrenAccountsUpdated {
                 childrenAccountsUpdated = false
                 return
@@ -35,7 +35,38 @@ class ModelData {
         }
     }
     var childrenAccountsUpdated = false
-    var quickStatistic = QuickStatisticRes()
+    var quickStatistic: [UInt32: QuickStatistic] {
+        
+        let accountGroupsToCurrenciesMap = Dictionary(uniqueKeysWithValues: accountGroups.map{ ($0.id, $0.currency) })
+        
+        var tmp = [UInt32: QuickStatistic]()
+        
+        for accountGroup in accountGroups {
+            tmp[accountGroup.id] = QuickStatistic(currency: accountGroup.currency)
+        }
+        
+        for account in accounts {
+            if account.type == .earnings || (account.budget == 0 && account.remainder == 0) {
+                continue
+            }
+            
+            let accountGroupCurrency = accountGroupsToCurrenciesMap[account.accountGroupID] ?? account.currency
+            
+            let relation = (currencies[accountGroupCurrency]?.rate ?? 1) / (currencies[account.currency]?.rate ?? 1)
+            
+            switch account.type {
+            case .expense:
+                tmp[account.accountGroupID]?.totalExpense += account.remainder * relation
+                tmp[account.accountGroupID]?.totalBudget += account.budget * relation
+                debugPrint(account.budget * relation)
+            case .earnings:
+                continue
+            default:
+                tmp[account.accountGroupID]?.totalRemainder += account.remainder * relation
+            }
+        }
+        return tmp
+    }
     var transactions = [Transaction]()
     var accountGroups = [AccountGroup]()
     var currencies = [String: Currency]()
@@ -62,21 +93,16 @@ class ModelData {
     }
     
     func getAccounts() {
-        AccountAPI().GetAccounts(req: GetAccountsRequest(period: "month")) { model, error in
+        
+        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
+        let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+        
+        AccountAPI().GetAccounts(req: GetAccountsRequest(dateFrom: dateFrom, dateTo: dateTo)) { model, error in
             if let err = error {
-                self.appSettings.showErrorAlert(error: err)
+                self.alerter.showErrorAlert(error: err)
             } else if let response = model {
                 self.accounts = response
-            }
-        }
-    }
-    
-    func getQuickStatistic() {
-        AccountAPI().QuickStatistic() { model, error in
-            if let err = error {
-                self.appSettings.showErrorAlert(error: err)
-            } else if let response = model {
-                self.quickStatistic = response
             }
         }
     }
@@ -84,7 +110,7 @@ class ModelData {
     func getTransactions() {
         TransactionAPI().GetTransactions(req: GetTransactionRequest(list: 0)) { model, error in
             if let err = error {
-                self.appSettings.showErrorAlert(error: err)
+                self.alerter.showErrorAlert(error: err)
             } else if let response = model {
                 self.transactions = response
             }
@@ -94,7 +120,7 @@ class ModelData {
     func getAccountGroups() {
         AccountAPI().GetAccountGroups() { model, error in
             if let err = error {
-                self.appSettings.showErrorAlert(error: err)
+                self.alerter.showErrorAlert(error: err)
             } else if let response = model {
                 self.accountGroups = response
             }
@@ -104,7 +130,7 @@ class ModelData {
     func getCurrencies() {
         UserAPI().GetCurrencies() { model, error in
             if let err = error {
-                self.appSettings.showErrorAlert(error: err)
+                self.alerter.showErrorAlert(error: err)
             } else if let response = model {
                 self.currencies = Dictionary(uniqueKeysWithValues: response.map{ ($0.isoCode, $0) })
             }
@@ -115,7 +141,6 @@ class ModelData {
         getAccounts()
         getAccountGroups()
         getTransactions()
-        getQuickStatistic()
         getCurrencies()
     }
 }
