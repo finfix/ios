@@ -15,6 +15,7 @@
 		B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */; };
 		B510BE942AE06273002CDB54 /* AccountGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE932AE06273002CDB54 /* AccountGroup.swift */; };
 		B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5251A2229025F3800EFCAB0 /* APIHelper.swift */; };
+		B52A7DEC2AE8292200CDE0A3 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */; };
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B531E6E02AE41A3000996520 /* Currencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = B531E6DF2AE41A3000996520 /* Currencies.swift */; };
 		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
@@ -69,6 +70,7 @@
 		B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetDetails.swift; sourceTree = "<group>"; };
 		B510BE932AE06273002CDB54 /* AccountGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroup.swift; sourceTree = "<group>"; };
 		B5251A2229025F3800EFCAB0 /* APIHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIHelper.swift; sourceTree = "<group>"; };
+		B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B531E6DF2AE41A3000996520 /* Currencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currencies.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
@@ -224,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				B5E89331290073C5002AC30C /* LoginView.swift */,
+				B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -404,6 +407,7 @@
 				B593F9532AE1BF6600378E17 /* UpdateAccount.swift in Sources */,
 				B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */,
 				B5B950452ADF16FF00798F8C /* Line.swift in Sources */,
+				B52A7DEC2AE8292200CDE0A3 /* RegisterView.swift in Sources */,
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,

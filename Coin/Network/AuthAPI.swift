@@ -33,6 +33,26 @@ class AuthAPI {
         }
     }
     
+    func Register(req: RegisterReq, completionHandler: @escaping (AuthResponse?, ErrorModel?) -> Void) {
+        
+        var headers = HTTPHeaders(
+            ["DeviceID": UIDevice.current.identifierForVendor!.uuidString])
+        
+        // Делаем запрос на сервер
+        AF.request(basePath + authBasePath + "/signUp", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
+            
+            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: AuthResponse.self)
+            if error != nil {
+                completionHandler(nil, error)
+                return
+            }
+            if model != nil {
+                completionHandler(model, nil)
+                return
+            }
+        }
+    }
+    
     func RefreshToken(req: RefreshTokensRequest, completionHandler: @escaping (RefreshTokensResponse?, ErrorModel?) -> Void) {
         
         var headers = HTTPHeaders(
