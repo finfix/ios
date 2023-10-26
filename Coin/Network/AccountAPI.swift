@@ -20,9 +20,15 @@ class AccountAPI {
             completionHandler(nil, err)
         }
         
-        var path = accountBasePath
+        // TODO: Переписать это дело под автоматическое проставление аргументов
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let dateFrom = dateFormatter.string(from: req.dateFrom!)
+        let dateTo = dateFormatter.string(from: req.dateTo!)
         
-        AF.request(basePath + path, method: .get, parameters: req, headers: headers).responseData { response in
+        let params: [String: Any] = ["dateFrom": dateFrom, "dateTo": dateTo]
+                
+        AF.request(basePath + accountBasePath, method: .get, parameters: params, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Account].self)
             if error != nil {

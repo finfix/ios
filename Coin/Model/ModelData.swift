@@ -93,7 +93,12 @@ class ModelData {
     }
     
     func getAccounts() {
-        AccountAPI().GetAccounts(req: GetAccountsRequest(period: "month")) { model, error in
+        
+        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
+        let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+        
+        AccountAPI().GetAccounts(req: GetAccountsRequest(dateFrom: dateFrom, dateTo: dateTo)) { model, error in
             if let err = error {
                 self.alerter.showErrorAlert(error: err)
             } else if let response = model {
