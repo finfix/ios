@@ -11,7 +11,6 @@ import Charts
 struct TransactionsList: View {
     
     @Environment(ModelData.self) var modelData
-    @Environment(AppSettings.self) var appSettings
     
     @State var showCreate = false
     
@@ -42,7 +41,7 @@ struct TransactionsList: View {
     func deleteTransaction(id: UInt32) {
         TransactionAPI().DeleteTransaction(req: DeleteTransactionRequest(id: id)) { error in
             if let err = error {
-                appSettings.showErrorAlert(error: err)
+                Alerter().showErrorAlert(error: err)
             }
         }
     }

@@ -9,7 +9,7 @@ import Foundation
 
 @Observable
 class ModelData {
-    private var appSettings = AppSettings()
+    private var alerter = Alerter()
     
     var accounts = [Account]() {
         didSet {
@@ -64,7 +64,7 @@ class ModelData {
     func getAccounts() {
         AccountAPI().GetAccounts(req: GetAccountsRequest(period: "month")) { model, error in
             if let err = error {
-                self.appSettings.showErrorAlert(error: err)
+                self.alerter.showErrorAlert(error: err)
             } else if let response = model {
                 self.accounts = response
             }
@@ -84,7 +84,7 @@ class ModelData {
     func getTransactions() {
         TransactionAPI().GetTransactions(req: GetTransactionRequest(list: 0)) { model, error in
             if let err = error {
-                self.appSettings.showErrorAlert(error: err)
+                self.alerter.showErrorAlert(error: err)
             } else if let response = model {
                 self.transactions = response
             }
@@ -94,7 +94,7 @@ class ModelData {
     func getAccountGroups() {
         AccountAPI().GetAccountGroups() { model, error in
             if let err = error {
-                self.appSettings.showErrorAlert(error: err)
+                self.alerter.showErrorAlert(error: err)
             } else if let response = model {
                 self.accountGroups = response
             }
@@ -104,7 +104,7 @@ class ModelData {
     func getCurrencies() {
         UserAPI().GetCurrencies() { model, error in
             if let err = error {
-                self.appSettings.showErrorAlert(error: err)
+                self.alerter.showErrorAlert(error: err)
             } else if let response = model {
                 self.currencies = Dictionary(uniqueKeysWithValues: response.map{ ($0.isoCode, $0) })
             }

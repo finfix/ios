@@ -11,7 +11,6 @@ struct CreateAccount: View {
     
     @Binding var isOpeningFrame: Bool
     @Environment(ModelData.self) var modelData
-    @Environment(AppSettings.self) var appSettings
     
     var accountType: AccountType
     @State var budget: String = ""
@@ -70,7 +69,7 @@ struct CreateAccount: View {
             remainder: remainder,
             type: accountType.rawValue)) { model, error in
                 if let err = error {
-                    appSettings.showErrorAlert(error: err)
+                    Alerter().showErrorAlert(error: err)
                 }
                 if let response = model {
                     modelData.accounts.append(Account(

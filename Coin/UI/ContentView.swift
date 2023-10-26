@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @Environment(AppSettings.self) var appSettings
     @AppStorage("isLogin") var isLogin: Bool = false
     
     var body: some View {
@@ -23,7 +22,6 @@ struct ContentView: View {
 
 struct MainView: View {
     
-    @Environment(AppSettings.self) var appSettings
     @Environment(ModelData.self) var modelData
     
     var body: some View {
@@ -69,6 +67,5 @@ struct MainView: View {
 
 #Preview {
     ContentView()
-        .environment(AppSettings())
         .environment(ModelData())
 }

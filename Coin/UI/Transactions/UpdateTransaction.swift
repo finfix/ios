@@ -10,7 +10,6 @@ import SwiftUI
 struct UpdateTransaction: View {
     
     @Binding var isUpdateOpen: Bool
-    @Environment(AppSettings.self) var appSettings
     
     var id: UInt32
     @State var amountFrom: String
@@ -60,7 +59,7 @@ struct UpdateTransaction: View {
         
         TransactionAPI().UpdateTransaction(req: req) { error in
             if let err = error {
-                appSettings.showErrorAlert(error: err)
+                Alerter().showErrorAlert(error: err)
             }
         }
     }
