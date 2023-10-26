@@ -11,6 +11,12 @@ struct Header: View {
     
     @Environment(ModelData.self) var modelData
     
+    var statistic: QuickStatistic {
+        modelData.quickStatistic[modelData.selectedAccountsGroupID] ?? QuickStatistic()
+    }
+    
+    var formatter = CurrencyFormatter()
+    
     let height: CGFloat = 40
     
     var body: some View {
@@ -19,27 +25,30 @@ struct Header: View {
             VStack {
                 Text("Расход")
                     .bold()
-                Text("\(modelData.quickStatistic.totalExpense, specifier: "%.0f") ₽")
+                Text(formatter.string(number: statistic.totalExpense, currency: statistic.currency))
+                Spacer()
             }
             Spacer()
             VStack {
                 Text("Баланс")
                     .bold()
-                Text("\(modelData.quickStatistic.totalRemainder, specifier: "%.0f") ₽")
+                Text(formatter.string(number: statistic.totalRemainder, currency: statistic.currency))
+                Spacer()
             }
             Spacer()
             VStack {
                 Text("Бюджет")
                     .bold()
-                Text("\(modelData.quickStatistic.leftToSpend, specifier: "%.0f") ₽")
-//                Text("\(modelData.quickStatistic.totalBudget, specifier: "%.0f") ₽")
+                Text(formatter.string(number: statistic.totalBudget, currency: statistic.currency))
+                Text(formatter.string(number: statistic.totalBudget - statistic.totalExpense, currency: statistic.currency))
+                    .foregroundColor(.gray)
+                Spacer()
             }
             Spacer()
         }
         .font(.caption2)
         .frame(maxWidth: .infinity)
         .frame(height: height)
-//        .background(Color("StrongGray"))
     }
 }
 

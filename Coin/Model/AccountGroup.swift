@@ -10,4 +10,5 @@ import Foundation
 struct AccountGroup: Decodable, Identifiable, Hashable {
     var id: UInt32
     var name: String
+    var currency: String
 }

@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct QuickStatisticRes: Decodable {
+struct QuickStatistic: Decodable {
+    var currency: String = ""
     var totalRemainder: Double = 0
     var totalExpense: Double = 0
-    var leftToSpend: Double = 0
     var totalBudget: Double = 0
 }
