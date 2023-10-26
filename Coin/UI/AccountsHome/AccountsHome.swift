@@ -13,8 +13,6 @@ struct AccountsHome: View {
     
     // TODO: Сделать универсальными
     @State var showDebts = false
-    @State var showInvestment = false
-    @State var showCredit = false
     
     @State var showCreate = false
     @State var currentIndex = 0
@@ -41,9 +39,7 @@ struct AccountsHome: View {
                         }
                         .frame(height: 150)
         
-                        AccountTypeDetailsView(header: "Инвестиции", accounts: modelData.filteredAccounts.filter { ($0.type == .investment) && ($0.visible) } )
                         AccountTypeDetailsView(header: "Долги", accounts: modelData.filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
-                        AccountTypeDetailsView(header: "Кредиты", accounts: modelData.filteredAccounts.filter { ($0.type == .credit) && ($0.visible) } )
                     }
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)

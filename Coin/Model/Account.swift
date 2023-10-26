@@ -29,5 +29,5 @@ struct Account: Decodable, Identifiable, Hashable {
 }
 
 enum AccountType: String, Decodable {
-    case expense, earnings, debt, investment, credit, regular
+    case expense, earnings, debt, regular
 }
