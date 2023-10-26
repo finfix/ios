@@ -13,14 +13,12 @@ let userBasePath = "/user"
 class UserAPI {
     func GetCurrencies(completionHandler: @escaping ([Currency]?, ErrorModel?) -> Void) {
         
-        var (headers, err) = getBaseHeaders()
+        let (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(nil, err)
         }
-        
-        var path = userBasePath + "/currencies"
-        
-        AF.request(basePath + path, method: .get, headers: headers).responseData { response in
+                
+        AF.request(basePath + userBasePath + "/currencies", method: .get, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Currency].self)
             if error != nil {

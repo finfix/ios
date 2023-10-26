@@ -12,7 +12,7 @@ class ModelData {
     private var alerter = Alerter()
     
     var accounts = [Account]() {
-        didSet {
+        willSet {
             if childrenAccountsUpdated {
                 childrenAccountsUpdated = false
                 return

@@ -34,7 +34,7 @@ struct UpdateAccount: View {
     var body: some View {
         Form {
             TextField("Название", text: $name)
-            if oldAccount.childrenAccounts == nil {
+            if oldAccount.childrenAccounts.isEmpty {
                 TextField("Бюджет", text: $budget)
                 TextField("Остаток", text: $remainder)
                     .keyboardType(.decimalPad)

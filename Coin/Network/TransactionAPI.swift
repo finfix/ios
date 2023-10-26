@@ -16,12 +16,11 @@ class TransactionAPI {
     // Получение транзакций
     func GetTransactions(req: GetTransactionRequest, completionHandler: @escaping ([Transaction]?, ErrorModel?) -> Void) {
         
-        var (headers, err) = getBaseHeaders()
+        let (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(nil, err)
         }
         
-        // Делаем запрос на сервер
         AF.request(basePath + transactionBasePath, method: .get, parameters: req, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Transaction].self)
@@ -38,12 +37,11 @@ class TransactionAPI {
     
     func CreateTransaction(req: CreateTransactionRequest, completionHandler: @escaping (ErrorModel?) -> Void) {
         
-        var (headers, err) = getBaseHeaders()
+        let (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(err)
         }
         
-        // Делаем запрос на сервер
         AF.request(basePath + transactionBasePath, method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
@@ -57,12 +55,11 @@ class TransactionAPI {
     
     func UpdateTransaction(req: UpdateTransactionReq, completionHandler: @escaping (ErrorModel?) -> Void) {
         
-        var (headers, err) = getBaseHeaders()
+        let (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(err)
         }
         
-        // Делаем запрос на сервер
         AF.request(basePath + transactionBasePath, method: .patch, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
@@ -76,12 +73,11 @@ class TransactionAPI {
     
     func DeleteTransaction(req: DeleteTransactionRequest, completionHandler: @escaping (ErrorModel?) -> Void) {
         
-        var (headers, err) = getBaseHeaders()
+        let (headers, err) = getBaseHeaders()
         if err != nil {
             completionHandler(err)
         }
         
-        // Делаем запрос на сервер
         AF.request(basePath + transactionBasePath, method: .delete, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
