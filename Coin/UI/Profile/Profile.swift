@@ -15,26 +15,39 @@ struct Profile: View {
     @AppStorage("isLogin") private var isLogin: Bool = false
     @Environment(ModelData.self) var modelData
     
+    @State var isShowHidedAccounts = false
+    
     var body: some View {
-        Form {
-            Toggle(isOn: $isDarkMode) {
-                HStack {
-                    Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
-                    Text("Темная тема")
+        NavigationStack {
+            Form {
+                Toggle(isOn: $isDarkMode) {
+                    HStack {
+                        Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
+                        Text("Темная тема")
+                    }
                 }
-            }
-            Section {
-                Button("Синхронизировать") {
-                    modelData.sync()
+                Section {
+                    Button("Синхронизировать") {
+                        modelData.sync()
+                    }
+                    Button("Скрытые счета") {
+                        isShowHidedAccounts = true
+                    }
+                    .navigationDestination(isPresented: $isShowHidedAccounts) {
+                        HidedAccountsList()
+                    }
                 }
-            }
-            Section {
-                Button("Выйти") {
-                    isLogin = false
-                    accessToken = nil
-                    refreshToken = nil
+                .frame(maxWidth: .infinity)
+                Section {
+                    Button("Выйти") {
+                        isLogin = false
+                        accessToken = nil
+                        refreshToken = nil
+                        modelData.deleteAllData()
+                    }
+                    .foregroundColor(.red)
                 }
-                .foregroundColor(.red)
+                .frame(maxWidth: .infinity)
             }
         }
     }

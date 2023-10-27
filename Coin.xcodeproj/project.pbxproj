@@ -43,6 +43,7 @@
 		B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950542ADF258700798F8C /* TransactionRow.swift */; };
 		B5B950572ADF261700798F8C /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950562ADF261700798F8C /* Header.swift */; };
 		B5B950592ADF274E00798F8C /* AccountCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950582ADF274E00798F8C /* AccountCard.swift */; };
+		B5C0C31C2AEAD9E70016990E /* HidedAccountsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C0C31B2AEAD9E70016990E /* HidedAccountsList.swift */; };
 		B5CF7D322AE578CC0086C0B6 /* CurrencySymbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CF7D312AE578CC0086C0B6 /* CurrencySymbols.swift */; };
 		B5CF7D342AE57A9B0086C0B6 /* CurrencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */; };
 		B5D143B22906A64000875037 /* ErrorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B12906A64000875037 /* ErrorModel.swift */; };
@@ -98,6 +99,7 @@
 		B5B950542ADF258700798F8C /* TransactionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRow.swift; sourceTree = "<group>"; };
 		B5B950562ADF261700798F8C /* Header.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Header.swift; sourceTree = "<group>"; };
 		B5B950582ADF274E00798F8C /* AccountCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCard.swift; sourceTree = "<group>"; };
+		B5C0C31B2AEAD9E70016990E /* HidedAccountsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HidedAccountsList.swift; sourceTree = "<group>"; };
 		B5CF7D312AE578CC0086C0B6 /* CurrencySymbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencySymbols.swift; sourceTree = "<group>"; };
 		B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatter.swift; sourceTree = "<group>"; };
 		B5D143B12906A64000875037 /* ErrorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorModel.swift; sourceTree = "<group>"; };
@@ -221,6 +223,7 @@
 			isa = PBXGroup;
 			children = (
 				B5B9504E2ADF235A00798F8C /* Profile.swift */,
+				B5C0C31B2AEAD9E70016990E /* HidedAccountsList.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -416,6 +419,7 @@
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
 				B5B950512ADF239A00798F8C /* CirclesArray.swift in Sources */,
+				B5C0C31C2AEAD9E70016990E /* HidedAccountsList.swift in Sources */,
 				B593F9552AE1CCB000378E17 /* UpdateTransaction.swift in Sources */,
 				B5D143B42906A66400875037 /* AuthModels.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
