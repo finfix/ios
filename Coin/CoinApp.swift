@@ -30,6 +30,8 @@ struct MyApp: App {
                             Text(errorDescription),
                           dismissButton:
                             .cancel(Text("OK")) {
+                                errorText = ""
+                                errorDescription = ""
                             }
                     )
                 }
