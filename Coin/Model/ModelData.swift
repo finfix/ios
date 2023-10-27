@@ -105,12 +105,19 @@ class ModelData {
         }
     }
     
-    func getTransactions() {
-        TransactionAPI().GetTransactions(req: GetTransactionRequest(list: 0)) { model, error in
+    func getTransactions(offset: UInt32 = 0) {
+        
+        let limit: UInt8 = 100
+        
+        TransactionAPI().GetTransactions(req: GetTransactionRequest(offset: offset, limit: limit)) { model, error in
             if let err = error {
                 showErrorAlert(error: err)
             } else if let response = model {
-                self.transactions = response
+                if offset == 0 {
+                    self.transactions = response
+                } else {
+                    self.transactions.append(contentsOf: response)
+                }
             }
         }
     }

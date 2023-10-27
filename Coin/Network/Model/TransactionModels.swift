@@ -33,8 +33,9 @@ struct GetTransactionRequest: Encodable {
     var accountID: UInt32?
     var dateFrom: Date?
     var dateTo: Date?
-    var list: UInt8?
     var type: String?
+    var offset: UInt32?
+    var limit: UInt8?
 }
 
 struct DeleteTransactionRequest: Encodable {

@@ -33,6 +33,10 @@ struct TransactionsList: View {
                         }
                     }
                 }
+                Text("Идет загрузка...")
+                    .onAppear {
+                        modelData.getTransactions(offset: UInt32(modelData.transactions.count))
+                    }
             }
             .listStyle(.grouped)
         }
