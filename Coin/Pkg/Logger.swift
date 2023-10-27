@@ -7,6 +7,10 @@
 
 import Foundation
 
-public func debugLog(_ message: String, file: String = #file, line: Int = #line) {
-    print("\(file):\(line) \(message)")
+public func debugLog(_ message: Any, file: String = #file, line: Int = #line, showPath: Bool = true) {
+    if showPath {
+        print("\(file):\(line) \(message)")
+    } else {
+        print(message)
+    }
 }

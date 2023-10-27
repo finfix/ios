@@ -11,7 +11,7 @@ import Foundation
 class ModelData {
     
     var accounts = [Account]() {
-        willSet {
+        didSet {
             if childrenAccountsUpdated {
                 childrenAccountsUpdated = false
                 return
@@ -45,7 +45,7 @@ class ModelData {
         }
         
         for account in accounts {
-            if account.type == .earnings || (account.budget == 0 && account.remainder == 0) {
+            if account.type == .earnings || (account.budget == 0 && account.remainder == 0) || !account.childrenAccounts.isEmpty {
                 continue
             }
             
