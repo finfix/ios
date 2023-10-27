@@ -38,7 +38,7 @@ class ApiHelper {
                     
                     // Если не парсится, обрабатываем ошибку
                 } catch {
-                    print("print. Мы не смогли распарсить ответ в структуру. Ошибка: \(error)")
+                    debugLog("Мы не смогли распарсить ответ в структуру. Ошибка: \(error)")
                     return (nil, ErrorModel(developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
                 }
                 
@@ -52,7 +52,7 @@ class ApiHelper {
                     
                     // Если не парсится, обрабатываем ошибку
                 } catch {
-                    print("print. Мы не смогли распарсить ошибку в структуру. Ошибка: \(error)")
+                    debugLog("Мы не смогли распарсить ошибку в структуру. Ошибка: \(error)")
                     return(nil, ErrorModel(developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
                 }
             }
@@ -89,7 +89,7 @@ class ApiHelper {
                     
                     // Если не парсится, обрабатываем ошибку
                 } catch {
-                    print("print. Мы не смогли распарсить ошибку в структуру. Ошибка: \(error)")
+                    debugLog("Мы не смогли распарсить ошибку в структуру. Ошибка: \(error)")
                     return(ErrorModel(developerTextError: "\(error)", humanTextError: "Что-то пошло не так", statusCode: 0), false)
                 }
             }

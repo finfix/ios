@@ -56,7 +56,7 @@ struct LoginView: View {
         AuthAPI().Auth(req: AuthRequest(email: login, password: password)) { response, error in
             
             if let err = error {
-                Alerter().showErrorAlert(error: err)
+                showErrorAlert(error: err)
                 
             } else if let response = response {
                 accessToken = response.token.accessToken

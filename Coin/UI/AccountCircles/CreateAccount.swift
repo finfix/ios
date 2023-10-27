@@ -69,7 +69,7 @@ struct CreateAccount: View {
             remainder: remainder,
             type: accountType.rawValue)) { model, error in
                 if let err = error {
-                    Alerter().showErrorAlert(error: err)
+                    showErrorAlert(error: err)
                 }
                 if let response = model {
                     modelData.accounts.append(Account(

@@ -28,6 +28,6 @@ struct Account: Decodable, Identifiable, Hashable {
     var isChild: Bool = false
 }
 
-enum AccountType: String, Decodable {
+enum AccountType: String, Decodable, CaseIterable {
     case expense, earnings, debt, regular
 }
