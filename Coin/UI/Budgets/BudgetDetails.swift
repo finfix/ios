@@ -32,12 +32,21 @@ struct BudgetDetails: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading) {
-            Text("Бюджет на месяц: " + currencyFormatter.string(number: account.budget))
-            Text("Текущий расход: " + currencyFormatter.string(number: account.remainder))
-            Text("Остаток до конца месяца: " + currencyFormatter.string(number: account.budget - account.remainder))
-            Text("Остаток на текущий день: " + currencyFormatter.string(number: availableExpense))
-            Text("Дневной бюджет: " + currencyFormatter.string(number: dailyBudget))
+        HStack {
+            VStack(alignment: .leading) {
+                Text("Бюджет на месяц: ")
+                Text("Текущий расход: ")
+                Text("Остаток до конца месяца: ")
+                Text("Остаток на текущий день: ")
+                Text("Дневной бюджет: ")
+            }
+            VStack(alignment: .trailing) {
+                Text(currencyFormatter.string(number: account.budget))
+                Text(currencyFormatter.string(number: account.remainder))
+                Text(currencyFormatter.string(number: account.budget - account.remainder))
+                Text(currencyFormatter.string(number: availableExpense))
+                Text(currencyFormatter.string(number: dailyBudget))
+            }
         }
     }
 }
