@@ -41,7 +41,7 @@ struct TransactionsList: View {
     func deleteTransaction(id: UInt32) {
         TransactionAPI().DeleteTransaction(req: DeleteTransactionRequest(id: id)) { error in
             if let err = error {
-                Alerter().showErrorAlert(error: err)
+                showErrorAlert(error: err)
             }
         }
     }

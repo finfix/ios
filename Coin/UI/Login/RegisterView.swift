@@ -49,7 +49,7 @@ struct RegisterView: View {
         AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name)) { response, error in
             
             if let err = error {
-                Alerter().showErrorAlert(error: err)
+                showErrorAlert(error: err)
             } else if let response = response {
                 accessToken = response.token.accessToken
                 refreshToken = response.token.refreshToken

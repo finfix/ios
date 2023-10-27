@@ -139,7 +139,7 @@ struct CreateTransactionView: View {
             type: transactionType.rawValue,
             isExecuted: true)) { error in
                 if let err = error {
-                    Alerter().showErrorAlert(error: err)
+                    showErrorAlert(error: err)
                 }
             }
     }

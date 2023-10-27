@@ -9,7 +9,6 @@ import Foundation
 
 @Observable
 class ModelData {
-    private var alerter = Alerter()
     
     var accounts = [Account]() {
         willSet {
@@ -99,7 +98,7 @@ class ModelData {
         
         AccountAPI().GetAccounts(req: GetAccountsRequest(dateFrom: dateFrom, dateTo: dateTo)) { model, error in
             if let err = error {
-                self.alerter.showErrorAlert(error: err)
+                showErrorAlert(error: err)
             } else if let response = model {
                 self.accounts = response
             }
@@ -109,7 +108,7 @@ class ModelData {
     func getTransactions() {
         TransactionAPI().GetTransactions(req: GetTransactionRequest(list: 0)) { model, error in
             if let err = error {
-                self.alerter.showErrorAlert(error: err)
+                showErrorAlert(error: err)
             } else if let response = model {
                 self.transactions = response
             }
@@ -119,7 +118,7 @@ class ModelData {
     func getAccountGroups() {
         AccountAPI().GetAccountGroups() { model, error in
             if let err = error {
-                self.alerter.showErrorAlert(error: err)
+                showErrorAlert(error: err)
             } else if let response = model {
                 self.accountGroups = response
             }
@@ -129,7 +128,7 @@ class ModelData {
     func getCurrencies() {
         UserAPI().GetCurrencies() { model, error in
             if let err = error {
-                self.alerter.showErrorAlert(error: err)
+                showErrorAlert(error: err)
             } else if let response = model {
                 self.currencies = Dictionary(uniqueKeysWithValues: response.map{ ($0.isoCode, $0) })
             }

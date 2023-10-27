@@ -37,20 +37,17 @@ struct MyApp: App {
     }
 }
 
-class Alerter {
+func showErrorAlert(error: ErrorModel) {
     
     @AppStorage("isErrorShowing") var isErrorShowing = false
     @AppStorage("errorText") var errorText: String?
     @AppStorage("errorDescription") var errorDescription: String?
     
-    func showErrorAlert(error: ErrorModel) {
-        isErrorShowing = true
-        errorText = error.humanTextError
-        errorDescription = error.developerTextError
-        print(error.developerTextError)
-        print(error.context ?? "")
-    }
-    
+    isErrorShowing = true
+    errorText = error.humanTextError
+    errorDescription = error.developerTextError
+    debugLog(error.developerTextError)
+    debugLog(error.context ?? "")
 }
 
 

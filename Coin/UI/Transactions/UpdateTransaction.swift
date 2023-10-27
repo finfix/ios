@@ -59,7 +59,7 @@ struct UpdateTransaction: View {
         
         TransactionAPI().UpdateTransaction(req: req) { error in
             if let err = error {
-                Alerter().showErrorAlert(error: err)
+                showErrorAlert(error: err)
             }
         }
     }
