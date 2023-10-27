@@ -148,5 +148,11 @@ class ModelData {
         getTransactions()
         getCurrencies()
     }
+    
+    func deleteAllData() {
+        accounts.removeAll()
+        transactions.removeAll()
+        accountGroups.removeAll()
+    }
 }
 
