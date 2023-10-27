@@ -27,7 +27,7 @@ struct BudgetDetails: View {
     var currencyFormatter: CurrencyFormatter
     
     init(account: Account) {
-        self.currencyFormatter = CurrencyFormatter(currency: account.currency)
+        self.currencyFormatter = CurrencyFormatter(currency: account.currency, maximumFractionDigits: 0)
         self.account = account
     }
     

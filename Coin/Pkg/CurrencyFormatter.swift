@@ -8,12 +8,20 @@
 import Foundation
 
 class CurrencyFormatter: NumberFormatter {
-        
-    init(currency: String? = nil) {
+    
+    // Передано ли minimumFractionDigits в функцию
+    var userMaximumFractionDigits = false
+    
+    // Возможные окончания числа
+    let units: [String] = ["", "k","M","G","T","P","E"]
+    
+    init(currency: String? = nil, maximumFractionDigits: Int? = nil) {
         super.init()
         self.numberStyle = .currency
-        self.minimumFractionDigits = 2
-        self.maximumFractionDigits = 2
+        if let digits = maximumFractionDigits {
+            self.maximumFractionDigits = digits
+            self.userMaximumFractionDigits = true
+        }
         self.groupingSeparator = "."
         self.usesGroupingSeparator = true
         if let currency = currency {
@@ -29,23 +37,66 @@ class CurrencyFormatter: NumberFormatter {
             self.currencySymbol = CurrencySymbols[currency]
         }
         
-        var num = number
+        // Округляем погрешности
+        var num = Double(round(number * 1_000_000) / 1_000_000)
         
-        let sign = ((num < 0) ? "-" : "" );
-        
-        num = fabs(num)
-        
-        if (num < 1000000.0){
-            return "\(sign)\(round(num)) \(self.currencySymbol ?? "")"
+        // Считаем разрядность от модуля числа
+        var countOfNumbers = 0
+        if num != 0 {
+            countOfNumbers = Int(log10(fabs(num))) + 1
         }
         
-        let exp:Int = Int(log10(num) / 6.0 )
+        switch(true) {
+            // Передано значение в форматтер при инициализации
+        case self.userMaximumFractionDigits: break
+            // Число без дробной части
+        case num.truncatingRemainder(dividingBy: 1) == 0:
+            self.maximumFractionDigits = 0
+            // Число больше миллиона
+        case countOfNumbers >= 7:
+            // Количество символов кратно 3
+            if countOfNumbers % 3 == 0 {
+                self.maximumFractionDigits = 1
+            } else {
+                self.maximumFractionDigits = 0
+            }
+            // Число меньше миллиона и число с дробью
+        default:
+            self.maximumFractionDigits = 2
+        }
         
-        let units:[String] = ["k","M","G","T","P","E"]
+        var cutFactor = 0
+        switch(true) {
+            
+            // Число меньше миллиона
+        case countOfNumbers < 7:
+            cutFactor = 0
+            
+        case countOfNumbers % 3 == 2:
+            // 123 456 789 -> 12 345M
+            cutFactor = countOfNumbers - 5
+            
+        case countOfNumbers % 3 != 2:
+            // 12 345 678 -> 1 234,6M
+            cutFactor = countOfNumbers - 4
+            
+        default:
+            cutFactor = 0
+        }
         
-        let roundedNum:Double = round(10 * num / pow(1000.0,Double(exp))) / 10
+        num /= pow(10, Double(cutFactor))
         
-        return "\(sign)\(roundedNum)\(units[exp-1]) \(self.currencySymbol ?? "")"
+        var selectedUnit = 0
+        // Число больше миллиона
+        
+        if countOfNumbers >= 7 {
+            selectedUnit = countOfNumbers / 3 - 1
+        }
+        
+        self.positiveSuffix = String("\(units[selectedUnit]) \(self.currencySymbol ?? "")")
+        self.negativeSuffix = String("\(units[selectedUnit]) \(self.currencySymbol ?? "")")
+                        
+        return self.string(for: num)!
     }
     
     required init?(coder: NSCoder) {

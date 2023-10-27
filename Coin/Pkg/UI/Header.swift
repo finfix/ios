@@ -15,7 +15,7 @@ struct Header: View {
         modelData.quickStatistic[modelData.selectedAccountsGroupID] ?? QuickStatistic()
     }
     
-    var formatter = CurrencyFormatter()
+    var formatter = CurrencyFormatter(maximumFractionDigits: 0)
     
     let height: CGFloat = 40
     
@@ -39,9 +39,11 @@ struct Header: View {
             VStack {
                 Text("Бюджет")
                     .bold()
-                Text(formatter.string(number: statistic.totalBudget, currency: statistic.currency))
-                Text(formatter.string(number: statistic.totalBudget - statistic.totalExpense, currency: statistic.currency))
-                    .foregroundColor(.gray)
+                VStack(alignment: .trailing) {
+                    Text(formatter.string(number: statistic.totalBudget, currency: statistic.currency))
+                    Text(formatter.string(number: statistic.totalBudget - statistic.totalExpense, currency: statistic.currency))
+                        .foregroundColor(.gray)
+                }
                 Spacer()
             }
             Spacer()
