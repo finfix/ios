@@ -58,7 +58,6 @@ class ModelData {
             case .expense:
                 tmp[account.accountGroupID]?.totalExpense += account.remainder * relation
                 tmp[account.accountGroupID]?.totalBudget += account.budget * relation
-                debugPrint(account.budget * relation)
             case .earnings:
                 continue
             default:
