@@ -24,6 +24,7 @@ struct CreateAccountReq: Encodable {
     var name: String
     var remainder: Double?
     var type: String
+    var gradualBudgetFilling: Bool
 }
 
 struct CreateAccountRes: Decodable {
@@ -38,4 +39,5 @@ struct UpdateAccountReq: Encodable {
     var name: String?
     var remainder: Double?
     var visible: Bool?
+    var gradualBudgetFilling: Bool?
 }

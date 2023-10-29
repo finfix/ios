@@ -37,8 +37,11 @@ struct BudgetBar: View {
             }
             // Уже потрачено
             Rectangle()
-                .fill(fillingCoef <= availableCoef ? Color.green : Color.red)
-                .frame(width: fillingCoef < 1 ? width * fillingCoef : width, height: height)
+            // Если бюджет превышен - красный
+                .fill(fillingCoef > 1 ? .red :
+                        // Если бюджет на текущий день превышен и счет с постепенным заполнением бюджета - желтый
+                        (fillingCoef > availableCoef && account.gradualBudgetFilling) ? .yellow : .green)
+                .frame(width: fillingCoef <= 1 ? width * fillingCoef : width, height: height)
                 .opacity(0.5)
             // Текущий день
             Line()
@@ -57,5 +60,10 @@ struct BudgetBar: View {
 }
 
 #Preview {
-    BudgetBar(account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 900, currency: "rub", iconID: 2, name: "Example", remainder: 600, type: .expense, visible: true))
+    Group {
+        BudgetBar(account: Account(budget: 100, name: "Незаполненный бюджет", remainder: 1, gradualBudgetFilling: true))
+        BudgetBar(account: Account(budget: 100, name: "Полностью заполненный бюджет постепенная", remainder: 100, gradualBudgetFilling: true))
+        BudgetBar(account: Account(budget: 100, name: "Полностью заполненный бюджет не постепенная", remainder: 100, gradualBudgetFilling: false))
+        BudgetBar(account: Account(budget: 100, name: "Превышенный бюджет", remainder: 200, gradualBudgetFilling: false))
+    }
 }

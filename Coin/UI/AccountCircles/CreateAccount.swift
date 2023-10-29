@@ -67,7 +67,9 @@ struct CreateAccount: View {
             iconID: 1,
             name: name,
             remainder: remainder,
-            type: accountType.rawValue)) { model, error in
+            type: accountType.rawValue,
+            gradualBudgetFilling: gradualBudgetFilling)
+        ) { model, error in
                 if let err = error {
                     showErrorAlert(error: err)
                 }
