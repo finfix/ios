@@ -18,6 +18,10 @@
 		B52A7DEC2AE8292200CDE0A3 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */; };
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B531E6E02AE41A3000996520 /* Currencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = B531E6DF2AE41A3000996520 /* Currencies.swift */; };
+		B54B09A62AEEC83A002914B9 /* OpenAPIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = B54B09A52AEEC83A002914B9 /* OpenAPIRuntime */; };
+		B54B09A92AEEC849002914B9 /* OpenAPIURLSession in Frameworks */ = {isa = PBXBuildFile; productRef = B54B09A82AEEC849002914B9 /* OpenAPIURLSession */; };
+		B54B09B22AEEC942002914B9 /* openapi.yaml in Resources */ = {isa = PBXBuildFile; fileRef = B54B09B12AEEC942002914B9 /* openapi.yaml */; };
+		B54B09B42AEEC982002914B9 /* openapi-generator-config.yaml in Resources */ = {isa = PBXBuildFile; fileRef = B54B09B32AEEC982002914B9 /* openapi-generator-config.yaml */; };
 		B54B09B72AEED085002914B9 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54B09B62AEED085002914B9 /* User.swift */; };
 		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
 		B5610EF928FC88FE0063AFEB /* CreateTransactionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */; };
@@ -77,6 +81,8 @@
 		B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B531E6DF2AE41A3000996520 /* Currencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currencies.swift; sourceTree = "<group>"; };
+		B54B09B12AEEC942002914B9 /* openapi.yaml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; name = openapi.yaml; path = ../../../../Desktop/openapi.yaml; sourceTree = "<group>"; };
+		B54B09B32AEEC982002914B9 /* openapi-generator-config.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = "openapi-generator-config.yaml"; sourceTree = "<group>"; };
 		B54B09B62AEED085002914B9 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		B5610EF828FC88FE0063AFEB /* CreateTransactionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTransactionView.swift; sourceTree = "<group>"; };
@@ -129,6 +135,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B54B09A62AEEC83A002914B9 /* OpenAPIRuntime in Frameworks */,
+				B54B09A92AEEC849002914B9 /* OpenAPIURLSession in Frameworks */,
 				B57A8485290900D700F883C3 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -277,6 +285,7 @@
 		B5F9CC6128F01CA80037A21A /* Coin */ = {
 			isa = PBXGroup;
 			children = (
+				B54B09B12AEEC942002914B9 /* openapi.yaml */,
 				B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */,
 				B5B9504A2ADF182100798F8C /* Model */,
 				B5E8933829007C53002AC30C /* UI */,
@@ -285,6 +294,7 @@
 				B5F9CC6228F01CA80037A21A /* CoinApp.swift */,
 				B5F9CC6628F01CA90037A21A /* Assets.xcassets */,
 				B5F9CC6828F01CA90037A21A /* Preview Content */,
+				B54B09B32AEEC982002914B9 /* openapi-generator-config.yaml */,
 			);
 			path = Coin;
 			sourceTree = "<group>";
@@ -332,10 +342,13 @@
 			buildRules = (
 			);
 			dependencies = (
+				B54B09AB2AEEC862002914B9 /* PBXTargetDependency */,
 			);
 			name = Coin;
 			packageProductDependencies = (
 				B57A8484290900D700F883C3 /* Alamofire */,
+				B54B09A52AEEC83A002914B9 /* OpenAPIRuntime */,
+				B54B09A82AEEC849002914B9 /* OpenAPIURLSession */,
 			);
 			productName = Coin;
 			productReference = B5F9CC5F28F01CA80037A21A /* Coin.app */;
@@ -367,6 +380,9 @@
 			mainGroup = B5F9CC5628F01CA80037A21A;
 			packageReferences = (
 				B57A8483290900D700F883C3 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				B54B09A32AEEC80F002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-generator" */,
+				B54B09A42AEEC83A002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */,
+				B54B09A72AEEC849002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */,
 			);
 			productRefGroup = B5F9CC6028F01CA80037A21A /* Products */;
 			projectDirPath = "";
@@ -384,8 +400,10 @@
 			files = (
 				B58705762900956D004C77DD /* README.md in Resources */,
 				B5F9CC6A28F01CA90037A21A /* Preview Assets.xcassets in Resources */,
+				B54B09B22AEEC942002914B9 /* openapi.yaml in Resources */,
 				B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */,
 				B5F9CC6728F01CA90037A21A /* Assets.xcassets in Resources */,
+				B54B09B42AEEC982002914B9 /* openapi-generator-config.yaml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -451,6 +469,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B54B09AB2AEEC862002914B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = B54B09AA2AEEC862002914B9 /* OpenAPIGenerator */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B5F9CC6B28F01CA90037A21A /* Debug */ = {
@@ -661,6 +686,30 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B54B09A32AEEC80F002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-generator" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-openapi-generator";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.3.2;
+			};
+		};
+		B54B09A42AEEC83A002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-openapi-runtime";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.3.5;
+			};
+		};
+		B54B09A72AEEC849002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-openapi-urlsession";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.0;
+			};
+		};
 		B57A8483290900D700F883C3 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -672,6 +721,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B54B09A52AEEC83A002914B9 /* OpenAPIRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B54B09A42AEEC83A002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */;
+			productName = OpenAPIRuntime;
+		};
+		B54B09A82AEEC849002914B9 /* OpenAPIURLSession */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B54B09A72AEEC849002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */;
+			productName = OpenAPIURLSession;
+		};
+		B54B09AA2AEEC862002914B9 /* OpenAPIGenerator */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B54B09A32AEEC80F002914B9 /* XCRemoteSwiftPackageReference "swift-openapi-generator" */;
+			productName = "plugin:OpenAPIGenerator";
+		};
 		B57A8484290900D700F883C3 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B57A8483290900D700F883C3 /* XCRemoteSwiftPackageReference "Alamofire" */;
