@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct Account: Decodable, Identifiable, Hashable {
+class Account: Decodable, Identifiable {
+    
     var id: UInt32
     var accountGroupID: UInt32
     var accounting: Bool
@@ -59,6 +60,16 @@ struct Account: Decodable, Identifiable, Hashable {
         self.gradualBudgetFilling = gradualBudgetFilling
     }
 }
+
+extension Account: Hashable {
+    
+    static func == (lhs: Account, rhs: Account) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
 
 enum AccountType: String, Decodable, CaseIterable {

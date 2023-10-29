@@ -7,9 +7,16 @@
 
 import Foundation
 
-struct QuickStatistic: Decodable {
-    var currency: String = ""
-    var totalRemainder: Double = 0
-    var totalExpense: Double = 0
-    var totalBudget: Double = 0
+class QuickStatistic: Decodable {
+    var currency: String
+    var totalRemainder: Double
+    var totalExpense: Double
+    var totalBudget: Double
+    
+    init(currency: String = "USD", totalRemainder: Double = 0, totalExpense: Double = 0, totalBudget: Double = 0) {
+        self.currency = currency
+        self.totalRemainder = totalRemainder
+        self.totalExpense = totalExpense
+        self.totalBudget = totalBudget
+    }
 }

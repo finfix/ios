@@ -133,6 +133,7 @@ class ModelData {
     }
     
     func getCurrencies() {
+        
         UserAPI().GetCurrencies() { model, error in
             if let err = error {
                 showErrorAlert(error: err)
