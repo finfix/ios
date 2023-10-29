@@ -61,6 +61,7 @@
 		B5FB6AA428F3D62D00C2A2AC /* TransactionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */; };
 		B5FB6AAA28F3D72300C2A2AC /* Account.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA928F3D72300C2A2AC /* Account.swift */; };
 		B5FB6AAE28F3D86000C2A2AC /* AccountsHome.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AAD28F3D86000C2A2AC /* AccountsHome.swift */; };
+		B5FF351E2AEC091F007694F9 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF351D2AEC091F007694F9 /* Defaults.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -118,6 +119,7 @@
 		B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsList.swift; sourceTree = "<group>"; };
 		B5FB6AA928F3D72300C2A2AC /* Account.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Account.swift; sourceTree = "<group>"; };
 		B5FB6AAD28F3D86000C2A2AC /* AccountsHome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsHome.swift; sourceTree = "<group>"; };
+		B5FF351D2AEC091F007694F9 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 				B5D143B72906B4F800875037 /* AccountAPI.swift */,
 				B557AA0D290D959F00631421 /* API.swift */,
 				B504B7E42AE46EEB0078643A /* UserAPI.swift */,
+				B5FF351D2AEC091F007694F9 /* Defaults.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -427,6 +430,7 @@
 				B5F9CC7328F01E4D0037A21A /* Transaction.swift in Sources */,
 				B59D458B28FE77D400773D46 /* SearchBar.swift in Sources */,
 				B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */,
+				B5FF351E2AEC091F007694F9 /* Defaults.swift in Sources */,
 				B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */,
 				B5B950592ADF274E00798F8C /* AccountCard.swift in Sources */,
 				B5B9504F2ADF235A00798F8C /* Profile.swift in Sources */,

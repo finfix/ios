@@ -9,9 +9,9 @@ import Foundation
 import Alamofire
 import SwiftUI
 
-let authBasePath = "/auth"
-
-class AuthAPI {
+class AuthAPI: API {
+    
+    let authBasePath = "/auth"
     
     func Auth(req: AuthRequest, completionHandler: @escaping (AuthResponse?, ErrorModel?) -> Void) {
         

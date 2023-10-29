@@ -9,9 +9,9 @@ import Foundation
 import Alamofire
 import SwiftUI
 
-let transactionBasePath = "/transaction"
-
-class TransactionAPI {
+class TransactionAPI: API {
+    
+    let transactionBasePath = "/transaction"
     
     // Получение транзакций
     func GetTransactions(req: GetTransactionRequest, completionHandler: @escaping ([Transaction]?, ErrorModel?) -> Void) {

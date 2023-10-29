@@ -6,3 +6,6 @@
 //
 
 import Foundation
+
+let defaultIsDarkMode = true
+let defaultBasePath = "https://bonavii.com"

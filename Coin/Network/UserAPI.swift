@@ -8,9 +8,10 @@
 import Foundation
 import Alamofire
 
-let userBasePath = "/user"
-
-class UserAPI {
+class UserAPI: API {
+    
+    let userBasePath = "/user"
+    
     func GetCurrencies(completionHandler: @escaping ([Currency]?, ErrorModel?) -> Void) {
         
         let (headers, err) = getBaseHeaders()
