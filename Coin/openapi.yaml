@@ -1,0 +1,1301 @@
+openapi: 3.0.1
+info:
+  title: COIN Server Documentation
+  description: API Documentation for Coin
+  contact:
+    name: Ilia Ivanov
+    email: bonavii@icloud.com
+  version: "1.0"
+servers:
+- url: https://bonavii.com
+paths:
+  /account:
+    get:
+      tags:
+      - account
+      summary: Получение счетов по фильтрам
+      parameters:
+      - name: accountGroupIDs
+        in: query
+        description: Идентификаторы групп счетов
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: integer
+      - name: accounting
+        in: query
+        description: Видимость счета
+        schema:
+          type: boolean
+      - name: dateFrom
+        in: query
+        description: Дата начала выборки (Обязательна при type = expense or earnings
+          и отсутствующем периоде)
+        schema:
+          type: string
+          format: date
+      - name: dateTo
+        in: query
+        description: Дата конца выборки (Обязательна при type = expense or earnings
+          и отсутствующем периоде)
+        schema:
+          type: string
+          format: date
+      - name: type
+        in: query
+        description: Тип счета
+        schema:
+          type: string
+          enum:
+          - regular
+          - expense
+          - debt
+          - earnings
+          x-enum-varnames:
+          - Regular
+          - Expense
+          - Debt
+          - Earnings
+        x-enum-varnames:
+        - Regular
+        - Expense
+        - Debt
+        - Earnings
+      - name: visible
+        in: query
+        description: Видимость счета
+        schema:
+          type: boolean
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_account_model.Account'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+    post:
+      tags:
+      - account
+      summary: Создание счета
+      description: Создается новый счет, если у него есть остаток, то создается транзакция
+        от нулевого счета для баланса
+      requestBody:
+        description: model.CreateReq
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_account_model.CreateReq'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_account_model.CreateRes'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+      x-codegen-request-body-name: Body
+    delete:
+      tags:
+      - account
+      summary: Удаление счета
+      description: Удаление данных по счету
+      parameters:
+      - name: id
+        in: query
+        description: Идентификатор счета
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+      responses:
+        200:
+          description: Если удаление счета прошло успешно, возвращается пустой ответ
+          content: {}
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+    patch:
+      tags:
+      - account
+      summary: Редактирование счета
+      description: Изменение данных счета
+      requestBody:
+        description: model.UpdateReq
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_account_model.UpdateReq'
+        required: true
+      responses:
+        200:
+          description: Если редактирование счета прошло успешно, возвращается пустой
+            ответ
+          content: {}
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+      x-codegen-request-body-name: Body
+  /account/accountGroups:
+    get:
+      tags:
+      - account
+      summary: Получение списка групп счетов
+      parameters:
+      - name: accountGroupIDs
+        in: query
+        description: Идентификаторы групп счетов
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: integer
+      responses:
+        200:
+          description: '[]model.AccountGroup'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_account_model.AccountGroup'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+  /account/quickStatistic:
+    get:
+      tags:
+      - account
+      summary: Получение краткой статистики по счетам
+      parameters:
+      - name: accountGroupID
+        in: query
+        description: Идентификатор группы счетов
+        schema:
+          type: integer
+      - name: currency
+        in: query
+        description: Валюта
+        schema:
+          type: string
+      - name: totalBudget
+        in: query
+        description: Общая сумма бюджетов
+        schema:
+          type: number
+      - name: totalExpense
+        in: query
+        description: Общая сумма расходов
+        schema:
+          type: number
+      - name: totalRemainder
+        in: query
+        description: Общий баланс видимых счетов
+        schema:
+          type: number
+      responses:
+        200:
+          description: '[]model.QuickStatistic'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_account_model.QuickStatistic'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+  /account/switch:
+    patch:
+      tags:
+      - account
+      summary: Изменение порядковых мест двух счетов
+      description: Поменять два счета местами
+      requestBody:
+        description: model.SwitchReq
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_account_model.SwitchReq'
+        required: true
+      responses:
+        200:
+          description: Если изменение порядка счетов прошло успешно, возвращается
+            пустой ответ
+          content: {}
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+      x-codegen-request-body-name: Body
+  /auth/refreshTokens:
+    post:
+      tags:
+      - auth
+      summary: Обновление токенов
+      requestBody:
+        description: pbAuth.RefreshTokensReq
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/pbAuth.RefreshTokensReq'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_auth_model.RefreshTokensRes'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      x-codegen-request-body-name: Dody
+  /auth/signIn:
+    post:
+      tags:
+      - auth
+      summary: Авторизация пользователя по логину и паролю
+      parameters:
+      - name: DeviceID
+        in: header
+        description: Нужен для идентификации устройства
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: model.SignInReq
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_auth_model.SignInReq'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_auth_model.AuthRes'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      x-codegen-request-body-name: Body
+  /auth/signUp:
+    post:
+      tags:
+      - auth
+      summary: Регистрация пользователя
+      parameters:
+      - name: DeviceID
+        in: header
+        description: Нужен для идентификации устройства
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: model.SignUpReq
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_auth_model.SignUpReq'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_auth_model.AuthRes'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      x-codegen-request-body-name: Body
+  /transaction:
+    get:
+      tags:
+      - transaction
+      summary: Получение всех транзакций
+      description: Получение всех транзакций по фильтрам
+      parameters:
+      - name: accountID
+        in: query
+        description: Транзакции какого счета нас интересуют
+        schema:
+          minimum: 1
+          type: integer
+      - name: dateFrom
+        in: query
+        description: Дата, от которой начинать учитывать транзакции
+        schema:
+          type: string
+          format: date
+      - name: dateTo
+        in: query
+        description: Дата, до которой учитывать транзакции
+        schema:
+          type: string
+          format: date
+      - name: limit
+        in: query
+        description: Количество транзакций в списке для пагинации
+        schema:
+          minimum: 1
+          type: integer
+      - name: offset
+        in: query
+        description: Смещение относительно начала списка для пагинации
+        schema:
+          minimum: 0
+          type: integer
+      - name: type
+        in: query
+        description: Тип транзакции
+        schema:
+          type: string
+          enum:
+          - transfer
+          - consumption
+          - balancing
+          - income
+          x-enum-varnames:
+          - Transfer
+          - Consumption
+          - Balancing
+          - Income
+        x-enum-varnames:
+        - Transfer
+        - Consumption
+        - Balancing
+        - Income
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_transaction_model.Transaction'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+    post:
+      tags:
+      - transaction
+      summary: Создание транзакции
+      description: Создание транзакции и изменение баланса счетов, между которыми
+        она произошла
+      requestBody:
+        description: model.CreateReq
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_transaction_model.CreateReq'
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_transaction_model.CreateRes'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+      x-codegen-request-body-name: Body
+    delete:
+      tags:
+      - transaction
+      summary: Удаление транзакции
+      description: Удаление данных транзакции и изменение баланса счетов
+      parameters:
+      - name: id
+        in: query
+        description: Идентификатор транзакции
+        required: true
+        schema:
+          minimum: 1
+          type: integer
+      responses:
+        200:
+          description: Если удаление транзакции прошло успешно, возвращается пустой
+            ответ
+          content: {}
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+    patch:
+      tags:
+      - transaction
+      summary: Редактирование транзакции
+      description: Изменение данных транзакции
+      requestBody:
+        description: model.CreateReq
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_transaction_model.UpdateReq'
+        required: true
+      responses:
+        200:
+          description: Если редактирование транзакции прошло успешно, возвращается
+            пустой ответ
+          content: {}
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+      x-codegen-request-body-name: Body
+  /user:
+    get:
+      tags:
+      - user
+      summary: Получение данных пользователя
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_user_model.User'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+  /user/getCurrencies:
+    get:
+      tags:
+      - user
+      summary: Получение списка валют
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_user_model.Currency'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errors.CustomError'
+      security:
+      - AuthJWT: []
+components:
+  schemas:
+    accountType.Type:
+      type: string
+      enum:
+      - regular
+      - expense
+      - debt
+      - earnings
+      x-enum-varnames:
+      - Regular
+      - Expense
+      - Debt
+      - Earnings
+    errors.CustomError:
+      required:
+      - context
+      type: object
+      properties:
+        context:
+          type: string
+        developerTextError:
+          type: string
+        humanTextError:
+          type: string
+        path:
+          type: string
+    gitlab_com_myCoin_server_json_app_internal_services_account_model.Account:
+      required:
+      - parentAccountID
+      type: object
+      properties:
+        accountGroupID:
+          type: integer
+          description: Идентификатор группы счета
+        accounting:
+          type: boolean
+          description: Будет ли счет учитываться в статистике
+        budget:
+          type: number
+          description: Месячный бюджет
+        currency:
+          type: string
+          description: Валюта счета
+        gradualBudgetFilling:
+          type: boolean
+          description: Постепенное пополнение бюджета
+        iconID:
+          type: integer
+          description: Идентификатор иконки
+        id:
+          type: integer
+          description: Идентификатор счета
+        name:
+          type: string
+          description: Название счета
+        parentAccountID:
+          type: integer
+          description: Идентификатор родительского аккаунта
+        remainder:
+          type: number
+          description: Остаток средств на счету
+        type:
+          type: object
+          description: Тип счета
+        visible:
+          type: boolean
+          description: Видимость счета
+    gitlab_com_myCoin_server_json_app_internal_services_account_model.AccountGroup:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: Валюта группы счетов
+        id:
+          type: integer
+          description: Идентификатор группы счетов
+        name:
+          type: string
+          description: Название группы счетов
+    gitlab_com_myCoin_server_json_app_internal_services_account_model.CreateReq:
+      required:
+      - accountGroupID
+      - accounting
+      - currency
+      - gradualBudgetFilling
+      - iconID
+      - name
+      - type
+      type: object
+      properties:
+        accountGroupID:
+          minimum: 1
+          type: integer
+          description: Группа счета
+        accounting:
+          type: boolean
+          description: Подсчет суммы счета в статистике
+        budget:
+          type: number
+          description: Месячный бюджет
+        currency:
+          type: string
+          description: Валюта счета
+        gradualBudgetFilling:
+          type: boolean
+          description: Постепенное пополнение бюджета
+        iconID:
+          minimum: 1
+          type: integer
+          description: Идентификатор иконки
+        name:
+          type: string
+          description: Название счета
+        remainder:
+          type: number
+          description: Остаток средств на счету
+        type:
+          type: object
+          description: Тип счета
+    gitlab_com_myCoin_server_json_app_internal_services_account_model.CreateRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор созданного счета
+    gitlab_com_myCoin_server_json_app_internal_services_account_model.QuickStatistic:
+      type: object
+      properties:
+        accountGroupID:
+          type: integer
+          description: Идентификатор группы счетов
+        currency:
+          type: string
+          description: Валюта
+        totalBudget:
+          type: number
+          description: Общая сумма бюджетов
+        totalExpense:
+          type: number
+          description: Общая сумма расходов
+        totalRemainder:
+          type: number
+          description: Общий баланс видимых счетов
+    gitlab_com_myCoin_server_json_app_internal_services_account_model.SwitchReq:
+      required:
+      - id_1
+      - id_2
+      type: object
+      properties:
+        id_1:
+          minimum: 1
+          type: integer
+          description: Идентификатор первого счета
+        id_2:
+          minimum: 1
+          type: integer
+          description: Идентификатор второго счета
+    gitlab_com_myCoin_server_json_app_internal_services_account_model.UpdateReq:
+      required:
+      - id
+      type: object
+      properties:
+        accountGroupID:
+          minimum: 1
+          type: integer
+          description: Идентификатор группы счета
+        accounting:
+          type: boolean
+          description: Будет ли счет учитываться в статистике
+        budget:
+          minimum: 0
+          type: integer
+          description: Месячный бюджет
+        gradualBudgetFilling:
+          type: boolean
+          description: Постепенное пополнение бюджета
+        iconID:
+          minimum: 1
+          type: integer
+          description: Идентификатор иконки
+        id:
+          minimum: 1
+          type: integer
+          description: Идентификатор счета
+        name:
+          type: string
+          description: Название счета
+        remainder:
+          type: number
+          description: Остаток средств на счету
+        visible:
+          type: boolean
+          description: Видимость счета
+    gitlab_com_myCoin_server_json_app_internal_services_auth_model.AuthRes:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор пользователя
+        token:
+          type: object
+          description: Токены доступа
+    gitlab_com_myCoin_server_json_app_internal_services_auth_model.RefreshTokensRes:
+      type: object
+      properties:
+        token:
+          type: object
+          description: Токены доступа
+    gitlab_com_myCoin_server_json_app_internal_services_auth_model.SignInReq:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          description: Электронная почта пользователя
+          format: email
+        password:
+          type: string
+          description: Пароль пользователя
+    gitlab_com_myCoin_server_json_app_internal_services_auth_model.SignUpReq:
+      required:
+      - email
+      - name
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          description: Электронная почта пользователя
+          format: email
+        name:
+          type: string
+          description: Имя пользователя
+        password:
+          type: string
+          description: Пароль пользователя
+    gitlab_com_myCoin_server_json_app_internal_services_auth_model.Token:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Токен доступа
+        refreshToken:
+          type: string
+          description: Токен восстановления доступа
+    gitlab_com_myCoin_server_json_app_internal_services_transaction_model.CreateReq:
+      required:
+      - accountFromID
+      - accountToID
+      - amountFrom
+      - amountTo
+      - dateTransaction
+      - isExecuted
+      - type
+      type: object
+      properties:
+        accountFromID:
+          minimum: 1
+          type: integer
+          description: Идентификатор счета списания
+        accountToID:
+          minimum: 1
+          type: integer
+          description: Идентификатор счета пополнения
+        amountFrom:
+          minimum: 1
+          type: number
+          description: Сумма списания с первого счета
+        amountTo:
+          minimum: 1
+          type: number
+          description: Сумма пополнения второго счета (в случаях меж валютной транзакции
+            цифры отличаются)
+        dateTransaction:
+          type: string
+          description: Дата транзакции
+          format: date
+        isExecuted:
+          type: boolean
+          description: Исполнена операция или нет (если нет, сделки как бы не существует)
+        note:
+          type: string
+          description: Заметка для транзакции
+        type:
+          type: object
+          description: Тип транзакции
+    gitlab_com_myCoin_server_json_app_internal_services_transaction_model.CreateRes:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          minimum: 1
+          type: integer
+          description: Идентификатор транзакции
+    gitlab_com_myCoin_server_json_app_internal_services_transaction_model.Tag:
+      type: object
+      properties:
+        tagID:
+          minimum: 1
+          type: integer
+        transactionID:
+          minimum: 1
+          type: integer
+    gitlab_com_myCoin_server_json_app_internal_services_transaction_model.Transaction:
+      type: object
+      properties:
+        accountFromID:
+          minimum: 1
+          type: integer
+          description: Идентификатор счета списания
+        accountToID:
+          minimum: 1
+          type: integer
+          description: Идентификатор счета пополнения
+        accounting:
+          type: boolean
+          description: Учитывается ли транзакция в статистике или нет
+        amountFrom:
+          minimum: 1
+          type: number
+          description: Сумма сделки в первой валюте
+        amountTo:
+          minimum: 1
+          type: number
+          description: Сумма сделки во второй валюте
+        dateTransaction:
+          type: string
+          description: Дата транзакции (пользовательские)
+          format: date
+        id:
+          minimum: 1
+          type: integer
+          description: Идентификатор транзакции
+        isExecuted:
+          type: boolean
+          description: Исполнена операция или нет (если нет, сделки как бы не существует)
+        note:
+          type: string
+          description: Заметка сделки
+        tags:
+          type: array
+          description: Подкатегории
+          items:
+            $ref: '#/components/schemas/gitlab_com_myCoin_server_json_app_internal_services_transaction_model.Tag'
+        type:
+          type: object
+          description: Тип транзакции
+    gitlab_com_myCoin_server_json_app_internal_services_transaction_model.UpdateReq:
+      required:
+      - id
+      type: object
+      properties:
+        accountFromID:
+          minimum: 1
+          type: integer
+          description: Идентификатор счета списания
+        accountToID:
+          minimum: 1
+          type: integer
+          description: Идентификатор счета пополнения
+        amountFrom:
+          minimum: 1
+          type: number
+          description: Сумма списания с первого счета
+        amountTo:
+          minimum: 1
+          type: number
+          description: Сумма пополнения второго счета
+        dateTransaction:
+          type: string
+          description: Дата транзакции
+          format: date
+        id:
+          minimum: 1
+          type: integer
+          description: Идентификатор транзакции
+        isExecuted:
+          type: boolean
+          description: Исполнена операция или нет (если нет, сделки как бы не существует)
+        note:
+          type: string
+          description: Заметка для транзакции
+    gitlab_com_myCoin_server_json_app_internal_services_user_model.Currency:
+      type: object
+      properties:
+        isoCode:
+          type: string
+        name:
+          type: string
+        rate:
+          type: number
+        symbol:
+          type: string
+    gitlab_com_myCoin_server_json_app_internal_services_user_model.User:
+      type: object
+      properties:
+        defaultCurrencySignatura:
+          type: string
+          description: Валюта по умолчанию
+        email:
+          type: string
+          description: Электронная почта
+        id:
+          type: integer
+          description: Идентификатор пользователя
+        name:
+          type: string
+          description: Имя пользователя
+        timeCreate:
+          type: string
+          description: Дата и время создания аккаунта
+    pbAuth.RefreshTokensReq:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Токен восстановления доступа
+    transactionType.Type:
+      type: string
+      enum:
+      - transfer
+      - consumption
+      - balancing
+      - income
+      x-enum-varnames:
+      - Transfer
+      - Consumption
+      - Balancing
+      - Income
+  securitySchemes:
+    AuthJWT:
+      type: apiKey
+      description: JWT-токен авторизации
+      name: Authorization
+      in: header
+    SecretKey:
+      type: apiKey
+      description: Ключ для доступа к админ-методам
+      name: MySecretKey
+      in: header
