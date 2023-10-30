@@ -35,7 +35,7 @@ struct MainView: View {
             AccountsHome()
                 .tag(1)
                 .tabItem {
-                    Image(systemName: "1.circle")
+                    Image(systemName: "list.bullet.rectangle.fill")
                     Text("Счета")
                 }
             
@@ -56,14 +56,14 @@ struct MainView: View {
             BudgetsList()
                 .tag(4)
                 .tabItem {
-                    Image(systemName: "4.circle")
+                    Image(systemName: "ruler.fill")
                     Text("Бюджеты")
                 }
             
             Profile()
                 .tag(5)
                 .tabItem {
-                    Image(systemName: "5.circle")
+                    Image(systemName: "person.fill")
                     Text("Профиль")
                 }
         }

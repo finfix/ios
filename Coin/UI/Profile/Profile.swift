@@ -37,10 +37,12 @@ struct Profile: View {
                     Text("Email: \(user.email)")
                     Text("Дата регистрации: \(user.timeCreate)")
                 }
-                Toggle(isOn: $isDarkMode) {
-                    HStack {
-                        Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
-                        Text("Темная тема")
+                Section {
+                    Toggle(isOn: $isDarkMode) {
+                        HStack {
+                            Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
+                            Text("Темная тема")
+                        }
                     }
                 }
                 Section {
@@ -77,7 +79,9 @@ struct Profile: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            .navigationTitle("Настройки")
         }
+        .onAppear(perform: getUser)
     }
     
     func getUser() {

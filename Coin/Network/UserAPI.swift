@@ -40,7 +40,7 @@ class UserAPI: API {
             completionHandler(nil, err)
         }
                 
-        AF.request(basePath + userBasePath, method: .get, headers: headers).responseData { response in
+        AF.request(basePath + userBasePath + "/", method: .get, headers: headers).responseData { response in
             
             let (model, error, _) = ApiHelper().dataProcessing(data: response, model: User.self)
             if error != nil {

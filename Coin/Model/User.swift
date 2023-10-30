@@ -33,7 +33,7 @@ import SwiftData
         id = try container.decode(UInt32.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
         email = try container.decode(String.self, forKey: .email)
-        timeCreate = try container.decode(Date.self, forKey: .timeCreate)
-        defaultCurrency = try container.decode(String.self, forKey: .timeCreate)
+        timeCreate = Date()
+        defaultCurrency = try container.decode(String.self, forKey: .defaultCurrency)
     }
 }

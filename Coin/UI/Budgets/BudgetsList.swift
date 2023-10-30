@@ -22,6 +22,12 @@ struct BudgetsList: View {
     
     var body: some View {
         ScrollView {
+            VStack(spacing: 0) {
+                Header()
+                if modelData.accountGroups.count > 1 {
+                    AccountsGroupSelector()
+                }
+            }
             VStack {
                 ForEach(filteredAccounts) { account in
                     BudgetRow(account: account)
