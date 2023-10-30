@@ -11,10 +11,10 @@ import SwiftData
 @Model class Currency: Decodable {
     @Attribute(.unique) var isoCode: String
     var name: String
-    var rate: Double
+    var rate: Decimal
     var symbol: String
     
-    init(isoCode: String = "USD", name: String = "", rate: Double = 1, symbol: String = "") {
+    init(isoCode: String = "USD", name: String = "", rate: Decimal = 1, symbol: String = "") {
         self.isoCode = isoCode
         self.name = name
         self.rate = rate
@@ -29,7 +29,7 @@ import SwiftData
         let container = try decoder.container(keyedBy: CodingKeys.self)
         isoCode = try container.decode(String.self, forKey: .isoCode)
         name = try container.decode(String.self, forKey: .name)
-        rate = try container.decode(Double.self, forKey: .rate)
+        rate = try container.decode(Decimal.self, forKey: .rate)
         symbol = try container.decode(String.self, forKey: .symbol)
     }
 }

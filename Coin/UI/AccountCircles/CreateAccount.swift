@@ -81,19 +81,19 @@ struct CreateAccount: View {
                 if let err = error {
                     showErrorAlert(error: err)
                 }
-                if let response = model {
-                    modelData.accounts.append(Account(
-                        id: response.id,
-                        accountGroupID: modelData.selectedAccountsGroupID,
-                        accounting: true,
-                        budget: budget ?? 0,
-                        currency: currency,
-                        iconID: 1,
-                        name: name,
-                        remainder: remainder ?? 0,
-                        type: accountType,
-                        visible: true))
-                }
+//                if let response = model {
+//                    modelData.accounts.append(Account(
+//                        id: response.id,
+//                        accountGroupID: modelData.selectedAccountsGroupID,
+//                        accounting: true,
+//                        budget: budget ?? 0,
+//                        currency: currency,
+//                        iconID: 1,
+//                        name: name,
+//                        remainder: remainder ?? 0,
+//                        type: accountType,
+//                        visible: true))
+//                }
             }
     }
 }

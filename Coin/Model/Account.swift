@@ -12,11 +12,11 @@ class Account: Decodable, Identifiable {
     var id: UInt32
     var accountGroupID: UInt32
     var accounting: Bool
-    var budget: Double
+    var budget: Decimal
     var currency: String
     var iconID: UInt32
     var name: String
-    var remainder: Double
+    var remainder: Decimal
     var type: AccountType
     var visible: Bool
     var parentAccountID: UInt32?
@@ -33,11 +33,11 @@ class Account: Decodable, Identifiable {
         id: UInt32 = 0,
         accountGroupID: UInt32 = 0,
         accounting: Bool = true,
-        budget: Double = 0,
+        budget: Decimal = 0,
         currency: String = "RUB",
         iconID: UInt32 = 1,
         name: String = "",
-        remainder: Double = 0,
+        remainder: Decimal = 0,
         type: AccountType = .regular,
         visible: Bool = true,
         parentAccountID: UInt32? = nil,

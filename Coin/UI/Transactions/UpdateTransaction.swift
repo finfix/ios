@@ -19,8 +19,8 @@ struct UpdateTransaction: View {
     init(isUpdateOpen: Binding<Bool>, transaction: Transaction) {
         self._isUpdateOpen = isUpdateOpen
         self.id = transaction.id
-        self.amountFrom = String(transaction.amountFrom)
-        self.amountTo = String(transaction.amountTo)
+        self.amountFrom = transaction.amountFrom.stringValue
+        self.amountTo = transaction.amountTo.stringValue
         self.note = transaction.note
     }
     

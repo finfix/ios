@@ -27,9 +27,9 @@ struct UpdateAccount: View {
         self.id = account.id
         self.accounting = account.accounting
         self.visible = account.visible
-        self.budget = String(account.budget)
+        self.budget = account.budget.stringValue
         self.name = account.name
-        self.remainder = String(account.remainder)
+        self.remainder = account.remainder.stringValue
         self.gradualBudgetFilling = account.gradualBudgetFilling
     }
     
@@ -75,12 +75,12 @@ struct UpdateAccount: View {
             req.gradualBudgetFilling = gradualBudgetFilling
 //            modelData.accountsGrouped[accountIndex].accounting = accounting
         }
-        if String(oldAccount.remainder) != self.remainder {
+        if oldAccount.remainder.stringValue != self.remainder {
             let remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
             req.remainder = remainder
 //            modelData.accountsGrouped[accountIndex].remainder = remainder!
         }
-        if String(oldAccount.budget) != self.budget {
+        if oldAccount.budget.stringValue != self.budget {
             let budget = Double(self.budget.replacingOccurrences(of: ",", with: "."))
             req.budget = budget
 //            modelData.accountsGrouped[accountIndex].budget = budget!
