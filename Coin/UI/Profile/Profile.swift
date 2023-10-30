@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct Profile: View {
     
@@ -17,9 +18,25 @@ struct Profile: View {
     @Environment(ModelData.self) var modelData
     @State var isShowHidedAccounts = false
     
+    @Environment(\.modelContext) var modelContext
+        
+    @Query var users: [User]
+    
+    var user: User {
+        if users.count != 0 {
+            return users[0]
+        }
+        return User()
+    }
+
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    Text("Имя пользователя: \(user.name)")
+                    Text("Email: \(user.email)")
+                    Text("Дата регистрации: \(user.timeCreate)")
+                }
                 Toggle(isOn: $isDarkMode) {
                     HStack {
                         Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
@@ -59,6 +76,18 @@ struct Profile: View {
                     .foregroundColor(.red)
                 }
                 .frame(maxWidth: .infinity)
+            }
+        }
+    }
+    
+    func getUser() {
+        if users.isEmpty {
+            UserAPI().GetUser() { model, error in
+                if let err = error {
+                    showErrorAlert(error: err)
+                } else if let response = model {
+                    modelContext.insert(response)
+                }
             }
         }
     }

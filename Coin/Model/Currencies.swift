@@ -7,7 +7,7 @@
 
 import Foundation
 
-@Model class Currency {
+class Currency: Decodable {
     var isoCode: String
     var name: String
     var rate: Double

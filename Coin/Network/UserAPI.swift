@@ -32,4 +32,25 @@ class UserAPI: API {
             }
         }
     }
+    
+    func GetUser(completionHandler: @escaping (User?, ErrorModel?) -> Void) {
+        
+        let (headers, err) = getBaseHeaders()
+        if err != nil {
+            completionHandler(nil, err)
+        }
+                
+        AF.request(basePath + userBasePath, method: .get, headers: headers).responseData { response in
+            
+            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: User.self)
+            if error != nil {
+                completionHandler(nil, error)
+                return
+            }
+            if model != nil {
+                completionHandler(model, nil)
+                return
+            }
+        }
+    }
 }

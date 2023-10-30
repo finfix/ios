@@ -7,8 +7,7 @@
 
 import Foundation
 
-@Observable
-class ModelData {
+@Observable class ModelData {
     
     var accounts = [Account]() {
         didSet {
