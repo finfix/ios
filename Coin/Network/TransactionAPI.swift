@@ -78,7 +78,7 @@ class TransactionAPI: API {
             completionHandler(err)
         }
         
-        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {
