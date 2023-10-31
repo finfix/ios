@@ -36,18 +36,26 @@ struct AccountCircleItem: View {
             Text(account.name)
                 .lineLimit(1)
             
-            Circle()
-                .frame(width: 30)
-                .foregroundColor(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red)
-                .onTapGesture(count: 2) {
-                    if !alreadyOpened {
-                        isChildrenOpen = true
+            ZStack {
+                if !account.childrenAccounts.isEmpty {
+                    Circle()
+                        .fill(.clear)
+                        .strokeBorder(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red, lineWidth: 1)
+                        .frame(width: 35)
+                }
+                Circle()
+                    .fill(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red)
+                    .frame(width: 30)
+                
+                    .onTapGesture(count: 2) {
+                        if !alreadyOpened {
+                            isChildrenOpen = true
+                        }
                     }
-                }
-                .onLongPressGesture(minimumDuration: 1.0) {
-                    isUpdateOpen = true
-                }
-            
+                    .onLongPressGesture(minimumDuration: 1.0) {
+                        isUpdateOpen = true
+                    }
+            }
             Text(formatter.string(number: account.remainder))
                 .lineLimit(1)
             
@@ -59,10 +67,13 @@ struct AccountCircleItem: View {
         }
         .font(.caption)
         .frame(width: 80, height: 100)
+        .opacity(account.accounting ? 1 : 0.5)
         .popover(isPresented: $isChildrenOpen) {
-            AccountChildren(parentAccount: account)
-                .padding()
-                .presentationCompactAdaptation(.popover)
+            ForEach(account.childrenAccounts) { childAccount in
+                AccountCircleItem(account: childAccount, alreadyOpened: true)
+            }
+            .padding()
+            .presentationCompactAdaptation(.popover)
         }
         .navigationDestination(isPresented: $isUpdateOpen) {
             UpdateAccount(isUpdateOpen: $isUpdateOpen, account: account)
