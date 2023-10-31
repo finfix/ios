@@ -46,18 +46,18 @@ struct MainView: View {
                     Text("Счета 2")
                 }
             
-            TransactionsList()
-                .tag(3)
-                .tabItem {
-                    Image(systemName: "3.circle")
-                    Text("Транзакции")
-                }
-            
             BudgetsList()
                 .tag(4)
                 .tabItem {
                     Image(systemName: "ruler.fill")
                     Text("Бюджеты")
+                }
+            
+            TransactionsList()
+                .tag(3)
+                .tabItem {
+                    Image(systemName: "3.circle")
+                    Text("Транзакции")
                 }
             
             Profile()
