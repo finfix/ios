@@ -44,7 +44,7 @@ import Foundation
         }
         
         for account in accounts {
-            if account.type == .earnings || (account.budget == 0 && account.remainder == 0) || !account.childrenAccounts.isEmpty {
+            if account.type == .earnings || (account.budget == 0 && account.remainder == 0) || !account.childrenAccounts.isEmpty || !account.accounting {
                 continue
             }
             
