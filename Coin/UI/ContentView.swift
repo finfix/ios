@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     
@@ -23,13 +24,18 @@ struct ContentView: View {
 struct MainView: View {
     
     @Environment(ModelData.self) var modelData
+    @Query var currencies: [Currency]
+    
+    @Environment(\.modelContext) var modelContext
+    
+    @AppStorage("lastFetchedCurrencies") var lastFetchedCurrencies: Double = Date.now.timeIntervalSince1970
     
     var body: some View {
         TabView {
             AccountsHome()
                 .tag(1)
                 .tabItem {
-                    Image(systemName: "1.circle")
+                    Image(systemName: "list.bullet.rectangle.fill")
                     Text("Счета")
                 }
             
@@ -40,6 +46,13 @@ struct MainView: View {
                     Text("Счета 2")
                 }
             
+            BudgetsList()
+                .tag(4)
+                .tabItem {
+                    Image(systemName: "ruler.fill")
+                    Text("Бюджеты")
+                }
+            
             TransactionsList()
                 .tag(3)
                 .tabItem {
@@ -47,21 +60,53 @@ struct MainView: View {
                     Text("Транзакции")
                 }
             
-            BudgetsList()
-                .tag(4)
-                .tabItem {
-                    Image(systemName: "4.circle")
-                    Text("Бюджеты")
-                }
-            
             Profile()
                 .tag(5)
                 .tabItem {
-                    Image(systemName: "5.circle")
+                    Image(systemName: "person.fill")
                     Text("Профиль")
                 }
         }
-        .onAppear(perform: modelData.sync)
+        .onAppear {
+            modelData.getAccounts()
+            modelData.getAccountGroups()
+            modelData.getTransactions()
+        }
+        .onAppear {
+            if hasExceededLimit() || currencies.isEmpty {
+                getCurrencies()
+            }
+            modelData.currencies = Dictionary(uniqueKeysWithValues: currencies.map{ ($0.isoCode, $0) })
+        }
+    }
+}
+
+extension MainView {
+    
+    func hasExceededLimit() -> Bool {
+        let timeLimit = 3600 // 1 hour
+        let currentTime = Date.now
+        let lastFetchedCurrenciesTime = Date(timeIntervalSince1970: lastFetchedCurrencies)
+        
+        guard let differenceInMins = Calendar.current.dateComponents([.second],
+                                                                     from: lastFetchedCurrenciesTime,
+                                                                     to: currentTime).second else {
+            return false
+        }
+        return differenceInMins >= timeLimit
+    }
+    
+    func getCurrencies() {
+        
+        UserAPI().GetCurrencies() { model, error in
+            if let err = error {
+                showErrorAlert(error: err)
+            } else if let currencies = model {
+                for currency in currencies { modelContext.insert(currency) }
+            }
+        }
+        
+        lastFetchedCurrencies = Date.now.timeIntervalSince1970
     }
 }
 

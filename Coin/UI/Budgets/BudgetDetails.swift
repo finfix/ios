@@ -16,12 +16,12 @@ struct BudgetDetails: View {
     let height: CGFloat = 60
     let today = Calendar.current.component(.day, from: Date())
     
-    var dailyBudget: Double {
-        account.budget / Double(daysInMonth)
+    var dailyBudget: Decimal {
+        account.budget / Decimal(daysInMonth)
     }
     
-    var availableExpense: Double {
-        dailyBudget * Double(today) - account.remainder
+    var availableExpense: Decimal {
+        dailyBudget * Decimal(today) - account.remainder
     }
     
     var currencyFormatter: CurrencyFormatter

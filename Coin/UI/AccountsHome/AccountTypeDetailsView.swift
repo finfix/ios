@@ -12,13 +12,15 @@ struct AccountTypeDetailsView: View {
     @State var header: String
     @State var showingList = false
     
-    var totalSum: Double {
-        var total = 0.0
+    var totalSum: Decimal {
+        var total: Decimal = 0
         for account in accounts {
             total += account.remainder
         }
         return total
     }
+    
+    var currencyFormatter = CurrencyFormatter(maximumFractionDigits: 0)
     
     var accounts: [Account]
     
@@ -34,7 +36,8 @@ struct AccountTypeDetailsView: View {
                     .rotationEffect(.degrees(showingList ? 90 : 0))
                 Text(header)
                 Spacer()
-                Text("\(String(format: "%.0f", totalSum))")
+                // TODO: Сделать динамическим
+                Text(currencyFormatter.string(number: totalSum, currency: "RUB"))
             }
             .foregroundColor(.primary)
             .padding()

@@ -17,11 +17,12 @@ struct CreateAccount: View {
     @State var remainder: String = ""
     @State var currency: String = "USD"
     @State var name: String = ""
+    @State var gradualBudgetFilling: Bool = true
     
     var body: some View {
-        
-        VStack {
-            Form {
+        Form {
+            Section {
+                
                 TextField("Название счета", text: $name)
                 
                 if accountType == .expense || accountType == .earnings {
@@ -32,17 +33,24 @@ struct CreateAccount: View {
                         .keyboardType(.decimalPad)
                 }
                 
-                TextField("Валюта", text: $currency)
+                Toggle(isOn: $gradualBudgetFilling) {
+                    Text("Плавное заполнение бюджета")
+                }
+                
+                Picker("Валюта", selection: $currency) {
+                    ForEach(modelData.currencies.keys.sorted(by: >), id: \.self) { currency in
+                        Text(currency)
+                            .tag(currency)
+                    }
+                }
             }
-            Spacer()
-            
-            Button {
-                createAccount()
-                isOpeningFrame = false
-            } label: {
-                Text("Сохранить")
+            Section {
+                Button("Сохранить") {
+                    createAccount()
+                    isOpeningFrame = false
+                }
             }
-            .padding()
+            .frame(maxWidth: .infinity)
         }
     }
     
@@ -58,7 +66,7 @@ struct CreateAccount: View {
         if self.remainder != "" {
             remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
         }
-                
+        
         AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: modelData.selectedAccountsGroupID,
             accounting: true,
@@ -67,23 +75,25 @@ struct CreateAccount: View {
             iconID: 1,
             name: name,
             remainder: remainder,
-            type: accountType.rawValue)) { model, error in
+            type: accountType.rawValue,
+            gradualBudgetFilling: gradualBudgetFilling)
+        ) { model, error in
                 if let err = error {
                     showErrorAlert(error: err)
                 }
-                if let response = model {
-                    modelData.accounts.append(Account(
-                        id: response.id,
-                        accountGroupID: modelData.selectedAccountsGroupID,
-                        accounting: true,
-                        budget: budget ?? 0,
-                        currency: currency,
-                        iconID: 1,
-                        name: name,
-                        remainder: remainder ?? 0,
-                        type: accountType,
-                        visible: true))
-                }
+//                if let response = model {
+//                    modelData.accounts.append(Account(
+//                        id: response.id,
+//                        accountGroupID: modelData.selectedAccountsGroupID,
+//                        accounting: true,
+//                        budget: budget ?? 0,
+//                        currency: currency,
+//                        iconID: 1,
+//                        name: name,
+//                        remainder: remainder ?? 0,
+//                        type: accountType,
+//                        visible: true))
+//                }
             }
     }
 }

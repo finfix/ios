@@ -30,27 +30,27 @@ class CurrencyFormatter: NumberFormatter {
         }
     }
     
-    func string(number: Double, currency: String? = nil) -> String {
+    func string(number: Decimal, currency: String? = nil) -> String {
         
         if let currency = currency {
             self.currencyCode = currency
             self.currencySymbol = CurrencySymbols[currency]
         }
         
-        // Округляем погрешности
-        var num = Double(round(number * 1_000_000) / 1_000_000)
+        var num = number
+        let doubleNum = num.doubleValue
         
         // Считаем разрядность от модуля числа
         var countOfNumbers = 0
         if num != 0 {
-            countOfNumbers = Int(log10(fabs(num))) + 1
+            countOfNumbers = Int(log10(fabs(doubleNum))) + 1
         }
         
         switch(true) {
             // Передано значение в форматтер при инициализации
         case self.userMaximumFractionDigits: break
             // Число без дробной части
-        case num.truncatingRemainder(dividingBy: 1) == 0:
+        case doubleNum.truncatingRemainder(dividingBy: 1) == 0:
             self.maximumFractionDigits = 0
             // Число больше миллиона
         case countOfNumbers >= 7:
@@ -84,7 +84,7 @@ class CurrencyFormatter: NumberFormatter {
             cutFactor = 0
         }
         
-        num /= pow(10, Double(cutFactor))
+        num /= pow(10, Int(cutFactor))
         
         var selectedUnit = 0
         // Число больше миллиона
@@ -101,5 +101,15 @@ class CurrencyFormatter: NumberFormatter {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+extension Decimal {
+    var doubleValue:Double {
+        return NSDecimalNumber(decimal:self).doubleValue
+    }
+    
+    var stringValue: String {
+        return NSDecimalNumber(decimal:self).stringValue
     }
 }

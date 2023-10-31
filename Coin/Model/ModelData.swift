@@ -7,8 +7,7 @@
 
 import Foundation
 
-@Observable
-class ModelData {
+@Observable class ModelData {
     
     var accounts = [Account]() {
         didSet {
@@ -45,7 +44,7 @@ class ModelData {
         }
         
         for account in accounts {
-            if account.type == .earnings || (account.budget == 0 && account.remainder == 0) || !account.childrenAccounts.isEmpty {
+            if account.type == .earnings || (account.budget == 0 && account.remainder == 0) || !account.childrenAccounts.isEmpty || !account.accounting {
                 continue
             }
             
@@ -132,21 +131,10 @@ class ModelData {
         }
     }
     
-    func getCurrencies() {
-        UserAPI().GetCurrencies() { model, error in
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let response = model {
-                self.currencies = Dictionary(uniqueKeysWithValues: response.map{ ($0.isoCode, $0) })
-            }
-        }
-    }
-    
     func sync() {
         getAccounts()
         getAccountGroups()
         getTransactions()
-        getCurrencies()
     }
     
     func deleteAllData() {

@@ -11,7 +11,7 @@ import SwiftUI
 
 let accountBasePath = "/account"
 
-class AccountAPI {
+class AccountAPI: API {
     
     func GetAccounts(req: GetAccountsRequest, completionHandler: @escaping ([Account]?, ErrorModel?) -> Void) {
         

@@ -9,9 +9,9 @@ import Foundation
 import Alamofire
 import SwiftUI
 
-let transactionBasePath = "/transaction"
-
-class TransactionAPI {
+class TransactionAPI: API {
+    
+    let transactionBasePath = "/transaction"
     
     // Получение транзакций
     func GetTransactions(req: GetTransactionRequest, completionHandler: @escaping ([Transaction]?, ErrorModel?) -> Void) {
@@ -78,7 +78,7 @@ class TransactionAPI {
             completionHandler(err)
         }
         
-        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
+        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, headers: headers).responseData { response in
             
             let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
             if error != nil {

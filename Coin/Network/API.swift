@@ -9,7 +9,9 @@ import Foundation
 import Alamofire
 import SwiftUI
 
-let basePath = "https://bonavii.com"
+class API {
+    @AppStorage("basePath") var basePath: String = defaultBasePath
+}
 
 func getBaseHeaders() -> (HTTPHeaders, ErrorModel?) {
     

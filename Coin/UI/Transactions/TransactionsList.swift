@@ -13,6 +13,7 @@ struct TransactionsList: View {
     @Environment(ModelData.self) var modelData
     
     @State var showCreate = false
+    @State var searchText = ""
     
     var groupedTransactionByDate: [Date : [Transaction]] {
         Dictionary(grouping: modelData.transactions, by: { $0.dateTransaction })
@@ -38,6 +39,7 @@ struct TransactionsList: View {
                         modelData.getTransactions(offset: UInt32(modelData.transactions.count))
                     }
             }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
             .listStyle(.grouped)
         }
     }

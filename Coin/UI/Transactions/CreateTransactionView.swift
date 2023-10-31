@@ -69,7 +69,7 @@ struct CreateTransactionView: View {
     var body: some View {
         VStack {
             Form {
-//                Section {
+                Section {
                     Picker("Выберите счет списания", selection: $accountFrom) {
                         ForEach (accountsFrom) {
                             Text($0.name).tag($0 as Account?)
@@ -93,8 +93,8 @@ struct CreateTransactionView: View {
                     DatePicker(selection: $date, displayedComponents: .date) {
                         Text("Дата транзакции")
                     }
-//                }
-//                Section {
+                }
+                Section {
                     ZStack(alignment: .topLeading) {
                         if note.isEmpty {
                             Text("Заметка")
@@ -105,18 +105,19 @@ struct CreateTransactionView: View {
                             .lineLimit(5)
                     }
                 }
-//            }
-            Spacer()
-            Button {
-                createTransaction()
-                isOpeningFrame = false
-            } label: {
-                Text("Сохранить")
-            }
-            .padding()
-            .onAppear {
-                self.accountFrom = accountsFrom.first
-                self.accountTo = accountsTo.first
+                Section {
+                    Button {
+                        createTransaction()
+                        isOpeningFrame = false
+                    } label: {
+                        Text("Сохранить")
+                    }
+                    .padding()
+                    .onAppear {
+                        self.accountFrom = accountsFrom.first
+                        self.accountTo = accountsTo.first
+                    }
+                }
             }
         }
     }

@@ -19,6 +19,7 @@ struct UpdateAccount: View {
     @State var budget: String
     @State var name: String
     @State var remainder: String
+    @State var gradualBudgetFilling: Bool
     
     init(isUpdateOpen: Binding<Bool>, account: Account) {
         self._isUpdateOpen = isUpdateOpen
@@ -26,9 +27,10 @@ struct UpdateAccount: View {
         self.id = account.id
         self.accounting = account.accounting
         self.visible = account.visible
-        self.budget = String(account.budget)
+        self.budget = account.budget.stringValue
         self.name = account.name
-        self.remainder = String(account.remainder)
+        self.remainder = account.remainder.stringValue
+        self.gradualBudgetFilling = account.gradualBudgetFilling
     }
     
     var body: some View {
@@ -45,10 +47,16 @@ struct UpdateAccount: View {
             Toggle(isOn: $visible) {
                 Text("Показывать ли счет")
             }
-        }
-        Button("Сохранить") {
-            updateAccount()
-            isUpdateOpen = false
+            Toggle(isOn: $gradualBudgetFilling) {
+                Text("Плавное заполнение бюджета")
+            }
+            Section {
+                Button("Сохранить") {
+                    updateAccount()
+                    isUpdateOpen = false
+                }
+            }
+            .frame(maxWidth: .infinity)
         }
     }
     
@@ -63,12 +71,16 @@ struct UpdateAccount: View {
             req.accounting = accounting
 //            modelData.accountsGrouped[accountIndex].accounting = accounting
         }
-        if String(oldAccount.remainder) != self.remainder {
+        if oldAccount.gradualBudgetFilling != gradualBudgetFilling {
+            req.gradualBudgetFilling = gradualBudgetFilling
+//            modelData.accountsGrouped[accountIndex].accounting = accounting
+        }
+        if oldAccount.remainder.stringValue != self.remainder {
             let remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
             req.remainder = remainder
 //            modelData.accountsGrouped[accountIndex].remainder = remainder!
         }
-        if String(oldAccount.budget) != self.budget {
+        if oldAccount.budget.stringValue != self.budget {
             let budget = Double(self.budget.replacingOccurrences(of: ",", with: "."))
             req.budget = budget
 //            modelData.accountsGrouped[accountIndex].budget = budget!
@@ -87,5 +99,5 @@ struct UpdateAccount: View {
 }
 
 #Preview {
-    UpdateAccount(isUpdateOpen: .constant(true), account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 1000.4, currency: "RUB", iconID: 1, name: "Надо поменять", remainder: 23, type: .regular, visible: false, parentAccountID: nil))
+    UpdateAccount(isUpdateOpen: .constant(true), account: Account())
 }
