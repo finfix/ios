@@ -18,7 +18,20 @@ struct MyApp: App {
     @AppStorage("isErrorShowing") var isErrorShowing = false
     @AppStorage("errorText") var errorText: String = ""
     @AppStorage("errorDescription") var errorDescription: String = ""
+    
+    var container: ModelContainer
 
+    init() {
+        do {
+            let storeURL = URL.documentsDirectory.appending(path: "database.sqlite")
+            let schema = Schema([Currency.self, User.self])
+            let config = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .private("coin"))
+            container = try ModelContainer(for: schema, configurations: config)
+        } catch {
+            fatalError("Failed to configure SwiftData container.")
+        }
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -37,7 +50,7 @@ struct MyApp: App {
                     )
                 }
         }
-        .modelContainer(for: [User.self])
+        .modelContainer(container)
     }
 }
 

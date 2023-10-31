@@ -23,8 +23,8 @@ struct Profile: View {
     @Query var users: [User]
     
     var user: User {
-        if users.count != 0 {
-            return users[0]
+        if !users.isEmpty {
+            return users.first!
         }
         return User()
     }

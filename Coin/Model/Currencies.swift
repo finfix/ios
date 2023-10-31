@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import SwiftData
 
-class Currency: Decodable {
-    var isoCode: String
+@Model class Currency: Decodable {
+    @Attribute(.unique) var isoCode: String
     var name: String
     var rate: Double
     var symbol: String

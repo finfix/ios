@@ -8,10 +8,9 @@
 import Foundation
 import SwiftData
 
-@Model 
-class User: Decodable {
+@Model class User: Decodable {
     
-    var id: UInt32
+    @Attribute(.unique) var id: UInt32
     var name: String
     var email: String
     var timeCreate: Date

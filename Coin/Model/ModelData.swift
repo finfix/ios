@@ -131,22 +131,10 @@ import Foundation
         }
     }
     
-    func getCurrencies() {
-        
-        UserAPI().GetCurrencies() { model, error in
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let response = model {
-                self.currencies = Dictionary(uniqueKeysWithValues: response.map{ ($0.isoCode, $0) })
-            }
-        }
-    }
-    
     func sync() {
         getAccounts()
         getAccountGroups()
         getTransactions()
-        getCurrencies()
     }
     
     func deleteAllData() {
