@@ -12,7 +12,11 @@ struct HidedAccountsList: View {
     @Environment(ModelData.self) var modelData
     
     var filteredAccounts: [Account] {
-        modelData.accounts.filter{ !$0.visible && !$0.isChild && $0.type == accountType && $0.accountGroupID == modelData.selectedAccountsGroupID }
+        modelData.accounts.filter{ !$0.visible && $0.childrenAccounts.isEmpty && $0.type == accountType && $0.accountGroupID == modelData.selectedAccountsGroupID }
+    }
+    
+    var groupedAccountsByCurrency: [String : [Account]] {
+        Dictionary(grouping: filteredAccounts, by: { $0.currency })
     }
     
     @State var accountType: AccountType = .regular
@@ -29,8 +33,12 @@ struct HidedAccountsList: View {
         AccountsGroupSelector()
         ScrollView {
             LazyVGrid(columns: columns) {
-                ForEach(filteredAccounts) { account in
-                    AccountCircleItem(account: account)
+                ForEach(groupedAccountsByCurrency.keys.sorted(by: >), id: \.self) { currency in
+                    Section(header: Text(CurrencySymbols[currency]!)) {
+                        ForEach(groupedAccountsByCurrency[currency] ?? []) { account in
+                            AccountCircleItem(account: account)
+                        }
+                    }
                 }
             }
         }
