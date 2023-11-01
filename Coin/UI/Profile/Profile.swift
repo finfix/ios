@@ -17,6 +17,7 @@ struct Profile: View {
     @AppStorage("basePath") private var basePath: String = defaultBasePath
     @Environment(ModelData.self) var modelData
     @State var isShowHidedAccounts = false
+    @State var isShowCurrencyRates = false
     
     @Environment(\.modelContext) var modelContext
         
@@ -52,8 +53,14 @@ struct Profile: View {
                     Button("Скрытые счета") {
                         isShowHidedAccounts = true
                     }
+                    Button("Курсы валют") {
+                        isShowCurrencyRates = true
+                    }
                     .navigationDestination(isPresented: $isShowHidedAccounts) {
                         HidedAccountsList()
+                    }
+                    .navigationDestination(isPresented: $isShowCurrencyRates) {
+                        CurrencyRates()
                     }
                 }
                 .frame(maxWidth: .infinity)

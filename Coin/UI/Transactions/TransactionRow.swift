@@ -14,6 +14,14 @@ struct TransactionRow: View {
     @State var showUpdate = false
     @State var transaction: Transaction
     
+    var accountGroupsMap: [UInt32: AccountGroup] {
+        Dictionary(uniqueKeysWithValues: modelData.accountGroups.map{ ($0.id, $0) })
+    }
+    
+    var accountsMap: [UInt32: Account] {
+        Dictionary(uniqueKeysWithValues: modelData.accounts.map{ ($0.id, $0) })
+    }
+    
     var prefix: String {
         switch transaction.type {
         case .income: return "+ "
@@ -22,18 +30,42 @@ struct TransactionRow: View {
         }
     }
     
+    var accountFrom: Account {
+        accountsMap[transaction.accountFromID] ?? Account(name: "Недоступный счет")
+    }
+    
+    var accountTo: Account {
+        accountsMap[transaction.accountToID] ?? Account(name: "Недоступный счет")
+    }
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
                 if transaction.type != .balancing {
-                    Text(modelData.accountsMap[transaction.accountFromID]?.name ?? "Нет счета")
-                        .font(.footnote)
+                    HStack {
+                        Text(accountFrom.name)
+                        Text(CurrencySymbols[accountFrom.currency] ?? "")
+                            .foregroundColor(.secondary)
+                        Text(accountGroupsMap[accountFrom.accountGroupID]?.name ?? "" )
+                            .foregroundColor(.secondary)
+                    }
+                    .font(.footnote)
                 }
-                Text(modelData.accountsMap[transaction.accountToID]?.name ?? "Нет счета")
+                HStack {
+                    Text(accountTo.name)
+                    Text(CurrencySymbols[accountTo.currency] ?? "")
+                        .foregroundColor(.secondary)
+                    Text(accountGroupsMap[accountTo.accountGroupID]?.name ?? "" )
+                        .foregroundColor(.secondary)
+                }
             }
             Spacer()
             VStack(alignment: .trailing) {
-                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: modelData.accountsMap[transaction.accountToID]?.currency))
+                if transaction.amountFrom != transaction.amountTo {
+                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: accountFrom.currency))
+                        .font(.footnote)
+                }
+                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: accountTo.currency))
                 if transaction.note != "" {
                     Text(transaction.note)
                         .font(.footnote)

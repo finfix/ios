@@ -21,10 +21,14 @@ import Foundation
                     let parentAccountIndex = accountsTmp.firstIndex { $0.id == parentAccountID }
                     let parentAccount = accountsTmp[parentAccountIndex!]
                     
-                    accountsTmp[parentAccountIndex!].childrenAccounts.append(account)
-                    let relation = (currencies[parentAccount.currency] ?? Currency()).rate / (currencies[account.currency] ?? Currency()).rate
-                    accountsTmp[parentAccountIndex!].budget += account.budget * relation
-                    accountsTmp[parentAccountIndex!].remainder += account.remainder * relation
+                    if account.visible {
+                        accountsTmp[parentAccountIndex!].childrenAccounts.append(account)
+                        if account.accounting {
+                            let relation = (currencies[parentAccount.currency]?.rate ?? 1) / (currencies[account.currency]?.rate ?? 1)
+                            accountsTmp[parentAccountIndex!].budget += account.budget * relation
+                            accountsTmp[parentAccountIndex!].remainder += account.remainder * relation
+                        }
+                    }
                     accountsTmp[i].isChild = true
                 }
             }
@@ -67,10 +71,6 @@ import Foundation
     var transactions = [Transaction]()
     var accountGroups = [AccountGroup]()
     var currencies = [String: Currency]()
-    
-    var accountsMap: [UInt32: Account] {
-        Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
-    }
     
     var filteredAccounts: [Account] {
         if accountGroups.count > 0 {
