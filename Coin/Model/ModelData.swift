@@ -68,10 +68,6 @@ import Foundation
     var accountGroups = [AccountGroup]()
     var currencies = [String: Currency]()
     
-    var accountsMap: [UInt32: Account] {
-        Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
-    }
-    
     var filteredAccounts: [Account] {
         if accountGroups.count > 0 {
             return accounts.filter { account in

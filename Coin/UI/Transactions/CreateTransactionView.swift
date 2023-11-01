@@ -27,11 +27,11 @@ struct CreateTransactionView: View {
         filteredAccounts.filter {
             switch transactionType {
             case .consumption:
-                return $0.type != .expense && $0.type != .earnings
+                return $0.type != .expense && $0.type != .earnings && $0.accountGroupID == accountGroupFrom.id
             case .income:
-                return $0.type == .earnings
+                return $0.type == .earnings && $0.accountGroupID == accountGroupFrom.id
             case .transfer:
-                return $0.type != .expense && $0.type != .earnings
+                return $0.type != .expense && $0.type != .earnings && $0.accountGroupID == accountGroupFrom.id
             default:
                 return true
             }
@@ -42,11 +42,11 @@ struct CreateTransactionView: View {
         filteredAccounts.filter {
             switch transactionType {
             case .consumption:
-                return $0.type == .expense
+                return $0.type == .expense && $0.accountGroupID == accountGroupTo.id
             case .income:
-                return $0.type != .expense && $0.type != .earnings
+                return $0.type != .expense && $0.type != .earnings && $0.accountGroupID == accountGroupTo.id
             case .transfer:
-                return $0.type != .expense && $0.type != .earnings && $0.id != accountFrom?.id
+                return $0.type != .expense && $0.type != .earnings && $0.id != accountFrom.id && $0.accountGroupID == accountGroupTo.id
             default:
                 return true
             }
@@ -54,8 +54,10 @@ struct CreateTransactionView: View {
     }
     
     var transactionType: TransactionType
-    @State var accountFrom: Account?
-    @State var accountTo: Account?
+    @State var accountGroupFrom = AccountGroup()
+    @State var accountGroupTo = AccountGroup()
+    @State var accountFrom = Account()
+    @State var accountTo = Account()
     @State var amountFrom: String = ""
     @State var amountTo: String = ""
     @State var selectedType: Int = 0
@@ -63,61 +65,93 @@ struct CreateTransactionView: View {
     @State var date = Date()
     
     var intercurrency: Bool {
-        return accountFrom?.currency != accountTo?.currency
+        return accountFrom.currency != accountTo.currency
     }
     
     var body: some View {
-        VStack {
-            Form {
-                Section {
-                    Picker("Выберите счет списания", selection: $accountFrom) {
-                        ForEach (accountsFrom) {
-                            Text($0.name).tag($0 as Account?)
+        Form {
+            Section {
+                HStack(spacing: 0) {
+                    Picker("", selection: $accountGroupFrom) {
+                        ForEach (modelData.accountGroups) { accountGroup in
+                            Text(accountGroup.name)
+                                .tag(accountGroup)
                         }
                     }
-                    
-                    // Пикер счета получения
-                    Picker("Выберите счет получения", selection: $accountTo) {
-                        ForEach (accountsTo) {
-                            Text($0.name).tag($0 as Account?)
+                    Picker("", selection: $accountFrom) {
+                        ForEach (accountsFrom) { account in
+                            HStack {
+                                Text(account.name)
+                                Spacer()
+                                Text(CurrencySymbols[account.currency]!)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(account)
                         }
                     }
-                    
-                    TextField(intercurrency ? "Сумма списания" : "Сумма", text: $amountFrom)
+                }
+                
+                HStack(spacing: 0) {
+                    Picker("", selection: $accountGroupTo) {
+                        ForEach (modelData.accountGroups) { accountGroup in
+                            Text(accountGroup.name)
+                                .tag(accountGroup)
+                        }
+                    }
+                    Picker("", selection: $accountTo) {
+                        ForEach (accountsTo) { account in
+                            HStack {
+                                Text(account.name)
+                                Spacer()
+                                Text(CurrencySymbols[account.currency]!)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(account)
+                        }
+                    }
+                }
+                
+                TextField(intercurrency ? "Сумма списания" : "Сумма", text: $amountFrom)
+                    .keyboardType(.decimalPad)
+                if intercurrency {
+                    TextField("Сумма начисления", text: $amountTo)
                         .keyboardType(.decimalPad)
-                    if intercurrency {
-                        TextField("Сумма начисления", text: $amountTo)
-                            .keyboardType(.decimalPad)
-                    }
-                    
-                    DatePicker(selection: $date, displayedComponents: .date) {
-                        Text("Дата транзакции")
-                    }
                 }
-                Section {
-                    ZStack(alignment: .topLeading) {
-                        if note.isEmpty {
-                            Text("Заметка")
-                                .foregroundColor(.secondary)
-                                .padding()
-                        }
-                        TextEditor(text: $note)
-                            .lineLimit(5)
-                    }
+                
+                DatePicker(selection: $date, displayedComponents: .date) {
+                    Text("Дата транзакции")
                 }
-                Section {
-                    Button {
-                        createTransaction()
-                        isOpeningFrame = false
-                    } label: {
-                        Text("Сохранить")
+            }
+            .pickerStyle(.wheel)
+            Section {
+                ZStack(alignment: .topLeading) {
+                    if note.isEmpty {
+                        Text("Заметка")
+                            .foregroundColor(.secondary)
+                            .padding()
                     }
-                    .padding()
-                    .onAppear {
-                        self.accountFrom = accountsFrom.first
-                        self.accountTo = accountsTo.first
-                    }
+                    TextEditor(text: $note)
+                        .lineLimit(5)
                 }
+            }
+            Section {
+                Button {
+                    createTransaction()
+                    isOpeningFrame = false
+                } label: {
+                    Text("Сохранить")
+                }
+                .padding()
+            }
+        }
+        .onAppear {
+            self.accountGroupFrom = modelData.accountGroups.first!
+            self.accountGroupTo = modelData.accountGroups.first!
+            if !accountsFrom.isEmpty {
+                self.accountFrom = accountsFrom.first!
+            }
+            if !accountsTo.isEmpty {
+                self.accountTo = accountsTo.first!
             }
         }
     }
@@ -131,8 +165,8 @@ struct CreateTransactionView: View {
         }
         
         TransactionAPI().CreateTransaction(req: CreateTransactionRequest(
-            accountFromID: accountFrom!.id,
-            accountToID: accountTo!.id,
+            accountFromID: accountFrom.id,
+            accountToID: accountTo.id,
             amountFrom: Double(amountFrom.replacingOccurrences(of: ",", with: ".")) ?? 0,
             amountTo: Double(amountTo.replacingOccurrences(of: ",", with: ".")) ?? 0,
             dateTransaction: format.string(from: date),
