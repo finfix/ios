@@ -83,5 +83,5 @@ struct TransactionRow: View {
 }
 
 #Preview {
-    TransactionRow(transaction: ModelData().transactions[0])
+    TransactionRow(transaction: Transaction())
 }

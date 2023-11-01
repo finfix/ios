@@ -23,10 +23,8 @@ struct MyApp: App {
 
     init() {
         do {
-            let storeURL = URL.documentsDirectory.appending(path: "database.sqlite")
-            let schema = Schema([Currency.self, User.self])
-            let config = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .private("coin"))
-            container = try ModelContainer(for: schema, configurations: config)
+            let schema = Schema([Currency.self, User.self, Transaction.self])
+            container = try ModelContainer(for: schema)
         } catch {
             fatalError("Failed to configure SwiftData container.")
         }

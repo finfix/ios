@@ -6,16 +6,18 @@
 //
 
 import Foundation
+import SwiftData
 
-
+@Model 
 class Transaction: Decodable, Identifiable {
+    @Attribute(.unique)
+    var id: UInt32
     var accountFromID: UInt32
     var accountToID: UInt32
     var accounting: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
     var dateTransaction: Date
-    var id: UInt32
     var isExecuted: Bool
     var note: String
     var type: TransactionType
@@ -32,8 +34,26 @@ class Transaction: Decodable, Identifiable {
         self.note = note
         self.type = type
     }
+    
+    enum CodingKeys: CodingKey {
+        case accountFromID, accountToID, accounting, amountFrom, amountTo, dateTransaction, id, isExecuted, note, type
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        accountFromID = try container.decode(UInt32.self, forKey: .accountFromID)
+        accountToID = try container.decode(UInt32.self, forKey: .accountToID)
+        accounting = try container.decode(Bool.self, forKey: .accounting)
+        amountFrom = try container.decode(Decimal.self, forKey: .amountFrom)
+        amountTo = try container.decode(Decimal.self, forKey: .amountTo)
+        dateTransaction = try container.decode(Date.self, forKey: .dateTransaction)
+        id = try container.decode(UInt32.self, forKey: .id)
+        isExecuted = try container.decode(Bool.self, forKey: .isExecuted)
+        note = try container.decode(String.self, forKey: .note)
+        type = try container.decode(TransactionType.self, forKey: .type)
+    }
 }
 
-enum TransactionType: String, Decodable {
+enum TransactionType: String, Codable {
     case consumption, income, transfer, balancing
 }

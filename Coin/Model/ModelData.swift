@@ -68,7 +68,6 @@ import Foundation
         }
         return tmp
     }
-    var transactions = [Transaction]()
     var accountGroups = [AccountGroup]()
     var currencies = [String: Currency]()
     
@@ -103,25 +102,7 @@ import Foundation
             }
         }
     }
-    
-    func getTransactions(offset: UInt32 = 0) {
-        
-        let limit: UInt8 = 100
-        
-        Task {
-            do {
-                let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq(offset: offset, limit: limit))
-                if offset == 0 {
-                    self.transactions = transactions
-                } else {
-                    self.transactions.append(contentsOf: transactions)
-                }
-            } catch {
-                debugLog(error)
-            }
-        }
-    }
-    
+
     func getAccountGroups() {
         Task {
             do {
@@ -135,12 +116,10 @@ import Foundation
     func sync() {
         getAccounts()
         getAccountGroups()
-        getTransactions()
     }
     
     func deleteAllData() {
         accounts.removeAll()
-        transactions.removeAll()
         accountGroups.removeAll()
     }
 }

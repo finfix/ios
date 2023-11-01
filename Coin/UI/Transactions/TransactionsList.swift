@@ -6,42 +6,27 @@
 //
 
 import SwiftUI
-import Charts
+import SwiftData
 
 struct TransactionsList: View {
-    
-    @Environment(ModelData.self) var modelData
-    
-    @State var showCreate = false
-    @State var searchText = ""
-    
-    var groupedTransactionByDate: [Date : [Transaction]] {
-        Dictionary(grouping: modelData.transactions, by: { $0.dateTransaction })
-    }
+    var groupedTransactionByDate: [Date : [Transaction]]
     
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
-                    Section(header: Text(date, style: .date).font(.headline)) {
-                        ForEach (groupedTransactionByDate[date] ?? []) { transaction in
-                            TransactionRow(transaction: transaction)
-                        }
-                        .onDelete {
-                            for i in $0.makeIterator() {
-                                deleteTransaction(id: groupedTransactionByDate[date]![i].id)
-                            }
+        List {
+            ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
+                Section(header: Text(date, style: .date).font(.headline)) {
+                    ForEach(groupedTransactionByDate[date]!) { transaction in
+                        TransactionRow(transaction: transaction)
+                    }
+                    .onDelete {
+                        for i in $0.makeIterator() {
+                            deleteTransaction(id: groupedTransactionByDate[date]![i].id)
                         }
                     }
                 }
-                Text("Идет загрузка...")
-                    .onAppear {
-                        modelData.getTransactions(offset: UInt32(modelData.transactions.count))
-                    }
             }
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
-            .listStyle(.grouped)
         }
+        .listStyle(.grouped)
     }
     
     func deleteTransaction(id: UInt32) {
@@ -55,6 +40,55 @@ struct TransactionsList: View {
     }
 }
 
+struct TransactionSubView: View {
+    
+    @Query(sort: [
+        SortDescriptor(\Transaction.dateTransaction, order: .reverse)
+    ]) var transactions: [Transaction]
+    
+    var groupedTransactionByDate: [Date : [Transaction]] {
+        print("Группируем транзакции")
+        return Dictionary(grouping: transactions, by: { $0.dateTransaction })
+    }
+    
+    init(searchString: String, dateFrom: Date, accountID: UInt32?) {
+        _transactions = Query(filter: #Predicate {
+            (searchString.isEmpty ? true : $0.note.localizedStandardContains(searchString)) &&
+            $0.dateTransaction >= dateFrom &&
+            (accountID == nil ? true : ($0.accountFromID == accountID || $0.accountToID == accountID))
+        })
+    }
+    
+    var body: some View {
+        TransactionsList(groupedTransactionByDate: groupedTransactionByDate)
+    }
+}
+
+struct TransactionsView: View {
+    
+    @State private var sortOrder = SortDescriptor(\Transaction.dateTransaction, order: .reverse)
+    @State private var searchText = ""
+    @State var dateFrom = Date()
+    @State var accountID: UInt32?
+    
+    var body: some View {
+        NavigationStack {
+            TransactionSubView(searchString: searchText, dateFrom: dateFrom)
+                .searchable(text: $searchText)
+                .toolbar {
+                    ToolbarItem {
+                        Menu {
+                            DatePicker("Дата транзакции", selection: $dateFrom, displayedComponents: .date)
+                        } label: {
+                            Image(systemName: "calendar")
+                        }
+                    }
+                }
+        }
+    }
+}
+
+
 #Preview {
-    TransactionsList()
+    TransactionsView()
 }

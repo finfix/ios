@@ -25,6 +25,7 @@ struct MainView: View {
     
     @Environment(ModelData.self) var modelData
     @Query var currencies: [Currency]
+    @Query var transactions: [Transaction]
     
     @Environment(\.modelContext) var modelContext
     
@@ -53,7 +54,7 @@ struct MainView: View {
                     Text("Бюджеты")
                 }
             
-            TransactionsList()
+            TransactionsView()
                 .tag(3)
                 .tabItem {
                     Image(systemName: "3.circle")
@@ -70,13 +71,16 @@ struct MainView: View {
         .onAppear {
             modelData.getAccounts()
             modelData.getAccountGroups()
-            modelData.getTransactions()
         }
         .onAppear {
             if hasExceededLimit() || currencies.isEmpty {
                 getCurrencies()
             }
             modelData.currencies = Dictionary(uniqueKeysWithValues: currencies.map{ ($0.isoCode, $0) })
+            if transactions.isEmpty {
+                print("Запросили транзакции с сервера")
+                getTransactions()
+            }
         }
     }
 }
@@ -102,6 +106,18 @@ extension MainView {
                 let currencies = try await UserAPI().GetCurrencies()
                 for currency in currencies { modelContext.insert(currency) }
                 lastFetchedCurrencies = Date.now.timeIntervalSince1970
+            } catch {
+                debugLog(error)
+            }
+        }
+    }
+    
+    func getTransactions() {
+        
+        Task {
+            do {
+                let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
+                for transaction in transactions { modelContext.insert(transaction) }
             } catch {
                 debugLog(error)
             }
