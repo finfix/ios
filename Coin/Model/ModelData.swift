@@ -7,47 +7,36 @@
 
 import Foundation
 
-@Observable class ModelData {
+func groupAccounts(accounts: [Account], currencies: [Currency]) -> [Account] {
     
-    var accounts = [Account]() {
-        didSet {
-            if childrenAccountsUpdated {
-                childrenAccountsUpdated = false
-                return
-            }
-            var accountsTmp = accounts
-            for (i, account) in accountsTmp.enumerated() {
-                if let parentAccountID = account.parentAccountID {
-                    let parentAccountIndex = accountsTmp.firstIndex { $0.id == parentAccountID }
-                    let parentAccount = accountsTmp[parentAccountIndex!]
-                    
-                    if account.visible {
-                        accountsTmp[parentAccountIndex!].childrenAccounts.append(account)
-                        if account.accounting {
-                            let relation = (currencies[parentAccount.currency]?.rate ?? 1) / (currencies[account.currency]?.rate ?? 1)
-                            accountsTmp[parentAccountIndex!].budget += account.budget * relation
-                            accountsTmp[parentAccountIndex!].remainder += account.remainder * relation
-                        }
-                    }
-                    accountsTmp[i].isChild = true
+    var ratesMap: [String: Decimal] {
+        Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0.rate ) })
+    }
+    
+    for (i, account) in accounts.enumerated() {
+        if let parentAccountID = account.parentAccountID {
+            let parentAccountIndex = accounts.firstIndex { $0.id == parentAccountID }
+            let parentAccount = accounts[parentAccountIndex!]
+            
+            if account.visible {
+                accounts[parentAccountIndex!].childrenAccounts.append(account)
+                if account.accounting {
+                    let relation = (ratesMap[parentAccount.currency] ?? 1) / (ratesMap[account.currency] ?? 1)
+                    accounts[parentAccountIndex!].budget += account.budget * relation
+                    accounts[parentAccountIndex!].remainder += account.remainder * relation
                 }
             }
-            childrenAccountsUpdated = true
-            accounts = accountsTmp
+            accounts[i].isChild = true
         }
     }
-    var childrenAccountsUpdated = false
+    return accounts
+}
+
+@Observable class ModelData {
+    
+    var accounts = [Account]()
     var accountGroups = [AccountGroup]()
     var currencies = [String: Currency]()
-    
-    var filteredAccounts: [Account] {
-        if accountGroups.count > 0 {
-            return accounts.filter { account in
-                account.accountGroupID == accountGroups[selectedAccountsGroupIndex].id
-            }
-        }
-        return []
-    }
     
     var selectedAccountsGroupIndex: Int = 0
     var selectedAccountsGroupID: UInt32 {

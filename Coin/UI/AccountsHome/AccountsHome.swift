@@ -11,6 +11,15 @@ struct AccountsHome: View {
     
     @Environment(ModelData.self) var modelData
     
+    var filteredAccounts: [Account] {
+        if modelData.accountGroups.count > 0 {
+            return modelData.accounts.filter { account in
+                account.accountGroupID == modelData.selectedAccountsGroupID
+            }
+        }
+        return []
+    }
+    
     // TODO: Сделать универсальными
     @State var showDebts = false
     
@@ -32,14 +41,14 @@ struct AccountsHome: View {
                     }
                     ScrollView {
                         Text("Карты и счета")
-                        SnapCarouselView(spacing: 30, index: $currentIndex, items: modelData.filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
+                        SnapCarouselView(spacing: 30, index: $currentIndex, items: filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
                             GeometryReader { proxy in
                                 AccountCard(size: proxy.size, account: account)
                             }
                         }
                         .frame(height: 150)
         
-                        AccountTypeDetailsView(header: "Долги", accounts: modelData.filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
+                        AccountTypeDetailsView(header: "Долги", accounts: filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
                     }
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)

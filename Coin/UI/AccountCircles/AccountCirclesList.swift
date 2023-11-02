@@ -6,13 +6,18 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AccountCircleList: View {
     
     @Environment(ModelData.self) var modelData
     
-    var filteredAccounts: [Account] {
-        modelData.accounts.filter { ( $0.accountGroupID == modelData.selectedAccountsGroupID ) && $0.visible && !$0.isChild }
+    @Query var currencies: [Currency]
+    
+    var accounts: [Account] {
+        debugLog("Группируем счета")
+        let tmp = modelData.accounts.filter { ( $0.accountGroupID == modelData.selectedAccountsGroupID ) && $0.visible }
+        return groupAccounts(accounts: tmp, currencies: currencies)
     }
     
     let rows = [
@@ -34,7 +39,7 @@ struct AccountCircleList: View {
                 }
                 ScrollView(.horizontal) {
                     HStack(spacing: horizontalSpacing) {
-                        CirclesArray(accounts: modelData.filteredAccounts, accountsType: .earnings)
+                        CirclesArray(accounts: accounts, accountsType: .earnings)
                     }
                 }
                 
@@ -42,7 +47,7 @@ struct AccountCircleList: View {
                 
                 ScrollView(.horizontal) {
                     HStack(spacing: horizontalSpacing) {
-                        CirclesArray(accounts: filteredAccounts, accountsType: .regular)
+                        CirclesArray(accounts: accounts, accountsType: .regular)
                     }
                 }
                 
@@ -50,7 +55,7 @@ struct AccountCircleList: View {
                 
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows, alignment: .top, spacing: horizontalSpacing) {
-                        CirclesArray(accounts: filteredAccounts, accountsType: .expense)
+                        CirclesArray(accounts: accounts, accountsType: .expense)
                     }
                 }
                 .frame(maxHeight: .infinity)
