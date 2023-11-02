@@ -12,7 +12,6 @@ struct AccountCircleItem: View {
     
     var account: Account
     
-    @Environment(ModelData.self) var modelData
     @Query var currencies: [Currency]
     
     @State var isChildrenOpen = false
@@ -137,5 +136,4 @@ struct AccountCircleItem: View {
                 type: .expense,
                 visible: true,
                 parentAccountID: nil)]))
-    .environment(ModelData())
 }

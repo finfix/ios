@@ -29,5 +29,5 @@ struct AccountCard: View {
 }
 
 #Preview {
-    AccountCard(size: CGSize(width: 30, height: 30), account: ModelData().accounts[0])
+    AccountCard(size: CGSize(width: 30, height: 30), account: Account())
 }

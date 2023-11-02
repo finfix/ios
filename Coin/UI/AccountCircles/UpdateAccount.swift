@@ -10,7 +10,6 @@ import SwiftUI
 struct UpdateAccount: View {
     
     @Binding var isUpdateOpen: Bool
-    @Environment(ModelData.self) var modelData
         
     var oldAccount: Account
     var id: UInt32

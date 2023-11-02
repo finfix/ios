@@ -23,9 +23,10 @@ struct ContentView: View {
 
 struct MainView: View {
     
-    @Environment(ModelData.self) var modelData
     @Query var currencies: [Currency]
     @Query var transactions: [Transaction]
+    @Query var accounts: [Account]
+    @Query var accountGroups: [AccountGroup]
     
     @Environment(\.modelContext) var modelContext
     
@@ -69,16 +70,20 @@ struct MainView: View {
                 }
         }
         .onAppear {
-            modelData.getAccounts()
-            modelData.getAccountGroups()
-        }
-        .onAppear {
             if hasExceededLimit() || currencies.isEmpty {
                 getCurrencies()
             }
             if transactions.isEmpty {
                 print("Запросили транзакции с сервера")
                 getTransactions()
+            }
+            if accounts.isEmpty {
+                print("Запросили счета с сервера")
+                getAccounts()
+            }
+            if accountGroups.isEmpty {
+                print("Запросили группы счетов с сервера")
+                getAccountGroups()
             }
         }
     }
@@ -122,9 +127,33 @@ extension MainView {
             }
         }
     }
+    
+    func getAccountGroups() {
+        AccountAPI().GetAccountGroups() { accountGroups, error in
+            if let err = error {
+                showErrorAlert(error: err)
+            } else if let accountGroups {
+                for accountGroup in accountGroups { modelContext.insert(accountGroup) }
+            }
+        }
+    }
+    
+    func getAccounts() {
+            
+            let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+            let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
+            let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+            
+            AccountAPI().GetAccounts(req: GetAccountsRequest(dateFrom: dateFrom, dateTo: dateTo)) { accounts, error in
+                if let err = error {
+                    showErrorAlert(error: err)
+                } else if let accounts {
+                    for account in accounts { modelContext.insert(account) }
+                }
+            }
+        }
 }
 
 #Preview {
     ContentView()
-        .environment(ModelData())
 }

@@ -22,5 +22,5 @@ struct CirclesArray: View {
 }
 
 #Preview {
-    CirclesArray(accounts: ModelData().accounts, accountsType: .regular)
+    CirclesArray(accounts: [], accountsType: .regular)
 }

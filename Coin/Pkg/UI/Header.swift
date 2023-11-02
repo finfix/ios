@@ -10,9 +10,10 @@ import SwiftData
 
 struct Header: View {
     
-    @Environment(ModelData.self) var modelData
     @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     @Query var currencies: [Currency]
+    @Query var accounts: [Account]
+    @Query var accountGroups: [AccountGroup]
     
     var currenciesMap: [String: Currency] {
         Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0) })
@@ -20,16 +21,16 @@ struct Header: View {
     
     var currency: String {
         debugLog("Считаем валюту группы счетов \(selectedAccountsGroupIndex)")
-        if !modelData.accountGroups.isEmpty {
-            return modelData.accountGroups[selectedAccountsGroupIndex].currency
+        if !accountGroups.isEmpty {
+            return accountGroups[selectedAccountsGroupIndex].currency
         }
         return "USD"
     }
     
-    var accounts: [Account] {
+    var filteredAccounts: [Account] {
         debugLog("Фильтруем счета для шапки")
-        return modelData.accounts.filter {
-            $0.accountGroupID == modelData.accountGroups[selectedAccountsGroupIndex].id &&
+        return accounts.filter {
+            $0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id &&
             $0.type != .earnings &&
             ($0.budget != 0 || $0.remainder != 0) &&
             $0.childrenAccounts.isEmpty &&
@@ -42,7 +43,7 @@ struct Header: View {
         debugLog("Считаем статистику для группы счетов \(selectedAccountsGroupIndex)")
         let tmp = QuickStatistic(currency: currency)
         
-        for account in accounts {
+        for account in filteredAccounts {
                         
             let relation = (currenciesMap[currency]?.rate ?? 1) / (currenciesMap[account.currency]?.rate ?? 1)
             
@@ -108,5 +109,4 @@ struct HeaderSubView: View {
         Header()
         Spacer()
     }
-    .environment(ModelData())
 }

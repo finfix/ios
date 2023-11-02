@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CreateTransactionView: View {
     
     @Binding var isOpeningFrame: Bool
-    @Environment(ModelData.self) var modelData
+    @Query var accounts: [Account]
+    @Query var accountGroups: [AccountGroup]
     
     init(isOpeningFrame: Binding<Bool>, transactionType: TransactionType) {
         self._isOpeningFrame = isOpeningFrame
@@ -18,7 +20,7 @@ struct CreateTransactionView: View {
     }
     
     var filteredAccounts: [Account] {
-        modelData.accounts.filter {
+        accounts.filter {
             $0.visible && $0.childrenAccounts.count == 0
         }
     }
@@ -73,7 +75,7 @@ struct CreateTransactionView: View {
             Section {
                 HStack(spacing: 0) {
                     Picker("", selection: $accountGroupFrom) {
-                        ForEach (modelData.accountGroups) { accountGroup in
+                        ForEach (accountGroups) { accountGroup in
                             Text(accountGroup.name)
                                 .tag(accountGroup)
                         }
@@ -93,7 +95,7 @@ struct CreateTransactionView: View {
                 
                 HStack(spacing: 0) {
                     Picker("", selection: $accountGroupTo) {
-                        ForEach (modelData.accountGroups) { accountGroup in
+                        ForEach (accountGroups) { accountGroup in
                             Text(accountGroup.name)
                                 .tag(accountGroup)
                         }
@@ -145,8 +147,8 @@ struct CreateTransactionView: View {
             }
         }
         .onAppear {
-            self.accountGroupFrom = modelData.accountGroups.first!
-            self.accountGroupTo = modelData.accountGroups.first!
+            self.accountGroupFrom = accountGroups.first!
+            self.accountGroupTo = accountGroups.first!
             if !accountsFrom.isEmpty {
                 self.accountFrom = accountsFrom.first!
             }

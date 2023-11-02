@@ -11,11 +11,11 @@ import SwiftData
 struct CreateAccount: View {
     
     @Binding var isOpeningFrame: Bool
-    @Environment(ModelData.self) var modelData
     @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     @Query(sort: [
         SortDescriptor(\Currency.isoCode)
     ]) var currencies: [Currency]
+    @Query var accountGroups: [AccountGroup]
     
     var accountType: AccountType
     @State var budget: String = ""

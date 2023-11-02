@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import SwiftData
 
-class Account: Decodable, Identifiable {
+@Model class Account: Decodable, Identifiable {
     
-    var id: UInt32
+    @Attribute(.unique) var id: UInt32
     var accountGroupID: UInt32
     var accounting: Bool
     var budget: Decimal
@@ -21,10 +22,6 @@ class Account: Decodable, Identifiable {
     var visible: Bool
     var parentAccountID: UInt32?
     var gradualBudgetFilling: Bool
-    
-    private enum CodingKeys: String, CodingKey {
-        case id, accountGroupID, accounting, budget, currency, iconID, name, remainder, type, visible, parentAccountID, gradualBudgetFilling
-    }
     
     var childrenAccounts: [Account] = []
     var isChild: Bool = false
@@ -59,7 +56,53 @@ class Account: Decodable, Identifiable {
         self.isChild = isChild
         self.gradualBudgetFilling = gradualBudgetFilling
     }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, accountGroupID, accounting, budget, currency, iconID, name, remainder, type, visible, parentAccountID, gradualBudgetFilling
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UInt32.self, forKey: .id)
+        accountGroupID = try container.decode(UInt32.self, forKey: .accountGroupID)
+        accounting = try container.decode(Bool.self, forKey: .accounting)
+        budget = try container.decode(Decimal.self, forKey: .budget)
+        currency = try container.decode(String.self, forKey: .currency)
+        iconID = try container.decode(UInt32.self, forKey: .iconID)
+        name = try container.decode(String.self, forKey: .name)
+        remainder = try container.decode(Decimal.self, forKey: .remainder)
+        type = try container.decode(AccountType.self, forKey: .type)
+        visible = try container.decode(Bool.self, forKey: .visible)
+        parentAccountID = try container.decode(UInt32?.self, forKey: .parentAccountID)
+        gradualBudgetFilling = try container.decode(Bool.self, forKey: .gradualBudgetFilling)
+    }
 }
+
+func groupAccounts(accounts: [Account], currencies: [Currency]) -> [Account] {
+    
+    var ratesMap: [String: Decimal] {
+        Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0.rate ) })
+    }
+    
+    for (i, account) in accounts.enumerated() {
+        if let parentAccountID = account.parentAccountID {
+            let parentAccountIndex = accounts.firstIndex { $0.id == parentAccountID }
+            let parentAccount = accounts[parentAccountIndex!]
+            
+            if account.visible {
+                accounts[parentAccountIndex!].childrenAccounts.append(account)
+                if account.accounting {
+                    let relation = (ratesMap[parentAccount.currency] ?? 1) / (ratesMap[account.currency] ?? 1)
+                    accounts[parentAccountIndex!].budget += account.budget * relation
+                    accounts[parentAccountIndex!].remainder += account.remainder * relation
+                }
+            }
+            accounts[i].isChild = true
+        }
+    }
+    return accounts
+}
+
 
 extension Account: Hashable {
     
@@ -72,6 +115,6 @@ extension Account: Hashable {
     }
 }
 
-enum AccountType: String, Decodable, CaseIterable {
+enum AccountType: String, Codable, CaseIterable {
     case expense, earnings, debt, regular
 }

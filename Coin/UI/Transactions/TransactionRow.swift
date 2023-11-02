@@ -6,20 +6,21 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TransactionRow: View {
-    
-    @Environment(ModelData.self) var modelData
-    
+        
     @State var showUpdate = false
     @State var transaction: Transaction
+    @Query var accountGroups: [AccountGroup]
+    @Query var accounts: [Account]
     
     var accountGroupsMap: [UInt32: AccountGroup] {
-        Dictionary(uniqueKeysWithValues: modelData.accountGroups.map{ ($0.id, $0) })
+        Dictionary(uniqueKeysWithValues: accountGroups.map{ ($0.id, $0) })
     }
     
     var accountsMap: [UInt32: Account] {
-        Dictionary(uniqueKeysWithValues: modelData.accounts.map{ ($0.id, $0) })
+        Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
     }
     
     var prefix: String {

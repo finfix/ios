@@ -9,15 +9,15 @@ import SwiftUI
 import SwiftData
 
 struct AccountCircleList: View {
-    
-    @Environment(ModelData.self) var modelData
-    
+        
     @Query var currencies: [Currency]
+    @Query var accounts: [Account]
+    @Query var accountGroups: [AccountGroup]
     @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     
-    var accounts: [Account] {
+    var groupedAccounts: [Account] {
         debugLog("Группируем счета")
-        let tmp = modelData.accounts.filter { ( $0.accountGroupID == modelData.accountGroups[selectedAccountsGroupIndex].id ) && $0.visible }
+        let tmp = accounts.filter { ( $0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id ) && $0.visible }
         return groupAccounts(accounts: tmp, currencies: currencies)
     }
     
@@ -34,13 +34,13 @@ struct AccountCircleList: View {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
                     Header()
-                    if modelData.accountGroups.count > 1 {
+                    if accountGroups.count > 1 {
                         AccountsGroupSelector()
                     }
                 }
                 ScrollView(.horizontal) {
                     HStack(spacing: horizontalSpacing) {
-                        CirclesArray(accounts: accounts, accountsType: .earnings)
+                        CirclesArray(accounts: groupedAccounts, accountsType: .earnings)
                     }
                 }
                 
@@ -48,7 +48,7 @@ struct AccountCircleList: View {
                 
                 ScrollView(.horizontal) {
                     HStack(spacing: horizontalSpacing) {
-                        CirclesArray(accounts: accounts, accountsType: .regular)
+                        CirclesArray(accounts: groupedAccounts, accountsType: .regular)
                     }
                 }
                 
@@ -56,7 +56,7 @@ struct AccountCircleList: View {
                 
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: rows, alignment: .top, spacing: horizontalSpacing) {
-                        CirclesArray(accounts: accounts, accountsType: .expense)
+                        CirclesArray(accounts: groupedAccounts, accountsType: .expense)
                     }
                 }
                 .frame(maxHeight: .infinity)
@@ -68,5 +68,4 @@ struct AccountCircleList: View {
 
 #Preview {
     AccountCircleList()
-        .environment(ModelData())
 }

@@ -24,6 +24,5 @@ struct AccountChildren: View {
 }
 
 #Preview {
-    AccountChildren(parentAccount: ModelData().accounts[0])
-        .environment(ModelData())
+    AccountChildren(parentAccount: Account())
 }

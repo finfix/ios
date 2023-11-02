@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import SwiftData
 
-class AccountGroup: Decodable, Identifiable {
-    var id: UInt32
+@Model class AccountGroup: Decodable, Identifiable {
+    
+    @Attribute(.unique) var id: UInt32
     var name: String
     var currency: String
     
@@ -16,6 +18,17 @@ class AccountGroup: Decodable, Identifiable {
         self.id = id
         self.name = name
         self.currency = currency
+    }
+    
+    private enum CodingKeys: CodingKey {
+        case id, name, currency
+    }
+
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UInt32.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        currency = try container.decode(String.self, forKey: .currency)
     }
 }
 

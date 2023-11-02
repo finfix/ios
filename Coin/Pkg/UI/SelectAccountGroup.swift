@@ -6,15 +6,15 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AccountsGroupSelector: View {
     
-    @Environment(ModelData.self) var modelData
-    
+    @Query var accountGroups: [AccountGroup]
     @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     
     var canForward: Bool {
-        selectedAccountsGroupIndex + 1 < modelData.accountGroups.count
+        selectedAccountsGroupIndex + 1 < accountGroups.count
     }
     
     var canBackward: Bool {
@@ -32,7 +32,7 @@ struct AccountsGroupSelector: View {
                     .foregroundColor(canBackward ? .primary : .gray)
             }
             
-            Text("\(modelData.accountGroups.count > 0 ? modelData.accountGroups[selectedAccountsGroupIndex].name : "")")
+            Text(accountGroups.count > 0 ? accountGroups[selectedAccountsGroupIndex].name : "")
                 .frame(width: 100)
             
             Button {
@@ -50,5 +50,4 @@ struct AccountsGroupSelector: View {
 
 #Preview {
     AccountsGroupSelector()
-        .environment(ModelData())
 }

@@ -6,16 +6,18 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AccountsHome: View {
     
-    @Environment(ModelData.self) var modelData
     @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @Query var accountGroups: [AccountGroup]
+    @Query var accounts: [Account]
     
     var filteredAccounts: [Account] {
-        if modelData.accountGroups.count > 0 {
-            return modelData.accounts.filter { account in
-                account.accountGroupID == modelData.accountGroups[selectedAccountsGroupIndex].id
+        if accountGroups.count > 0 {
+            return accounts.filter { account in
+                account.accountGroupID == accountGroups[selectedAccountsGroupIndex].id
             }
         }
         return []
@@ -36,7 +38,7 @@ struct AccountsHome: View {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
                         Header()
-                        if modelData.accountGroups.count > 1 {
+                        if accountGroups.count > 1 {
                             AccountsGroupSelector()
                         }
                     }

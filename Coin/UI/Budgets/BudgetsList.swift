@@ -6,16 +6,17 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct BudgetsList: View {
-    
-    @Environment(ModelData.self) var modelData
-    
+        
     @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @Query var accounts: [Account]
+    @Query var accountGroups: [AccountGroup]
     
     var filteredAccounts: [Account] {
-        modelData.accounts.filter {
-            ($0.accountGroupID == modelData.accountGroups[selectedAccountsGroupIndex].id) &&
+        accounts.filter {
+            ($0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id) &&
             $0.visible &&
             !$0.isChild &&
             $0.type == .expense &&
@@ -26,7 +27,7 @@ struct BudgetsList: View {
         ScrollView {
             VStack(spacing: 0) {
                 Header()
-                if modelData.accountGroups.count > 1 {
+                if accountGroups.count > 1 {
                     AccountsGroupSelector()
                 }
             }

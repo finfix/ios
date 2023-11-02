@@ -10,9 +10,7 @@ import SwiftData
 
 @main
 struct MyApp: App {
-    
-    @State private var modelData = ModelData()
-    
+        
     @AppStorage("isDarkMode") var isDarkMode = false
     
     @AppStorage("isErrorShowing") var isErrorShowing = false
@@ -23,7 +21,7 @@ struct MyApp: App {
 
     init() {
         do {
-            let schema = Schema([Currency.self, User.self, Transaction.self])
+            let schema = Schema([Currency.self, User.self, Transaction.self, Account.self, AccountGroup.self])
             container = try ModelContainer(for: schema)
         } catch {
             fatalError("Failed to configure SwiftData container.")
@@ -34,7 +32,6 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(isDarkMode ? .dark : .light)
-                .environment(modelData)
                 .alert(isPresented: $isErrorShowing) {
                     Alert(title: 
                             Text(errorText),

@@ -15,7 +15,6 @@ struct Profile: View {
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
     @AppStorage("basePath") private var basePath: String = defaultBasePath
-    @Environment(ModelData.self) var modelData
     @State var isShowHidedAccounts = false
     @State var isShowCurrencyRates = false
     
@@ -48,7 +47,6 @@ struct Profile: View {
                 }
                 Section {
                     Button("Синхронизировать") {
-                        getUser()
                     }
                     Button("Скрытые счета") {
                         isShowHidedAccounts = true
