@@ -10,11 +10,12 @@ import SwiftUI
 struct AccountsHome: View {
     
     @Environment(ModelData.self) var modelData
+    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     
     var filteredAccounts: [Account] {
         if modelData.accountGroups.count > 0 {
             return modelData.accounts.filter { account in
-                account.accountGroupID == modelData.selectedAccountsGroupID
+                account.accountGroupID == modelData.accountGroups[selectedAccountsGroupIndex].id
             }
         }
         return []

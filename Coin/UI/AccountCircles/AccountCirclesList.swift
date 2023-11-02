@@ -13,10 +13,11 @@ struct AccountCircleList: View {
     @Environment(ModelData.self) var modelData
     
     @Query var currencies: [Currency]
+    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     
     var accounts: [Account] {
         debugLog("Группируем счета")
-        let tmp = modelData.accounts.filter { ( $0.accountGroupID == modelData.selectedAccountsGroupID ) && $0.visible }
+        let tmp = modelData.accounts.filter { ( $0.accountGroupID == modelData.accountGroups[selectedAccountsGroupIndex].id ) && $0.visible }
         return groupAccounts(accounts: tmp, currencies: currencies)
     }
     

@@ -80,7 +80,6 @@ struct Profile: View {
                         isLogin = false
                         accessToken = nil
                         refreshToken = nil
-                        modelData.deleteAllData()
                     }
                 }
                 .frame(maxWidth: .infinity)

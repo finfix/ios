@@ -10,9 +10,10 @@ import SwiftUI
 struct HidedAccountsList: View {
     
     @Environment(ModelData.self) var modelData
+    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     
     var filteredAccounts: [Account] {
-        modelData.accounts.filter{ !$0.visible && $0.childrenAccounts.isEmpty && $0.type == accountType && $0.accountGroupID == modelData.selectedAccountsGroupID }
+        modelData.accounts.filter{ !$0.visible && $0.childrenAccounts.isEmpty && $0.type == accountType && $0.accountGroupID == modelData.accountGroups[selectedAccountsGroupIndex].id }
     }
     
     var groupedAccountsByCurrency: [String : [Account]] {

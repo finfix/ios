@@ -11,31 +11,33 @@ struct AccountsGroupSelector: View {
     
     @Environment(ModelData.self) var modelData
     
+    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    
     var canForward: Bool {
-        modelData.selectedAccountsGroupIndex + 1 < modelData.accountGroups.count
+        selectedAccountsGroupIndex + 1 < modelData.accountGroups.count
     }
     
     var canBackward: Bool {
-        modelData.selectedAccountsGroupIndex > 0
+        selectedAccountsGroupIndex > 0
     }
     
     var body: some View {
         HStack(spacing: 80) {
             Button {
                 if canBackward {
-                    modelData.selectedAccountsGroupIndex -= 1
+                    selectedAccountsGroupIndex -= 1
                 }
             } label: {
                 Image(systemName: "chevron.left")
                     .foregroundColor(canBackward ? .primary : .gray)
             }
             
-            Text("\(modelData.accountGroups.count > 0 ? modelData.accountGroups[modelData.selectedAccountsGroupIndex].name : "")")
+            Text("\(modelData.accountGroups.count > 0 ? modelData.accountGroups[selectedAccountsGroupIndex].name : "")")
                 .frame(width: 100)
             
             Button {
                 if canForward {
-                    modelData.selectedAccountsGroupIndex += 1
+                    selectedAccountsGroupIndex += 1
                 }
             } label: {
                 Image(systemName: "chevron.right")

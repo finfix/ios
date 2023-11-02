@@ -10,11 +10,12 @@ import SwiftUI
 struct Header: View {
     
     @Environment(ModelData.self) var modelData
+    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     
     var currency: String {
-        debugLog("Считаем валюту группы счетов \(modelData.selectedAccountsGroupID)")
+        debugLog("Считаем валюту группы счетов \(selectedAccountsGroupIndex)")
         if !modelData.accountGroups.isEmpty {
-            return modelData.accountGroups[modelData.selectedAccountsGroupIndex].currency
+            return modelData.accountGroups[selectedAccountsGroupIndex].currency
         }
         return "USD"
     }
@@ -22,7 +23,7 @@ struct Header: View {
     var accounts: [Account] {
         debugLog("Фильтруем счета для шапки")
         return modelData.accounts.filter {
-            $0.accountGroupID == modelData.selectedAccountsGroupID &&
+            $0.accountGroupID == modelData.accountGroups[selectedAccountsGroupIndex].id &&
             $0.type != .earnings &&
             ($0.budget != 0 || $0.remainder != 0) &&
             $0.childrenAccounts.isEmpty &&
@@ -32,7 +33,7 @@ struct Header: View {
     }
     
     var statistic: QuickStatistic {
-        debugLog("Считаем статистику для группы счетов \(modelData.selectedAccountsGroupID)")
+        debugLog("Считаем статистику для группы счетов \(selectedAccountsGroupIndex)")
         let tmp = QuickStatistic(currency: currency)
         
         for account in accounts {

@@ -11,6 +11,7 @@ struct CreateAccount: View {
     
     @Binding var isOpeningFrame: Bool
     @Environment(ModelData.self) var modelData
+    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     
     var accountType: AccountType
     @State var budget: String = ""

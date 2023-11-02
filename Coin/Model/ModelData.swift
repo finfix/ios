@@ -32,19 +32,16 @@ func groupAccounts(accounts: [Account], currencies: [Currency]) -> [Account] {
     return accounts
 }
 
+
+
+
+
+
 @Observable class ModelData {
     
     var accounts = [Account]()
     var accountGroups = [AccountGroup]()
     var currencies = [String: Currency]()
-    
-    var selectedAccountsGroupIndex: Int = 0
-    var selectedAccountsGroupID: UInt32 {
-        if accountGroups.count != 0 {
-            return accountGroups[selectedAccountsGroupIndex].id
-        }
-        return 0
-    }
     
     func getAccounts() {
         
@@ -69,16 +66,6 @@ func groupAccounts(accounts: [Account], currencies: [Currency]) -> [Account] {
                 debugLog(error)
             }
         }
-    }
-    
-    func sync() {
-        getAccounts()
-        getAccountGroups()
-    }
-    
-    func deleteAllData() {
-        accounts.removeAll()
-        accountGroups.removeAll()
     }
 }
 
