@@ -32,16 +32,10 @@ func groupAccounts(accounts: [Account], currencies: [Currency]) -> [Account] {
     return accounts
 }
 
-
-
-
-
-
 @Observable class ModelData {
     
     var accounts = [Account]()
     var accountGroups = [AccountGroup]()
-    var currencies = [String: Currency]()
     
     func getAccounts() {
         

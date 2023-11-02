@@ -76,7 +76,6 @@ struct MainView: View {
             if hasExceededLimit() || currencies.isEmpty {
                 getCurrencies()
             }
-            modelData.currencies = Dictionary(uniqueKeysWithValues: currencies.map{ ($0.isoCode, $0) })
             if transactions.isEmpty {
                 print("Запросили транзакции с сервера")
                 getTransactions()

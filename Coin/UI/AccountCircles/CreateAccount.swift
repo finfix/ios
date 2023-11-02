@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CreateAccount: View {
     
     @Binding var isOpeningFrame: Bool
     @Environment(ModelData.self) var modelData
     @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @Query(sort: [
+        SortDescriptor(\Currency.isoCode)
+    ]) var currencies: [Currency]
     
     var accountType: AccountType
     @State var budget: String = ""
@@ -39,9 +43,8 @@ struct CreateAccount: View {
                 }
                 
                 Picker("Валюта", selection: $currency) {
-                    ForEach(modelData.currencies.keys.sorted(by: >), id: \.self) { currency in
-                        Text(currency)
-                            .tag(currency)
+                    ForEach(currencies) { currency in
+                        Text(currency.name)
                     }
                 }
             }

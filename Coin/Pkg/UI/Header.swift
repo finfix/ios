@@ -6,11 +6,17 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct Header: View {
     
     @Environment(ModelData.self) var modelData
     @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @Query var currencies: [Currency]
+    
+    var currenciesMap: [String: Currency] {
+        Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0) })
+    }
     
     var currency: String {
         debugLog("Считаем валюту группы счетов \(selectedAccountsGroupIndex)")
@@ -38,7 +44,7 @@ struct Header: View {
         
         for account in accounts {
                         
-            let relation = (modelData.currencies[currency]?.rate ?? 1) / (modelData.currencies[account.currency]?.rate ?? 1)
+            let relation = (currenciesMap[currency]?.rate ?? 1) / (currenciesMap[account.currency]?.rate ?? 1)
             
             switch account.type {
             case .expense:

@@ -6,20 +6,26 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AccountCircleItem: View {
     
     var account: Account
     
     @Environment(ModelData.self) var modelData
+    @Query var currencies: [Currency]
     
     @State var isChildrenOpen = false
     @State var isUpdateOpen = false
     
     var alreadyOpened = false
     
+    var currenciesMap: [String: Currency] {
+        Dictionary(uniqueKeysWithValues: currencies.map{ ($0.isoCode, $0) })
+    }
+    
     var currencySymbol: String {
-        modelData.currencies[account.currency]?.symbol ?? ""
+        currenciesMap[account.currency]?.symbol ?? ""
     }
     
     var formatter: CurrencyFormatter
