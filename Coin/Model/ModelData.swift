@@ -37,37 +37,6 @@ import Foundation
         }
     }
     var childrenAccountsUpdated = false
-    var quickStatistic: [UInt32: QuickStatistic] {
-        
-        let accountGroupsToCurrenciesMap = Dictionary(uniqueKeysWithValues: accountGroups.map{ ($0.id, $0.currency) })
-        
-        var tmp = [UInt32: QuickStatistic]()
-        
-        for accountGroup in accountGroups {
-            tmp[accountGroup.id] = QuickStatistic(currency: accountGroup.currency)
-        }
-        
-        for account in accounts {
-            if account.type == .earnings || (account.budget == 0 && account.remainder == 0) || !account.childrenAccounts.isEmpty || !account.accounting {
-                continue
-            }
-            
-            let accountGroupCurrency = accountGroupsToCurrenciesMap[account.accountGroupID] ?? account.currency
-            
-            let relation = (currencies[accountGroupCurrency]?.rate ?? 1) / (currencies[account.currency]?.rate ?? 1)
-            
-            switch account.type {
-            case .expense:
-                tmp[account.accountGroupID]?.totalExpense += account.remainder * relation
-                tmp[account.accountGroupID]?.totalBudget += account.budget * relation
-            case .earnings:
-                continue
-            default:
-                tmp[account.accountGroupID]?.totalRemainder += account.remainder * relation
-            }
-        }
-        return tmp
-    }
     var accountGroups = [AccountGroup]()
     var currencies = [String: Currency]()
     

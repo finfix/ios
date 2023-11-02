@@ -11,13 +11,55 @@ struct Header: View {
     
     @Environment(ModelData.self) var modelData
     
-    var statistic: QuickStatistic {
-        modelData.quickStatistic[modelData.selectedAccountsGroupID] ?? QuickStatistic()
+    var currency: String {
+        debugLog("Считаем валюту группы счетов \(modelData.selectedAccountsGroupID)")
+        if !modelData.accountGroups.isEmpty {
+            return modelData.accountGroups[modelData.selectedAccountsGroupIndex].currency
+        }
+        return "USD"
     }
     
-    var formatter = CurrencyFormatter(maximumFractionDigits: 0)
+    var accounts: [Account] {
+        debugLog("Фильтруем счета для шапки")
+        return modelData.accounts.filter {
+            $0.accountGroupID == modelData.selectedAccountsGroupID &&
+            $0.type != .earnings &&
+            ($0.budget != 0 || $0.remainder != 0) &&
+            $0.childrenAccounts.isEmpty &&
+            $0.accounting &&
+            $0.visible
+        }
+    }
     
-    let height: CGFloat = 40
+    var statistic: QuickStatistic {
+        debugLog("Считаем статистику для группы счетов \(modelData.selectedAccountsGroupID)")
+        let tmp = QuickStatistic(currency: currency)
+        
+        for account in accounts {
+                        
+            let relation = (modelData.currencies[currency]?.rate ?? 1) / (modelData.currencies[account.currency]?.rate ?? 1)
+            
+            switch account.type {
+            case .expense:
+                tmp.totalExpense += account.remainder * relation
+                tmp.totalBudget += account.budget * relation
+            default:
+                tmp.totalRemainder += account.remainder * relation
+            }
+        }
+        return tmp
+    }
+        
+    var body: some View {
+        HeaderSubView(statistic: statistic)
+    }
+}
+
+struct HeaderSubView: View {
+    
+    var statistic: QuickStatistic
+    
+    var formatter = CurrencyFormatter(maximumFractionDigits: 0)
     
     var body: some View {
         HStack {
@@ -50,7 +92,7 @@ struct Header: View {
         }
         .font(.caption2)
         .frame(maxWidth: .infinity)
-        .frame(height: height)
+        .frame(height: 40)
     }
 }
 
