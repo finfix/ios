@@ -28,7 +28,6 @@
 		B593F9532AE1BF6600378E17 /* UpdateAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B593F9522AE1BF6600378E17 /* UpdateAccount.swift */; };
 		B593F9552AE1CCB000378E17 /* UpdateTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B593F9542AE1CCB000378E17 /* UpdateTransaction.swift */; };
 		B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B596E6092A278CC1007D7E6D /* AccountModels.swift */; };
-		B59D458B28FE77D400773D46 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59D458A28FE77D400773D46 /* SearchBar.swift */; };
 		B59F0F2128FDC7C000AA33A9 /* AccountTypeDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */; };
 		B59F0F2628FDD30F00AA33A9 /* AccountCirclesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2528FDD30F00AA33A9 /* AccountCirclesList.swift */; };
 		B59F0F2928FDD4C200AA33A9 /* SelectAccountGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2828FDD4C200AA33A9 /* SelectAccountGroup.swift */; };
@@ -86,7 +85,6 @@
 		B593F9522AE1BF6600378E17 /* UpdateAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateAccount.swift; sourceTree = "<group>"; };
 		B593F9542AE1CCB000378E17 /* UpdateTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateTransaction.swift; sourceTree = "<group>"; };
 		B596E6092A278CC1007D7E6D /* AccountModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountModels.swift; sourceTree = "<group>"; };
-		B59D458A28FE77D400773D46 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		B59F0F2028FDC7C000AA33A9 /* AccountTypeDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTypeDetailsView.swift; sourceTree = "<group>"; };
 		B59F0F2528FDD30F00AA33A9 /* AccountCirclesList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCirclesList.swift; sourceTree = "<group>"; };
 		B59F0F2828FDD4C200AA33A9 /* SelectAccountGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAccountGroup.swift; sourceTree = "<group>"; };
@@ -174,7 +172,6 @@
 			isa = PBXGroup;
 			children = (
 				B59F0F2828FDD4C200AA33A9 /* SelectAccountGroup.swift */,
-				B59D458A28FE77D400773D46 /* SearchBar.swift */,
 				B5E8932F28FF090B002AC30C /* SnapCarousel.swift */,
 				B5E89336290074F4002AC30C /* Modifiers.swift */,
 				B5B950442ADF16FF00798F8C /* Line.swift */,
@@ -428,7 +425,6 @@
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
 				B5F9CC7328F01E4D0037A21A /* Transaction.swift in Sources */,
-				B59D458B28FE77D400773D46 /* SearchBar.swift in Sources */,
 				B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */,
 				B5FF351E2AEC091F007694F9 /* Defaults.swift in Sources */,
 				B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */,

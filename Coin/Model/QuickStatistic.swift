@@ -8,6 +8,7 @@
 import Foundation
 
 class QuickStatistic: Decodable {
+    
     var currency: String
     var totalRemainder: Decimal
     var totalExpense: Decimal

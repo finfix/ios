@@ -48,7 +48,7 @@ struct Profile: View {
                 }
                 Section {
                     Button("Синхронизировать") {
-                        modelData.sync()
+                        getUser()
                     }
                     Button("Скрытые счета") {
                         isShowHidedAccounts = true
@@ -76,13 +76,12 @@ struct Profile: View {
                 }
                 .frame(maxWidth: .infinity)
                 Section {
-                    Button("Выйти") {
+                    Button("Выйти", role: .destructive) {
                         isLogin = false
                         accessToken = nil
                         refreshToken = nil
                         modelData.deleteAllData()
                     }
-                    .foregroundColor(.red)
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -107,5 +106,4 @@ struct Profile: View {
 
 #Preview {
     Profile()
-        .environment(ModelData())
 }
