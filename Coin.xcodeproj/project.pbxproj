@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B5024EB02AE1914300F60449 /* AccountChildren.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5024EAF2AE1914300F60449 /* AccountChildren.swift */; };
 		B5024EB22AE1A20F00F60449 /* CreateAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5024EB12AE1A20F00F60449 /* CreateAccount.swift */; };
 		B504B7E52AE46EEB0078643A /* UserAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B504B7E42AE46EEB0078643A /* UserAPI.swift */; };
 		B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B504B7E62AE526DA0078643A /* PlusNewAccount.swift */; };
@@ -36,7 +35,6 @@
 		B5B950452ADF16FF00798F8C /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950442ADF16FF00798F8C /* Line.swift */; };
 		B5B9504C2ADF18BC00798F8C /* QuickStatistic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B9504B2ADF18BC00798F8C /* QuickStatistic.swift */; };
 		B5B9504F2ADF235A00798F8C /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B9504E2ADF235A00798F8C /* Profile.swift */; };
-		B5B950512ADF239A00798F8C /* CirclesArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950502ADF239A00798F8C /* CirclesArray.swift */; };
 		B5B950532ADF24A900798F8C /* AccountCircleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950522ADF24A900798F8C /* AccountCircleItem.swift */; };
 		B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950542ADF258700798F8C /* TransactionRow.swift */; };
 		B5B950572ADF261700798F8C /* Header.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950562ADF261700798F8C /* Header.swift */; };
@@ -64,7 +62,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B5024EAF2AE1914300F60449 /* AccountChildren.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountChildren.swift; sourceTree = "<group>"; };
 		B5024EB12AE1A20F00F60449 /* CreateAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccount.swift; sourceTree = "<group>"; };
 		B504B7E42AE46EEB0078643A /* UserAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAPI.swift; sourceTree = "<group>"; };
 		B504B7E62AE526DA0078643A /* PlusNewAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlusNewAccount.swift; sourceTree = "<group>"; };
@@ -93,7 +90,6 @@
 		B5B950442ADF16FF00798F8C /* Line.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Line.swift; sourceTree = "<group>"; };
 		B5B9504B2ADF18BC00798F8C /* QuickStatistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickStatistic.swift; sourceTree = "<group>"; };
 		B5B9504E2ADF235A00798F8C /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
-		B5B950502ADF239A00798F8C /* CirclesArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CirclesArray.swift; sourceTree = "<group>"; };
 		B5B950522ADF24A900798F8C /* AccountCircleItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCircleItem.swift; sourceTree = "<group>"; };
 		B5B950542ADF258700798F8C /* TransactionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionRow.swift; sourceTree = "<group>"; };
 		B5B950562ADF261700798F8C /* Header.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Header.swift; sourceTree = "<group>"; };
@@ -195,9 +191,7 @@
 			isa = PBXGroup;
 			children = (
 				B59F0F2528FDD30F00AA33A9 /* AccountCirclesList.swift */,
-				B5B950502ADF239A00798F8C /* CirclesArray.swift */,
 				B5B950522ADF24A900798F8C /* AccountCircleItem.swift */,
-				B5024EAF2AE1914300F60449 /* AccountChildren.swift */,
 				B5024EB12AE1A20F00F60449 /* CreateAccount.swift */,
 				B593F9522AE1BF6600378E17 /* UpdateAccount.swift */,
 				B504B7E62AE526DA0078643A /* PlusNewAccount.swift */,
@@ -393,7 +387,6 @@
 				B59F0F2128FDC7C000AA33A9 /* AccountTypeDetailsView.swift in Sources */,
 				B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */,
 				B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */,
-				B5024EB02AE1914300F60449 /* AccountChildren.swift in Sources */,
 				B5E89337290074F4002AC30C /* Modifiers.swift in Sources */,
 				B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */,
 				B557AA0E290D959F00631421 /* API.swift in Sources */,
@@ -418,7 +411,6 @@
 				B5624DD32AEB996C00346BB3 /* Logger.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
-				B5B950512ADF239A00798F8C /* CirclesArray.swift in Sources */,
 				B5C0C31C2AEAD9E70016990E /* HidedAccountsList.swift in Sources */,
 				B593F9552AE1CCB000378E17 /* UpdateTransaction.swift in Sources */,
 				B5D143B42906A66400875037 /* AuthModels.swift in Sources */,
