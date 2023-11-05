@@ -12,11 +12,6 @@ struct AccountCirclesListSubView: View {
     
     @Query var accounts: [Account]
     @State var path = NavigationPath()
-    
-    var groupedAccounts: [Account] {
-        debugLog("Группируем счета")
-        return groupAccounts(accounts, currencies: currencies)
-    }
 
     init(path: NavigationPath, accountGroupID: UInt32) {
         self.path = path
@@ -32,6 +27,8 @@ struct AccountCirclesListSubView: View {
     let horizontalSpacing: CGFloat = 10
     
     var body: some View {
+        let groupedAccounts = groupAccounts(accounts)
+        
         NavigationStack(path: $path) {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
