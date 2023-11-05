@@ -10,7 +10,7 @@ import SwiftData
 
 struct Header: View {
     
-    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query var currencies: [Currency]
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
@@ -20,17 +20,14 @@ struct Header: View {
     }
     
     var currency: String {
-        debugLog("Считаем валюту группы счетов \(selectedAccountsGroupIndex)")
-        if !accountGroups.isEmpty {
-            return accountGroups[selectedAccountsGroupIndex].currency
-        }
-        return "USD"
+        debugLog("Считаем валюту группы счетов ID: \(selectedAccountsGroupID)")
+        return accountGroups.first{$0.id == selectedAccountsGroupID}?.currency ?? "USD"
     }
     
     var filteredAccounts: [Account] {
         debugLog("Фильтруем счета для шапки")
         return accounts.filter {
-            $0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id &&
+            $0.accountGroupID == selectedAccountsGroupID &&
             $0.type != .earnings &&
             ($0.budget != 0 || $0.remainder != 0) &&
             $0.childrenAccounts.isEmpty &&
@@ -40,7 +37,7 @@ struct Header: View {
     }
     
     var statistic: QuickStatistic {
-        debugLog("Считаем статистику для группы счетов \(selectedAccountsGroupIndex)")
+        debugLog("Считаем статистику для группы счетов \(selectedAccountsGroupID)")
         let tmp = QuickStatistic(currency: currency)
         
         for account in filteredAccounts {

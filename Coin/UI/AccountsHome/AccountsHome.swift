@@ -10,17 +10,11 @@ import SwiftData
 
 struct AccountsHome: View {
     
-    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
-    @Query var accountGroups: [AccountGroup]
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query var accounts: [Account]
     
     var filteredAccounts: [Account] {
-        if accountGroups.count > 0 {
-            return accounts.filter { account in
-                account.accountGroupID == accountGroups[selectedAccountsGroupIndex].id
-            }
-        }
-        return []
+        accounts.filter { $0.accountGroupID == selectedAccountsGroupID }
     }
     
     // TODO: Сделать универсальными
@@ -38,9 +32,7 @@ struct AccountsHome: View {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
                         Header()
-                        if accountGroups.count > 1 {
-                            AccountsGroupSelector()
-                        }
+                        AccountsGroupSelector()
                     }
                     ScrollView {
                         Text("Карты и счета")

@@ -10,7 +10,7 @@ import SwiftData
 
 struct HidedAccountsList: View {
     
-    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
     

@@ -13,12 +13,10 @@ struct AccountCircleList: View {
     @Query var currencies: [Currency]
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
-    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
     
     var groupedAccounts: [Account] {
         debugLog("Группируем счета")
-        let tmp = accounts.filter { ( $0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id ) && $0.visible }
-        return groupAccounts(accounts: tmp, currencies: currencies)
+        return groupAccounts(accounts, currencies: currencies)
     }
     
     let rows = [

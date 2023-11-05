@@ -11,7 +11,7 @@ import SwiftData
 struct CreateAccount: View {
     
     @Binding var isOpeningFrame: Bool
-    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query(sort: [
         SortDescriptor(\Currency.isoCode)
     ]) var currencies: [Currency]

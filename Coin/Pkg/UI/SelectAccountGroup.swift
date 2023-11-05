@@ -11,33 +11,42 @@ import SwiftData
 struct AccountsGroupSelector: View {
     
     @Query var accountGroups: [AccountGroup]
-    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0 {
+        didSet {
+            guard accountGroups.count >= selectedAccountGroupIndex + 1 else {
+                debugLog("len(accountGroups) = \(accountGroups.count). Пытаемся взять \(selectedAccountGroupIndex) элемент")
+                return
+            }
+            selectedAccountGroupID = Int(accountGroups[selectedAccountGroupIndex].id)
+        }
+    }
+    @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
     
     var canForward: Bool {
-        selectedAccountsGroupIndex + 1 < accountGroups.count
+        selectedAccountGroupIndex + 1 < accountGroups.count
     }
     
     var canBackward: Bool {
-        selectedAccountsGroupIndex > 0
+        selectedAccountGroupIndex > 0
     }
     
     var body: some View {
         HStack(spacing: 80) {
             Button {
                 if canBackward {
-                    selectedAccountsGroupIndex -= 1
+                    selectedAccountGroupIndex -= 1
                 }
             } label: {
                 Image(systemName: "chevron.left")
                     .foregroundColor(canBackward ? .primary : .gray)
             }
             
-            Text(accountGroups.count > 0 ? accountGroups[selectedAccountsGroupIndex].name : "")
+            Text(accountGroups.count > 0 ? accountGroups[selectedAccountGroupIndex].name : "")
                 .frame(width: 100)
             
             Button {
                 if canForward {
-                    selectedAccountsGroupIndex += 1
+                    selectedAccountGroupIndex += 1
                 }
             } label: {
                 Image(systemName: "chevron.right")

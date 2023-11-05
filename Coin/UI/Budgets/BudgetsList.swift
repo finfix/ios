@@ -10,13 +10,12 @@ import SwiftData
 
 struct BudgetsList: View {
         
-    @AppStorage("accountGroupIndex") var selectedAccountsGroupIndex: Int = 0
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query var accounts: [Account]
-    @Query var accountGroups: [AccountGroup]
     
     var filteredAccounts: [Account] {
-        accounts.filter {
-            ($0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id) &&
+        var tmp = accounts.filter {
+            ($0.accountGroupID == selectedAccountsGroupID) &&
             $0.visible &&
             $0.type == .expense &&
             $0.showingBudget != 0 }
@@ -26,9 +25,7 @@ struct BudgetsList: View {
         ScrollView {
             VStack(spacing: 0) {
                 Header()
-                if accountGroups.count > 1 {
-                    AccountsGroupSelector()
-                }
+                AccountsGroupSelector()
             }
             VStack {
                 ForEach(filteredAccounts) { account in
