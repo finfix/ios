@@ -52,6 +52,21 @@ class Transaction: Decodable, Identifiable {
         note = try container.decode(String.self, forKey: .note)
         type = try container.decode(TransactionType.self, forKey: .type)
     }
+    
+    func filter(_ filters: TransactionFilters) -> Bool {
+        if let note = filters.note {
+            if !self.note.localizedStandardContains(note) {
+                return false
+            }
+        }
+        return true
+    }
+}
+
+struct TransactionFilters {
+    var note: String?
+    var dateFrom: Date?
+    var dateTo: Date?
 }
 
 enum TransactionType: String, Codable {
