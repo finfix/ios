@@ -11,7 +11,7 @@ import SwiftData
 @main
 struct MyApp: App {
         
-    @AppStorage("isDarkMode") var isDarkMode = false
+    @AppStorage("isDarkMode") var isDarkMode = defaultIsDarkMode
     
     @AppStorage("isErrorShowing") var isErrorShowing = false
     @AppStorage("errorText") var errorText: String = ""
