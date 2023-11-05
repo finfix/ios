@@ -152,6 +152,7 @@ func groupAccounts(_ accounts: [Account]) -> [Account] {
             accountsContainer.append(account)
         }
     }
+    debugLog("Сгруппировали счета", timeInterval: check)
     return accountsContainer
 }
 

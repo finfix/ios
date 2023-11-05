@@ -10,54 +10,35 @@ import SwiftData
 
 struct Header: View {
     
-    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
+    @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
-    
-    
-    var filteredAccounts: [Account] {
-        debugLog("Фильтруем счета для шапки")
-        return accounts.filter {
-            $0.accountGroupID == selectedAccountsGroupID &&
-            $0.type != .earnings &&
-            ($0.budget != 0 || $0.remainder != 0) &&
-            $0.childrenAccounts.isEmpty &&
-            $0.accounting &&
-            $0.visible
-        }
-    }
-    
-    var statistic: QuickStatistic {
-        debugLog("Считаем статистику для группы счетов \(selectedAccountsGroupID)")
-        let tmp = QuickStatistic(currency: currency)
-        
-        for account in filteredAccounts {
-                        
-            let relation = (currenciesMap[currency]?.rate ?? 1) / (currenciesMap[account.currency]?.rate ?? 1)
             
-            switch account.type {
-            case .expense:
-                tmp.totalExpense += account.remainder * relation
-                tmp.totalBudget += account.budget * relation
-            default:
-                tmp.totalRemainder += account.remainder * relation
-            }
-        }
-        return tmp
-    }
-        
     var body: some View {
-        HeaderSubView(statistic: statistic)
+        HeaderSubView(currency: accountGroups[accountGroupIndex].currency, accountGroupID: accountGroups[accountGroupIndex].id)
     }
 }
 
 struct HeaderSubView: View {
     
-    var statistic: QuickStatistic
+    @Query var accounts: [Account]
+    var currency: String
+        
+    var formatter: CurrencyFormatter
     
-    var formatter = CurrencyFormatter(maximumFractionDigits: 0)
+    init(currency: String, accountGroupID: UInt32) {
+        self.formatter = CurrencyFormatter(currency: currency, maximumFractionDigits: 0)
+        self.currency = currency
+        _accounts = Query(filter: #Predicate {
+            $0.accountGroupID == accountGroupID &&
+            $0.accounting &&
+            $0.visible
+        })
+    }
     
     var body: some View {
+        let statistic = calculateStatistic(accounts: accounts, accountGroupCurrency: currency)
+        
         HStack {
             Spacer()
             VStack {
@@ -90,7 +71,33 @@ struct HeaderSubView: View {
         .frame(maxWidth: .infinity)
         .frame(height: 40)
     }
+    
+    func calculateStatistic(accounts: [Account], accountGroupCurrency: String) -> QuickStatistic {
+        let timeStart = Date()
+                
+        let rates = Currencies.rates
+        let tmp = QuickStatistic(currency: currency)
+        
+        for account in accounts {
+                        
+            let relation = (rates[currency] ?? 1) / (rates[account.currency] ?? 1)
+            
+            switch account.type {
+            case .expense:
+                tmp.totalExpense += account.remainder * relation
+                tmp.totalBudget += account.budget * relation
+            case .earnings:
+                continue
+            default:
+                tmp.totalRemainder += account.remainder * relation
+            }
+        }
+        debugLog("Посчитали статистику для шапки", timeInterval: timeStart)
+        return tmp
+    }
 }
+
+
 
 #Preview {
     Group {

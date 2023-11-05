@@ -13,10 +13,8 @@ struct AccountsGroupSelector: View {
     @Query var accountGroups: [AccountGroup]
     @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0 {
         didSet {
-            guard accountGroups.count >= selectedAccountGroupIndex + 1 else {
-                debugLog("len(accountGroups) = \(accountGroups.count). Пытаемся взять \(selectedAccountGroupIndex) элемент")
-                return
-            }
+            guard accountGroups.count >= selectedAccountGroupIndex + 1 else { return }
+            debugLog("Выбрали группу счетов \(accountGroups[selectedAccountGroupIndex].name)")
             selectedAccountGroupID = Int(accountGroups[selectedAccountGroupIndex].id)
         }
     }
