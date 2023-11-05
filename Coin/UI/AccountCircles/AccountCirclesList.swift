@@ -14,6 +14,7 @@ struct AccountCirclesListSubView: View {
     @State var path = NavigationPath()
 
     init(path: NavigationPath, accountGroupID: UInt32) {
+        debugLog("\nИнициализировали AccountCirclesListSubView")
         self.path = path
         _accounts = Query(filter: #Predicate { $0.accountGroupID == accountGroupID && $0.visible } )
     }

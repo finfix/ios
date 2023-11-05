@@ -23,7 +23,7 @@ struct BudgetsListSubView: View {
     @State var accountType: AccountType = .regular
     
     init(accountGroupID: UInt32) {
-        debugLog("Инициализируем BudgetsListSubView")
+        debugLog("\nИнициализируем BudgetsListSubView")
         _accounts = Query(filter: #Predicate {
             $0.visible &&
 //            $0.type.rawValue == accountType.rawValue &&
