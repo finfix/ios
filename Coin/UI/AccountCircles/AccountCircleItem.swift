@@ -12,13 +12,13 @@ struct AccountCircleItem: View {
     
     var account: Account
     
+    @Environment(\.dismiss) var dismiss
     @Query var currencies: [Currency]
-    
     @State var isChildrenOpen = false
-    @State var isUpdateOpen = false
-    
-    var alreadyOpened = false
-    
+    @State var isTransactionOpen = false
+    @Binding var path: NavigationPath
+    var isAlreadyOpened: Bool
+        
     var currenciesMap: [String: Currency] {
         Dictionary(uniqueKeysWithValues: currencies.map{ ($0.isoCode, $0) })
     }
@@ -29,18 +29,18 @@ struct AccountCircleItem: View {
     
     var formatter: CurrencyFormatter
     
-    init(account: Account, alreadyOpened: Bool = false) {
+    init(_ account: Account, isAlreadyOpened: Bool = false, path: Binding<NavigationPath>) {
         self.formatter = CurrencyFormatter(currency: account.currency)
         self.account = account
-        self.alreadyOpened = alreadyOpened
+        self.isAlreadyOpened = isAlreadyOpened
+        self._path = path
     }
     
+    
     var body: some View {
-        
         VStack {
             Text(account.name)
                 .lineLimit(1)
-            
             ZStack {
                 if !account.childrenAccounts.isEmpty {
                     Circle()
@@ -51,17 +51,22 @@ struct AccountCircleItem: View {
                 Circle()
                     .fill(account.showingBudget == 0 ? .gray : account.showingBudget >= account.showingRemainder ? .green : .red)
                     .frame(width: 30)
-                
-                    .onTapGesture(count: 2) {
-                        if !alreadyOpened {
-                            isChildrenOpen = true
-                        }
-                    }
-                    .onLongPressGesture(minimumDuration: 1.0) {
-                        isUpdateOpen = true
-                    }
             }
-            Text(formatter.string(number: account.remainder))
+            .onTapGesture(count: 2) {
+                if !account.childrenAccounts.isEmpty {
+                    isChildrenOpen = true
+                }
+            }
+            .onTapGesture(count: 1) {
+                isTransactionOpen = true
+            }
+            .onLongPressGesture {
+                if isAlreadyOpened {
+                    dismiss()
+                }
+                path.append(account)
+            }
+            Text(formatter.string(number: account.showingRemainder))
                 .lineLimit(1)
             
             if account.showingBudget != 0 {
@@ -74,14 +79,14 @@ struct AccountCircleItem: View {
         .frame(width: 80, height: 100)
         .opacity(account.accounting ? 1 : 0.5)
         .popover(isPresented: $isChildrenOpen) {
-            ForEach(account.childrenAccounts) { childAccount in
-                AccountCircleItem(account: childAccount, alreadyOpened: true)
+            ForEach(account.childrenAccounts) { account in
+                AccountCircleItem(account, isAlreadyOpened: true, path: $path)
             }
-            .padding()
             .presentationCompactAdaptation(.popover)
+            .padding()
         }
-        .navigationDestination(isPresented: $isUpdateOpen) {
-            UpdateAccount(isUpdateOpen: $isUpdateOpen, account: account)
+        .navigationDestination(isPresented: $isTransactionOpen) {
+            TransactionsView(accountID: account.id)
         }
     }
 }
@@ -135,5 +140,6 @@ struct AccountCircleItem: View {
                 remainder: 43,
                 type: .expense,
                 visible: true,
-                parentAccountID: nil)]))
+                parentAccountID: nil)]),
+                      path: .constant(NavigationPath()))
 }

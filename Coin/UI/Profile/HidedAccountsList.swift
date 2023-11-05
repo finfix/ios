@@ -16,6 +16,8 @@ struct HidedAccountsList: View {
     
     @State var accountType: AccountType = .regular
     
+    @State var path = NavigationPath()
+    
     let columns = [
         GridItem(),
         GridItem(),
@@ -32,15 +34,16 @@ struct HidedAccountsList: View {
     
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             AccountsGroupSelector()
             ScrollView {
                 LazyVGrid(columns: columns) {
                     ForEach(accounts) { account in
-                        AccountCircleItem(account: account)
+                        AccountCircleItem(account, path: $path)
                     }
                 }
             }
+            .navigationDestination(for: Account.self) { UpdateAccount(account: $0) }
         }
         .toolbar {
             Picker("Тип счета", selection: $accountType) {

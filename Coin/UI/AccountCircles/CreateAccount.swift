@@ -10,7 +10,7 @@ import SwiftData
 
 struct CreateAccount: View {
     
-    @Binding var isOpeningFrame: Bool
+    @Environment(\.dismiss) var dismiss
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query(sort: [
         SortDescriptor(\Currency.isoCode)
@@ -51,7 +51,7 @@ struct CreateAccount: View {
             Section {
                 Button("Сохранить") {
                     createAccount()
-                    isOpeningFrame = false
+                    dismiss()
                 }
             }
             .frame(maxWidth: .infinity)
@@ -91,5 +91,5 @@ struct CreateAccount: View {
 }
 
 #Preview {
-    CreateAccount(isOpeningFrame: .constant(true), accountType: .regular)
+    CreateAccount(accountType: .regular)
 }

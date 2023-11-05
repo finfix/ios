@@ -10,9 +10,9 @@ import SwiftData
 
 struct CreateTransactionView: View {
     
-    @Binding var isOpeningFrame: Bool
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
+    @Environment(\.dismiss) private var dismiss
     
     init(isOpeningFrame: Binding<Bool>, transactionType: TransactionType) {
         self._isOpeningFrame = isOpeningFrame
@@ -139,7 +139,7 @@ struct CreateTransactionView: View {
             Section {
                 Button {
                     createTransaction()
-                    isOpeningFrame = false
+                    dismiss()
                 } label: {
                     Text("Сохранить")
                 }
@@ -185,6 +185,6 @@ struct CreateTransactionView: View {
 }
 
 #Preview {
-    CreateTransactionView(isOpeningFrame: .constant(true), transactionType: .transfer)
+    CreateTransactionView(transactionType: .transfer)
 }
 

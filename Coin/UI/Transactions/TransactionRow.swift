@@ -10,7 +10,6 @@ import SwiftData
 
 struct TransactionRow: View {
         
-    @State var showUpdate = false
     @State var transaction: Transaction
     @Query var accountGroups: [AccountGroup]
     @Query var accounts: [Account]
@@ -73,13 +72,7 @@ struct TransactionRow: View {
                 }
             }
         }
-        .onTapGesture {
-            showUpdate = true
-        }
         .padding()
-        .navigationDestination(isPresented: $showUpdate) {
-            UpdateTransaction(isUpdateOpen: $showUpdate, transaction: transaction)
-        }
     }
 }
 

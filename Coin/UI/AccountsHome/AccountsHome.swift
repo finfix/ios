@@ -19,12 +19,9 @@ struct AccountsHome: View {
     
     // TODO: Сделать универсальными
     @State var showDebts = false
-    
-    @State var showCreate = false
     @State var currentIndex = 0
     
     @State var chooseBlurIsOpened = false
-    @State var transactionType: TransactionType = .consumption
         
     var body: some View {
         NavigationStack {
@@ -59,38 +56,26 @@ struct AccountsHome: View {
                     }
 
                     if chooseBlurIsOpened {
-                        Button {
-                            transactionType = .consumption
-                            showCreate = true
-                        } label: {
+                        NavigationLink(value: TransactionType.consumption) {
                             CircleTypeTransaction(imageName: "minus")
                         }
                         .padding(.bottom, 90)
                         
-                        Button {
-                            transactionType = .income
-                            showCreate = true
-                        } label: {
+                        NavigationLink(value: TransactionType.income) {
                             CircleTypeTransaction(imageName: "plus")
                         }
                         .padding(.trailing, 90)
                         
-                        Button {
-                            transactionType = .transfer
-                            showCreate = true
-                        } label: {
+                        NavigationLink(value: TransactionType.transfer) {
                             CircleTypeTransaction(imageName: "arrow.left.arrow.right")
                         }
                         .padding(.trailing, 75)
                         .padding(.bottom, 75)
                     }
-                    
                 }
                 .onDisappear { chooseBlurIsOpened = false }
             }
-            .navigationDestination(isPresented: $showCreate) {
-                CreateTransactionView(isOpeningFrame: $showCreate, transactionType: transactionType)
-            }
+            .navigationDestination(for: TransactionType.self ) { CreateTransactionView(transactionType: $0) }
         }
     }
 }

@@ -9,27 +9,22 @@ import SwiftUI
 
 struct PlusNewAccount: View {
     
-    @State var isOpenCreate = false
     var accountType: AccountType
     
     var body: some View {
-        VStack {
-            ZStack {
-                Circle()
-                    .stroke(.gray, lineWidth: 2)
-                    .foregroundColor(.clear)
-                    .frame(width: 30)
-                Image(systemName: "plus")
-                    .foregroundColor(.gray)
+        NavigationLink(value: accountType) {
+            VStack {
+                ZStack {
+                    Circle()
+                        .stroke(.gray, lineWidth: 2)
+                        .foregroundColor(.clear)
+                        .frame(width: 30)
+                    Image(systemName: "plus")
+                        .foregroundColor(.gray)
+                }
+                .foregroundColor(.primary)
             }
-            .foregroundColor(.primary)
-            .onTapGesture {
-                isOpenCreate = true
-            }
-        }
-        .frame(width: 80, height: 100)
-        .navigationDestination(isPresented: $isOpenCreate) {
-            CreateAccount(isOpeningFrame: $isOpenCreate, accountType: accountType)
+            .frame(width: 80, height: 100)
         }
     }
 }

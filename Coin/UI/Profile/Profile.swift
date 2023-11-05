@@ -8,6 +8,10 @@
 import SwiftUI
 import SwiftData
 
+enum ProfileViews {
+    case hidedAccounts, currencyRates
+}
+
 struct Profile: View {
     
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
@@ -15,8 +19,6 @@ struct Profile: View {
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
     @AppStorage("basePath") private var basePath: String = defaultBasePath
-    @State var isShowHidedAccounts = false
-    @State var isShowCurrencyRates = false
     
     @Environment(\.modelContext) var modelContext
         
@@ -46,20 +48,9 @@ struct Profile: View {
                     }
                 }
                 Section {
-                    Button("Синхронизировать") {
-                    }
-                    Button("Скрытые счета") {
-                        isShowHidedAccounts = true
-                    }
-                    Button("Курсы валют") {
-                        isShowCurrencyRates = true
-                    }
-                    .navigationDestination(isPresented: $isShowHidedAccounts) {
-                        HidedAccountsList()
-                    }
-                    .navigationDestination(isPresented: $isShowCurrencyRates) {
-                        CurrencyRates()
-                    }
+                    Button("Синхронизировать") {}
+                    NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
+                    NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
                 }
                 .frame(maxWidth: .infinity)
                 Section {
@@ -81,6 +72,12 @@ struct Profile: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
+            }
+            .navigationDestination(for: ProfileViews.self) { view in
+                switch view {
+                case .currencyRates: CurrencyRates()
+                case .hidedAccounts: HidedAccountsList()
+                }
             }
             .navigationTitle("Настройки")
         }

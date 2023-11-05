@@ -9,7 +9,6 @@ import SwiftUI
 
 struct UpdateAccount: View {
     
-    @Binding var isUpdateOpen: Bool
         
     var oldAccount: Account
     var id: UInt32
@@ -31,6 +30,7 @@ struct UpdateAccount: View {
         self.remainder = account.remainder.stringValue
         self.gradualBudgetFilling = account.gradualBudgetFilling
     }
+    @Environment (\.dismiss) var dismiss
     
     var body: some View {
         Form {
@@ -51,8 +51,8 @@ struct UpdateAccount: View {
             }
             Section {
                 Button("Сохранить") {
-                    updateAccount()
-                    isUpdateOpen = false
+                    dismiss()
+//                    updateAccount()
                 }
             }
             .frame(maxWidth: .infinity)
@@ -99,5 +99,5 @@ struct UpdateAccount: View {
 }
 
 #Preview {
-    UpdateAccount(isUpdateOpen: .constant(true), account: Account())
+    UpdateAccount(account: Account())
 }

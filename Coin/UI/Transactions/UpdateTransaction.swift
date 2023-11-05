@@ -9,7 +9,6 @@ import SwiftUI
 
 struct UpdateTransaction: View {
     
-    @Binding var isUpdateOpen: Bool
     
     var id: UInt32
     @State var amountFrom: String
@@ -23,6 +22,7 @@ struct UpdateTransaction: View {
         self.amountTo = transaction.amountTo.stringValue
         self.note = transaction.note
     }
+    @Environment (\.dismiss) var dismiss
     
     var body: some View {
         Form {
@@ -43,8 +43,8 @@ struct UpdateTransaction: View {
             }
             Section {
                 Button("Сохранить") {
-                    isUpdateOpen = false
-                    updateTransaction()
+                    dismiss()
+//                    updateTransaction()
                 }
             }
         }
@@ -67,7 +67,7 @@ struct UpdateTransaction: View {
 }
 
 #Preview {
-    UpdateTransaction(isUpdateOpen: .constant(true), transaction: Transaction(
+    UpdateTransaction(transaction: Transaction(
         accountFromID: 1,
         accountToID: 2,
         accounting: true,
