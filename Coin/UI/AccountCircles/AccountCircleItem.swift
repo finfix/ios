@@ -45,11 +45,11 @@ struct AccountCircleItem: View {
                 if !account.childrenAccounts.isEmpty {
                     Circle()
                         .fill(.clear)
-                        .strokeBorder(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red, lineWidth: 1)
+                        .strokeBorder(account.showingBudget == 0 ? .gray : account.showingBudget >= account.showingRemainder ? .green : .red, lineWidth: 1)
                         .frame(width: 35)
                 }
                 Circle()
-                    .fill(account.budget == 0 ? .gray : account.budget >= account.remainder ? .green : .red)
+                    .fill(account.showingBudget == 0 ? .gray : account.showingBudget >= account.showingRemainder ? .green : .red)
                     .frame(width: 30)
                 
                     .onTapGesture(count: 2) {
@@ -64,8 +64,8 @@ struct AccountCircleItem: View {
             Text(formatter.string(number: account.remainder))
                 .lineLimit(1)
             
-            if account.budget != 0 {
-                Text(formatter.string(number: account.budget))
+            if account.showingBudget != 0 {
+                Text(formatter.string(number: account.showingBudget))
                     .lineLimit(1)
                     .foregroundColor(.secondary)
             }

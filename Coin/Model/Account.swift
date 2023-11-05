@@ -23,8 +23,15 @@ import SwiftData
     var parentAccountID: UInt32?
     var gradualBudgetFilling: Bool
     
-    var childrenAccounts: [Account] = []
-    var isChild: Bool = false
+    @Transient var childrenAccounts: [Account] = []
+    @Transient var showingBudget: Decimal = 0
+    @Transient var showingRemainder: Decimal = 0
+    
+    func clearTransientData() {
+        self.childrenAccounts = []
+        self.showingBudget = 0
+        self.showingRemainder = 0
+    }
     
     init(
         id: UInt32 = 0,
@@ -39,7 +46,6 @@ import SwiftData
         visible: Bool = true,
         parentAccountID: UInt32? = nil,
         childrenAccounts: [Account] = [Account](),
-        isChild: Bool = true,
         gradualBudgetFilling: Bool = false) {
         self.id = id
         self.accountGroupID = accountGroupID
@@ -53,7 +59,6 @@ import SwiftData
         self.visible = visible
         self.parentAccountID = parentAccountID
         self.childrenAccounts = childrenAccounts
-        self.isChild = isChild
         self.gradualBudgetFilling = gradualBudgetFilling
     }
 
@@ -78,29 +83,76 @@ import SwiftData
     }
 }
 
-func groupAccounts(accounts: [Account], currencies: [Currency]) -> [Account] {
+func groupAccounts(_ accounts: [Account], currencies: [Currency]) -> [Account] {
     
     var ratesMap: [String: Decimal] {
         Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0.rate ) })
     }
     
-    for (i, account) in accounts.enumerated() {
+    for account in accounts {
+        account.clearTransientData()
+    }
+
+    // Делаем контейнер для сбора счетов и счетов с аггрегацией
+    var accountsContainer = [Account]()
+        
+    for account in accounts {
+        
+        // Если у элемента исходного массива есть родитель
         if let parentAccountID = account.parentAccountID {
-            let parentAccountIndex = accounts.firstIndex { $0.id == parentAccountID }
-            let parentAccount = accounts[parentAccountIndex!]
             
-            if account.visible {
-                accounts[parentAccountIndex!].childrenAccounts.append(account)
-                if account.accounting {
-                    let relation = (ratesMap[parentAccount.currency] ?? 1) / (ratesMap[account.currency] ?? 1)
-                    accounts[parentAccountIndex!].budget += account.budget * relation
-                    accounts[parentAccountIndex!].remainder += account.remainder * relation
+            // Индекс родителя в контейнере
+            var parentAccountIndex: Int = 0
+            
+            // Ищем индекс родителя в контейнере
+            if let index = accountsContainer.firstIndex(where: { $0.id == parentAccountID }) {
+                // Если находим, присваиваем переменной
+                parentAccountIndex = index
+                
+            // Если не находим
+            } else {
+                
+                // Добавляем родителя из accounts в контейнер
+                if let parentAccount = accounts.first(where: { $0.id == parentAccountID }) {
+                    accountsContainer.append(parentAccount)
+                    
+                    // Получаем его индекс
+                    parentAccountIndex = accountsContainer.firstIndex(where: { $0.id == parentAccountID })!
+                } else {
+                    continue
                 }
             }
-            accounts[i].isChild = true
+            
+            // Получаем родителя
+            let parentAccount = accountsContainer[parentAccountIndex]
+            
+            // Если счет нужно показывать
+            if account.visible {
+                
+                account.showingBudget = account.budget
+                account.showingRemainder = account.remainder
+                
+                // Добавляем его в дочерние счета родителя
+                accountsContainer[parentAccountIndex].childrenAccounts.append(account)
+                
+                // Аггрегируем бюджеты и остатки, если необхдоимо
+                if account.accounting {
+                    let relation = (ratesMap[parentAccount.currency] ?? 1) / (ratesMap[account.currency] ?? 1)
+                    accountsContainer[parentAccountIndex].showingBudget += account.budget * relation
+                    accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
+                }
+            }
+            
+        } else {
+            // Проверяем, чтобы такого счета уже не было в контейнере
+            guard accountsContainer.firstIndex(where: { $0.id == account.id }) == nil else { continue }
+            account.showingBudget = account.budget
+            account.showingRemainder = account.remainder
+            // Добавляем счет в контейнер
+            accountsContainer.append(account)
         }
     }
-    return accounts
+    return accountsContainer
 }
 
 

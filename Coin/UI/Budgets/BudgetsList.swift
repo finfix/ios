@@ -18,9 +18,8 @@ struct BudgetsList: View {
         accounts.filter {
             ($0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id) &&
             $0.visible &&
-            !$0.isChild &&
             $0.type == .expense &&
-            $0.budget != 0 }
+            $0.showingBudget != 0 }
     }
     
     var body: some View {
