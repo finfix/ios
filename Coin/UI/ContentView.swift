@@ -10,27 +10,62 @@ import SwiftData
 
 struct ContentView: View {
     
+    @AppStorage("lastFetchedCurrencies") var lastFetchedCurrencies: Double = Date.now.timeIntervalSince1970
     @AppStorage("isLogin") var isLogin: Bool = false
+    @Query var currencies: [Currency]
+    @Environment(\.modelContext) var modelContext
     
     var body: some View {
-        if isLogin {
-            MainView()
-        } else {
-            LoginView()
+        Group {
+            if isLogin {
+                MainView()
+            } else {
+                LoginView()
+            }
         }
+        .onAppear {
+            if hasExceededLimit() || currencies.isEmpty {
+                getCurrencies()
+            }
+            Currencies.rates = Dictionary(uniqueKeysWithValues: currencies.map{ ( $0.isoCode, $0.rate ) })
+        }
+    }
+    
+    func hasExceededLimit() -> Bool {
+        let timeLimit = 3600 // 1 hour
+        let currentTime = Date.now
+        let lastFetchedCurrenciesTime = Date(timeIntervalSince1970: lastFetchedCurrencies)
+        
+        guard let differenceInMins = Calendar.current.dateComponents([.second],
+                                                                     from: lastFetchedCurrenciesTime,
+                                                                     to: currentTime).second else {
+            return false
+        }
+        return differenceInMins >= timeLimit
+    }
+    
+    func getCurrencies() {
+        
+        UserAPI().GetCurrencies() { model, error in
+            if let err = error {
+                showErrorAlert(error: err)
+            } else if let currencies = model {
+                for currency in currencies { modelContext.insert(currency) }
+                Currencies.rates = Dictionary(uniqueKeysWithValues: currencies.map{ ( $0.isoCode, $0.rate ) })
+            }
+        }
+        
+        lastFetchedCurrencies = Date.now.timeIntervalSince1970
     }
 }
 
 struct MainView: View {
-    
-    @Query var currencies: [Currency]
+
     @Query var transactions: [Transaction]
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
     
     @Environment(\.modelContext) var modelContext
-    
-    @AppStorage("lastFetchedCurrencies") var lastFetchedCurrencies: Double = Date.now.timeIntervalSince1970
     
     var body: some View {
         TabView {
@@ -70,9 +105,6 @@ struct MainView: View {
                 }
         }
         .onAppear {
-            if hasExceededLimit() || currencies.isEmpty {
-                getCurrencies()
-            }
             if transactions.isEmpty {
                 print("Запросили транзакции с сервера")
                 getTransactions()
@@ -90,31 +122,6 @@ struct MainView: View {
 }
 
 extension MainView {
-    
-    func hasExceededLimit() -> Bool {
-        let timeLimit = 3600 // 1 hour
-        let currentTime = Date.now
-        let lastFetchedCurrenciesTime = Date(timeIntervalSince1970: lastFetchedCurrencies)
-        
-        guard let differenceInMins = Calendar.current.dateComponents([.second],
-                                                                     from: lastFetchedCurrenciesTime,
-                                                                     to: currentTime).second else {
-            return false
-        }
-        return differenceInMins >= timeLimit
-    }
-    
-    func getCurrencies() {
-        Task {
-            do {
-                let currencies = try await UserAPI().GetCurrencies()
-                for currency in currencies { modelContext.insert(currency) }
-                lastFetchedCurrencies = Date.now.timeIntervalSince1970
-            } catch {
-                debugLog(error)
-            }
-        }
-    }
     
     func getTransactions() {
         

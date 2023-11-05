@@ -11,7 +11,6 @@ import SwiftData
 struct AccountCirclesListSubView: View {
     
     @Query var accounts: [Account]
-    @Query var currencies: [Currency]
     @State var path = NavigationPath()
     
     var groupedAccounts: [Account] {

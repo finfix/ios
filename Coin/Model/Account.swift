@@ -83,11 +83,11 @@ import SwiftData
     }
 }
 
-func groupAccounts(_ accounts: [Account], currencies: [Currency]) -> [Account] {
+func groupAccounts(_ accounts: [Account]) -> [Account] {
     
-    var ratesMap: [String: Decimal] {
-        Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0.rate ) })
-    }
+    let check = Date()
+    
+    let rates = Currencies.rates
     
     for account in accounts {
         account.clearTransientData()
@@ -137,7 +137,7 @@ func groupAccounts(_ accounts: [Account], currencies: [Currency]) -> [Account] {
                 
                 // Аггрегируем бюджеты и остатки, если необхдоимо
                 if account.accounting {
-                    let relation = (ratesMap[parentAccount.currency] ?? 1) / (ratesMap[account.currency] ?? 1)
+                    let relation = (rates[parentAccount.currency] ?? 1) / (rates[account.currency] ?? 1)
                     accountsContainer[parentAccountIndex].showingBudget += account.budget * relation
                     accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
                 }

@@ -13,19 +13,10 @@ struct AccountCircleItem: View {
     var account: Account
     
     @Environment(\.dismiss) var dismiss
-    @Query var currencies: [Currency]
     @State var isChildrenOpen = false
     @State var isTransactionOpen = false
     @Binding var path: NavigationPath
     var isAlreadyOpened: Bool
-        
-    var currenciesMap: [String: Currency] {
-        Dictionary(uniqueKeysWithValues: currencies.map{ ($0.isoCode, $0) })
-    }
-    
-    var currencySymbol: String {
-        currenciesMap[account.currency]?.symbol ?? ""
-    }
     
     var formatter: CurrencyFormatter
     

@@ -15,6 +15,8 @@ class CurrencyFormatter: NumberFormatter {
     // Возможные окончания числа
     let units: [String] = ["", "k","M","G","T","P","E"]
     
+    let curerncySymbols = Currencies.symbols
+    
     init(currency: String? = nil, maximumFractionDigits: Int? = nil) {
         super.init()
         self.numberStyle = .currency
@@ -26,7 +28,7 @@ class CurrencyFormatter: NumberFormatter {
         self.usesGroupingSeparator = true
         if let currency = currency {
             self.currencyCode = currency
-            self.currencySymbol = CurrencySymbols[currency]
+            self.currencySymbol = curerncySymbols[currency]
         }
     }
     
@@ -34,7 +36,7 @@ class CurrencyFormatter: NumberFormatter {
         
         if let currency = currency {
             self.currencyCode = currency
-            self.currencySymbol = CurrencySymbols[currency]
+            self.currencySymbol = curerncySymbols[currency]
         }
         
         var num = number

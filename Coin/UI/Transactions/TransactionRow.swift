@@ -38,13 +38,15 @@ struct TransactionRow: View {
         accountsMap[transaction.accountToID] ?? Account(name: "Недоступный счет")
     }
     
+    let currencies = Currencies.symbols
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
                 if transaction.type != .balancing {
                     HStack {
                         Text(accountFrom.name)
-                        Text(CurrencySymbols[accountFrom.currency] ?? "")
+                        Text(currencies[accountFrom.currency] ?? "")
                             .foregroundColor(.secondary)
                         Text(accountGroupsMap[accountFrom.accountGroupID]?.name ?? "" )
                             .foregroundColor(.secondary)
@@ -53,7 +55,7 @@ struct TransactionRow: View {
                 }
                 HStack {
                     Text(accountTo.name)
-                    Text(CurrencySymbols[accountTo.currency] ?? "")
+                    Text(currencies[accountTo.currency] ?? "")
                         .foregroundColor(.secondary)
                     Text(accountGroupsMap[accountTo.accountGroupID]?.name ?? "" )
                         .foregroundColor(.secondary)

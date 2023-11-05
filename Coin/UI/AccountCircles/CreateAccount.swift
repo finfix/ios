@@ -12,9 +12,7 @@ struct CreateAccount: View {
     
     @Environment(\.dismiss) var dismiss
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query(sort: [
-        SortDescriptor(\Currency.isoCode)
-    ]) var currencies: [Currency]
+    let currencies = Currencies.symbols
     @Query var accountGroups: [AccountGroup]
     
     var accountType: AccountType
@@ -43,8 +41,8 @@ struct CreateAccount: View {
                 }
                 
                 Picker("Валюта", selection: $currency) {
-                    ForEach(currencies) { currency in
-                        Text(currency.isoCode)
+                    ForEach(currencies.keys.sorted(by: >), id: \.self) { currency in
+                        Text(currency)
                     }
                 }
             }

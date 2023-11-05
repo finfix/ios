@@ -12,7 +12,6 @@ struct BudgetsList: View {
         
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query var accounts: [Account]
-    @Query var currencies: [Currency]
     
     var filteredAccounts: [Account] {
         var tmp = accounts.filter {

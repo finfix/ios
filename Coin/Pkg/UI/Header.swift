@@ -11,18 +11,9 @@ import SwiftData
 struct Header: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query var currencies: [Currency]
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
     
-    var currenciesMap: [String: Currency] {
-        Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0) })
-    }
-    
-    var currency: String {
-        debugLog("Считаем валюту группы счетов ID: \(selectedAccountsGroupID)")
-        return accountGroups.first{$0.id == selectedAccountsGroupID}?.currency ?? "USD"
-    }
     
     var filteredAccounts: [Account] {
         debugLog("Фильтруем счета для шапки")
@@ -72,14 +63,14 @@ struct HeaderSubView: View {
             VStack {
                 Text("Расход")
                     .bold()
-                Text(formatter.string(number: statistic.totalExpense, currency: statistic.currency))
+                Text(formatter.string(number: statistic.totalExpense))
                 Spacer()
             }
             Spacer()
             VStack {
                 Text("Баланс")
                     .bold()
-                Text(formatter.string(number: statistic.totalRemainder, currency: statistic.currency))
+                Text(formatter.string(number: statistic.totalRemainder))
                 Spacer()
             }
             Spacer()
@@ -87,8 +78,8 @@ struct HeaderSubView: View {
                 Text("Бюджет")
                     .bold()
                 VStack(alignment: .trailing) {
-                    Text(formatter.string(number: statistic.totalBudget, currency: statistic.currency))
-                    Text(formatter.string(number: statistic.totalBudget - statistic.totalExpense, currency: statistic.currency))
+                    Text(formatter.string(number: statistic.totalBudget))
+                    Text(formatter.string(number: statistic.totalBudget - statistic.totalExpense))
                         .foregroundColor(.gray)
                 }
                 Spacer()
