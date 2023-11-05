@@ -44,7 +44,7 @@ struct CreateAccount: View {
                 
                 Picker("Валюта", selection: $currency) {
                     ForEach(currencies) { currency in
-                        Text(currency.name)
+                        Text(currency.isoCode)
                     }
                 }
             }

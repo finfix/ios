@@ -12,6 +12,7 @@ struct BudgetsList: View {
         
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query var accounts: [Account]
+    @Query var currencies: [Currency]
     
     var filteredAccounts: [Account] {
         var tmp = accounts.filter {
@@ -19,6 +20,7 @@ struct BudgetsList: View {
             $0.visible &&
             $0.type == .expense &&
             $0.showingBudget != 0 }
+        return groupAccounts(tmp, currencies: currencies)
     }
     
     var body: some View {

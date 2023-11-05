@@ -92,7 +92,7 @@ struct AccountCircleItem: View {
 }
 
 #Preview {
-    AccountCircleItem(account: Account(
+    AccountCircleItem(Account(
         id: 1,
         accountGroupID: 1,
         accounting: true,
