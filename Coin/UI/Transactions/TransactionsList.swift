@@ -21,7 +21,7 @@ struct TransactionsView: View {
     var body: some View {
         NavigationStack {
             TransactionsList(searchString: searchText, dateFrom: dateFrom, dateTo: dateTo, accountID: accountID)
-                .navigationDestination(for: Transaction.self) { UpdateTransaction(transaction: $0) }
+                .navigationDestination(for: Transaction.self) { UpdateTransaction($0) }
                 .searchable(text: $searchText)
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {

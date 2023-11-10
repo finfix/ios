@@ -14,13 +14,18 @@ struct UpdateTransaction: View {
     @State var amountFrom: String
     @State var amountTo: String
     @State var note: String
+    @State var date: Date
+    @State var accountFromID: UInt32
+    @State var accountToID: UInt32
     
-    init(isUpdateOpen: Binding<Bool>, transaction: Transaction) {
-        self._isUpdateOpen = isUpdateOpen
+    init(_ transaction: Transaction) {
         self.id = transaction.id
-        self.amountFrom = transaction.amountFrom.stringValue
-        self.amountTo = transaction.amountTo.stringValue
-        self.note = transaction.note
+        _amountFrom = .init(wrappedValue: transaction.amountFrom.stringValue)
+        _amountTo = .init(wrappedValue: transaction.amountTo.stringValue)
+        _note = .init(wrappedValue: transaction.note)
+        _date = .init(wrappedValue: transaction.dateTransaction)
+        _accountFromID = .init(wrappedValue: transaction.accountFromID)
+        _accountToID = .init(wrappedValue: transaction.accountToID)
     }
     @Environment (\.dismiss) var dismiss
     
@@ -31,15 +36,9 @@ struct UpdateTransaction: View {
                     .keyboardType(.decimalPad)
                 TextField("Сумма зачисления", text: $amountTo)
                     .keyboardType(.decimalPad)
-                ZStack(alignment: .topLeading) {
-                    if note.isEmpty {
-                        Text("Заметка")
-                            .foregroundColor(.secondary)
-                            .padding()
-                    }
-                    TextEditor(text: $note)
-                        .lineLimit(5)
-                }
+            }
+            Section {
+                TextField("Заметка", text: $note, axis: .vertical)
             }
             Section {
                 Button("Сохранить") {
@@ -67,7 +66,7 @@ struct UpdateTransaction: View {
 }
 
 #Preview {
-    UpdateTransaction(transaction: Transaction(
+    UpdateTransaction(Transaction(
         accountFromID: 1,
         accountToID: 2,
         accounting: true,

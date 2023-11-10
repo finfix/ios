@@ -106,15 +106,15 @@ struct MainView: View {
         }
         .onAppear {
             if transactions.isEmpty {
-                print("Запросили транзакции с сервера")
+                debugLog("Запросили транзакции с сервера")
                 getTransactions()
             }
             if accounts.isEmpty {
-                print("Запросили счета с сервера")
+                debugLog("Запросили счета с сервера")
                 getAccounts()
             }
             if accountGroups.isEmpty {
-                print("Запросили группы счетов с сервера")
+                debugLog("Запросили группы счетов с сервера")
                 getAccountGroups()
             }
         }

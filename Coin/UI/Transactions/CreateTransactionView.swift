@@ -14,8 +14,7 @@ struct CreateTransactionView: View {
     @Query var accountGroups: [AccountGroup]
     @Environment(\.dismiss) private var dismiss
     
-    init(isOpeningFrame: Binding<Bool>, transactionType: TransactionType) {
-        self._isOpeningFrame = isOpeningFrame
+    init(transactionType: TransactionType) {
         self.transactionType = transactionType
     }
     
@@ -60,8 +59,8 @@ struct CreateTransactionView: View {
     @State var accountGroupTo = AccountGroup()
     @State var accountFrom = Account()
     @State var accountTo = Account()
-    @State var amountFrom: String = ""
-    @State var amountTo: String = ""
+    @State var amountFrom: Decimal = 0
+    @State var amountTo: Decimal = 0
     @State var selectedType: Int = 0
     @State var note = ""
     @State var date = Date()
@@ -85,7 +84,7 @@ struct CreateTransactionView: View {
                             HStack {
                                 Text(account.name)
                                 Spacer()
-                                Text(CurrencySymbols[account.currency]!)
+                                Text(Currencies.symbols[account.currency]!)
                                     .foregroundColor(.secondary)
                             }
                             .tag(account)
@@ -105,7 +104,7 @@ struct CreateTransactionView: View {
                             HStack {
                                 Text(account.name)
                                 Spacer()
-                                Text(CurrencySymbols[account.currency]!)
+                                Text(Currencies.symbols[account.currency]!)
                                     .foregroundColor(.secondary)
                             }
                             .tag(account)
@@ -113,10 +112,10 @@ struct CreateTransactionView: View {
                     }
                 }
                 
-                TextField(intercurrency ? "Сумма списания" : "Сумма", text: $amountFrom)
+                TextField(intercurrency ? "Сумма списания" : "Сумма", value: $amountFrom, format: .currency(code: "USD"))
                     .keyboardType(.decimalPad)
                 if intercurrency {
-                    TextField("Сумма начисления", text: $amountTo)
+                    TextField("Сумма начисления", value: $amountTo, format: .number)
                         .keyboardType(.decimalPad)
                 }
                 
@@ -126,15 +125,7 @@ struct CreateTransactionView: View {
             }
             .pickerStyle(.wheel)
             Section {
-                ZStack(alignment: .topLeading) {
-                    if note.isEmpty {
-                        Text("Заметка")
-                            .foregroundColor(.secondary)
-                            .padding()
-                    }
-                    TextEditor(text: $note)
-                        .lineLimit(5)
-                }
+                TextField("Заметка", text: $note, axis: .vertical)
             }
             Section {
                 Button {
