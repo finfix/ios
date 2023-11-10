@@ -43,7 +43,7 @@ struct HidedAccountsList: View {
                     }
                 }
             }
-            .navigationDestination(for: Account.self) { UpdateAccount(account: $0) }
+            .navigationDestination(for: Account.self) { CreateAccount($0) }
         }
         .toolbar {
             Picker("Тип счета", selection: $accountType) {

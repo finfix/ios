@@ -69,7 +69,7 @@ struct AccountCirclesListSubView: View {
                     }
                     .frame(maxHeight: .infinity)
                 }
-                .navigationDestination(for: Account.self) { UpdateAccount(account: $0) }
+                .navigationDestination(for: Account.self) { CreateAccount($0) }
                 .navigationDestination(for: AccountType.self) { CreateAccount(accountType: $0) }
             }
             Spacer()

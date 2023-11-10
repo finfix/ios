@@ -8,47 +8,74 @@
 import SwiftUI
 import SwiftData
 
+enum mode {
+    case create, update
+}
+
 struct CreateAccount: View {
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) var modelContext
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    let currencies = Currencies.symbols
-    @Query var accountGroups: [AccountGroup]
+    @State var account: Account
+    var oldAccount: Account = Account()
     
-    var accountType: AccountType
-    @State var budget: String = ""
-    @State var remainder: String = ""
-    @State var currency: String = "USD"
-    @State var name: String = ""
-    @State var gradualBudgetFilling: Bool = true
+    var mode: mode
+    let currencies = Currencies.symbols
+    var currencyFormatter = CurrencyFormatter()
+    
+    init(_ account: Account) {
+        self.oldAccount = account
+        _account = .init(wrappedValue: account)
+        mode = .update
+        numberFormatter = NumberFormatter()
+        numberFormatter.currencySymbol = "&"
+    }
+    
+    init(accountType: AccountType) {
+        _account = .init(wrappedValue: Account(
+                currency: "USD",
+                type: accountType
+            )
+        )
+        mode = .create
+        numberFormatter = NumberFormatter()
+        numberFormatter.currencySymbol = "&"
+    }
+    
+    let numberFormatter: NumberFormatter
     
     var body: some View {
         Form {
             Section {
                 
-                TextField("Название счета", text: $name)
+                TextField("Название счета", text: $account.name)
                 
-                if accountType == .expense || accountType == .earnings {
-                    TextField("Бюджет", text: $budget)
-                        .keyboardType(.decimalPad)
-                } else {
-                    TextField("Начальный баланс", text: $remainder)
-                        .keyboardType(.decimalPad)
+                TextField("Бюджет", value: $account.budget, format: .number)
+                    .keyboardType(.decimalPad)
+                
+                TextField(mode == .create ? "Начальный баланс" : "Баланс", value: $account.remainder, format: .number)
+                    .keyboardType(.decimalPad)
+                
+            }
+            Section {
+                
+                if mode == .update {
+                    Toggle("Видимость счета", isOn: $account.visible)
                 }
                 
-                Toggle(isOn: $gradualBudgetFilling) {
-                    Text("Плавное заполнение бюджета")
-                }
+                Toggle("Плавное заполнение бюджета", isOn: $account.gradualBudgetFilling)
                 
-                Picker("Валюта", selection: $currency) {
-                    ForEach(currencies.keys.sorted(by: >), id: \.self) { currency in
-                        Text(currency)
+                if mode == .create {
+                    Picker("Валюта", selection: $account.currency) {
+                        ForEach(currencies.keys.sorted(by: >), id: \.self) { currency in
+                            Text(currency)
+                        }
                     }
                 }
             }
             Section {
                 Button("Сохранить") {
-                    createAccount()
                     dismiss()
                 }
             }
