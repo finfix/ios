@@ -10,12 +10,12 @@ import SwiftData
 
 struct Header: View {
     
-    @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
+    @AppStorage("accountGroupID") var accountGroupID: Int = 0
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
             
     var body: some View {
-        HeaderSubView(currency: accountGroups[accountGroupIndex].currency, accountGroupID: accountGroups[accountGroupIndex].id)
+        HeaderSubView(currency: accountGroups.first {$0.id == accountGroupID}?.currency ?? "USD", accountGroupID: UInt32(accountGroupID))
     }
 }
 
