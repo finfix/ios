@@ -11,33 +11,53 @@ import SwiftData
 struct QuickStatisticView: View {
     
     @AppStorage("accountGroupID") var accountGroupID: Int = 0
-    @Query var accounts: [Account]
-    @Query var accountGroups: [AccountGroup]
+    
             
     var body: some View {
-        QuickStatisticSubView(currency: accountGroups.first {$0.id == accountGroupID}?.currency ?? "USD", accountGroupID: UInt32(accountGroupID))
+        QuickStatisticSubView(accountGroupID: UInt32(accountGroupID))
     }
 }
 
 struct QuickStatisticSubView: View {
     
+    @Query var accountGroups: [AccountGroup]
+    
+    init(accountGroupID: UInt32) {
+        _accountGroups = Query(filter: #Predicate { $0.id == accountGroupID })
+    }
+    
+    var accountGroup: AccountGroup {
+        if accountGroups.count > 0 {
+            return accountGroups.first!
+        }
+        return AccountGroup()
+    }
+    
+    var body: some View {
+        QuickStatisticSubSubView(accountGroup: accountGroup)
+    }
+}
+
+struct QuickStatisticSubSubView: View {
+    
     @Query var accounts: [Account]
-    var currency: String
+    var currency: Currency
         
     var formatter: CurrencyFormatter
     
-    init(currency: String, accountGroupID: UInt32) {
-        self.formatter = CurrencyFormatter(currency: currency, maximumFractionDigits: 0)
-        self.currency = currency
+    init(accountGroup: AccountGroup) {
+        self.formatter = CurrencyFormatter(currency: accountGroup.currency, maximumFractionDigits: 0)
+        self.currency = accountGroup.currency ?? Currency()
+        let accountGroupID = accountGroup.id
         _accounts = Query(filter: #Predicate {
-            $0.accountGroupID == accountGroupID &&
+            $0.accountGroup?.id == accountGroupID &&
             $0.accounting &&
             $0.visible
         })
     }
     
     var body: some View {
-        let statistic = calculateStatistic(accounts: accounts, accountGroupCurrency: currency)
+        let statistic = calculateStatistic(accounts: accounts, targetCurrency: currency)
         
         HStack {
             Spacer()
@@ -72,15 +92,14 @@ struct QuickStatisticSubView: View {
         .frame(height: 40)
     }
     
-    func calculateStatistic(accounts: [Account], accountGroupCurrency: String) -> QuickStatistic {
+    func calculateStatistic(accounts: [Account], targetCurrency: Currency) -> QuickStatistic {
         let timeStart = Date()
                 
-        let rates = Currencies.rates
         let tmp = QuickStatistic(currency: currency)
         
         for account in accounts {
                         
-            let relation = (rates[currency] ?? 1) / (rates[account.currency] ?? 1)
+            let relation = targetCurrency.rate / (account.currency?.rate ?? 1)
             
             switch account.type {
             case .expense:

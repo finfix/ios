@@ -9,12 +9,12 @@ import Foundation
 
 class QuickStatistic: Decodable {
     
-    var currency: String
+    var currency: Currency
     var totalRemainder: Decimal
     var totalExpense: Decimal
     var totalBudget: Decimal
     
-    init(currency: String = "USD", totalRemainder: Decimal = 0, totalExpense: Decimal = 0, totalBudget: Decimal = 0) {
+    init(currency: Currency, totalRemainder: Decimal = 0, totalExpense: Decimal = 0, totalBudget: Decimal = 0) {
         self.currency = currency
         self.totalRemainder = totalRemainder
         self.totalExpense = totalExpense

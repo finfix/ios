@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AccountCategoryView: View {
     
@@ -37,7 +38,7 @@ struct AccountCategoryView: View {
                 Text(header)
                 Spacer()
                 // TODO: Сделать динамическим
-                Text(currencyFormatter.string(number: totalSum, currency: "RUB"))
+                Text("Сумма")
             }
             .foregroundColor(.primary)
             .padding()

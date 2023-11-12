@@ -24,7 +24,7 @@ struct MyApp: App {
             let schema = Schema([Currency.self, User.self, Transaction.self, Account.self, AccountGroup.self])
             container = try ModelContainer(for: schema)
         } catch {
-            fatalError("Failed to configure SwiftData container.")
+            fatalError(error.localizedDescription)
         }
     }
     

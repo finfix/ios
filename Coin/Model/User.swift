@@ -14,14 +14,16 @@ import SwiftData
     var name: String
     var email: String
     var timeCreate: Date
-    var defaultCurrency: String
+    var defaultCurrencyName: String
+    
+    var currency: Currency?
     
     init(id: UInt32 = 0, name: String = "", email: String = "", timeCreate: Date = Date(), defaultCurrency: String = "") {
         self.id = id
         self.name = name
         self.email = email
         self.timeCreate = timeCreate
-        self.defaultCurrency = defaultCurrency
+        self.defaultCurrencyName = defaultCurrency
     }
     
     enum CodingKeys: CodingKey {
@@ -34,6 +36,6 @@ import SwiftData
         name = try container.decode(String.self, forKey: .name)
         email = try container.decode(String.self, forKey: .email)
         timeCreate = Date()
-        defaultCurrency = try container.decode(String.self, forKey: .defaultCurrency)
+        defaultCurrencyName = try container.decode(String.self, forKey: .defaultCurrency)
     }
 }

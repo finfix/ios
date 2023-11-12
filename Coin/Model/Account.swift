@@ -11,10 +11,8 @@ import SwiftData
 @Model class Account: Decodable {
     
     @Attribute(.unique) var id: UInt32
-    var accountGroupID: UInt32
     var accounting: Bool
     var budget: Decimal
-    var currency: String
     var iconID: UInt32
     var name: String
     var remainder: Decimal
@@ -23,9 +21,12 @@ import SwiftData
     var parentAccountID: UInt32?
     var gradualBudgetFilling: Bool
     
-    @Relationship (inverse: \Transaction.accountFrom) var transactionsFrom: [Transaction]
-    @Relationship (inverse: \Transaction.accountTo) var transactionsTo: [Transaction]
-    
+    var currency: Currency?
+    var accountGroup: AccountGroup?
+   
+    var currencyName: String
+    var accountGroupID: UInt32
+
     @Transient var childrenAccounts: [Account] = []
     @Transient var showingBudget: Decimal = 0
     @Transient var showingRemainder: Decimal = 0
@@ -56,7 +57,7 @@ import SwiftData
         self.accountGroupID = accountGroupID
         self.accounting = accounting
         self.budget = budget
-        self.currency = currency
+        self.currencyName = currency
         self.iconID = iconID
         self.name = name
         self.remainder = remainder
@@ -65,8 +66,6 @@ import SwiftData
         self.parentAccountID = parentAccountID
         self.childrenAccounts = childrenAccounts
         self.gradualBudgetFilling = gradualBudgetFilling
-        self.transactionsFrom = transactionsFrom
-        self.transactionsTo = transactionsTo
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -79,7 +78,7 @@ import SwiftData
         accountGroupID = try container.decode(UInt32.self, forKey: .accountGroupID)
         accounting = try container.decode(Bool.self, forKey: .accounting)
         budget = try container.decode(Decimal.self, forKey: .budget)
-        currency = try container.decode(String.self, forKey: .currency)
+        currencyName = try container.decode(String.self, forKey: .currency)
         iconID = try container.decode(UInt32.self, forKey: .iconID)
         name = try container.decode(String.self, forKey: .name)
         remainder = try container.decode(Decimal.self, forKey: .remainder)
@@ -87,17 +86,13 @@ import SwiftData
         visible = try container.decode(Bool.self, forKey: .visible)
         parentAccountID = try container.decode(UInt32?.self, forKey: .parentAccountID)
         gradualBudgetFilling = try container.decode(Bool.self, forKey: .gradualBudgetFilling)
-        transactionsFrom = []
-        transactionsTo = []
     }
 }
 
 func groupAccounts(_ accounts: [Account]) -> [Account] {
     
     let check = Date()
-    
-    let rates = Currencies.rates
-    
+        
     for account in accounts {
         account.clearTransientData()
     }
@@ -146,7 +141,7 @@ func groupAccounts(_ accounts: [Account]) -> [Account] {
                 
                 // Аггрегируем бюджеты и остатки, если необхдоимо
                 if account.accounting {
-                    let relation = (rates[parentAccount.currency] ?? 1) / (rates[account.currency] ?? 1)
+                    let relation = (parentAccount.currency?.rate ?? 1) / (account.currency?.rate ?? 1)
                     accountsContainer[parentAccountIndex].showingBudget += account.budget * relation
                     accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
                 }

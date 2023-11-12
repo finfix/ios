@@ -27,7 +27,6 @@ struct ContentView: View {
             if hasExceededLimit() || currencies.isEmpty {
                 getCurrencies()
             }
-            Currencies.rates = Dictionary(uniqueKeysWithValues: currencies.map{ ( $0.isoCode, $0.rate ) })
         }
     }
     
@@ -51,7 +50,6 @@ struct ContentView: View {
                 showErrorAlert(error: err)
             } else if let currencies = model {
                 for currency in currencies { modelContext.insert(currency) }
-                Currencies.rates = Dictionary(uniqueKeysWithValues: currencies.map{ ( $0.isoCode, $0.rate ) })
             }
         }
         

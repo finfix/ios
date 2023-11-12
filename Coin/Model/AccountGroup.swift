@@ -12,12 +12,13 @@ import SwiftData
     
     @Attribute(.unique) var id: UInt32
     var name: String
-    var currency: String
+    var currencyName: String
+    var currency: Currency?
     
     init(id: UInt32 = 0, name: String = "", currency: String = "USD") {
         self.id = id
         self.name = name
-        self.currency = currency
+        self.currencyName = currency
     }
     
     private enum CodingKeys: CodingKey {
@@ -28,6 +29,6 @@ import SwiftData
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UInt32.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
-        currency = try container.decode(String.self, forKey: .currency)
+        currencyName = try container.decode(String.self, forKey: .currency)
     }
 }

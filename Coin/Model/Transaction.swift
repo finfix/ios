@@ -12,10 +12,6 @@ import SwiftData
 class Transaction: Decodable {
     @Attribute(.unique)
     var id: UInt32
-    var accountFromID: UInt32
-    var accountToID: UInt32
-    var accountFrom: Account?
-    var accountTo: Account?
     var accounting: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
@@ -23,6 +19,12 @@ class Transaction: Decodable {
     var isExecuted: Bool
     var note: String
     var type: TransactionType
+    
+    var accountFrom: Account?
+    var accountTo: Account?
+    
+    var accountFromID: UInt32
+    var accountToID: UInt32
     
     init(accountFromID: UInt32 = 0, accountToID: UInt32 = 0, accounting: Bool = true, amountFrom: Decimal = 0, amountTo: Decimal = 0, dateTransaction: Date = Date(), id: UInt32 = 0, isExecuted: Bool = true, note: String = "", type: TransactionType = .consumption) {
         self.accountFromID = accountFromID

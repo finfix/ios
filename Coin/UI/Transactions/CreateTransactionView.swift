@@ -84,7 +84,7 @@ struct CreateTransactionView: View {
                             HStack {
                                 Text(account.name)
                                 Spacer()
-                                Text(Currencies.symbols[account.currency]!)
+                                Text(account.currency?.symbol ?? "?")
                                     .foregroundColor(.secondary)
                             }
                             .tag(account)
@@ -104,7 +104,7 @@ struct CreateTransactionView: View {
                             HStack {
                                 Text(account.name)
                                 Spacer()
-                                Text(Currencies.symbols[account.currency]!)
+                                Text(account.currency?.symbol ?? "?")
                                     .foregroundColor(.secondary)
                             }
                             .tag(account)

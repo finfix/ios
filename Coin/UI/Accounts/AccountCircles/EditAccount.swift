@@ -16,35 +16,28 @@ struct EditAccount: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var modelContext
+    @Query var currencies: [Currency]
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @State var account: Account
     var oldAccount: Account = Account()
     
     var mode: mode
-    let currencies = Currencies.symbols
-    var currencyFormatter = CurrencyFormatter()
     
     init(_ account: Account) {
+        mode = .update
         self.oldAccount = account
         _account = .init(wrappedValue: account)
-        mode = .update
-        numberFormatter = NumberFormatter()
-        numberFormatter.currencySymbol = "&"
     }
     
     init(accountType: AccountType) {
+        mode = .create
         _account = .init(wrappedValue: Account(
                 currency: "USD",
                 type: accountType
             )
         )
-        mode = .create
-        numberFormatter = NumberFormatter()
-        numberFormatter.currencySymbol = "&"
     }
-    
-    let numberFormatter: NumberFormatter
-    
+        
     var body: some View {
         Form {
             Section {
@@ -68,8 +61,8 @@ struct EditAccount: View {
                 
                 if mode == .create {
                     Picker("Валюта", selection: $account.currency) {
-                        ForEach(currencies.keys.sorted(by: >), id: \.self) { currency in
-                            Text(currency)
+                        ForEach(currencies) { currency in
+                            Text(currency.isoCode)
                         }
                     }
                 }
@@ -85,29 +78,26 @@ struct EditAccount: View {
     
     func createAccount() {
         Task {
-            var budget: Double?
-            var remainder: Double?
+            var req = CreateAccountReq(
+                accountGroupID: UInt32(selectedAccountsGroupID),
+                accounting: true,
+                currency: account.currency?.isoCode ?? "",
+                iconID: 1,
+                name: account.name,
+                type: account.type.rawValue,
+                gradualBudgetFilling: account.gradualBudgetFilling
+            )
             
-            if self.budget != "" {
-                budget = Double(self.budget.replacingOccurrences(of: ",", with: "."))
+            if account.budget != 0 {
+                req.budget = account.budget
             }
             
-            if self.remainder != "" {
-                remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
+            if account.remainder != 0 {
+                req.budget = account.remainder
             }
             
             do {
-                let id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
-                    accountGroupID: modelData.selectedAccountsGroupID,
-                    accounting: true,
-                    budget: budget,
-                    currency: currency,
-                    iconID: 1,
-                    name: name,
-                    remainder: remainder,
-                    type: accountType.rawValue,
-                    gradualBudgetFilling: gradualBudgetFilling)
-                )
+                let id = try await AccountAPI().CreateAccount(req: req)
             } catch {
                 debugLog(error)
             }
