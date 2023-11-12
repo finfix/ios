@@ -30,14 +30,6 @@ struct TransactionRow: View {
         }
     }
     
-    var accountFrom: Account {
-        accountsMap[transaction.accountFromID] ?? Account(name: "Недоступный счет")
-    }
-    
-    var accountTo: Account {
-        accountsMap[transaction.accountToID] ?? Account(name: "Недоступный счет")
-    }
-    
     let currencies = Currencies.symbols
     
     var body: some View {
@@ -45,29 +37,29 @@ struct TransactionRow: View {
             VStack(alignment: .leading) {
                 if transaction.type != .balancing {
                     HStack {
-                        Text(accountFrom.name)
-                        Text(currencies[accountFrom.currency] ?? "")
+                        Text(transaction.accountFrom?.name ?? "Недоступный счет")
+                        Text(currencies[transaction.accountFrom?.currency ?? ""] ?? "")
                             .foregroundColor(.secondary)
-                        Text(accountGroupsMap[accountFrom.accountGroupID]?.name ?? "" )
+                        Text(accountGroupsMap[transaction.accountFrom?.accountGroupID ?? 0]?.name ?? "" )
                             .foregroundColor(.secondary)
                     }
                     .font(.footnote)
                 }
                 HStack {
-                    Text(accountTo.name)
-                    Text(currencies[accountTo.currency] ?? "")
+                    Text(transaction.accountTo?.name ?? "Недоступный счет")
+                    Text(currencies[transaction.accountTo?.currency ?? "USD"] ?? "")
                         .foregroundColor(.secondary)
-                    Text(accountGroupsMap[accountTo.accountGroupID]?.name ?? "" )
+                    Text(accountGroupsMap[transaction.accountTo?.accountGroupID ?? 0]?.name ?? "" )
                         .foregroundColor(.secondary)
                 }
             }
             Spacer()
             VStack(alignment: .trailing) {
                 if transaction.amountFrom != transaction.amountTo {
-                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: accountFrom.currency))
+                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom?.currency ?? "USD"))
                         .font(.footnote)
                 }
-                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: accountTo.currency))
+                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo?.currency ?? "USD"))
                 if transaction.note != "" {
                     Text(transaction.note)
                         .font(.footnote)

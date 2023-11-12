@@ -23,6 +23,9 @@ import SwiftData
     var parentAccountID: UInt32?
     var gradualBudgetFilling: Bool
     
+    @Relationship (inverse: \Transaction.accountFrom) var transactionsFrom: [Transaction]
+    @Relationship (inverse: \Transaction.accountTo) var transactionsTo: [Transaction]
+    
     @Transient var childrenAccounts: [Account] = []
     @Transient var showingBudget: Decimal = 0
     @Transient var showingRemainder: Decimal = 0
@@ -46,7 +49,9 @@ import SwiftData
         visible: Bool = true,
         parentAccountID: UInt32? = nil,
         childrenAccounts: [Account] = [Account](),
-        gradualBudgetFilling: Bool = false) {
+        gradualBudgetFilling: Bool = false,
+        transactionsFrom: [Transaction] = [],
+        transactionsTo: [Transaction] = []) {
         self.id = id
         self.accountGroupID = accountGroupID
         self.accounting = accounting
@@ -60,6 +65,8 @@ import SwiftData
         self.parentAccountID = parentAccountID
         self.childrenAccounts = childrenAccounts
         self.gradualBudgetFilling = gradualBudgetFilling
+        self.transactionsFrom = transactionsFrom
+        self.transactionsTo = transactionsTo
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -80,6 +87,8 @@ import SwiftData
         visible = try container.decode(Bool.self, forKey: .visible)
         parentAccountID = try container.decode(UInt32?.self, forKey: .parentAccountID)
         gradualBudgetFilling = try container.decode(Bool.self, forKey: .gradualBudgetFilling)
+        transactionsFrom = []
+        transactionsTo = []
     }
 }
 

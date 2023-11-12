@@ -9,11 +9,13 @@ import Foundation
 import SwiftData
 
 @Model 
-class Transaction: Decodable, Identifiable {
+class Transaction: Decodable {
     @Attribute(.unique)
     var id: UInt32
     var accountFromID: UInt32
     var accountToID: UInt32
+    var accountFrom: Account?
+    var accountTo: Account?
     var accounting: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
