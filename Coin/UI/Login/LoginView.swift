@@ -19,33 +19,35 @@ struct LoginView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
-                TextField("Email", text: $login)
-                    .modifier(CustomTextField())
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .textContentType(.emailAddress)
-                
-                SecureField("Password", text: $password)
-                    .modifier(CustomTextField())
-                    .textContentType(.password)
-                
-                HStack {
-                    Text("Нет аккаунта?")
-                    Button("Зарегистрироваться") {
-                        isSignUpOpen = true
-                    }
-                    .buttonStyle(.borderless)
-                    .navigationDestination(isPresented: $isSignUpOpen) {
-                        RegisterView(isSignUpOpen: $isSignUpOpen, login: login, password: password)
+            Form {
+                Section {
+                    TextField("Email", text: $login)
+                        .keyboardType(.emailAddress)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .textContentType(.emailAddress)
+                }
+                Section {
+                    SecureField("Password", text: $password)
+                        .textContentType(.password)
+                }
+                Section {
+                    HStack {
+                        Text("Нет аккаунта?")
+                        Button("Зарегистрироваться") {
+                            isSignUpOpen = true
+                        }
+                        .buttonStyle(.borderless)
+                        .navigationDestination(isPresented: $isSignUpOpen) {
+                            RegisterView(isSignUpOpen: $isSignUpOpen, login: login, password: password)
+                        }
                     }
                 }
-                
-                Button("Войти") {
-                    auth()
+                Section {
+                    Button("Войти") {
+                        auth()
+                    }
                 }
-                .modifier(CustomButton())
             }
             .navigationTitle("Вход")
         }

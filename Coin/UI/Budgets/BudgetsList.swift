@@ -37,8 +37,8 @@ struct BudgetsListSubView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                Header()
-                AccountsGroupSelector()
+                QuickStatisticView()
+                AccountGroupSelector()
             }
             VStack {
                 ForEach(groupedAccounts) { account in

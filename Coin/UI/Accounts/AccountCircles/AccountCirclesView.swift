@@ -8,7 +8,17 @@
 import SwiftUI
 import SwiftData
 
-struct AccountCirclesListSubView: View {
+struct AccountCirclesView: View {
+    
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
+    @State var path = NavigationPath()
+    
+    var body: some View {
+        AccountCirclesSubView(path: path, accountGroupID: UInt32(selectedAccountsGroupID))
+    }
+}
+
+struct AccountCirclesSubView: View {
     
     @Query var accounts: [Account]
     @State var path = NavigationPath()
@@ -33,8 +43,8 @@ struct AccountCirclesListSubView: View {
         NavigationStack(path: $path) {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
-                    Header()
-                    AccountsGroupSelector()
+                    QuickStatisticView()
+                    AccountGroupSelector()
                 }
                 Group {
                     ScrollView(.horizontal) {
@@ -69,24 +79,14 @@ struct AccountCirclesListSubView: View {
                     }
                     .frame(maxHeight: .infinity)
                 }
-                .navigationDestination(for: Account.self) { CreateAccount($0) }
-                .navigationDestination(for: AccountType.self) { CreateAccount(accountType: $0) }
+                .navigationDestination(for: Account.self) { EditAccount($0) }
+                .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0) }
             }
             Spacer()
         }
     }
 }
 
-struct AccountCircleList: View {
-    
-    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @State var path = NavigationPath()
-    
-    var body: some View {
-        AccountCirclesListSubView(path: path, accountGroupID: UInt32(selectedAccountsGroupID))
-    }
-}
-
 #Preview {
-    AccountCircleList()
+    AccountCirclesView()
 }

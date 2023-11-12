@@ -19,27 +19,27 @@ struct RegisterView: View {
     @State var name = ""
     
     var body: some View {
-        VStack {
-            
-            TextField("Имя", text: $name)
-                .modifier(CustomTextField())
-                .textContentType(.givenName)
-            
-            TextField("Email", text: $login)
-                .modifier(CustomTextField())
-                .keyboardType(.emailAddress)
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-                .textContentType(.emailAddress)
-            
-            SecureField("Password", text: $password)
-                .modifier(CustomTextField())
-                .textContentType(.password)
-            
-            Button("Войти") {
-                register()
+        Form {
+            Section {
+                TextField("Имя", text: $name)
+                    .textContentType(.givenName)
             }
-            .modifier(CustomButton())
+            Section {
+                TextField("Email", text: $login)
+                    .keyboardType(.emailAddress)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .textContentType(.emailAddress)
+            }
+            Section {
+                SecureField("Password", text: $password)
+                    .textContentType(.password)
+            }
+            Section {
+                Button("Войти") {
+                    register()
+                }
+            }
         }
         .navigationTitle("Регистрация")
     }

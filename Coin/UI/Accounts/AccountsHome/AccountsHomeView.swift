@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct AccountsHome: View {
+struct AccountsHomeView: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Query var accounts: [Account]
@@ -28,8 +28,8 @@ struct AccountsHome: View {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
-                        Header()
-                        AccountsGroupSelector()
+                        QuickStatisticView()
+                        AccountGroupSelector()
                     }
                     ScrollView {
                         Text("Карты и счета")
@@ -40,7 +40,7 @@ struct AccountsHome: View {
                         }
                         .frame(height: 150)
         
-                        AccountTypeDetailsView(header: "Долги", accounts: filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
+                        AccountCategoryView(header: "Долги", accounts: filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
                     }
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)
@@ -98,5 +98,5 @@ struct CircleTypeTransaction: View {
 }
     
 #Preview {
-    AccountsHome()
+    AccountsHomeView()
 }

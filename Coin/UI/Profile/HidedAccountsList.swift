@@ -35,7 +35,7 @@ struct HidedAccountsList: View {
     
     var body: some View {
         NavigationStack(path: $path) {
-            AccountsGroupSelector()
+            AccountGroupSelector()
             ScrollView {
                 LazyVGrid(columns: columns) {
                     ForEach(accounts) { account in
@@ -43,7 +43,7 @@ struct HidedAccountsList: View {
                     }
                 }
             }
-            .navigationDestination(for: Account.self) { CreateAccount($0) }
+            .navigationDestination(for: Account.self) { EditAccount($0) }
         }
         .toolbar {
             Picker("Тип счета", selection: $accountType) {

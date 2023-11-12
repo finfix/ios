@@ -69,14 +69,14 @@ struct MainView: View {
     
     var body: some View {
         TabView {
-            AccountsHome()
+            AccountsHomeView()
                 .tag(1)
                 .tabItem {
                     Image(systemName: "list.bullet.rectangle.fill")
                     Text("Счета")
                 }
             
-            AccountCircleList()
+            AccountCirclesView()
                 .tag(2)
                 .tabItem {
                     Image(systemName: "2.circle")

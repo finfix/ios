@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct AccountsGroupSelector: View {
+struct AccountGroupSelector: View {
     
     @Query var accountGroups: [AccountGroup]
     @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0 {
@@ -56,5 +56,5 @@ struct AccountsGroupSelector: View {
 }
 
 #Preview {
-    AccountsGroupSelector()
+    AccountGroupSelector()
 }

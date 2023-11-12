@@ -83,54 +83,5 @@ struct AccountCircleItem: View {
 }
 
 #Preview {
-    AccountCircleItem(Account(
-        id: 1,
-        accountGroupID: 1,
-        accounting: true,
-        budget: 49,
-        currency: "RUB",
-        iconID: 1,
-        name: "parent",
-        remainder: 34,
-        type: .expense,
-        visible: true,
-        parentAccountID: nil,
-        childrenAccounts: [
-            Account(
-                id: 2,
-                accountGroupID: 1,
-                accounting: true,
-                budget: 0,
-                currency: "RUB",
-                iconID: 1,
-                name: "child",
-                remainder: 43,
-                type: .expense,
-                visible: true,
-                parentAccountID: nil),
-            Account(
-                id: 3,
-                accountGroupID: 1,
-                accounting: true,
-                budget: 34,
-                currency: "RUB",
-                iconID: 1,
-                name: "child",
-                remainder: 43,
-                type: .expense,
-                visible: true,
-                parentAccountID: nil),
-            Account(
-                id: 4,
-                accountGroupID: 1,
-                accounting: true,
-                budget: 34,
-                currency: "RUB",
-                iconID: 1,
-                name: "child",
-                remainder: 43,
-                type: .expense,
-                visible: true,
-                parentAccountID: nil)]),
-                      path: .constant(NavigationPath()))
+    AccountCircleItem(Account(), path: .constant(NavigationPath()))
 }

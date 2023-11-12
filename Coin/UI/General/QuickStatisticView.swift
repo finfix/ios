@@ -8,18 +8,18 @@
 import SwiftUI
 import SwiftData
 
-struct Header: View {
+struct QuickStatisticView: View {
     
     @AppStorage("accountGroupID") var accountGroupID: Int = 0
     @Query var accounts: [Account]
     @Query var accountGroups: [AccountGroup]
             
     var body: some View {
-        HeaderSubView(currency: accountGroups.first {$0.id == accountGroupID}?.currency ?? "USD", accountGroupID: UInt32(accountGroupID))
+        QuickStatisticSubView(currency: accountGroups.first {$0.id == accountGroupID}?.currency ?? "USD", accountGroupID: UInt32(accountGroupID))
     }
 }
 
-struct HeaderSubView: View {
+struct QuickStatisticSubView: View {
     
     @Query var accounts: [Account]
     var currency: String
@@ -101,7 +101,7 @@ struct HeaderSubView: View {
 
 #Preview {
     Group {
-        Header()
+        QuickStatisticView()
         Spacer()
     }
 }

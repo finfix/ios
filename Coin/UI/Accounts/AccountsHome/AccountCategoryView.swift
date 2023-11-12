@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AccountTypeDetailsView: View {
+struct AccountCategoryView: View {
     
     @State var header: String
     @State var showingList = false
@@ -65,5 +65,5 @@ struct AccountTypeDetailsView: View {
 }
 
 #Preview {
-    AccountTypeDetailsView(header: "Заголовок", accounts: [Account(id: 1, accountGroupID: 1, accounting: true, budget: 0, currency: "Rub", iconID: 3, name: "Some", remainder: 3, type: .expense, visible: true, parentAccountID: nil)])
+    AccountCategoryView(header: "Заголовок", accounts: [Account(id: 1, accountGroupID: 1, accounting: true, budget: 0, currency: "Rub", iconID: 3, name: "Some", remainder: 3, type: .expense, visible: true, parentAccountID: nil)])
 }

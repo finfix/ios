@@ -12,7 +12,7 @@ enum mode {
     case create, update
 }
 
-struct CreateAccount: View {
+struct EditAccount: View {
     
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var modelContext
@@ -116,5 +116,5 @@ struct CreateAccount: View {
 }
 
 #Preview {
-    CreateAccount(accountType: .regular)
+    EditAccount(accountType: .regular)
 }
