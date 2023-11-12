@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-@Model class Account: Decodable, Identifiable {
+@Model class Account: Decodable {
     
     @Attribute(.unique) var id: UInt32
     var accountGroupID: UInt32
@@ -163,18 +163,6 @@ func groupAccounts(_ accounts: [Account]) -> [Account] {
     }
     debugLog("Сгруппировали счета", timeInterval: check)
     return accountsContainer
-}
-
-
-extension Account: Hashable {
-    
-    static func == (lhs: Account, rhs: Account) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
 }
 
 enum AccountType: String, Codable, CaseIterable {

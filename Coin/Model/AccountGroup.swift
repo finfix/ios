@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-@Model class AccountGroup: Decodable, Identifiable {
+@Model class AccountGroup: Decodable {
     
     @Attribute(.unique) var id: UInt32
     var name: String
@@ -29,16 +29,5 @@ import SwiftData
         id = try container.decode(UInt32.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
         currency = try container.decode(String.self, forKey: .currency)
-    }
-}
-
-extension AccountGroup: Hashable {
-    
-    static func == (lhs: AccountGroup, rhs: AccountGroup) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
     }
 }
