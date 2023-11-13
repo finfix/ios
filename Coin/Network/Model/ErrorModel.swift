@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ErrorModel: Decodable {
+struct ErrorModel: Error, Decodable {
     var developerTextError: String = ""
     var humanTextError: String = ""
     var statusCode: Int?

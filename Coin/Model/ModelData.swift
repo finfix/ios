@@ -95,11 +95,11 @@ import Foundation
         let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
         let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
         
-        AccountAPI().GetAccounts(req: GetAccountsRequest(dateFrom: dateFrom, dateTo: dateTo)) { model, error in
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let response = model {
-                self.accounts = response
+        Task {
+            do {
+                self.accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
+            } catch {
+                debugLog(error)
             }
         }
     }
@@ -108,25 +108,26 @@ import Foundation
         
         let limit: UInt8 = 100
         
-        TransactionAPI().GetTransactions(req: GetTransactionRequest(offset: offset, limit: limit)) { model, error in
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let response = model {
+        Task {
+            do {
+                let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq(offset: offset, limit: limit))
                 if offset == 0 {
-                    self.transactions = response
+                    self.transactions = transactions
                 } else {
-                    self.transactions.append(contentsOf: response)
+                    self.transactions.append(contentsOf: transactions)
                 }
+            } catch {
+                debugLog(error)
             }
         }
     }
     
     func getAccountGroups() {
-        AccountAPI().GetAccountGroups() { model, error in
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let response = model {
-                self.accountGroups = response
+        Task {
+            do {
+                self.accountGroups = try await AccountAPI().GetAccountGroups()
+            } catch {
+                debugLog(error)
             }
         }
     }

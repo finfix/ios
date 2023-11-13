@@ -55,46 +55,34 @@ struct CreateAccount: View {
     }
     
     func createAccount() {
-        
-        var budget: Double?
-        var remainder: Double?
-        
-        if self.budget != "" {
-            budget = Double(self.budget.replacingOccurrences(of: ",", with: "."))
-        }
-        
-        if self.remainder != "" {
-            remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
-        }
-        
-        AccountAPI().CreateAccount(req: CreateAccountReq(
-            accountGroupID: modelData.selectedAccountsGroupID,
-            accounting: true,
-            budget: budget,
-            currency: currency,
-            iconID: 1,
-            name: name,
-            remainder: remainder,
-            type: accountType.rawValue,
-            gradualBudgetFilling: gradualBudgetFilling)
-        ) { model, error in
-                if let err = error {
-                    showErrorAlert(error: err)
-                }
-//                if let response = model {
-//                    modelData.accounts.append(Account(
-//                        id: response.id,
-//                        accountGroupID: modelData.selectedAccountsGroupID,
-//                        accounting: true,
-//                        budget: budget ?? 0,
-//                        currency: currency,
-//                        iconID: 1,
-//                        name: name,
-//                        remainder: remainder ?? 0,
-//                        type: accountType,
-//                        visible: true))
-//                }
+        Task {
+            var budget: Double?
+            var remainder: Double?
+            
+            if self.budget != "" {
+                budget = Double(self.budget.replacingOccurrences(of: ",", with: "."))
             }
+            
+            if self.remainder != "" {
+                remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
+            }
+            
+            do {
+                let id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
+                    accountGroupID: modelData.selectedAccountsGroupID,
+                    accounting: true,
+                    budget: budget,
+                    currency: currency,
+                    iconID: 1,
+                    name: name,
+                    remainder: remainder,
+                    type: accountType.rawValue,
+                    gradualBudgetFilling: gradualBudgetFilling)
+                )
+            } catch {
+                debugLog(error)
+            }
+        }
     }
 }
 

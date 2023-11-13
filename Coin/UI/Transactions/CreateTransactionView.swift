@@ -164,19 +164,21 @@ struct CreateTransactionView: View {
             amountTo = amountFrom
         }
         
-        TransactionAPI().CreateTransaction(req: CreateTransactionRequest(
-            accountFromID: accountFrom.id,
-            accountToID: accountTo.id,
-            amountFrom: Double(amountFrom.replacingOccurrences(of: ",", with: ".")) ?? 0,
-            amountTo: Double(amountTo.replacingOccurrences(of: ",", with: ".")) ?? 0,
-            dateTransaction: format.string(from: date),
-            note: note,
-            type: transactionType.rawValue,
-            isExecuted: true)) { error in
-                if let err = error {
-                    showErrorAlert(error: err)
-                }
+        Task {
+            do {
+                try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
+                    accountFromID: accountFrom.id,
+                    accountToID: accountTo.id,
+                    amountFrom: Double(amountFrom.replacingOccurrences(of: ",", with: ".")) ?? 0,
+                    amountTo: Double(amountTo.replacingOccurrences(of: ",", with: ".")) ?? 0,
+                    dateTransaction: format.string(from: date),
+                    note: note,
+                    type: transactionType.rawValue,
+                    isExecuted: true))
+            } catch {
+                debugLog(error)
             }
+        }
     }
 }
 

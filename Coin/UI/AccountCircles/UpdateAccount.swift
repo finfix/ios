@@ -62,37 +62,38 @@ struct UpdateAccount: View {
     
     func updateAccount() {
         
-        var req = UpdateAccountReq(id: id)
-        if oldAccount.visible != visible {
-            req.visible = visible
-//            modelData.accountsGrouped[accountIndex].visible = visible
-        }
-        if oldAccount.accounting != accounting {
-            req.accounting = accounting
-//            modelData.accountsGrouped[accountIndex].accounting = accounting
-        }
-        if oldAccount.gradualBudgetFilling != gradualBudgetFilling {
-            req.gradualBudgetFilling = gradualBudgetFilling
-//            modelData.accountsGrouped[accountIndex].accounting = accounting
-        }
-        if oldAccount.remainder.stringValue != self.remainder {
-            let remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
-            req.remainder = remainder
-//            modelData.accountsGrouped[accountIndex].remainder = remainder!
-        }
-        if oldAccount.budget.stringValue != self.budget {
-            let budget = Double(self.budget.replacingOccurrences(of: ",", with: "."))
-            req.budget = budget
-//            modelData.accountsGrouped[accountIndex].budget = budget!
-        }
-        if oldAccount.name != name {
-            req.name = name
-//            modelData.accountsGrouped[accountIndex].name = name
-        }
-        
-        AccountAPI().UpdateAccount(req: req) { error in
-            if let err = error {
-                showErrorAlert(error: err)
+        Task {
+            var req = UpdateAccountReq(id: id)
+            if oldAccount.visible != visible {
+                req.visible = visible
+                //            modelData.accountsGrouped[accountIndex].visible = visible
+            }
+            if oldAccount.accounting != accounting {
+                req.accounting = accounting
+                //            modelData.accountsGrouped[accountIndex].accounting = accounting
+            }
+            if oldAccount.gradualBudgetFilling != gradualBudgetFilling {
+                req.gradualBudgetFilling = gradualBudgetFilling
+                //            modelData.accountsGrouped[accountIndex].accounting = accounting
+            }
+            if oldAccount.remainder.stringValue != self.remainder {
+                let remainder = Double(self.remainder.replacingOccurrences(of: ",", with: "."))
+                req.remainder = remainder
+                //            modelData.accountsGrouped[accountIndex].remainder = remainder!
+            }
+            if oldAccount.budget.stringValue != self.budget {
+                let budget = Double(self.budget.replacingOccurrences(of: ",", with: "."))
+                req.budget = budget
+                //            modelData.accountsGrouped[accountIndex].budget = budget!
+            }
+            if oldAccount.name != name {
+                req.name = name
+                //            modelData.accountsGrouped[accountIndex].name = name
+            }
+            do {
+                try await AccountAPI().UpdateAccount(req: req)
+            } catch {
+                debugLog(error)
             }
         }
     }

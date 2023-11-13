@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AuthRequest: Encodable {
+struct AuthReq: Encodable {
     var email: String
     var password: String
 }
@@ -18,7 +18,7 @@ struct RegisterReq: Encodable {
     var name: String
 }
 
-struct AuthResponse: Decodable {
+struct AuthRes: Decodable {
     var id: Int
     var token: Token
 }
@@ -28,11 +28,11 @@ struct Token: Decodable {
     var refreshToken: String
 }
 
-struct RefreshTokensResponse: Decodable {
+struct RefreshTokensRes: Decodable {
     var accessToken: String
     var refreshToken: String
 }
 
-struct RefreshTokensRequest: Encodable {
+struct RefreshTokensReq: Encodable {
     var token: String
 }

@@ -45,20 +45,17 @@ struct RegisterView: View {
     }
     
     func register() {
-        
-        AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name)) { response, error in
-            
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let response = response {
+        Task {
+            do {
+                let response = try await AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name))
                 accessToken = response.token.accessToken
                 refreshToken = response.token.refreshToken
                 isLogin = true
                 isSignUpOpen = false
+            } catch {
+                debugLog(error)
             }
         }
-        
-       
     }
 }
 

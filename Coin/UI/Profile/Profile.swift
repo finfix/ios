@@ -93,11 +93,12 @@ struct Profile: View {
     
     func getUser() {
         if users.isEmpty {
-            UserAPI().GetUser() { model, error in
-                if let err = error {
-                    showErrorAlert(error: err)
-                } else if let response = model {
-                    modelContext.insert(response)
+            Task {
+                do {
+                    let user = try await UserAPI().GetUser()
+                    modelContext.insert(user)
+                } catch {
+                    debugLog(error)
                 }
             }
         }

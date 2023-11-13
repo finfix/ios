@@ -14,7 +14,6 @@
 		B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */; };
 		B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */; };
 		B510BE942AE06273002CDB54 /* AccountGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE932AE06273002CDB54 /* AccountGroup.swift */; };
-		B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5251A2229025F3800EFCAB0 /* APIHelper.swift */; };
 		B52A7DEC2AE8292200CDE0A3 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */; };
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B531E6E02AE41A3000996520 /* Currencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = B531E6DF2AE41A3000996520 /* Currencies.swift */; };
@@ -25,7 +24,6 @@
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
 		B5624DD32AEB996C00346BB3 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5624DD22AEB996C00346BB3 /* Logger.swift */; };
 		B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
-		B57A8485290900D700F883C3 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = B57A8484290900D700F883C3 /* Alamofire */; };
 		B58705762900956D004C77DD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
 		B593F9532AE1BF6600378E17 /* UpdateAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B593F9522AE1BF6600378E17 /* UpdateAccount.swift */; };
 		B593F9552AE1CCB000378E17 /* UpdateTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B593F9542AE1CCB000378E17 /* UpdateTransaction.swift */; };
@@ -74,7 +72,6 @@
 		B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetBar.swift; sourceTree = "<group>"; };
 		B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetDetails.swift; sourceTree = "<group>"; };
 		B510BE932AE06273002CDB54 /* AccountGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroup.swift; sourceTree = "<group>"; };
-		B5251A2229025F3800EFCAB0 /* APIHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIHelper.swift; sourceTree = "<group>"; };
 		B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B531E6DF2AE41A3000996520 /* Currencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currencies.swift; sourceTree = "<group>"; };
@@ -131,7 +128,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B57A8485290900D700F883C3 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -167,7 +163,6 @@
 			isa = PBXGroup;
 			children = (
 				B59F0F1D28FDC74C00AA33A9 /* UI */,
-				B5251A2229025F3800EFCAB0 /* APIHelper.swift */,
 				B5CF7D312AE578CC0086C0B6 /* CurrencySymbols.swift */,
 				B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */,
 				B5624DD22AEB996C00346BB3 /* Logger.swift */,
@@ -338,7 +333,6 @@
 			);
 			name = Coin;
 			packageProductDependencies = (
-				B57A8484290900D700F883C3 /* Alamofire */,
 			);
 			productName = Coin;
 			productReference = B5F9CC5F28F01CA80037A21A /* Coin.app */;
@@ -369,7 +363,6 @@
 			);
 			mainGroup = B5F9CC5628F01CA80037A21A;
 			packageReferences = (
-				B57A8483290900D700F883C3 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = B5F9CC6028F01CA80037A21A /* Products */;
 			projectDirPath = "";
@@ -449,7 +442,6 @@
 				B510BE942AE06273002CDB54 /* AccountGroup.swift in Sources */,
 				B59F0F2628FDD30F00AA33A9 /* AccountCirclesList.swift in Sources */,
 				B5B950532ADF24A900798F8C /* AccountCircleItem.swift in Sources */,
-				B5251A2329025F3800EFCAB0 /* APIHelper.swift in Sources */,
 				B5FB6AA428F3D62D00C2A2AC /* TransactionsList.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -663,25 +655,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		B57A8483290900D700F883C3 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		B57A8484290900D700F883C3 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B57A8483290900D700F883C3 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B5F9CC5728F01CA80037A21A /* Project object */;
 }
