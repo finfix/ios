@@ -159,11 +159,11 @@ struct CreateTransactionView: View {
         
         Task {
             do {
-                try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
+                let id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
                     accountFromID: accountFrom.id,
                     accountToID: accountTo.id,
-                    amountFrom: Double(amountFrom.replacingOccurrences(of: ",", with: ".")) ?? 0,
-                    amountTo: Double(amountTo.replacingOccurrences(of: ",", with: ".")) ?? 0,
+                    amountFrom: amountFrom,
+                    amountTo: amountTo,
                     dateTransaction: format.string(from: date),
                     note: note,
                     type: transactionType.rawValue,

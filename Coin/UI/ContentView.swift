@@ -45,15 +45,11 @@ struct ContentView: View {
     
     func getCurrencies() {
         
-        UserAPI().GetCurrencies() { model, error in
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let currencies = model {
-                for currency in currencies { modelContext.insert(currency) }
-            }
+        Task {
+            let currencies = try await UserAPI().GetCurrencies()
+            for currency in currencies { modelContext.insert(currency) }
+            lastFetchedCurrencies = Date.now.timeIntervalSince1970
         }
-        
-        lastFetchedCurrencies = Date.now.timeIntervalSince1970
     }
 }
 
@@ -134,29 +130,30 @@ extension MainView {
     }
     
     func getAccountGroups() {
-        AccountAPI().GetAccountGroups() { accountGroups, error in
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let accountGroups {
+        Task {
+            do {
+                let accountGroups = try await AccountAPI().GetAccountGroups()
                 for accountGroup in accountGroups { modelContext.insert(accountGroup) }
+            } catch {
+                debugLog(error)
             }
         }
     }
     
     func getAccounts() {
-            
+        Task {
             let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
             let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
             let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
             
-            AccountAPI().GetAccounts(req: GetAccountsRequest(dateFrom: dateFrom, dateTo: dateTo)) { accounts, error in
-                if let err = error {
-                    showErrorAlert(error: err)
-                } else if let accounts {
-                    for account in accounts { modelContext.insert(account) }
-                }
+            do {
+                let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
+                for account in accounts { modelContext.insert(account) }
+            } catch {
+                debugLog(error)
             }
         }
+    }
 }
 
 #Preview {
