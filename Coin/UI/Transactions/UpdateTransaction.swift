@@ -52,14 +52,15 @@ struct UpdateTransaction: View {
     
     func updateTransaction() {
         
-        var req = UpdateTransactionReq(id: id)
-        req.note = note
-        req.amountFrom = Double(self.amountFrom.replacingOccurrences(of: ",", with: "."))
-        req.amountTo = Double(self.amountTo.replacingOccurrences(of: ",", with: "."))
-        
-        TransactionAPI().UpdateTransaction(req: req) { error in
-            if let err = error {
-                showErrorAlert(error: err)
+        Task {
+            do {
+                var req = UpdateTransactionReq(id: id)
+                req.note = note
+                req.amountFrom = Double(self.amountFrom.replacingOccurrences(of: ",", with: "."))
+                req.amountTo = Double(self.amountTo.replacingOccurrences(of: ",", with: "."))
+                try await TransactionAPI().UpdateTransaction(req: req)
+            } catch {
+                debugLog(error)
             }
         }
     }

@@ -6,86 +6,46 @@
 //
 
 import Foundation
-import Alamofire
 import SwiftUI
 
 class TransactionAPI: API {
-    
+        
     let transactionBasePath = "/transaction"
     
-    // Получение транзакций
-    func GetTransactions(req: GetTransactionRequest, completionHandler: @escaping ([Transaction]?, ErrorModel?) -> Void) {
-        
-        let (headers, err) = getBaseHeaders()
-        if err != nil {
-            completionHandler(nil, err)
-        }
-        
-        AF.request(basePath + transactionBasePath, method: .get, parameters: req, headers: headers).responseData { response in
-            
-            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: [Transaction].self)
-            if error != nil {
-                completionHandler(nil, error)
-                return
-            }
-            if model != nil {
-                completionHandler(model, nil)
-                return
-            }
-        }
+    func GetTransactions(req: GetTransactionReq) async throws -> [Transaction] {
+        return try await request(
+            url: basePath + transactionBasePath,
+            method: .get,
+            headers: getBaseHeaders(),
+            query: ["offset": String(req.offset!), "limit": String(req.limit!)],
+            resModel: [Transaction].self)
     }
     
-    func CreateTransaction(req: CreateTransactionRequest, completionHandler: @escaping (ErrorModel?) -> Void) {
-        
-        let (headers, err) = getBaseHeaders()
-        if err != nil {
-            completionHandler(err)
-        }
-        
-        AF.request(basePath + transactionBasePath, method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
-            
-            let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
-            if error != nil {
-                completionHandler(error)
-                return
-            }
-            completionHandler(nil)
-        }
+    func CreateTransaction(req: CreateTransactionReq) async throws -> UInt32 {
+        return try await request(
+            url: basePath + transactionBasePath,
+            method: .post,
+            headers: getBaseHeaders(),
+            reqModel: req,
+            resModel: CreateTransactionRes.self
+        ).id
     }
     
-    func UpdateTransaction(req: UpdateTransactionReq, completionHandler: @escaping (ErrorModel?) -> Void) {
-        
-        let (headers, err) = getBaseHeaders()
-        if err != nil {
-            completionHandler(err)
-        }
-        
-        AF.request(basePath + transactionBasePath, method: .patch, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
-            
-            let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
-            if error != nil {
-                completionHandler(error)
-                return
-            }
-            completionHandler(nil)
-        }
+    func UpdateTransaction(req: UpdateTransactionReq) async throws {
+        return try await request(
+            url: basePath + transactionBasePath,
+            method: .patch,
+            headers: getBaseHeaders(),
+            reqModel: req
+        )
     }
     
-    func DeleteTransaction(req: DeleteTransactionRequest, completionHandler: @escaping (ErrorModel?) -> Void) {
-        
-        let (headers, err) = getBaseHeaders()
-        if err != nil {
-            completionHandler(err)
-        }
-        
-        AF.request(basePath + transactionBasePath, method: .delete, parameters: req, headers: headers).responseData { response in
-            
-            let (error, _) = ApiHelper().dataProcessingWithoutParse(data: response)
-            if error != nil {
-                completionHandler(error)
-                return
-            }
-            completionHandler(nil)
-        }
+    func DeleteTransaction(req: DeleteTransactionReq) async throws {
+        return try await request(
+            url: basePath + transactionBasePath,
+            method: .delete,
+            headers: getBaseHeaders(),
+            query: ["id": String(req.id)]
+        )
     }
 }

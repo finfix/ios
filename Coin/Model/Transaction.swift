@@ -37,10 +37,3 @@ class Transaction: Decodable, Identifiable {
 enum TransactionType: String, Decodable {
     case consumption, income, transfer, balancing
 }
-
-struct ModelError: Decodable {
-    var humanTextError: String
-    var developerTextError: String
-    var context: String?
-}
-

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct GetAccountsRequest: Encodable {
+struct GetAccountsReq: Encodable {
     var accountGroupID: UInt32?
     var accounting: Bool?
     var dateFrom: Date?

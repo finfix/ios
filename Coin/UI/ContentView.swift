@@ -97,16 +97,15 @@ extension MainView {
     }
     
     func getCurrencies() {
-        
-        UserAPI().GetCurrencies() { model, error in
-            if let err = error {
-                showErrorAlert(error: err)
-            } else if let currencies = model {
+        Task {
+            do {
+                let currencies = try await UserAPI().GetCurrencies()
                 for currency in currencies { modelContext.insert(currency) }
+                lastFetchedCurrencies = Date.now.timeIntervalSince1970
+            } catch {
+                debugLog(error)
             }
         }
-        
-        lastFetchedCurrencies = Date.now.timeIntervalSince1970
     }
 }
 

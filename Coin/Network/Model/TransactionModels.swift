@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CreateTransactionRequest: Encodable {
+struct CreateTransactionReq: Encodable {
     var accountFromID: UInt32
     var accountToID: UInt32
     var amountFrom: Double
@@ -16,6 +16,10 @@ struct CreateTransactionRequest: Encodable {
     var note: String
     var type: String
     var isExecuted: Bool
+}
+
+struct CreateTransactionRes: Decodable {
+    var id: UInt32
 }
 
 struct UpdateTransactionReq: Encodable {
@@ -29,7 +33,7 @@ struct UpdateTransactionReq: Encodable {
 //    var isExecuted: Bool
 }
 
-struct GetTransactionRequest: Encodable {
+struct GetTransactionReq: Encodable {
     var accountID: UInt32?
     var dateFrom: Date?
     var dateTo: Date?
@@ -38,6 +42,6 @@ struct GetTransactionRequest: Encodable {
     var limit: UInt8?
 }
 
-struct DeleteTransactionRequest: Encodable {
+struct DeleteTransactionReq: Encodable {
     var id: UInt32
 }

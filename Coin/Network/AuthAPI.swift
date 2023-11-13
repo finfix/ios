@@ -6,67 +6,39 @@
 //
 
 import Foundation
-import Alamofire
 import SwiftUI
 
 class AuthAPI: API {
     
     let authBasePath = "/auth"
     
-    func Auth(req: AuthRequest, completionHandler: @escaping (AuthResponse?, ErrorModel?) -> Void) {
-        
-        let headers = HTTPHeaders(
-            ["DeviceID": UIDevice.current.identifierForVendor!.uuidString])
-        
-        AF.request(basePath + authBasePath + "/signIn", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
-            
-            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: AuthResponse.self)
-            if error != nil {
-                completionHandler(nil, error)
-                return
-            }
-            if model != nil {
-                completionHandler(model, nil)
-                return
-            }
-        }
+    func Auth(req: AuthReq) async throws -> AuthRes {
+        return try await request(
+            url: basePath + authBasePath + "/signIn",
+            method: .post,
+            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString], 
+            reqModel: req,
+            resModel: AuthRes.self
+        )
     }
     
-    func Register(req: RegisterReq, completionHandler: @escaping (AuthResponse?, ErrorModel?) -> Void) {
-        
-        let headers = HTTPHeaders(
-            ["DeviceID": UIDevice.current.identifierForVendor!.uuidString])
-        
-        AF.request(basePath + authBasePath + "/signUp", method: .post, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
-            
-            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: AuthResponse.self)
-            if error != nil {
-                completionHandler(nil, error)
-                return
-            }
-            if model != nil {
-                completionHandler(model, nil)
-                return
-            }
-        }
+    func Register(req: RegisterReq) async throws -> AuthRes {
+        return try await request(
+            url: basePath + authBasePath + "/signUp",
+            method: .post,
+            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
+            reqModel: req,
+            resModel: AuthRes.self
+        )
     }
     
-    func RefreshToken(req: RefreshTokensRequest, completionHandler: @escaping (RefreshTokensResponse?, ErrorModel?) -> Void) {
-        
-        let headers = HTTPHeaders(
-            ["DeviceID": UIDevice.current.identifierForVendor!.uuidString])
-        
-        AF.request(basePath + authBasePath + "/refreshTokens", method: .get, parameters: req, encoder: JSONParameterEncoder(), headers: headers).responseData { response in
-            
-            let (model, error, _) = ApiHelper().dataProcessing(data: response, model: RefreshTokensResponse.self)
-            if error != nil {
-                completionHandler(nil, error)
-                return
-            }
-            if model != nil {
-                completionHandler(model, nil)
-                return
-            }
-        }
+    func RefreshToken(req: RefreshTokensReq) async throws -> RefreshTokensRes {
+        return try await request(
+            url: basePath + authBasePath + "/refreshTokens",
+            method: .get,
+            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
+            query: ["token": req.token],
+            resModel: RefreshTokensRes.self
+        )
     }
 }

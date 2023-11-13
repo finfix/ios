@@ -52,16 +52,14 @@ struct LoginView: View {
     }
     
     func auth() {
-        
-        AuthAPI().Auth(req: AuthRequest(email: login, password: password)) { response, error in
-            
-            if let err = error {
-                showErrorAlert(error: err)
-                
-            } else if let response = response {
+        Task {
+            do {
+                let response = try await AuthAPI().Auth(req: AuthReq(email: login, password: password))
                 accessToken = response.token.accessToken
                 refreshToken = response.token.refreshToken
                 isLogin = true
+            } catch {
+                debugLog(error)
             }
         }
     }

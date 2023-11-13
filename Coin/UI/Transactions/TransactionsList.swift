@@ -45,9 +45,11 @@ struct TransactionsList: View {
     }
     
     func deleteTransaction(id: UInt32) {
-        TransactionAPI().DeleteTransaction(req: DeleteTransactionRequest(id: id)) { error in
-            if let err = error {
-                showErrorAlert(error: err)
+        Task {
+            do {
+                try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: id))
+            } catch {
+                debugLog(error)
             }
         }
     }
