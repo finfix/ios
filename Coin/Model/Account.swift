@@ -87,6 +87,15 @@ import SwiftData
         parentAccountID = try container.decode(UInt32?.self, forKey: .parentAccountID)
         gradualBudgetFilling = try container.decode(Bool.self, forKey: .gradualBudgetFilling)
     }
+    
+    func getByID(_ id: UInt32, context: ModelContext) -> Account {
+        let descriptor = FetchDescriptor<Account>(predicate: #Predicate { $0.id == id })
+        let accounts = (try? context.fetch(descriptor)) ?? []
+        if let account = accounts.first {
+            return account
+        }
+        return Account()
+    }
 }
 
 func groupAccounts(_ accounts: [Account]) -> [Account] {

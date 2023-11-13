@@ -33,4 +33,13 @@ import SwiftData
         rate = try container.decode(Decimal.self, forKey: .rate)
         symbol = try container.decode(String.self, forKey: .symbol)
     }
+    
+    func getByIsoCode(_ isoCode: String, context: ModelContext) -> Currency {
+        let descriptor = FetchDescriptor<Currency>(predicate: #Predicate { $0.isoCode == isoCode })
+        let currencies = (try? context.fetch(descriptor)) ?? []
+        if let currency = currencies.first {
+            return currency
+        }
+        return Currency()
+    }
 }

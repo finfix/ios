@@ -31,4 +31,13 @@ import SwiftData
         name = try container.decode(String.self, forKey: .name)
         currencyName = try container.decode(String.self, forKey: .currency)
     }
+    
+    func getByID(_ id: UInt32, context: ModelContext) -> AccountGroup {
+        let descriptor = FetchDescriptor<AccountGroup>(predicate: #Predicate { $0.id == id })
+        let accountGroups = (try? context.fetch(descriptor)) ?? []
+        if let accountGroup = accountGroups.first {
+            return accountGroup
+        }
+        return AccountGroup()
+    }
 }
