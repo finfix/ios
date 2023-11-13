@@ -156,6 +156,28 @@ extension MainView {
     }
 }
 
+actor LoadModelActor: ModelActor {
+    let modelContainer: ModelContainer
+    let modelExecutor: any ModelExecutor
+    
+    init(modelContainer: ModelContainer) {
+        self.modelContainer = modelContainer
+        let context = ModelContext(modelContainer)
+        modelExecutor = DefaultSerialModelExecutor(modelContext: context)
+    }
+    
+    func currenciesAsync () async {
+        do {
+            let currencies = try await UserAPI().GetCurrencies()
+            for currency in currencies {
+                modelContext.insert(currency)
+            }
+        } catch {
+            debugLog(error)
+        }
+    }
+}
+
 #Preview {
     ContentView()
 }
