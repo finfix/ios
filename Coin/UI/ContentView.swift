@@ -10,10 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     
-    @AppStorage("lastFetchedCurrencies") var lastFetchedCurrencies: Double = Date.now.timeIntervalSince1970
     @AppStorage("isLogin") var isLogin: Bool = false
-    @Query var currencies: [Currency]
-    @Environment(\.modelContext) var modelContext
     
     var body: some View {
         Group {
@@ -23,44 +20,10 @@ struct ContentView: View {
                 LoginView()
             }
         }
-        .onAppear {
-            if hasExceededLimit() || currencies.isEmpty {
-                getCurrencies()
-            }
-        }
-    }
-    
-    func hasExceededLimit() -> Bool {
-        let timeLimit = 3600 // 1 hour
-        let currentTime = Date.now
-        let lastFetchedCurrenciesTime = Date(timeIntervalSince1970: lastFetchedCurrencies)
-        
-        guard let differenceInMins = Calendar.current.dateComponents([.second],
-                                                                     from: lastFetchedCurrenciesTime,
-                                                                     to: currentTime).second else {
-            return false
-        }
-        return differenceInMins >= timeLimit
-    }
-    
-    func getCurrencies() {
-        
-        Task {
-            let currencies = try await UserAPI().GetCurrencies()
-            for currency in currencies { modelContext.insert(currency) }
-            lastFetchedCurrencies = Date.now.timeIntervalSince1970
-        }
     }
 }
 
 struct MainView: View {
-
-    @Query var transactions: [Transaction]
-    @Query var accounts: [Account]
-    @Query var accountGroups: [AccountGroup]
-    
-    @Environment(\.modelContext) var modelContext
-    
     var body: some View {
         TabView {
             AccountsHomeView()
@@ -97,83 +60,6 @@ struct MainView: View {
                     Image(systemName: "person.fill")
                     Text("Профиль")
                 }
-        }
-        .onAppear {
-            if transactions.isEmpty {
-                debugLog("Запросили транзакции с сервера")
-                getTransactions()
-            }
-            if accounts.isEmpty {
-                debugLog("Запросили счета с сервера")
-                getAccounts()
-            }
-            if accountGroups.isEmpty {
-                debugLog("Запросили группы счетов с сервера")
-                getAccountGroups()
-            }
-        }
-    }
-}
-
-extension MainView {
-    
-    func getTransactions() {
-        
-        Task {
-            do {
-                let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
-                for transaction in transactions { modelContext.insert(transaction) }
-            } catch {
-                debugLog(error)
-            }
-        }
-    }
-    
-    func getAccountGroups() {
-        Task {
-            do {
-                let accountGroups = try await AccountAPI().GetAccountGroups()
-                for accountGroup in accountGroups { modelContext.insert(accountGroup) }
-            } catch {
-                debugLog(error)
-            }
-        }
-    }
-    
-    func getAccounts() {
-        Task {
-            let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-            let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
-            let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
-            
-            do {
-                let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
-                for account in accounts { modelContext.insert(account) }
-            } catch {
-                debugLog(error)
-            }
-        }
-    }
-}
-
-actor LoadModelActor: ModelActor {
-    let modelContainer: ModelContainer
-    let modelExecutor: any ModelExecutor
-    
-    init(modelContainer: ModelContainer) {
-        self.modelContainer = modelContainer
-        let context = ModelContext(modelContainer)
-        modelExecutor = DefaultSerialModelExecutor(modelContext: context)
-    }
-    
-    func currenciesAsync () async {
-        do {
-            let currencies = try await UserAPI().GetCurrencies()
-            for currency in currencies {
-                modelContext.insert(currency)
-            }
-        } catch {
-            debugLog(error)
         }
     }
 }

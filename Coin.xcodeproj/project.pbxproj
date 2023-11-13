@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B500D3592B025ED40001576B /* LoadModelActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500D3582B025ED40001576B /* LoadModelActor.swift */; };
 		B5024EB22AE1A20F00F60449 /* EditAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5024EB12AE1A20F00F60449 /* EditAccount.swift */; };
 		B504B7E52AE46EEB0078643A /* UserAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B504B7E42AE46EEB0078643A /* UserAPI.swift */; };
 		B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B504B7E62AE526DA0078643A /* PlusNewAccount.swift */; };
@@ -59,6 +60,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B500D3582B025ED40001576B /* LoadModelActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadModelActor.swift; sourceTree = "<group>"; };
 		B5024EB12AE1A20F00F60449 /* EditAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccount.swift; sourceTree = "<group>"; };
 		B504B7E42AE46EEB0078643A /* UserAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAPI.swift; sourceTree = "<group>"; };
 		B504B7E62AE526DA0078643A /* PlusNewAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlusNewAccount.swift; sourceTree = "<group>"; };
@@ -170,7 +172,6 @@
 		B59F0F1C28FDC74000AA33A9 /* Pkg */ = {
 			isa = PBXGroup;
 			children = (
-				B5251A2229025F3800EFCAB0 /* APIHelper.swift */,
 				B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */,
 				B5624DD22AEB996C00346BB3 /* Logger.swift */,
 			);
@@ -202,6 +203,7 @@
 		B5B9504A2ADF182100798F8C /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				B500D3582B025ED40001576B /* LoadModelActor.swift */,
 				B5F9CC7228F01E4D0037A21A /* Transaction.swift */,
 				B5FB6AA928F3D72300C2A2AC /* Account.swift */,
 				B5B9504B2ADF18BC00798F8C /* QuickStatistic.swift */,
@@ -420,6 +422,7 @@
 				B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */,
 				B5B950592ADF274E00798F8C /* AccountCard.swift in Sources */,
 				B5B9504F2ADF235A00798F8C /* Profile.swift in Sources */,
+				B500D3592B025ED40001576B /* LoadModelActor.swift in Sources */,
 				B54B09B72AEED085002914B9 /* User.swift in Sources */,
 				B5B950572ADF261700798F8C /* QuickStatisticView.swift in Sources */,
 				B5B950432ADF16B300798F8C /* BudgetRow.swift in Sources */,

@@ -24,25 +24,6 @@ struct CurrencyRates: View {
                 Spacer()
                 Text(currencyFormatter.string(number: currency.rate, currency: currency))
             }
-            
-        }
-        .toolbar{
-            ToolbarItem(placement: .primaryAction) {
-                Button("Очистить") {
-                    do {
-                        try modelContext.delete(model: Currency.self)
-                    } catch {
-                        debugLog(error)
-                    }
-                }
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Button("Обновить") {
-                    Task {
-                        await LoadModelActor(modelContainer: modelContext.container).currenciesAsync()
-                    }
-                }
-            }
         }
     }
 }

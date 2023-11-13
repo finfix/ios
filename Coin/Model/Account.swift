@@ -88,85 +88,76 @@ import SwiftData
         gradualBudgetFilling = try container.decode(Bool.self, forKey: .gradualBudgetFilling)
     }
     
-    func getByID(_ id: UInt32, context: ModelContext) -> Account {
-        let descriptor = FetchDescriptor<Account>(predicate: #Predicate { $0.id == id })
-        let accounts = (try? context.fetch(descriptor)) ?? []
-        if let account = accounts.first {
-            return account
+    static func groupAccounts(_ accounts: [Account]) -> [Account] {
+        
+        let check = Date()
+            
+        for account in accounts {
+            account.clearTransientData()
         }
-        return Account()
-    }
-}
 
-func groupAccounts(_ accounts: [Account]) -> [Account] {
-    
-    let check = Date()
-        
-    for account in accounts {
-        account.clearTransientData()
-    }
-
-    // Делаем контейнер для сбора счетов и счетов с аггрегацией
-    var accountsContainer = [Account]()
-        
-    for account in accounts {
-        
-        // Если у элемента исходного массива есть родитель
-        if let parentAccountID = account.parentAccountID {
+        // Делаем контейнер для сбора счетов и счетов с аггрегацией
+        var accountsContainer = [Account]()
             
-            // Индекс родителя в контейнере
-            var parentAccountIndex: Int = 0
+        for account in accounts {
             
-            // Ищем индекс родителя в контейнере
-            if let index = accountsContainer.firstIndex(where: { $0.id == parentAccountID }) {
-                // Если находим, присваиваем переменной
-                parentAccountIndex = index
+            // Если у элемента исходного массива есть родитель
+            if let parentAccountID = account.parentAccountID {
                 
-            // Если не находим
-            } else {
+                // Индекс родителя в контейнере
+                var parentAccountIndex: Int = 0
                 
-                // Добавляем родителя из accounts в контейнер
-                if let parentAccount = accounts.first(where: { $0.id == parentAccountID }) {
-                    accountsContainer.append(parentAccount)
+                // Ищем индекс родителя в контейнере
+                if let index = accountsContainer.firstIndex(where: { $0.id == parentAccountID }) {
+                    // Если находим, присваиваем переменной
+                    parentAccountIndex = index
                     
-                    // Получаем его индекс
-                    parentAccountIndex = accountsContainer.firstIndex(where: { $0.id == parentAccountID })!
+                // Если не находим
                 } else {
-                    continue
+                    
+                    // Добавляем родителя из accounts в контейнер
+                    if let parentAccount = accounts.first(where: { $0.id == parentAccountID }) {
+                        accountsContainer.append(parentAccount)
+                        
+                        // Получаем его индекс
+                        parentAccountIndex = accountsContainer.firstIndex(where: { $0.id == parentAccountID })!
+                    } else {
+                        continue
+                    }
                 }
-            }
-            
-            // Получаем родителя
-            let parentAccount = accountsContainer[parentAccountIndex]
-            
-            // Если счет нужно показывать
-            if account.visible {
                 
+                // Получаем родителя
+                let parentAccount = accountsContainer[parentAccountIndex]
+                
+                // Если счет нужно показывать
+                if account.visible {
+                    
+                    account.showingBudget = account.budget
+                    account.showingRemainder = account.remainder
+                    
+                    // Добавляем его в дочерние счета родителя
+                    accountsContainer[parentAccountIndex].childrenAccounts.append(account)
+                    
+                    // Аггрегируем бюджеты и остатки, если необхдоимо
+                    if account.accounting {
+                        let relation = (parentAccount.currency?.rate ?? 1) / (account.currency?.rate ?? 1)
+                        accountsContainer[parentAccountIndex].showingBudget += account.budget * relation
+                        accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
+                    }
+                }
+                
+            } else {
+                // Проверяем, чтобы такого счета уже не было в контейнере
+                guard accountsContainer.firstIndex(where: { $0.id == account.id }) == nil else { continue }
                 account.showingBudget = account.budget
                 account.showingRemainder = account.remainder
-                
-                // Добавляем его в дочерние счета родителя
-                accountsContainer[parentAccountIndex].childrenAccounts.append(account)
-                
-                // Аггрегируем бюджеты и остатки, если необхдоимо
-                if account.accounting {
-                    let relation = (parentAccount.currency?.rate ?? 1) / (account.currency?.rate ?? 1)
-                    accountsContainer[parentAccountIndex].showingBudget += account.budget * relation
-                    accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
-                }
+                // Добавляем счет в контейнер
+                accountsContainer.append(account)
             }
-            
-        } else {
-            // Проверяем, чтобы такого счета уже не было в контейнере
-            guard accountsContainer.firstIndex(where: { $0.id == account.id }) == nil else { continue }
-            account.showingBudget = account.budget
-            account.showingRemainder = account.remainder
-            // Добавляем счет в контейнер
-            accountsContainer.append(account)
         }
+        debugLog("Сгруппировали счета", timeInterval: check)
+        return accountsContainer
     }
-    debugLog("Сгруппировали счета", timeInterval: check)
-    return accountsContainer
 }
 
 enum AccountType: String, Codable, CaseIterable {

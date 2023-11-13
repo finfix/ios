@@ -11,17 +11,7 @@ import SwiftData
 struct TransactionRow: View {
         
     @State var transaction: Transaction
-    @Query var accountGroups: [AccountGroup]
-    @Query var accounts: [Account]
-    
-    var accountGroupsMap: [UInt32: AccountGroup] {
-        Dictionary(uniqueKeysWithValues: accountGroups.map{ ($0.id, $0) })
-    }
-    
-    var accountsMap: [UInt32: Account] {
-        Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
-    }
-    
+        
     var prefix: String {
         switch transaction.type {
         case .income: return "+ "
@@ -38,7 +28,7 @@ struct TransactionRow: View {
                         Text(transaction.accountFrom?.name ?? "Недоступный счет")
                         Text(transaction.accountFrom?.currency?.symbol ?? "")
                             .foregroundColor(.secondary)
-                        Text(accountGroupsMap[transaction.accountFrom?.accountGroupID ?? 0]?.name ?? "" )
+                        Text(transaction.accountFrom?.accountGroup?.name ?? "" )
                             .foregroundColor(.secondary)
                     }
                     .font(.footnote)
@@ -47,7 +37,7 @@ struct TransactionRow: View {
                     Text(transaction.accountTo?.name ?? "Недоступный счет")
                     Text(transaction.accountTo?.currency?.symbol ?? "")
                         .foregroundColor(.secondary)
-                    Text(accountGroupsMap[transaction.accountTo?.accountGroupID ?? 0]?.name ?? "" )
+                    Text(transaction.accountTo?.accountGroup?.name ?? "" )
                         .foregroundColor(.secondary)
                 }
             }

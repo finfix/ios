@@ -38,7 +38,7 @@ struct AccountCirclesSubView: View {
     let horizontalSpacing: CGFloat = 10
     
     var body: some View {
-        let groupedAccounts = groupAccounts(accounts)
+        let groupedAccounts = Account.groupAccounts(accounts)
         
         NavigationStack(path: $path) {
             VStack(spacing: 5) {

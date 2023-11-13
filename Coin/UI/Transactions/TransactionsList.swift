@@ -42,16 +42,16 @@ struct TransactionsList: View {
     ]) var transactions: [Transaction]
         
     init(searchString: String = "", dateFrom: Date? = nil, dateTo: Date? = nil, accountID: UInt32? = nil) {
-        debugLog("Фильтруем транзакции")
-        _transactions = Query(filter: #Predicate {
-            (searchString.isEmpty ? true : $0.note.localizedStandardContains(searchString)) &&
-            (dateFrom == nil ? true : $0.dateTransaction >= dateFrom!) &&
-            (dateTo == nil ? true : $0.dateTransaction <= dateTo!)
-//            (
-//                (accountID == nil ? true : $0.accountToID == accountID!) ||
-//                (accountID == nil ? true : $0.accountFromID == accountID!)
-//            )
-        })
+//        debugLog("Фильтруем транзакции")
+//        _transactions = Query(filter: #Predicate {
+//            (searchString.isEmpty ? true : $0.note.localizedStandardContains(searchString)) &&
+//            (dateFrom == nil ? true : $0.dateTransaction >= dateFrom!) &&
+//            (dateTo == nil ? true : $0.dateTransaction <= dateTo!)
+////            (
+////                (accountID == nil ? true : $0.accountToID == accountID!) ||
+////                (accountID == nil ? true : $0.accountFromID == accountID!)
+////            )
+//        })
     }
     
     var body: some View {
@@ -71,6 +71,16 @@ struct TransactionsList: View {
                         }
                     }
                 }
+            }
+        }
+        .toolbar {
+            ToolbarItem {
+                Button {
+                    debugLog(transactions.count)
+                } label: {
+                    Text("Количество")
+                }
+
             }
         }
         .listStyle(.grouped)

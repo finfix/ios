@@ -29,11 +29,7 @@ struct BudgetsListSubView: View {
 //            $0.type.rawValue == accountType.rawValue &&
             $0.accountGroupID == accountGroupID })
     }
-    
-    var groupedAccounts: [Account] {
-        groupAccounts(accounts)
-    }
-    
+        
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -41,7 +37,7 @@ struct BudgetsListSubView: View {
                 AccountGroupSelector()
             }
             VStack {
-                ForEach(groupedAccounts) { account in
+                ForEach(Account.groupAccounts(accounts)) { account in
                     BudgetRow(account: account)
                 }
             }
