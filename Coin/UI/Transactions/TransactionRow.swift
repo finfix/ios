@@ -6,22 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct TransactionRow: View {
-    
-    @Environment(ModelData.self) var modelData
-    
-    @State var showUpdate = false
+        
     @State var transaction: Transaction
-    
-    var accountGroupsMap: [UInt32: AccountGroup] {
-        Dictionary(uniqueKeysWithValues: modelData.accountGroups.map{ ($0.id, $0) })
-    }
-    
-    var accountsMap: [UInt32: Account] {
-        Dictionary(uniqueKeysWithValues: modelData.accounts.map{ ($0.id, $0) })
-    }
-    
+        
     var prefix: String {
         switch transaction.type {
         case .income: return "+ "
@@ -29,59 +19,45 @@ struct TransactionRow: View {
         default: return ""
         }
     }
-    
-    var accountFrom: Account {
-        accountsMap[transaction.accountFromID] ?? Account(name: "Недоступный счет")
-    }
-    
-    var accountTo: Account {
-        accountsMap[transaction.accountToID] ?? Account(name: "Недоступный счет")
-    }
-    
+        
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
                 if transaction.type != .balancing {
                     HStack {
-                        Text(accountFrom.name)
-                        Text(CurrencySymbols[accountFrom.currency] ?? "")
+                        Text(transaction.accountFrom?.name ?? "Недоступный счет")
+                        Text(transaction.accountFrom?.currency?.symbol ?? "")
                             .foregroundColor(.secondary)
-                        Text(accountGroupsMap[accountFrom.accountGroupID]?.name ?? "" )
+                        Text(transaction.accountFrom?.accountGroup?.name ?? "" )
                             .foregroundColor(.secondary)
                     }
                     .font(.footnote)
                 }
                 HStack {
-                    Text(accountTo.name)
-                    Text(CurrencySymbols[accountTo.currency] ?? "")
+                    Text(transaction.accountTo?.name ?? "Недоступный счет")
+                    Text(transaction.accountTo?.currency?.symbol ?? "")
                         .foregroundColor(.secondary)
-                    Text(accountGroupsMap[accountTo.accountGroupID]?.name ?? "" )
+                    Text(transaction.accountTo?.accountGroup?.name ?? "" )
                         .foregroundColor(.secondary)
                 }
             }
             Spacer()
             VStack(alignment: .trailing) {
                 if transaction.amountFrom != transaction.amountTo {
-                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: accountFrom.currency))
+                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom?.currency))
                         .font(.footnote)
                 }
-                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: accountTo.currency))
+                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo?.currency))
                 if transaction.note != "" {
                     Text(transaction.note)
                         .font(.footnote)
                 }
             }
         }
-        .onTapGesture {
-            showUpdate = true
-        }
         .padding()
-        .navigationDestination(isPresented: $showUpdate) {
-            UpdateTransaction(isUpdateOpen: $showUpdate, transaction: transaction)
-        }
     }
 }
 
 #Preview {
-    TransactionRow(transaction: ModelData().transactions[0])
+    TransactionRow(transaction: Transaction())
 }

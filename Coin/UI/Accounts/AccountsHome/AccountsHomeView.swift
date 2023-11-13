@@ -6,40 +6,41 @@
 //
 
 import SwiftUI
+import SwiftData
 
-struct AccountsHome: View {
+struct AccountsHomeView: View {
     
-    @Environment(ModelData.self) var modelData
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
+    @Query var accounts: [Account]
+    
+    var filteredAccounts: [Account] {
+        accounts.filter { $0.accountGroupID == selectedAccountsGroupID }
+    }
     
     // TODO: Сделать универсальными
     @State var showDebts = false
-    
-    @State var showCreate = false
     @State var currentIndex = 0
     
     @State var chooseBlurIsOpened = false
-    @State var transactionType: TransactionType = .consumption
         
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
-                        Header()
-                        if modelData.accountGroups.count > 1 {
-                            AccountsGroupSelector()
-                        }
+                        QuickStatisticView()
+                        AccountGroupSelector()
                     }
                     ScrollView {
                         Text("Карты и счета")
-                        SnapCarouselView(spacing: 30, index: $currentIndex, items: modelData.filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
+                        SnapCarouselView(spacing: 30, index: $currentIndex, items: filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
                             GeometryReader { proxy in
                                 AccountCard(size: proxy.size, account: account)
                             }
                         }
                         .frame(height: 150)
         
-                        AccountTypeDetailsView(header: "Долги", accounts: modelData.filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
+                        AccountCategoryView(header: "Долги", accounts: filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
                     }
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)
@@ -55,38 +56,26 @@ struct AccountsHome: View {
                     }
 
                     if chooseBlurIsOpened {
-                        Button {
-                            transactionType = .consumption
-                            showCreate = true
-                        } label: {
+                        NavigationLink(value: TransactionType.consumption) {
                             CircleTypeTransaction(imageName: "minus")
                         }
                         .padding(.bottom, 90)
                         
-                        Button {
-                            transactionType = .income
-                            showCreate = true
-                        } label: {
+                        NavigationLink(value: TransactionType.income) {
                             CircleTypeTransaction(imageName: "plus")
                         }
                         .padding(.trailing, 90)
                         
-                        Button {
-                            transactionType = .transfer
-                            showCreate = true
-                        } label: {
+                        NavigationLink(value: TransactionType.transfer) {
                             CircleTypeTransaction(imageName: "arrow.left.arrow.right")
                         }
                         .padding(.trailing, 75)
                         .padding(.bottom, 75)
                     }
-                    
                 }
                 .onDisappear { chooseBlurIsOpened = false }
             }
-            .navigationDestination(isPresented: $showCreate) {
-                CreateTransactionView(isOpeningFrame: $showCreate, transactionType: transactionType)
-            }
+            .navigationDestination(for: TransactionType.self ) { CreateTransactionView(transactionType: $0) }
         }
     }
 }
@@ -109,5 +98,5 @@ struct CircleTypeTransaction: View {
 }
     
 #Preview {
-    AccountsHome()
+    AccountsHomeView()
 }

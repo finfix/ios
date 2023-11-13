@@ -9,42 +9,30 @@ import SwiftUI
 
 struct UpdateTransaction: View {
     
-    @Binding var isUpdateOpen: Bool
+    var oldTransaction: Transaction
+    @State var transaction: Transaction
     
-    var id: UInt32
-    @State var amountFrom: String
-    @State var amountTo: String
-    @State var note: String
-    
-    init(isUpdateOpen: Binding<Bool>, transaction: Transaction) {
-        self._isUpdateOpen = isUpdateOpen
-        self.id = transaction.id
-        self.amountFrom = transaction.amountFrom.stringValue
-        self.amountTo = transaction.amountTo.stringValue
-        self.note = transaction.note
+    init(_ transaction: Transaction) {
+        self.oldTransaction = transaction
+        _transaction = .init(wrappedValue: transaction)
     }
+    @Environment (\.dismiss) var dismiss
     
     var body: some View {
         Form {
             Section {
-                TextField("Сумма списания", text: $amountFrom)
+                TextField("Сумма списания", value: $transaction.amountFrom, format: .number)
                     .keyboardType(.decimalPad)
-                TextField("Сумма зачисления", text: $amountTo)
+                TextField("Сумма зачисления", value: $transaction.amountTo, format: .number)
                     .keyboardType(.decimalPad)
-                ZStack(alignment: .topLeading) {
-                    if note.isEmpty {
-                        Text("Заметка")
-                            .foregroundColor(.secondary)
-                            .padding()
-                    }
-                    TextEditor(text: $note)
-                        .lineLimit(5)
-                }
+            }
+            Section {
+                TextField("Заметка", text: $transaction.note, axis: .vertical)
             }
             Section {
                 Button("Сохранить") {
-                    isUpdateOpen = false
-                    updateTransaction()
+                    dismiss()
+//                    updateTransaction()
                 }
             }
         }
@@ -53,11 +41,27 @@ struct UpdateTransaction: View {
     func updateTransaction() {
         
         Task {
+            var req = UpdateTransactionReq(id: transaction.id)
+            if oldTransaction.accountFrom != transaction.accountFrom {
+                req.accountFromID = transaction.accountFrom?.id
+            }
+            if oldTransaction.accountTo != transaction.accountTo {
+                req.accountToID = transaction.accountTo?.id
+            }
+            if oldTransaction.amountFrom != transaction.amountFrom {
+                req.amountFrom = transaction.amountFrom
+            }
+            if oldTransaction.amountTo != transaction.amountTo {
+                req.amountTo = transaction.amountTo
+            }
+            if oldTransaction.dateTransaction != transaction.dateTransaction {
+                req.dateTransaction = transaction.dateTransaction
+            }
+            if oldTransaction.note != transaction.note {
+                req.note = transaction.note
+            }
+            
             do {
-                var req = UpdateTransactionReq(id: id)
-                req.note = note
-                req.amountFrom = Double(self.amountFrom.replacingOccurrences(of: ",", with: "."))
-                req.amountTo = Double(self.amountTo.replacingOccurrences(of: ",", with: "."))
                 try await TransactionAPI().UpdateTransaction(req: req)
             } catch {
                 debugLog(error)
@@ -67,15 +71,5 @@ struct UpdateTransaction: View {
 }
 
 #Preview {
-    UpdateTransaction(isUpdateOpen: .constant(true), transaction: Transaction(
-        accountFromID: 1,
-        accountToID: 2,
-        accounting: true,
-        amountFrom: 30,
-        amountTo: 50,
-        dateTransaction: Date(),
-        id: 1,
-        isExecuted: true,
-        note: "Заметка",
-        type: .transfer))
+    UpdateTransaction(Transaction())
 }

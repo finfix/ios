@@ -17,7 +17,7 @@ class TransactionAPI: API {
             url: basePath + transactionBasePath,
             method: .get,
             headers: getBaseHeaders(),
-            query: ["offset": String(req.offset!), "limit": String(req.limit!)],
+//            query: ["offset": String(req.offset!), "limit": String(req.limit!)],
             resModel: [Transaction].self)
     }
     

@@ -14,8 +14,8 @@ class CurrencyFormatter: NumberFormatter {
     
     // Возможные окончания числа
     let units: [String] = ["", "k","M","G","T","P","E"]
-    
-    init(currency: String? = nil, maximumFractionDigits: Int? = nil) {
+        
+    init(currency: Currency? = nil, maximumFractionDigits: Int? = nil) {
         super.init()
         self.numberStyle = .currency
         if let digits = maximumFractionDigits {
@@ -25,16 +25,16 @@ class CurrencyFormatter: NumberFormatter {
         self.groupingSeparator = "."
         self.usesGroupingSeparator = true
         if let currency = currency {
-            self.currencyCode = currency
-            self.currencySymbol = CurrencySymbols[currency]
+            self.currencyCode = currency.isoCode
+            self.currencySymbol = currency.symbol
         }
     }
     
-    func string(number: Decimal, currency: String? = nil) -> String {
+    func string(number: Decimal, currency: Currency? = nil) -> String {
         
         if let currency = currency {
-            self.currencyCode = currency
-            self.currencySymbol = CurrencySymbols[currency]
+            self.currencyCode = currency.isoCode
+            self.currencySymbol = currency.symbol
         }
         
         var num = number

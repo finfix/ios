@@ -6,41 +6,44 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HidedAccountsList: View {
     
-    @Environment(ModelData.self) var modelData
-    
-    var filteredAccounts: [Account] {
-        modelData.accounts.filter{ !$0.visible && $0.childrenAccounts.isEmpty && $0.type == accountType && $0.accountGroupID == modelData.selectedAccountsGroupID }
-    }
-    
-    var groupedAccountsByCurrency: [String : [Account]] {
-        Dictionary(grouping: filteredAccounts, by: { $0.currency })
-    }
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
+    @Query var accounts: [Account]
+    @Query var accountGroups: [AccountGroup]
     
     @State var accountType: AccountType = .regular
     
+    @State var path = NavigationPath()
+    
     let columns = [
-            GridItem(),
-            GridItem(),
-            GridItem(),
-            GridItem()
-        ]
-        
+        GridItem(),
+        GridItem(),
+        GridItem(),
+        GridItem()
+    ]
+    
+    init() {
+        _accounts = Query(filter: #Predicate {
+            !$0.visible /* &&
+            $0.type == accountType &&
+            $0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id */ })
+    }
+    
     
     var body: some View {
-        AccountsGroupSelector()
-        ScrollView {
-            LazyVGrid(columns: columns) {
-                ForEach(groupedAccountsByCurrency.keys.sorted(by: >), id: \.self) { currency in
-                    Section(header: Text(CurrencySymbols[currency]!)) {
-                        ForEach(groupedAccountsByCurrency[currency] ?? []) { account in
-                            AccountCircleItem(account: account)
-                        }
+        NavigationStack(path: $path) {
+            AccountGroupSelector()
+            ScrollView {
+                LazyVGrid(columns: columns) {
+                    ForEach(accounts) { account in
+                        AccountCircleItem(account, path: $path)
                     }
                 }
             }
+            .navigationDestination(for: Account.self) { EditAccount($0) }
         }
         .toolbar {
             Picker("Тип счета", selection: $accountType) {
@@ -55,5 +58,4 @@ struct HidedAccountsList: View {
 
 #Preview {
     HidedAccountsList()
-        .environment(ModelData())
 }

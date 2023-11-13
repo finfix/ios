@@ -17,7 +17,7 @@ struct BudgetBar: View {
     let today = Calendar.current.component(.day, from: Date())
     
     var fillingCoef: CGFloat {
-        account.remainder.doubleValue / account.budget.doubleValue
+        account.showingRemainder.doubleValue / account.showingBudget.doubleValue
     }
     
     var availableCoef: CGFloat {

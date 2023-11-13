@@ -10,8 +10,8 @@ import Foundation
 struct CreateTransactionReq: Encodable {
     var accountFromID: UInt32
     var accountToID: UInt32
-    var amountFrom: Double
-    var amountTo: Double
+    var amountFrom: Decimal
+    var amountTo: Decimal
     var dateTransaction: String
     var note: String
     var type: String
@@ -25,8 +25,8 @@ struct CreateTransactionRes: Decodable {
 struct UpdateTransactionReq: Encodable {
     var accountFromID: UInt32?
     var accountToID: UInt32?
-    var amountFrom: Double?
-    var amountTo: Double?
+    var amountFrom: Decimal?
+    var amountTo: Decimal?
     var dateTransaction: Date?
     var note: String?
     var id: UInt32

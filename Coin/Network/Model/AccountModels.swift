@@ -18,11 +18,11 @@ struct GetAccountsReq: Encodable {
 struct CreateAccountReq: Encodable {
     var accountGroupID: UInt32
     var accounting: Bool
-    var budget: Double?
+    var budget: Decimal?
     var currency: String
     var iconID: UInt32
     var name: String
-    var remainder: Double?
+    var remainder: Decimal?
     var type: String
     var gradualBudgetFilling: Bool
 }

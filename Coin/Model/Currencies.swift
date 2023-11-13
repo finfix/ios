@@ -9,6 +9,7 @@ import Foundation
 import SwiftData
 
 @Model class Currency: Decodable {
+    
     @Attribute(.unique) var isoCode: String
     var name: String
     var rate: Decimal

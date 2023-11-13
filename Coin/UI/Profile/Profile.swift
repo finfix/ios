@@ -8,6 +8,10 @@
 import SwiftUI
 import SwiftData
 
+enum ProfileViews {
+    case hidedAccounts, currencyRates
+}
+
 struct Profile: View {
     
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
@@ -15,29 +19,13 @@ struct Profile: View {
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
     @AppStorage("basePath") private var basePath: String = defaultBasePath
-    @Environment(ModelData.self) var modelData
-    @State var isShowHidedAccounts = false
-    @State var isShowCurrencyRates = false
+    @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
     
     @Environment(\.modelContext) var modelContext
-        
-    @Query var users: [User]
-    
-    var user: User {
-        if !users.isEmpty {
-            return users.first!
-        }
-        return User()
-    }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    Text("Имя пользователя: \(user.name)")
-                    Text("Email: \(user.email)")
-                    Text("Дата регистрации: \(user.timeCreate)")
-                }
                 Section {
                     Toggle(isOn: $isDarkMode) {
                         HStack {
@@ -48,19 +36,16 @@ struct Profile: View {
                 }
                 Section {
                     Button("Синхронизировать") {
-                        modelData.sync()
+                        Task {
+                            await LoadModelActor(modelContainer: modelContext.container).sync()
+                        }
                     }
-                    Button("Скрытые счета") {
-                        isShowHidedAccounts = true
-                    }
-                    Button("Курсы валют") {
-                        isShowCurrencyRates = true
-                    }
-                    .navigationDestination(isPresented: $isShowHidedAccounts) {
-                        HidedAccountsList()
-                    }
-                    .navigationDestination(isPresented: $isShowCurrencyRates) {
-                        CurrencyRates()
+                    NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
+                    NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
+                    Button("Удалить всю информацию") {
+                        Task {
+                            await LoadModelActor(modelContainer: modelContext.container).deleteAll()
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -76,36 +61,25 @@ struct Profile: View {
                 }
                 .frame(maxWidth: .infinity)
                 Section {
-                    Button("Выйти") {
+                    Button("Выйти", role: .destructive) {
                         isLogin = false
                         accessToken = nil
                         refreshToken = nil
-                        modelData.deleteAllData()
                     }
-                    .foregroundColor(.red)
                 }
                 .frame(maxWidth: .infinity)
             }
-            .navigationTitle("Настройки")
-        }
-        .onAppear(perform: getUser)
-    }
-    
-    func getUser() {
-        if users.isEmpty {
-            Task {
-                do {
-                    let user = try await UserAPI().GetUser()
-                    modelContext.insert(user)
-                } catch {
-                    debugLog(error)
+            .navigationDestination(for: ProfileViews.self) { view in
+                switch view {
+                case .currencyRates: CurrencyRates()
+                case .hidedAccounts: HidedAccountsList()
                 }
             }
+            .navigationTitle("Настройки")
         }
     }
 }
 
 #Preview {
     Profile()
-        .environment(ModelData())
 }

@@ -6,19 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CreateTransactionView: View {
     
-    @Binding var isOpeningFrame: Bool
-    @Environment(ModelData.self) var modelData
+    @Query var accounts: [Account]
+    @Query var accountGroups: [AccountGroup]
+    @Environment(\.dismiss) private var dismiss
     
-    init(isOpeningFrame: Binding<Bool>, transactionType: TransactionType) {
-        self._isOpeningFrame = isOpeningFrame
+    init(transactionType: TransactionType) {
         self.transactionType = transactionType
     }
     
     var filteredAccounts: [Account] {
-        modelData.accounts.filter {
+        accounts.filter {
             $0.visible && $0.childrenAccounts.count == 0
         }
     }
@@ -58,8 +59,8 @@ struct CreateTransactionView: View {
     @State var accountGroupTo = AccountGroup()
     @State var accountFrom = Account()
     @State var accountTo = Account()
-    @State var amountFrom: String = ""
-    @State var amountTo: String = ""
+    @State var amountFrom: Decimal = 0
+    @State var amountTo: Decimal = 0
     @State var selectedType: Int = 0
     @State var note = ""
     @State var date = Date()
@@ -73,7 +74,7 @@ struct CreateTransactionView: View {
             Section {
                 HStack(spacing: 0) {
                     Picker("", selection: $accountGroupFrom) {
-                        ForEach (modelData.accountGroups) { accountGroup in
+                        ForEach (accountGroups) { accountGroup in
                             Text(accountGroup.name)
                                 .tag(accountGroup)
                         }
@@ -83,7 +84,7 @@ struct CreateTransactionView: View {
                             HStack {
                                 Text(account.name)
                                 Spacer()
-                                Text(CurrencySymbols[account.currency]!)
+                                Text(account.currency?.symbol ?? "?")
                                     .foregroundColor(.secondary)
                             }
                             .tag(account)
@@ -93,7 +94,7 @@ struct CreateTransactionView: View {
                 
                 HStack(spacing: 0) {
                     Picker("", selection: $accountGroupTo) {
-                        ForEach (modelData.accountGroups) { accountGroup in
+                        ForEach (accountGroups) { accountGroup in
                             Text(accountGroup.name)
                                 .tag(accountGroup)
                         }
@@ -103,7 +104,7 @@ struct CreateTransactionView: View {
                             HStack {
                                 Text(account.name)
                                 Spacer()
-                                Text(CurrencySymbols[account.currency]!)
+                                Text(account.currency?.symbol ?? "?")
                                     .foregroundColor(.secondary)
                             }
                             .tag(account)
@@ -111,10 +112,10 @@ struct CreateTransactionView: View {
                     }
                 }
                 
-                TextField(intercurrency ? "Сумма списания" : "Сумма", text: $amountFrom)
+                TextField(intercurrency ? "Сумма списания" : "Сумма", value: $amountFrom, format: .currency(code: "USD"))
                     .keyboardType(.decimalPad)
                 if intercurrency {
-                    TextField("Сумма начисления", text: $amountTo)
+                    TextField("Сумма начисления", value: $amountTo, format: .number)
                         .keyboardType(.decimalPad)
                 }
                 
@@ -124,20 +125,12 @@ struct CreateTransactionView: View {
             }
             .pickerStyle(.wheel)
             Section {
-                ZStack(alignment: .topLeading) {
-                    if note.isEmpty {
-                        Text("Заметка")
-                            .foregroundColor(.secondary)
-                            .padding()
-                    }
-                    TextEditor(text: $note)
-                        .lineLimit(5)
-                }
+                TextField("Заметка", text: $note, axis: .vertical)
             }
             Section {
                 Button {
                     createTransaction()
-                    isOpeningFrame = false
+                    dismiss()
                 } label: {
                     Text("Сохранить")
                 }
@@ -145,8 +138,8 @@ struct CreateTransactionView: View {
             }
         }
         .onAppear {
-            self.accountGroupFrom = modelData.accountGroups.first!
-            self.accountGroupTo = modelData.accountGroups.first!
+            self.accountGroupFrom = accountGroups.first!
+            self.accountGroupTo = accountGroups.first!
             if !accountsFrom.isEmpty {
                 self.accountFrom = accountsFrom.first!
             }
@@ -166,11 +159,11 @@ struct CreateTransactionView: View {
         
         Task {
             do {
-                try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
+                let id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
                     accountFromID: accountFrom.id,
                     accountToID: accountTo.id,
-                    amountFrom: Double(amountFrom.replacingOccurrences(of: ",", with: ".")) ?? 0,
-                    amountTo: Double(amountTo.replacingOccurrences(of: ",", with: ".")) ?? 0,
+                    amountFrom: amountFrom,
+                    amountTo: amountTo,
                     dateTransaction: format.string(from: date),
                     note: note,
                     type: transactionType.rawValue,
@@ -183,6 +176,6 @@ struct CreateTransactionView: View {
 }
 
 #Preview {
-    CreateTransactionView(isOpeningFrame: .constant(true), transactionType: .transfer)
+    CreateTransactionView(transactionType: .transfer)
 }
 

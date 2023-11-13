@@ -10,10 +10,8 @@ import SwiftData
 
 @main
 struct MyApp: App {
-    
-    @State private var modelData = ModelData()
-    
-    @AppStorage("isDarkMode") var isDarkMode = false
+        
+    @AppStorage("isDarkMode") var isDarkMode = defaultIsDarkMode
     
     @AppStorage("isErrorShowing") var isErrorShowing = false
     @AppStorage("errorText") var errorText: String = ""
@@ -23,12 +21,10 @@ struct MyApp: App {
 
     init() {
         do {
-            let storeURL = URL.documentsDirectory.appending(path: "database.sqlite")
-            let schema = Schema([Currency.self, User.self])
-            let config = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .private("coin"))
-            container = try ModelContainer(for: schema, configurations: config)
+            let schema = Schema([Currency.self, User.self, Transaction.self, Account.self, AccountGroup.self])
+            container = try ModelContainer(for: schema)
         } catch {
-            fatalError("Failed to configure SwiftData container.")
+            fatalError(error.localizedDescription)
         }
     }
     
@@ -36,7 +32,6 @@ struct MyApp: App {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(isDarkMode ? .dark : .light)
-                .environment(modelData)
                 .alert(isPresented: $isErrorShowing) {
                     Alert(title: 
                             Text(errorText),
