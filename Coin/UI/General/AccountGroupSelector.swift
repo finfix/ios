@@ -57,4 +57,5 @@ struct AccountGroupSelector: View {
 
 #Preview {
     AccountGroupSelector()
+        .modelContainer(previewContainer)
 }

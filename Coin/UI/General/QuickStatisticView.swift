@@ -123,4 +123,5 @@ struct QuickStatisticSubSubView: View {
         QuickStatisticView()
         Spacer()
     }
+    .modelContainer(previewContainer)
 }

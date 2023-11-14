@@ -30,4 +30,5 @@ struct CurrencyRates: View {
 
 #Preview {
     CurrencyRates()
+        .modelContainer(previewContainer)
 }

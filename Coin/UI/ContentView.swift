@@ -66,4 +66,5 @@ struct MainView: View {
 
 #Preview {
     ContentView()
+        .modelContainer(previewContainer)
 }

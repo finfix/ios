@@ -47,4 +47,5 @@ struct BudgetsListSubView: View {
 
 #Preview {
     BudgetsList()
+        .modelContainer(previewContainer)
 }

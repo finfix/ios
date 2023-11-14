@@ -58,4 +58,5 @@ struct HidedAccountsList: View {
 
 #Preview {
     HidedAccountsList()
+        .modelContainer(previewContainer)
 }

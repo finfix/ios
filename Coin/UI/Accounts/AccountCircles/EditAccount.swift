@@ -107,4 +107,5 @@ struct EditAccount: View {
 
 #Preview {
     EditAccount(accountType: .regular)
+        .modelContainer(previewContainer)
 }

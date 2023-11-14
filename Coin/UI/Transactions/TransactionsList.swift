@@ -99,4 +99,5 @@ struct TransactionsList: View {
 
 #Preview {
     TransactionsView()
+        .modelContainer(previewContainer)
 }

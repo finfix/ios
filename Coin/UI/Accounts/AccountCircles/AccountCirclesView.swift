@@ -89,4 +89,5 @@ struct AccountCirclesSubView: View {
 
 #Preview {
     AccountCirclesView()
+        .modelContainer(previewContainer)
 }

@@ -99,4 +99,5 @@ struct CircleTypeTransaction: View {
     
 #Preview {
     AccountsHomeView()
+        .modelContainer(previewContainer)
 }
