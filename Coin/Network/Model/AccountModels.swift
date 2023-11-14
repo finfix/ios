@@ -34,10 +34,10 @@ struct CreateAccountRes: Decodable {
 struct UpdateAccountReq: Encodable {
     var id: UInt32
     var accounting: Bool?
-    var budget: Double?
+    var budget: Decimal?
 //    var iconID: UInt32?
     var name: String?
-    var remainder: Double?
+    var remainder: Decimal?
     var visible: Bool?
     var gradualBudgetFilling: Bool?
 }
