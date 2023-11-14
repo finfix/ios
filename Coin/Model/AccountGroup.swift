@@ -15,6 +15,8 @@ import SwiftData
     var currencyName: String
     var currency: Currency?
     
+    @Relationship(deleteRule: .nullify, inverse: \Account.accountGroup) var accounts: [Account]?
+    
     init(id: UInt32 = 0, name: String = "", currency: String = "USD") {
         self.id = id
         self.name = name

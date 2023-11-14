@@ -42,16 +42,22 @@ class AccountAPI: API {
             url: basePath + accountBasePath,
             method: .post,
             headers: getBaseHeaders(),
+            reqModel: req,
             resModel: CreateAccountRes.self
         ).id
     }
     
     func UpdateAccount(req: UpdateAccountReq) async throws {
-        return try await request(
-            url: basePath + accountBasePath,
-            method: .patch,
-            headers: getBaseHeaders(),
-            reqModel: req
-        )
+        do {
+            return try await request(
+                url: basePath + accountBasePath,
+                method: .patch,
+                headers: getBaseHeaders(),
+                reqModel: req
+            )
+        } catch {
+            debugLog(error)
+            showErrorAlert(error.localizedDescription)
+        }
     }
 }

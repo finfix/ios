@@ -27,8 +27,8 @@ struct QuickStatisticSubView: View {
     }
     
     var accountGroup: AccountGroup {
-        if accountGroups.count > 0 {
-            return accountGroups.first!
+        if let accountGroup = accountGroups.first {
+            return accountGroup
         }
         return AccountGroup()
     }

@@ -78,7 +78,8 @@ actor LoadModelActor: ModelActor {
                 modelContext.insert(transaction)
             }
         } catch {
-            showErrorAlert(error: ErrorModel(developerTextError: error.localizedDescription))
+            debugLog(error)
+            showErrorAlert(error.localizedDescription)
         }
     }
     
@@ -91,7 +92,8 @@ actor LoadModelActor: ModelActor {
             try modelContext.delete(model: Currency.self)
             try modelContext.delete(model: AccountGroup.self)
         } catch {
-            showErrorAlert(error: ErrorModel(developerTextError: error.localizedDescription))
+            debugLog(error)
+            showErrorAlert(error.localizedDescription)
         }
     }
     

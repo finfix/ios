@@ -42,11 +42,6 @@ struct Profile: View {
                     }
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
                     NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
-                    Button("Удалить всю информацию") {
-                        Task {
-                            await LoadModelActor(modelContainer: modelContext.container).deleteAll()
-                        }
-                    }
                 }
                 .frame(maxWidth: .infinity)
                 Section {
@@ -62,6 +57,9 @@ struct Profile: View {
                 .frame(maxWidth: .infinity)
                 Section {
                     Button("Выйти", role: .destructive) {
+                        Task {
+                            await LoadModelActor(modelContainer: modelContext.container).deleteAll()
+                        }
                         isLogin = false
                         accessToken = nil
                         refreshToken = nil

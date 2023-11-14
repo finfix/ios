@@ -14,7 +14,7 @@ struct MyApp: App {
     @AppStorage("isDarkMode") var isDarkMode = defaultIsDarkMode
     
     @AppStorage("isErrorShowing") var isErrorShowing = false
-    @AppStorage("errorText") var errorText: String = ""
+    @AppStorage("errorTitle") var errorText: String = ""
     @AppStorage("errorDescription") var errorDescription: String = ""
     
     var container: ModelContainer
@@ -49,17 +49,19 @@ struct MyApp: App {
     }
 }
 
-func showErrorAlert(error: ErrorModel) {
+func showErrorAlert(_ title: String, description: String? = nil) {
     
     @AppStorage("isErrorShowing") var isErrorShowing = false
-    @AppStorage("errorText") var errorText: String?
+    @AppStorage("errorTitle") var errorText: String?
     @AppStorage("errorDescription") var errorDescription: String?
     
     isErrorShowing = true
-    errorText = error.humanTextError
-    errorDescription = error.developerTextError
-    debugLog(error.developerTextError)
-    debugLog(error.context ?? "")
+    errorText = title
+    errorDescription = description
+    debugLog(title)
+    if let description {
+        debugLog(description)
+    }
 }
 
 
