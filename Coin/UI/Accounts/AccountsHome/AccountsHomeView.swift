@@ -17,7 +17,6 @@ struct AccountsHomeView: View {
         accounts.filter { $0.accountGroupID == selectedAccountsGroupID }
     }
     
-    // TODO: Сделать универсальными
     @State var showDebts = false
     @State var currentIndex = 0
     
@@ -75,7 +74,7 @@ struct AccountsHomeView: View {
                 }
                 .onDisappear { chooseBlurIsOpened = false }
             }
-            .navigationDestination(for: TransactionType.self ) { CreateTransactionView(transactionType: $0) }
+            .navigationDestination(for: TransactionType.self ) { EditTransaction(transactionType: $0) }
         }
     }
 }
