@@ -24,6 +24,8 @@
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
 		B5624DD32AEB996C00346BB3 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5624DD22AEB996C00346BB3 /* Logger.swift */; };
 		B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
+		B56361A12B04F9E10044CDD8 /* AppScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56361A02B04F9E10044CDD8 /* AppScreen.swift */; };
+		B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56361A32B04FC000044CDD8 /* AppTabView.swift */; };
 		B58705762900956D004C77DD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
 		B593F9552AE1CCB000378E17 /* EditTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B593F9542AE1CCB000378E17 /* EditTransaction.swift */; };
 		B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B596E6092A278CC1007D7E6D /* AccountModels.swift */; };
@@ -77,6 +79,8 @@
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
 		B5624DD22AEB996C00346BB3 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsList.swift; sourceTree = "<group>"; };
+		B56361A02B04F9E10044CDD8 /* AppScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppScreen.swift; sourceTree = "<group>"; };
+		B56361A32B04FC000044CDD8 /* AppTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTabView.swift; sourceTree = "<group>"; };
 		B58705752900956D004C77DD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B593F9542AE1CCB000378E17 /* EditTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTransaction.swift; sourceTree = "<group>"; };
 		B596E6092A278CC1007D7E6D /* AccountModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountModels.swift; sourceTree = "<group>"; };
@@ -158,6 +162,15 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
+		B56361A22B04FBE60044CDD8 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				B56361A02B04F9E10044CDD8 /* AppScreen.swift */,
+				B56361A32B04FC000044CDD8 /* AppTabView.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
 		B59D458928FE537700773D46 /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -236,6 +249,7 @@
 		B5E8933829007C53002AC30C /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				B56361A22B04FBE60044CDD8 /* Navigation */,
 				B559E9D42B00FA1700A430D2 /* General */,
 				B5B9504D2ADF234F00798F8C /* Profile */,
 				B559E9D52B00FA9400A430D2 /* Accounts */,
@@ -388,6 +402,7 @@
 				B531E6E02AE41A3000996520 /* Currencies.swift in Sources */,
 				B59F0F2128FDC7C000AA33A9 /* AccountCategoryView.swift in Sources */,
 				B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */,
+				B56361A12B04F9E10044CDD8 /* AppScreen.swift in Sources */,
 				B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */,
 				B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */,
 				B557AA0E290D959F00631421 /* API.swift in Sources */,
@@ -414,6 +429,7 @@
 				B593F9552AE1CCB000378E17 /* EditTransaction.swift in Sources */,
 				B5D143B42906A66400875037 /* AuthModels.swift in Sources */,
 				B5E6C1942AF2AF9500097067 /* CurrencyRates.swift in Sources */,
+				B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
 				B5F9CC7328F01E4D0037A21A /* Transaction.swift in Sources */,
