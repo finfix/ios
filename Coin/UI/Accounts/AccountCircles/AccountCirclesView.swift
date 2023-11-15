@@ -29,12 +29,6 @@ struct AccountCirclesSubView: View {
         _accounts = Query(filter: #Predicate { $0.accountGroupID == accountGroupID && $0.visible } )
     }
     
-    let rows = [
-        GridItem(.flexible()),
-        GridItem(.flexible()),
-        GridItem(.flexible())
-    ]
-    
     let horizontalSpacing: CGFloat = 10
     
     var body: some View {
@@ -70,7 +64,7 @@ struct AccountCirclesSubView: View {
                     Divider()
                     
                     ScrollView(.horizontal) {
-                        LazyHGrid(rows: rows, alignment: .top, spacing: horizontalSpacing) {
+                        LazyHGrid(rows: [GridItem(.adaptive(minimum: 100))], alignment: .top, spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .expense }) { account in
                                 AccountCircleItem(account, path: $path)
                             }
@@ -79,6 +73,8 @@ struct AccountCirclesSubView: View {
                     }
                     .frame(maxHeight: .infinity)
                 }
+                .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
+                .scrollIndicators(.hidden)
                 .navigationDestination(for: Account.self) { EditAccount($0) }
                 .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0) }
             }
