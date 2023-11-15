@@ -17,14 +17,7 @@ struct HidedAccountsList: View {
     @State var accountType: AccountType = .regular
     
     @State var path = NavigationPath()
-    
-    let columns = [
-        GridItem(),
-        GridItem(),
-        GridItem(),
-        GridItem()
-    ]
-    
+        
     init() {
         _accounts = Query(filter: #Predicate {
             !$0.visible /* &&
@@ -32,12 +25,11 @@ struct HidedAccountsList: View {
             $0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id */ })
     }
     
-    
     var body: some View {
         NavigationStack(path: $path) {
             AccountGroupSelector()
             ScrollView {
-                LazyVGrid(columns: columns) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
                     ForEach(accounts) { account in
                         AccountCircleItem(account, path: $path)
                     }
@@ -45,6 +37,7 @@ struct HidedAccountsList: View {
             }
             .navigationDestination(for: Account.self) { EditAccount($0) }
         }
+        .contentMargins(.horizontal, 10, for: .automatic)
         .toolbar {
             Picker("Тип счета", selection: $accountType) {
                 ForEach(AccountType.allCases, id: \.self) { value in
