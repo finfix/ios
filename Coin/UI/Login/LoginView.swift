@@ -9,47 +9,108 @@ import SwiftUI
 
 struct LoginView: View {
     
+    private enum Mode {
+        case login, register
+    }
+    
+    private enum Field: Hashable {
+        case name, login, password
+    }
+    
     @AppStorage("isLogin") var isLogin: Bool = false
     @AppStorage("accessToken") var accessToken: String?
     @AppStorage("refreshToken") var refreshToken: String?
+    @FocusState private var focusedField: Field?
     
-    @State var login = ""
-    @State var password = ""
-    @State var isSignUpOpen = false
+    @State private var mode: Mode = .login
+    @State private var login = ""
+    @State private var password = ""
+    @State private var name = ""
+    @State var isShowPassword = false
     
     var body: some View {
         NavigationStack {
             Form {
                 Section {
+                    if mode == .register {
+                        TextField("Имя", text: $name)
+                            .focused($focusedField, equals: .name)
+                            .textContentType(.givenName)
+                            .onSubmit { focusedField = .login }
+                            .submitLabel(.next)
+                    }
                     TextField("Email", text: $login)
+                        .focused($focusedField, equals: .login)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                         .textContentType(.emailAddress)
-                }
-                Section {
-                    SecureField("Password", text: $password)
-                        .textContentType(.password)
-                }
-                Section {
+                        .onSubmit { focusedField = .password }
+                        .submitLabel(.next)
                     HStack {
-                        Text("Нет аккаунта?")
-                        Button("Зарегистрироваться") {
-                            isSignUpOpen = true
+                        Group {
+                            if !isShowPassword {
+                                SecureField("Password", text: $password)
+                            } else {
+                                TextField("Password", text: $password)
+                            }
                         }
-                        .buttonStyle(.borderless)
-                        .navigationDestination(isPresented: $isSignUpOpen) {
-                            RegisterView(isSignUpOpen: $isSignUpOpen, login: login, password: password)
+                        .submitLabel(.go)
+                        .focused($focusedField, equals: .password)
+                        .textContentType(.password)
+                        .onSubmit {
+                            switch mode {
+                            case .login: auth()
+                            case .register: register()
+                            }
+                        }
+                        
+                        Button {
+                            isShowPassword.toggle()
+                        } label: {
+                            Image(systemName: "eye")
+                                .accentColor(.secondary)
+                                .symbolVariant(isShowPassword ? .none : .slash)
+                                .contentTransition(.symbolEffect(.replace))
                         }
                     }
                 }
                 Section {
-                    Button("Войти") {
-                        auth()
+                    Button(mode == .login ? "Войти" : "Зарегистрироваться") {
+                        switch mode {
+                        case .login: auth()
+                        case .register: register()
+                        }
+                    }
+                } footer: {
+                    if mode == .login {
+                        HStack {
+                            Text("Нет аккаунта?")
+                            Button("Зарегистрироваться") {
+                                withAnimation {
+                                    mode = .register
+                                }
+                            }
+                        }
+                        .padding()
+                        .font(.caption)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .contentMargins(.top, 200)
+            .navigationTitle(mode == .login ? "Вход" : "Регистрация")
+            .toolbar {
+                if mode == .register {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Назад") {
+                            withAnimation {
+                                mode = .login
+                            }
+                        }
                     }
                 }
             }
-            .navigationTitle("Вход")
         }
     }
     
@@ -57,6 +118,19 @@ struct LoginView: View {
         Task {
             do {
                 let response = try await AuthAPI().Auth(req: AuthReq(email: login, password: password))
+                accessToken = response.token.accessToken
+                refreshToken = response.token.refreshToken
+                isLogin = true
+            } catch {
+                debugLog(error)
+            }
+        }
+    }
+    
+    func register() {
+        Task {
+            do {
+                let response = try await AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name))
                 accessToken = response.token.accessToken
                 refreshToken = response.token.refreshToken
                 isLogin = true

@@ -14,7 +14,6 @@
 		B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */; };
 		B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */; };
 		B510BE942AE06273002CDB54 /* AccountGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE932AE06273002CDB54 /* AccountGroup.swift */; };
-		B52A7DEC2AE8292200CDE0A3 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */; };
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B531E6E02AE41A3000996520 /* Currencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = B531E6DF2AE41A3000996520 /* Currencies.swift */; };
 		B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54254842AF5218C008ECC33 /* TransactionFilterView.swift */; };
@@ -69,7 +68,6 @@
 		B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetBar.swift; sourceTree = "<group>"; };
 		B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetDetails.swift; sourceTree = "<group>"; };
 		B510BE932AE06273002CDB54 /* AccountGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroup.swift; sourceTree = "<group>"; };
-		B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B531E6DF2AE41A3000996520 /* Currencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currencies.swift; sourceTree = "<group>"; };
 		B54254842AF5218C008ECC33 /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
@@ -241,7 +239,6 @@
 			isa = PBXGroup;
 			children = (
 				B5E89331290073C5002AC30C /* LoginView.swift */,
-				B52A7DEB2AE8292100CDE0A3 /* RegisterView.swift */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -420,7 +417,6 @@
 				B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */,
 				B5CF4C652B0354B700CA0CEC /* PreviewModelContainer.swift in Sources */,
 				B5B950452ADF16FF00798F8C /* Line.swift in Sources */,
-				B52A7DEC2AE8292200CDE0A3 /* RegisterView.swift in Sources */,
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
 				B5624DD32AEB996C00346BB3 /* Logger.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
