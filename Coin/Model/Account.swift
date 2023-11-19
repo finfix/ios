@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-@Model class Account: Decodable {
+@Model class Account {
     
     @Attribute(.unique) var id: UInt32
     var accounting: Bool
@@ -20,78 +20,59 @@ import SwiftData
     var visible: Bool
     var parentAccountID: UInt32?
     var gradualBudgetFilling: Bool
-    
     var currency: Currency?
     var accountGroup: AccountGroup?
-   
-    var currencyName: String
-    var accountGroupID: UInt32
 
     @Transient var childrenAccounts: [Account] = []
     @Transient var showingBudget: Decimal = 0
     @Transient var showingRemainder: Decimal = 0
     
-    func clearTransientData() {
-        self.childrenAccounts = []
-        self.showingBudget = 0
-        self.showingRemainder = 0
-    }
-    
     init(
         id: UInt32 = 0,
-        accountGroupID: UInt32 = 0,
+        accountGroup: AccountGroup = AccountGroup(),
+        currency: Currency = Currency(),
         accounting: Bool = true,
         budget: Decimal = 0,
-        currency: String = "RUB",
         iconID: UInt32 = 1,
         name: String = "",
         remainder: Decimal = 0,
         type: AccountType = .regular,
         visible: Bool = true,
         parentAccountID: UInt32? = nil,
-        childrenAccounts: [Account] = [Account](),
-        gradualBudgetFilling: Bool = false,
-        transactionsFrom: [Transaction] = [],
-        transactionsTo: [Transaction] = []) {
+        gradualBudgetFilling: Bool = false
+    ) {
         self.id = id
-        self.accountGroupID = accountGroupID
+        self.accountGroup = accountGroup
         self.accounting = accounting
         self.budget = budget
-        self.currencyName = currency
         self.iconID = iconID
         self.name = name
         self.remainder = remainder
         self.type = type
         self.visible = visible
         self.parentAccountID = parentAccountID
-        self.childrenAccounts = childrenAccounts
         self.gradualBudgetFilling = gradualBudgetFilling
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case id, accountGroupID, accounting, budget, currency, iconID, name, remainder, type, visible, parentAccountID, gradualBudgetFilling
+        self.accountGroup = accountGroup
+        self.currency = currency
     }
     
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(UInt32.self, forKey: .id)
-        accountGroupID = try container.decode(UInt32.self, forKey: .accountGroupID)
-        accounting = try container.decode(Bool.self, forKey: .accounting)
-        budget = try container.decode(Decimal.self, forKey: .budget)
-        currencyName = try container.decode(String.self, forKey: .currency)
-        iconID = try container.decode(UInt32.self, forKey: .iconID)
-        name = try container.decode(String.self, forKey: .name)
-        remainder = try container.decode(Decimal.self, forKey: .remainder)
-        type = try container.decode(AccountType.self, forKey: .type)
-        visible = try container.decode(Bool.self, forKey: .visible)
-        parentAccountID = try container.decode(UInt32?.self, forKey: .parentAccountID)
-        gradualBudgetFilling = try container.decode(Bool.self, forKey: .gradualBudgetFilling)
+    init(_ res: GetAccountsRes, currenciesMap: [String: Currency], accountGroupsMap: [UInt32: AccountGroup]) {
+        self.id = res.id
+        self.accounting = res.accounting
+        self.budget = res.budget
+        self.iconID = res.iconID
+        self.name = res.name
+        self.remainder = res.remainder
+        self.type = res.type
+        self.visible = res.visible
+        self.parentAccountID = res.parentAccountID
+        self.gradualBudgetFilling = res.gradualBudgetFilling
+        self.accountGroup = accountGroupsMap[res.accountGroupID]!
+        self.currency = currenciesMap[res.currency]!
     }
     
     static func groupAccounts(_ accounts: [Account]) -> [Account] {
-        
-        let check = Date()
-            
+                    
         for account in accounts {
             account.clearTransientData()
         }
@@ -155,8 +136,13 @@ import SwiftData
                 accountsContainer.append(account)
             }
         }
-        debugLog("Сгруппировали счета", timeInterval: check)
         return accountsContainer
+    }
+    
+    func clearTransientData() {
+        self.childrenAccounts = []
+        self.showingBudget = 0
+        self.showingRemainder = 0
     }
 }
 

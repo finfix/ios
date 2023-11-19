@@ -33,58 +33,48 @@ actor LoadModelActor: ModelActor {
             async let t = getTransactions()
                         
             // Сохраняем валюты
-            let currencies = try await c
-            for currency in currencies {
             logger.info("Получаем валюты")
+            let currenciesRes = try await c
+            var currenciesMap: [String: Currency] = [:]
+            for currencyRes in currenciesRes {
+                let currency = Currency(currencyRes)
+                currenciesMap[currency.isoCode] = currency
                 modelContext.insert(currency)
             }
-            let currenciesMap = Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0) })
             
             // Сохраняем юзера
-            let user = try await u
-            guard let currency = currenciesMap[user.defaultCurrencyName] else {
-                throw ErrorModel(developerTextError: "Не смогли найти валюту")
-            }
-            user.currency = currency
-            modelContext.insert(user)
             logger.info("Получаем пользователя")
+            let userRes = try await u
+            modelContext.insert(User(userRes, currenciesMap: currenciesMap))
             
             // Сохраняем группы счетов
-            let accountGroups = try await ag
-            for accountGroup in accountGroups {
-                guard let currency = currenciesMap[accountGroup.currencyName] else {
-                    throw ErrorModel(developerTextError: "Не смогли найти валюту")
-                }
-                accountGroup.currency = currency
             logger.info("Получаем группы счетов")
+            let accountGroupsRes = try await ag
+            var accountGroupsMap: [UInt32: AccountGroup] = [:]
+            for accountGroupRes in accountGroupsRes {
+                let accountGroup = AccountGroup(accountGroupRes, currenciesMap: currenciesMap)
+                accountGroupsMap[accountGroup.id] = accountGroup
                 modelContext.insert(accountGroup)
             }
-            let accountGroupsMap = Dictionary(uniqueKeysWithValues: accountGroups.map { ($0.id, $0) })
             
             // Сохраняем счета
-            let accounts = try await a
-            for account in accounts {
-                guard let currency = currenciesMap[account.currencyName] else {
-                    throw ErrorModel(developerTextError: "Не смогли найти валюту")
-                }
-                account.currency = currency
-                guard let accountGroup = accountGroupsMap[account.accountGroupID] else {
-                    throw ErrorModel(developerTextError: "Не смогли найти группу счетов")
-                }
-                account.accountGroup = accountGroup
             logger.info("Получаем счета счетов")
+            let accountsRes = try await a
+            var accountsMap: [UInt32: Account] = [:]
+            for accountRes in accountsRes {
+                let account = Account(accountRes, currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
+                accountsMap[account.id] = account
                 modelContext.insert(account)
             }
-            let accountsMap = Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0) })
             
             // Сохраняем транзакции
-            let transactions = try await t
-            for transaction in transactions {
-                transaction.accountFrom = accountsMap[transaction.accountFromID]
-                transaction.accountTo = accountsMap[transaction.accountToID]
             logger.info("Получаем транзакции")
+            let transactionsRes = try await t
+            for transactionRes in transactionsRes {
+                let transaction = Transaction(transactionRes, accountsMap: accountsMap)
                 modelContext.insert(transaction)
             }
+            
             logger.info("Все сохраняем")
         } catch {
             logger.error("\(error)")
@@ -106,19 +96,19 @@ actor LoadModelActor: ModelActor {
         }
     }
     
-    private func getCurrencies() async throws -> [Currency] {
+    private func getCurrencies() async throws -> [GetCurrenciesRes] {
         return try await UserAPI().GetCurrencies()
     }
     
-    private func getTransactions() async throws -> [Transaction] {
+    private func getTransactions() async throws -> [GetTransactionsRes] {
         return try await TransactionAPI().GetTransactions(req: GetTransactionReq())
     }
     
-    private func getAccountGroups() async throws -> [AccountGroup] {
+    private func getAccountGroups() async throws -> [GetAccountGroupsRes] {
         return try await AccountAPI().GetAccountGroups()
     }
     
-    private func getAccounts() async throws -> [Account] {
+    private func getAccounts() async throws -> [GetAccountsRes] {
         let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
         let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
         let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
@@ -126,7 +116,7 @@ actor LoadModelActor: ModelActor {
         return try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
     }
     
-    private func getUser() async throws -> User {
+    private func getUser() async throws -> GetUserRes {
         return try await UserAPI().GetUser()
     }
 }

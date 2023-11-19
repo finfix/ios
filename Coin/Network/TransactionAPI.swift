@@ -12,13 +12,13 @@ class TransactionAPI: API {
         
     let transactionBasePath = "/transaction"
     
-    func GetTransactions(req: GetTransactionReq) async throws -> [Transaction] {
+    func GetTransactions(req: GetTransactionReq) async throws -> [GetTransactionsRes] {
         return try await request(
             url: basePath + transactionBasePath,
             method: .get,
             headers: getBaseHeaders(),
 //            query: ["offset": String(req.offset!), "limit": String(req.limit!)],
-            resModel: [Transaction].self)
+            resModel: [GetTransactionsRes].self)
     }
     
     func CreateTransaction(req: CreateTransactionReq) async throws -> UInt32 {

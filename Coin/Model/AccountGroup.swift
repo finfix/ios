@@ -8,29 +8,29 @@
 import Foundation
 import SwiftData
 
-@Model class AccountGroup: Decodable {
+@Model class AccountGroup {
     
     @Attribute(.unique) var id: UInt32
     var name: String
-    var currencyName: String
     var currency: Currency?
     
-    @Relationship(deleteRule: .nullify, inverse: \Account.accountGroup) var accounts: [Account]?
+//    @Relationship(deleteRule: .nullify, inverse: \Account.accountGroup) var accounts: [Account]
     
-    init(id: UInt32 = 0, name: String = "", currency: String = "USD") {
+    init(
+        id: UInt32 = 0,
+        name: String = "",
+        currency: Currency? = nil
+    ) {
         self.id = id
         self.name = name
-        self.currencyName = currency
+        self.currency = currency
+//        self.accounts = []
     }
     
-    private enum CodingKeys: CodingKey {
-        case id, name, currency
-    }
-
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(UInt32.self, forKey: .id)
-        name = try container.decode(String.self, forKey: .name)
-        currencyName = try container.decode(String.self, forKey: .currency)
+    init(_ res: GetAccountGroupsRes, currenciesMap: [String: Currency]) {
+        self.id = res.id
+        self.name = res.name
+        self.currency = currenciesMap[res.currency]
+//        self.accounts = []
     }
 }

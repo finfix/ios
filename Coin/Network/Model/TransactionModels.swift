@@ -42,6 +42,19 @@ struct GetTransactionReq: Encodable {
     var limit: UInt8?
 }
 
+struct GetTransactionsRes: Decodable {
+    var id: UInt32
+    var accounting: Bool
+    var amountFrom: Decimal
+    var amountTo: Decimal
+    var dateTransaction: Date
+    var isExecuted: Bool
+    var note: String
+    var type: TransactionType
+    var accountFromID: UInt32
+    var accountToID: UInt32
+}
+
 struct DeleteTransactionReq: Encodable {
     var id: UInt32
 }
