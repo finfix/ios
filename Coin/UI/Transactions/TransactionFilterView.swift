@@ -10,8 +10,8 @@ import SwiftUI
 struct TransactionFilterView: View {
     
     @Binding var isShowing: Bool
-    @Binding var dateFrom: Date
-    @Binding var dateTo: Date
+    @Binding var dateFrom: Date?
+    @Binding var dateTo: Date?
     
     var body: some View {
         NavigationStack {
@@ -40,7 +40,7 @@ struct Сalendar: View {
     
     var buttonName: String
     @State private var isCalendarShowing = false
-    @Binding var date: Date
+    @Binding var date: Date?
     
     var body: some View {
         Group {
@@ -51,11 +51,19 @@ struct Сalendar: View {
             } label: {
                 Text(buttonName)
                 Spacer()
-                Text(date, style: .date)
-                    .foregroundStyle(.secondary)
+                Group {
+                    if let date {
+                        Text(date, style: .date)
+                    } else {
+                        Text("Дата не выбрана")
+                    }
+                }
+                .foregroundStyle(.secondary)
             }
             if isCalendarShowing {
-                DatePicker(buttonName, selection: $date, displayedComponents: .date)
+                DatePicker(buttonName, 
+                           selection: Binding<Date>(get: {date ?? Date()}, set: {date = $0}),
+                           displayedComponents: .date)
             }
         }
         .buttonStyle(.plain)

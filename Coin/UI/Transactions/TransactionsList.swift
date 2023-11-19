@@ -15,9 +15,9 @@ struct TransactionsView: View {
     
     @State private var sortOrder = SortDescriptor(\Transaction.dateTransaction, order: .reverse)
     @State private var searchText = ""
-    @State var dateFrom = Date()
+    @State var dateFrom: Date?
     
-    @State var dateTo = Date()
+    @State var dateTo: Date?
     @State var accountID: UInt32?
     @State var isFilterOpen = false
     
@@ -45,16 +45,16 @@ struct TransactionsList: View {
     ]) var transactions: [Transaction]
         
     init(searchString: String = "", dateFrom: Date? = nil, dateTo: Date? = nil, accountID: UInt32? = nil) {
-//        _transactions = Query(filter: #Predicate {
-//            (searchString.isEmpty ? true : $0.note.localizedStandardContains(searchString)) &&
-//            (dateFrom == nil ? true : $0.dateTransaction >= dateFrom!) &&
-//            (dateTo == nil ? true : $0.dateTransaction <= dateTo!)
-////            (
-////                (accountID == nil ? true : $0.accountToID == accountID!) ||
-////                (accountID == nil ? true : $0.accountFromID == accountID!)
-////            )
-//        })
         logger.info("Фильтруем транзакции")
+        _transactions = Query(filter: #Predicate {
+            (searchString.isEmpty ? true : $0.note.localizedStandardContains(searchString)) &&
+            (dateFrom == nil ? true : $0.dateTransaction >= dateFrom!) &&
+            (dateTo == nil ? true : $0.dateTransaction <= dateTo!)
+            (
+                (accountID == nil ? true : $0.accountToID == accountID!) ||
+                (accountID == nil ? true : $0.accountFromID == accountID!)
+            )
+        })
     }
     
     var body: some View {
