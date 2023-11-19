@@ -17,7 +17,8 @@ struct QuickStatisticView: View {
     
             
     var body: some View {
-        QuickStatisticSubView(accountGroupID: UInt32(accountGroupID))
+        Group {}
+//        QuickStatisticSubView(accountGroupID: UInt32(accountGroupID))
     }
 }
 

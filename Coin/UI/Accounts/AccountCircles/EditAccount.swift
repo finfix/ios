@@ -20,8 +20,9 @@ struct EditAccount: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) var modelContext
     @Query var currencies: [Currency]
+    @Query var accountGroups: [AccountGroup]
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @State var account: Account
+    @Bindable var account: Account
     var oldAccount: Account = Account()
     
     var mode: mode
@@ -35,7 +36,7 @@ struct EditAccount: View {
     init(accountType: AccountType) {
         mode = .create
         _account = .init(wrappedValue: Account(
-                currency: "USD",
+                id: UInt32.random(in: 10000..<10000000),
                 type: accountType
             )
         )
@@ -47,6 +48,8 @@ struct EditAccount: View {
                 
                 TextField("Название счета", text: $account.name)
                 
+                Text(account.accountGroup?.name ?? "")
+                                
                 TextField("Бюджет", value: $account.budget, format: .number)
                     .keyboardType(.decimalPad)
                 
@@ -86,11 +89,11 @@ struct EditAccount: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .navigationTitle(mode == .create ? "Cоздание счета" : "Изменение счета")
     }
     
     func createAccount() async {
         do {
-            modelContext.insert(account)
             let id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
                 accountGroupID: UInt32(selectedAccountsGroupID),
                 accounting: true,
@@ -115,12 +118,12 @@ struct EditAccount: View {
         do {
             try await AccountAPI().UpdateAccount(req: UpdateAccountReq(
                 id: account.id,
-                accounting: oldAccount.accounting != account.accounting ? account.accounting : nil,
-                budget: oldAccount.budget != account.budget ? account.budget : nil,
-                name: oldAccount.name != account.name ? account.name : nil,
-                remainder: oldAccount.remainder != account.remainder ? account.remainder : nil,
-                visible: oldAccount.visible != account.visible ? account.visible : nil,
-                gradualBudgetFilling: oldAccount.gradualBudgetFilling != account.gradualBudgetFilling ? account.gradualBudgetFilling : nil)
+                accounting: account.accounting,
+                budget: account.budget,
+                name: account.name,
+                remainder: account.remainder,
+                visible: account.visible,
+                gradualBudgetFilling: account.gradualBudgetFilling)
             )
             try modelContext.save()
         } catch {

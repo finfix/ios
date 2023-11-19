@@ -55,6 +55,11 @@ struct AccountGroupSelector: View {
             }
         }
         .padding()
+        .onAppear {
+            if selectedAccountGroupIndex + 1 > accountGroups.count {
+                selectedAccountGroupIndex = 0
+            }
+        }
     }
 }
 

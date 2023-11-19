@@ -40,6 +40,7 @@ struct TransactionsView: View {
 
 struct TransactionsList: View {
     
+    @Environment(\.modelContext) var modelContext
     @Query(sort: [
         SortDescriptor(\Transaction.dateTransaction, order: .reverse)
     ]) var transactions: [Transaction]
@@ -70,29 +71,20 @@ struct TransactionsList: View {
                     }
                     .onDelete {
                         for i in $0.makeIterator() {
-                            deleteTransaction(id: groupedTransactionByDate[date]![i].id)
+                            deleteTransaction(groupedTransactionByDate[date]![i])
                         }
                     }
                 }
             }
         }
-        .toolbar {
-            ToolbarItem {
-                Button {
-                    debugLog(transactions.count)
-                } label: {
-                    Text("Количество")
-                }
-
-            }
-        }
         .listStyle(.grouped)
     }
     
-    func deleteTransaction(id: UInt32) {
+    func deleteTransaction(_ transaction: Transaction) {
         Task {
             do {
-                try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: id))
+                modelContext.delete(transaction)
+                try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
                 try modelContext.save()
             } catch {
                 modelContext.rollback()

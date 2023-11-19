@@ -29,13 +29,18 @@ struct AccountCirclesSubView: View {
     init(path: NavigationPath, accountGroupID: UInt32) {
         logger.info("Инициализировали AccountCirclesListSubView")
         self.path = path
-        _accounts = Query(filter: #Predicate { $0.accountGroupID == accountGroupID && $0.visible } )
+        _accounts = Query(filter: #Predicate { $0.accountGroup?.id == accountGroupID && $0.visible } )
     }
     
     let horizontalSpacing: CGFloat = 10
     
+    func groupAcccounts() -> [Account] {
+        logger.info("Группируем счета")
+        return Account.groupAccounts(accounts)
+    }
+    
     var body: some View {
-        let groupedAccounts = Account.groupAccounts(accounts)
+        let groupedAccounts = groupAcccounts()
         
         NavigationStack(path: $path) {
             VStack(spacing: 5) {

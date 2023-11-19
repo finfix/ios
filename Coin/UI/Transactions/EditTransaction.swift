@@ -20,7 +20,8 @@ struct EditTransaction: View {
     @Environment (\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     private var oldTransaction: Transaction = Transaction()
-    @State private var transaction: Transaction
+    @Bindable private var transaction: Transaction
+    @Query private var accounts: [Account]
     @Query private var accountGroups: [AccountGroup]
     
     private var mode: Mode
@@ -34,6 +35,7 @@ struct EditTransaction: View {
     init(transactionType: TransactionType) {
         mode = .create
         _transaction = .init(wrappedValue: Transaction(
+                id: UInt32.random(in: 10000..<10000000),
                 type: transactionType
             )
         )
@@ -47,7 +49,10 @@ struct EditTransaction: View {
     }
     
     private var accountsFrom: [Account] {
-        (accountGroupFrom.accounts  ?? []).filter {
+        let subFiltered = accounts.filter {
+            return $0.accountGroup == accountGroupFrom && $0.visible && $0.childrenAccounts.isEmpty
+        }
+        return subFiltered.filter {
             switch transaction.type {
             case .consumption:
                 return $0.type != .expense && $0.type != .earnings
@@ -62,7 +67,10 @@ struct EditTransaction: View {
     }
     
     private var accountsTo: [Account] {
-        (accountGroupTo.accounts ?? []).filter {
+        let subFiltered = accounts.filter {
+                return $0.accountGroup == accountGroupTo && $0.visible && $0.childrenAccounts.isEmpty
+        }
+        return subFiltered.filter {
             switch transaction.type {
             case .consumption:
                 return $0.type == .expense
@@ -91,7 +99,7 @@ struct EditTransaction: View {
                             HStack {
                                 Text(account.name)
                                 Spacer()
-                                Text(account.currency?.symbol ?? "?")
+                                Text(account.currency!.symbol)
                                     .foregroundColor(.secondary)
                             }
                             .tag(account as Account?)
@@ -135,13 +143,13 @@ struct EditTransaction: View {
                 TextField("Заметка", text: $transaction.note, axis: .vertical)
             }
             Section {
-                Button {
-//                    createTransaction()
+                Button("Сохранить") {
+                    switch mode {
+                    case .create: createTransaction()
+                    case .update: updateTransaction()
+                    }
                     dismiss()
-                } label: {
-                    Text("Сохранить")
                 }
-                .padding()
             }
         }
     }
@@ -154,11 +162,11 @@ struct EditTransaction: View {
             transaction.amountTo = transaction.amountFrom
         }
         
-        transaction.accountFrom!.remainder -= transaction.amountFrom
+        
         
         Task {
             do {
-                modelContext.insert(transaction)
+                transaction = transaction.dateTransaction.stripTime()
                 let id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
                     accountFromID: transaction.accountFrom?.id ?? 0,
                     accountToID: transaction.accountTo?.id ?? 0,
@@ -169,7 +177,18 @@ struct EditTransaction: View {
                     type: transaction.type.rawValue,
                     isExecuted: true))
                 
+                    switch transaction.type {
+                    case .income:
+                        transaction.accountFrom!.remainder += transaction.amountFrom
+                        transaction.accountTo!.remainder += transaction.amountTo
+                    case .transfer, .consumption:
+                        transaction.accountFrom!.remainder -= transaction.amountFrom
+                        transaction.accountTo!.remainder += transaction.amountTo
+                    default: break
+                    }
+                    
                     transaction.id = id
+                    transaction.isSaved = true
                     try modelContext.save()
             } catch {
                 modelContext.rollback()
@@ -181,28 +200,15 @@ struct EditTransaction: View {
     func updateTransaction() {
         
         Task {
-            var req = UpdateTransactionReq(id: transaction.id)
-            if oldTransaction.accountFrom != transaction.accountFrom {
-                req.accountFromID = transaction.accountFrom?.id
-            }
-            if oldTransaction.accountTo != transaction.accountTo {
-                req.accountToID = transaction.accountTo?.id
-            }
-            if oldTransaction.amountFrom != transaction.amountFrom {
-                req.amountFrom = transaction.amountFrom
-            }
-            if oldTransaction.amountTo != transaction.amountTo {
-                req.amountTo = transaction.amountTo
-            }
-            if oldTransaction.dateTransaction != transaction.dateTransaction {
-                req.dateTransaction = transaction.dateTransaction
-            }
-            if oldTransaction.note != transaction.note {
-                req.note = transaction.note
-            }
-            
             do {
-                try await TransactionAPI().UpdateTransaction(req: req)
+                try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
+                    accountFromID: transaction.accountFrom?.id, 
+                    accountToID: transaction.accountTo?.id, 
+                    amountFrom: transaction.amountFrom,
+                    amountTo: transaction.amountTo,
+                    dateTransaction: transaction.dateTransaction,
+                    note: transaction.note,
+                    id: transaction.id))
                 try modelContext.save()
             } catch {
                 modelContext.rollback()
@@ -215,4 +221,14 @@ struct EditTransaction: View {
 #Preview {
     EditTransaction(Transaction())
         .modelContainer(previewContainer)
+}
+
+extension Date {
+
+    func stripTime() -> Date {
+        let components = Calendar.current.dateComponents([.year, .month, .day], from: self)
+        let date = Calendar.current.date(from: components)
+        return date!
+    }
+
 }

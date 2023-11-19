@@ -30,18 +30,23 @@ struct BudgetsListSubView: View {
         _accounts = Query(filter: #Predicate {
             $0.visible &&
 //            $0.type.rawValue == accountType.rawValue &&
-            $0.accountGroupID == accountGroupID })
+            $0.accountGroup?.id == accountGroupID })
+    }
+    
+    func groupAccounts() -> [Account] {
         logger.info("Группируем счета")
+        return Account.groupAccounts(accounts)
     }
         
     var body: some View {
+        let groupedAccounts = groupAccounts()
         ScrollView {
             VStack(spacing: 0) {
                 QuickStatisticView()
                 AccountGroupSelector()
             }
             VStack {
-                ForEach(Account.groupAccounts(accounts)) { account in
+                ForEach(groupedAccounts) { account in
                     BudgetRow(account: account)
                 }
             }
