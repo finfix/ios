@@ -7,6 +7,9 @@
 
 import Foundation
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "loading data from server")
 
 actor LoadModelActor: ModelActor {
     let modelContainer: ModelContainer
@@ -19,8 +22,8 @@ actor LoadModelActor: ModelActor {
     }
     
     func sync() async {
-        debugLog("Синхронизируем данные")
         await deleteAll()
+        logger.info("Синхронизируем данные")
         do {
             // Получаем все данные
             async let c = getCurrencies()
@@ -32,6 +35,7 @@ actor LoadModelActor: ModelActor {
             // Сохраняем валюты
             let currencies = try await c
             for currency in currencies {
+            logger.info("Получаем валюты")
                 modelContext.insert(currency)
             }
             let currenciesMap = Dictionary(uniqueKeysWithValues: currencies.map { ($0.isoCode, $0) })
@@ -43,6 +47,7 @@ actor LoadModelActor: ModelActor {
             }
             user.currency = currency
             modelContext.insert(user)
+            logger.info("Получаем пользователя")
             
             // Сохраняем группы счетов
             let accountGroups = try await ag
@@ -51,6 +56,7 @@ actor LoadModelActor: ModelActor {
                     throw ErrorModel(developerTextError: "Не смогли найти валюту")
                 }
                 accountGroup.currency = currency
+            logger.info("Получаем группы счетов")
                 modelContext.insert(accountGroup)
             }
             let accountGroupsMap = Dictionary(uniqueKeysWithValues: accountGroups.map { ($0.id, $0) })
@@ -66,6 +72,7 @@ actor LoadModelActor: ModelActor {
                     throw ErrorModel(developerTextError: "Не смогли найти группу счетов")
                 }
                 account.accountGroup = accountGroup
+            logger.info("Получаем счета счетов")
                 modelContext.insert(account)
             }
             let accountsMap = Dictionary(uniqueKeysWithValues: accounts.map { ($0.id, $0) })
@@ -75,16 +82,18 @@ actor LoadModelActor: ModelActor {
             for transaction in transactions {
                 transaction.accountFrom = accountsMap[transaction.accountFromID]
                 transaction.accountTo = accountsMap[transaction.accountToID]
+            logger.info("Получаем транзакции")
                 modelContext.insert(transaction)
             }
+            logger.info("Все сохраняем")
         } catch {
-            debugLog(error)
+            logger.error("\(error)")
             showErrorAlert(error.localizedDescription)
         }
     }
     
     func deleteAll() async {
-        debugLog("Удаляем все данные")
+        logger.info("Удаляем все данные")
         do {
             try modelContext.delete(model: User.self)
             try modelContext.delete(model: Transaction.self)

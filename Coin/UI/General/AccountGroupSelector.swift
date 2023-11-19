@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "account group selector")
 
 struct AccountGroupSelector: View {
     
@@ -14,7 +17,7 @@ struct AccountGroupSelector: View {
     @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0 {
         didSet {
             guard accountGroups.count >= selectedAccountGroupIndex + 1 else { return }
-            debugLog("\nВыбрали группу счетов \(accountGroups[selectedAccountGroupIndex].name)")
+            logger.info("Выбрали группу счетов \(accountGroups[selectedAccountGroupIndex].name, privacy: .private)")
             selectedAccountGroupID = Int(accountGroups[selectedAccountGroupIndex].id)
         }
     }

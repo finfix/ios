@@ -6,6 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "Login")
 
 struct LoginView: View {
     
@@ -122,7 +126,7 @@ struct LoginView: View {
                 refreshToken = response.token.refreshToken
                 isLogin = true
             } catch {
-                debugLog(error)
+                logger.error("\(error)")
             }
         }
     }
@@ -135,7 +139,7 @@ struct LoginView: View {
                 refreshToken = response.token.refreshToken
                 isLogin = true
             } catch {
-                debugLog(error)
+                logger.error("\(error)")
             }
         }
     }

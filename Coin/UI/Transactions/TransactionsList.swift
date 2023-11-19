@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "TransactionList")
 
 struct TransactionsView: View {
     
@@ -42,7 +45,6 @@ struct TransactionsList: View {
     ]) var transactions: [Transaction]
         
     init(searchString: String = "", dateFrom: Date? = nil, dateTo: Date? = nil, accountID: UInt32? = nil) {
-//        debugLog("Фильтруем транзакции")
 //        _transactions = Query(filter: #Predicate {
 //            (searchString.isEmpty ? true : $0.note.localizedStandardContains(searchString)) &&
 //            (dateFrom == nil ? true : $0.dateTransaction >= dateFrom!) &&
@@ -52,6 +54,7 @@ struct TransactionsList: View {
 ////                (accountID == nil ? true : $0.accountFromID == accountID!)
 ////            )
 //        })
+        logger.info("Фильтруем транзакции")
     }
     
     var body: some View {
@@ -91,7 +94,7 @@ struct TransactionsList: View {
             do {
                 try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: id))
             } catch {
-                debugLog(error)
+                logger.error("\(error)")
             }
         }
     }

@@ -7,6 +7,9 @@
 
 import Foundation
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "AccountAPI")
 
 let accountBasePath = "/account"
 
@@ -56,7 +59,7 @@ class AccountAPI: API {
                 reqModel: req
             )
         } catch {
-            debugLog(error)
+            logger.error("\(error)")
             showErrorAlert(error.localizedDescription)
         }
     }

@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "Main")
 
 @main
 struct MyApp: App {
@@ -58,9 +61,9 @@ func showErrorAlert(_ title: String, description: String? = nil) {
     isErrorShowing = true
     errorText = title
     errorDescription = description
-    debugLog(title)
+    logger.error("\(title)")
     if let description {
-        debugLog(description)
+        logger.error("\(description)")
     }
 }
 

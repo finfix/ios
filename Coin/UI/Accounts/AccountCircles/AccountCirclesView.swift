@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "AccountCirclesView")
 
 struct AccountCirclesView: View {
     
@@ -24,7 +27,7 @@ struct AccountCirclesSubView: View {
     @State var path = NavigationPath()
 
     init(path: NavigationPath, accountGroupID: UInt32) {
-        debugLog("\nИнициализировали AccountCirclesListSubView")
+        logger.info("Инициализировали AccountCirclesListSubView")
         self.path = path
         _accounts = Query(filter: #Predicate { $0.accountGroupID == accountGroupID && $0.visible } )
     }

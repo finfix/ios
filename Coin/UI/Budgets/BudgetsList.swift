@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "BudgetList")
 
 struct BudgetsList: View {
     
@@ -23,11 +26,12 @@ struct BudgetsListSubView: View {
     @State var accountType: AccountType = .regular
     
     init(accountGroupID: UInt32) {
-        debugLog("\nИнициализируем BudgetsListSubView")
+        logger.info("Инициализируем BudgetsListSubView")
         _accounts = Query(filter: #Predicate {
             $0.visible &&
 //            $0.type.rawValue == accountType.rawValue &&
             $0.accountGroupID == accountGroupID })
+        logger.info("Группируем счета")
     }
         
     var body: some View {

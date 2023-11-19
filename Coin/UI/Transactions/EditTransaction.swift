@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "EditTransaction")
 
 struct EditTransaction: View {
     
@@ -151,9 +154,7 @@ struct EditTransaction: View {
             transaction.amountTo = transaction.amountFrom
         }
         
-        debugLog(transaction.accountFrom!.remainder)
         transaction.accountFrom!.remainder -= transaction.amountFrom
-        debugLog(transaction.accountFrom!.remainder)
         
         Task {
             do {
@@ -170,7 +171,7 @@ struct EditTransaction: View {
                 
                     transaction.id = id
             } catch {
-                debugLog(error)
+                logger.error("\(error)")
             }
         }
     }
@@ -201,7 +202,7 @@ struct EditTransaction: View {
             do {
                 try await TransactionAPI().UpdateTransaction(req: req)
             } catch {
-                debugLog(error)
+                logger.error("\(error)")
             }
         }
     }

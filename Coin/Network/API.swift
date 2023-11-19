@@ -7,6 +7,9 @@
 
 import Foundation
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "API")
 
 class API {
     @AppStorage("basePath") var basePath: String = defaultBasePath

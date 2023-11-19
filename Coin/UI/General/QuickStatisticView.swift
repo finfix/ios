@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "quick statistic")
 
 struct QuickStatisticView: View {
     
@@ -93,7 +96,7 @@ struct QuickStatisticSubSubView: View {
     }
     
     func calculateStatistic(accounts: [Account], targetCurrency: Currency) -> QuickStatistic {
-        let timeStart = Date()
+        logger.info("Считаем статистику для шапки")
                 
         let tmp = QuickStatistic(currency: currency)
         
@@ -111,7 +114,6 @@ struct QuickStatisticSubSubView: View {
                 tmp.totalRemainder += account.remainder * relation
             }
         }
-        debugLog("Посчитали статистику для шапки", timeInterval: timeStart)
         return tmp
     }
 }
