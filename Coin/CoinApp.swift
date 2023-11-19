@@ -48,7 +48,7 @@ struct MyApp: App {
                     )
                 }
         }
-        .modelContainer(container)
+        .modelContainer(for: [Currency.self, User.self, Transaction.self, Account.self, AccountGroup.self], isAutosaveEnabled: false)
     }
 }
 

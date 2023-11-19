@@ -103,7 +103,9 @@ struct EditAccount: View {
                 gradualBudgetFilling: account.gradualBudgetFilling)
             )
             account.id = id
+            try modelContext.save()
         } catch {
+            modelContext.rollback()
             logger.error("\(error)")
             showErrorAlert(error.localizedDescription)
         }
@@ -120,7 +122,9 @@ struct EditAccount: View {
                 visible: oldAccount.visible != account.visible ? account.visible : nil,
                 gradualBudgetFilling: oldAccount.gradualBudgetFilling != account.gradualBudgetFilling ? account.gradualBudgetFilling : nil)
             )
+            try modelContext.save()
         } catch {
+            modelContext.rollback()
             logger.error("\(error)")
             showErrorAlert(error.localizedDescription)
         }

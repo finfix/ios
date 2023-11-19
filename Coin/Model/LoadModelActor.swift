@@ -22,8 +22,8 @@ actor LoadModelActor: ModelActor {
     }
     
     func sync() async {
-        await deleteAll()
         logger.info("Синхронизируем данные")
+        await deleteAll(isSave: false)
         do {
             // Получаем все данные
             async let c = getCurrencies()
@@ -76,13 +76,14 @@ actor LoadModelActor: ModelActor {
             }
             
             logger.info("Все сохраняем")
+            try modelContext.save()
         } catch {
             logger.error("\(error)")
             showErrorAlert(error.localizedDescription)
         }
     }
     
-    func deleteAll() async {
+    func deleteAll(isSave: Bool = true) async {
         logger.info("Удаляем все данные")
         do {
             try modelContext.delete(model: User.self)
@@ -90,8 +91,12 @@ actor LoadModelActor: ModelActor {
             try modelContext.delete(model: Account.self)
             try modelContext.delete(model: Currency.self)
             try modelContext.delete(model: AccountGroup.self)
+            if isSave {
+                try modelContext.save()
+            }
         } catch {
-            debugLog(error)
+            modelContext.rollback()
+            logger.error("\(error)")
             showErrorAlert(error.localizedDescription)
         }
     }

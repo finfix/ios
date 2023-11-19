@@ -170,7 +170,9 @@ struct EditTransaction: View {
                     isExecuted: true))
                 
                     transaction.id = id
+                    try modelContext.save()
             } catch {
+                modelContext.rollback()
                 logger.error("\(error)")
             }
         }
@@ -201,7 +203,9 @@ struct EditTransaction: View {
             
             do {
                 try await TransactionAPI().UpdateTransaction(req: req)
+                try modelContext.save()
             } catch {
+                modelContext.rollback()
                 logger.error("\(error)")
             }
         }

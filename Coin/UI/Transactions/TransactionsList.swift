@@ -93,7 +93,9 @@ struct TransactionsList: View {
         Task {
             do {
                 try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: id))
+                try modelContext.save()
             } catch {
+                modelContext.rollback()
                 logger.error("\(error)")
             }
         }
