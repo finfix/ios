@@ -12,8 +12,6 @@ struct BudgetDetails: View {
     var account: Account
     
     let daysInMonth = Calendar.current.range(of: .day, in: .month, for: Date())!.count
-    let width: CGFloat = UIScreen.main.bounds.width * 0.9
-    let height: CGFloat = 60
     let today = Calendar.current.component(.day, from: Date())
     
     var dailyBudget: Decimal {

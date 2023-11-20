@@ -28,9 +28,13 @@ struct UpdateTransaction: View {
         Form {
             Section {
                 TextField("Сумма списания", text: $amountFrom)
+                    #if os(iOS)
                     .keyboardType(.decimalPad)
+                    #endif
                 TextField("Сумма зачисления", text: $amountTo)
+                    #if os(iOS)
                     .keyboardType(.decimalPad)
+                    #endif
                 ZStack(alignment: .topLeading) {
                     if note.isEmpty {
                         Text("Заметка")

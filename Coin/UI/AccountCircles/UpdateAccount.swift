@@ -39,7 +39,9 @@ struct UpdateAccount: View {
             if oldAccount.childrenAccounts.isEmpty {
                 TextField("Бюджет", text: $budget)
                 TextField("Остаток", text: $remainder)
+            #if !os(macOS)
                     .keyboardType(.decimalPad)
+            #endif
             }
             Toggle(isOn: $accounting) {
                 Text("Подсчитывать ли счет в шапке")

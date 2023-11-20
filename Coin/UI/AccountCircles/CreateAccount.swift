@@ -27,10 +27,14 @@ struct CreateAccount: View {
                 
                 if accountType == .expense || accountType == .earnings {
                     TextField("Бюджет", text: $budget)
+                        #if os(iOS)
                         .keyboardType(.decimalPad)
+                        #endif
                 } else {
                     TextField("Начальный баланс", text: $remainder)
+                        #if os(iOS)
                         .keyboardType(.decimalPad)
+                        #endif
                 }
                 
                 Toggle(isOn: $gradualBudgetFilling) {

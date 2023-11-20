@@ -112,17 +112,23 @@ struct CreateTransactionView: View {
                 }
                 
                 TextField(intercurrency ? "Сумма списания" : "Сумма", text: $amountFrom)
+                    #if os(iOS)
                     .keyboardType(.decimalPad)
+                    #endif
                 if intercurrency {
                     TextField("Сумма начисления", text: $amountTo)
+                        #if os(iOS)
                         .keyboardType(.decimalPad)
+                        #endif
                 }
                 
                 DatePicker(selection: $date, displayedComponents: .date) {
                     Text("Дата транзакции")
                 }
             }
+            #if os(iOS)
             .pickerStyle(.wheel)
+            #endif
             Section {
                 ZStack(alignment: .topLeading) {
                     if note.isEmpty {

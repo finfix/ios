@@ -12,11 +12,17 @@ class AuthAPI: API {
     
     let authBasePath = "/auth"
     
+    #if os(iOS)
+    let deviceID = UIDevice.current.identifierForVendor!.uuidString
+    #else
+    let deviceID = Host.current().name!
+    #endif
+    
     func Auth(req: AuthReq) async throws -> AuthRes {
         return try await request(
             url: basePath + authBasePath + "/signIn",
             method: .post,
-            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString], 
+            headers: ["DeviceID": deviceID],
             reqModel: req,
             resModel: AuthRes.self
         )
@@ -26,7 +32,7 @@ class AuthAPI: API {
         return try await request(
             url: basePath + authBasePath + "/signUp",
             method: .post,
-            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
+            headers: ["DeviceID": deviceID],
             reqModel: req,
             resModel: AuthRes.self
         )
@@ -36,7 +42,7 @@ class AuthAPI: API {
         return try await request(
             url: basePath + authBasePath + "/refreshTokens",
             method: .get,
-            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
+            headers: ["DeviceID": deviceID],
             query: ["token": req.token],
             resModel: RefreshTokensRes.self
         )

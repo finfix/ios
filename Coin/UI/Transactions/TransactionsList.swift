@@ -39,8 +39,12 @@ struct TransactionsList: View {
                         modelData.getTransactions(offset: UInt32(modelData.transactions.count))
                     }
             }
+            #if os(iOS)
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
             .listStyle(.grouped)
+            #else
+            .searchable(text: $searchText)
+            #endif
         }
     }
     

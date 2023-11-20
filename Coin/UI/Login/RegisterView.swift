@@ -27,10 +27,12 @@ struct RegisterView: View {
             
             TextField("Email", text: $login)
                 .modifier(CustomTextField())
-                .keyboardType(.emailAddress)
-                .autocapitalization(.none)
                 .disableAutocorrection(true)
                 .textContentType(.emailAddress)
+                #if os(iOS)
+                .keyboardType(.emailAddress)
+                .autocapitalization(.none)
+                #endif
             
             SecureField("Password", text: $password)
                 .modifier(CustomTextField())

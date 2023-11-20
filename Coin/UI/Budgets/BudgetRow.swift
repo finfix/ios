@@ -22,6 +22,7 @@ struct BudgetRow: View {
             }
         } label: {
             BudgetBar(account: account)
+                .frame(height: 60)
         }
         if isDetailsOpened {
             BudgetDetails(account: account)
