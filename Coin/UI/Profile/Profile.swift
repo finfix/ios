@@ -58,7 +58,11 @@ struct Profile: View {
                 Section {
                     Button("Выйти", role: .destructive) {
                         Task {
-                            await LoadModelActor(modelContainer: modelContext.container).deleteAll()
+                            do {
+                                try await LoadModelActor(modelContainer: modelContext.container).deleteAll()
+                            } catch {
+                                showErrorAlert("\(error)")
+                            }
                         }
                         isLogin = false
                         accessToken = nil
