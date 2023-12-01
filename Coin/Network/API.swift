@@ -77,7 +77,9 @@ class API {
                 
         // Тело
         do {
-            request.httpBody = try JSONEncoder().encode(reqModel)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .formatted(self.dateFormatter)
+            request.httpBody = try encoder.encode(reqModel)
         } catch {
             throw RequestError.encodingError(error)
         }
@@ -140,7 +142,9 @@ class API {
                 
         // Тело
         do {
-            request.httpBody = try JSONEncoder().encode(reqModel)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .formatted(self.dateFormatter)
+            request.httpBody = try encoder.encode(reqModel)
         } catch {
             throw RequestError.encodingError(error)
         }

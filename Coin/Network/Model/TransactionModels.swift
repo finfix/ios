@@ -12,7 +12,7 @@ struct CreateTransactionReq: Encodable {
     var accountToID: UInt32
     var amountFrom: Decimal
     var amountTo: Decimal
-    var dateTransaction: String
+    var dateTransaction: Date
     var note: String
     var type: String
     var isExecuted: Bool
