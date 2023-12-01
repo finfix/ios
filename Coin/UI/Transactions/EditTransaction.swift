@@ -18,114 +18,58 @@ struct EditTransaction: View {
     }
     
     @Environment (\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
+    private var modelContext: ModelContext
     private var oldTransaction: Transaction = Transaction()
     @Bindable private var transaction: Transaction
-    @Query private var accounts: [Account]
-    @Query private var accountGroups: [AccountGroup]
+    private var accountGroups: [AccountGroup]
     
     private var mode: Mode
     
     init(_ transaction: Transaction) {
+        self.init()
         mode = .update
         self.oldTransaction = transaction
-        _transaction = .init(wrappedValue: transaction)
+        self.transaction = modelContext.model(for: transaction.persistentModelID) as! Transaction
     }
     
     init(transactionType: TransactionType) {
+        self.init()
         mode = .create
         _transaction = .init(wrappedValue: Transaction(
-                id: UInt32.random(in: 10000..<10000000),
-                type: transactionType
-            )
-        )
+            type: transactionType
+        ))
     }
     
-    @State private var accountGroupFrom = AccountGroup()
-    @State private var accountGroupTo = AccountGroup()
+    private init() {
+        modelContext = ModelContext(container)
+        modelContext.autosaveEnabled = false
+        accountGroups = try! modelContext.fetch(FetchDescriptor<AccountGroup>())
+        transaction = Transaction()
+        mode = .create
+    }
     
     private var intercurrency: Bool {
         return transaction.accountFrom?.currency != transaction.accountTo?.currency
     }
     
-    private var accountsFrom: [Account] {
-        let subFiltered = accounts.filter {
-            return $0.accountGroup == accountGroupFrom && $0.visible && $0.childrenAccounts.isEmpty
-        }
-        return subFiltered.filter {
-            switch transaction.type {
-            case .consumption:
-                return $0.type != .expense && $0.type != .earnings
-            case .income:
-                return $0.type == .earnings
-            case .transfer:
-                return $0.type != .expense && $0.type != .earnings
-            default:
-                return true
-            }
-        }
-    }
-    
-    private var accountsTo: [Account] {
-        let subFiltered = accounts.filter {
-                return $0.accountGroup == accountGroupTo && $0.visible && $0.childrenAccounts.isEmpty
-        }
-        return subFiltered.filter {
-            switch transaction.type {
-            case .consumption:
-                return $0.type == .expense
-            case .income:
-                return $0.type != .expense && $0.type != .earnings
-            case .transfer:
-                return $0.type != .expense && $0.type != .earnings && $0 != transaction.accountFrom
-            default:
-                return true
-            }
-        }
-    }
-    
     var body: some View {
         Form {
             Section {
-                HStack(spacing: 0) {
-                    Picker("", selection: $accountGroupFrom) {
-                        ForEach (accountGroups) { accountGroup in
-                            Text(accountGroup.name)
-                                .tag(accountGroup)
-                        }
-                    }
-                    Picker("", selection: $transaction.accountFrom) {
-                        ForEach (accountsFrom) { account in
-                            HStack {
-                                Text(account.name)
-                                Spacer()
-                                Text(account.currency!.symbol)
-                                    .foregroundColor(.secondary)
-                            }
-                            .tag(account as Account?)
-                        }
-                    }
-                }
-                
-                HStack(spacing: 0) {
-                    Picker("", selection: $accountGroupTo) {
-                        ForEach (accountGroups) { accountGroup in
-                            Text(accountGroup.name)
-                                .tag(accountGroup)
-                        }
-                    }
-                    Picker("", selection: $transaction.accountTo) {
-                        ForEach (accountsTo) { account in
-                            HStack {
-                                Text(account.name)
-                                Spacer()
-                                Text(account.currency?.symbol ?? "?")
-                                    .foregroundColor(.secondary)
-                            }
-                            .tag(account as Account?)
-                        }
-                    }
-                }
+                Pickers(
+                    buttonName: "Счет списания",
+                    account: $transaction.accountFrom,
+                    accountGroups: accountGroups,
+                    position: .up,
+                    transactionType: transaction.type
+                )
+                Pickers(
+                    buttonName: "Счет пополнения",
+                    account: $transaction.accountTo,
+                    accountGroups: accountGroups,
+                    position: .down,
+                    transactionType: transaction.type,
+                    excludeAccount: transaction.accountFrom
+                )
                 
                 TextField(intercurrency ? "Сумма списания" : "Сумма", value: $transaction.amountFrom, format: .number)
                     .keyboardType(.decimalPad)
@@ -155,43 +99,37 @@ struct EditTransaction: View {
     }
     
     func createTransaction() {
-        let format = DateFormatter()
-        format.dateFormat = "YYYY-MM-dd"
         
         if !intercurrency {
             transaction.amountTo = transaction.amountFrom
         }
         
-        
-        
         Task {
             do {
                 transaction.dateTransaction = transaction.dateTransaction.stripTime()
-                let id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
+                transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
                     accountFromID: transaction.accountFrom?.id ?? 0,
                     accountToID: transaction.accountTo?.id ?? 0,
                     amountFrom: transaction.amountFrom,
                     amountTo: transaction.amountTo,
-                    dateTransaction: format.string(from: transaction.dateTransaction),
+                    dateTransaction: transaction.dateTransaction,
                     note: transaction.note,
                     type: transaction.type.rawValue,
-                    isExecuted: true))
-                
-                    switch transaction.type {
-                    case .income:
-                        transaction.accountFrom!.remainder += transaction.amountFrom
-                        transaction.accountTo!.remainder += transaction.amountTo
-                    case .transfer, .consumption:
-                        transaction.accountFrom!.remainder -= transaction.amountFrom
-                        transaction.accountTo!.remainder += transaction.amountTo
-                    default: break
-                    }
-                    
-                    transaction.id = id
-                    transaction.isSaved = true
-                    try modelContext.save()
+                    isExecuted: true
+                ))
+                modelContext.insert(transaction)
+                switch transaction.type {
+                case .income:
+                    transaction.accountFrom!.remainder += transaction.amountFrom
+                    transaction.accountTo!.remainder += transaction.amountTo
+                case .transfer, .consumption:
+                    transaction.accountFrom!.remainder -= transaction.amountFrom
+                    transaction.accountTo!.remainder += transaction.amountTo
+                default: break
+                }
+                try modelContext.save()
             } catch {
-                modelContext.rollback()
+                showErrorAlert("\(error)")
                 logger.error("\(error)")
             }
         }
@@ -201,17 +139,18 @@ struct EditTransaction: View {
         
         Task {
             do {
+                transaction.dateTransaction = transaction.dateTransaction.stripTime()
                 try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
-                    accountFromID: transaction.accountFrom?.id, 
-                    accountToID: transaction.accountTo?.id, 
-                    amountFrom: transaction.amountFrom,
-                    amountTo: transaction.amountTo,
-                    dateTransaction: transaction.dateTransaction,
-                    note: transaction.note,
+                    accountFromID: transaction.accountFrom?.id != oldTransaction.accountFrom?.id ? transaction.accountFrom?.id : nil,
+                    accountToID: transaction.accountTo?.id != oldTransaction.accountTo?.id ? transaction.accountTo?.id : nil,
+                    amountFrom: transaction.amountFrom != oldTransaction.amountFrom ? transaction.amountFrom : nil,
+                    amountTo: transaction.amountTo != oldTransaction.amountTo ? transaction.amountTo : nil,
+                    dateTransaction: transaction.dateTransaction != oldTransaction.dateTransaction ? transaction.dateTransaction : nil,
+                    note: transaction.note != oldTransaction.note ? transaction.note : nil,
                     id: transaction.id))
                 try modelContext.save()
             } catch {
-                modelContext.rollback()
+                showErrorAlert("\(error)")
                 logger.error("\(error)")
             }
         }
@@ -231,4 +170,93 @@ extension Date {
         return date!
     }
 
+}
+
+private struct Pickers: View {
+    
+    enum Position {
+        case up, down
+    }
+    
+    @State private var isPickerShowing = false
+    var buttonName: String
+    @Binding var account: Account?
+    var accountGroups: [AccountGroup]
+    @State private var accountGroup = AccountGroup()
+    var position: Position
+    var transactionType: TransactionType
+    var excludeAccount: Account?
+    
+    var accounts: [Account] {
+        
+        var subfiltered = accountGroup.accounts.filter { $0.visible && $0.id != excludeAccount?.id ?? 0 }
+        
+        switch transactionType {
+        case .consumption:
+            switch position {
+            case .up:
+                subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
+            case .down:
+                subfiltered = subfiltered.filter { $0.type == .expense }
+            }
+        case .transfer:
+            subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
+        case .income:
+            switch position {
+            case .up:
+                subfiltered = subfiltered.filter { $0.type == .earnings }
+            case .down:
+                subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
+            }
+        default:
+            subfiltered = []
+        }
+        return subfiltered
+    }
+    
+    var body: some View {
+        Group {
+            Button {
+                withAnimation {
+                    isPickerShowing.toggle()
+                }
+            } label: {
+                Text(buttonName)
+                Spacer()
+                Text(account?.name ?? "Счет не выбран")
+                    .foregroundStyle(.secondary)
+                Text(account?.currency?.symbol ?? "?")
+                    .foregroundColor(.secondary)
+            }
+            if isPickerShowing {
+                HStack(spacing: 0) {
+                    Picker("", selection: $accountGroup) {
+                        ForEach (accountGroups) { accountGroup in
+                            Text(accountGroup.name)
+                                .tag(accountGroup)
+                        }
+                    }
+                    .onChange(of: accountGroup) {
+                        account = accountGroup.accounts.first
+                    }
+                    Picker("", selection: $account) {
+                        ForEach (accounts) { account in
+                            HStack {
+                                Text(account.name)
+                                Spacer()
+                                Text(account.currency!.symbol)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(account as Account?)
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            accountGroup = accountGroups.first ?? AccountGroup()
+            account = accounts.first
+        }
+        .buttonStyle(.plain)
+    }
 }

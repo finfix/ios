@@ -36,7 +36,7 @@ struct TransactionFilterView: View {
     
 }
 
-struct Сalendar: View {
+private struct Сalendar: View {
     
     var buttonName: String
     @State private var isCalendarShowing = false

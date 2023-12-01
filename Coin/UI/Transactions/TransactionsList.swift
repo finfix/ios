@@ -79,11 +79,10 @@ struct TransactionsList: View {
     func deleteTransaction(_ transaction: Transaction) {
         Task {
             do {
-                modelContext.delete(transaction)
                 try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
-                try modelContext.save()
+                modelContext.delete(transaction)
             } catch {
-                modelContext.rollback()
+                showErrorAlert("\(error)")
                 logger.error("\(error)")
             }
         }
