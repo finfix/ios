@@ -231,9 +231,11 @@ class API {
         var urlComponents = URLComponents(string: urlString)
         
         // Параметры строки
-        var urlQueryItems: [URLQueryItem] = []
-        query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
-        urlComponents?.queryItems = urlQueryItems
+        if query != [:] {
+            var urlQueryItems: [URLQueryItem] = []
+            query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
+            urlComponents?.queryItems = urlQueryItems
+        }
         
         guard let url = urlComponents?.url else { throw RequestError.invalidURL }
         

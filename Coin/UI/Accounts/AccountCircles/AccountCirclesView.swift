@@ -48,7 +48,7 @@ struct AccountCirclesSubView: View {
                     QuickStatisticView()
                     AccountGroupSelector()
                 }
-                Group {
+                VStack {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .earnings }) { account in
@@ -79,7 +79,6 @@ struct AccountCirclesSubView: View {
                             PlusNewAccount(accountType: .expense)
                         }
                     }
-                    .frame(maxHeight: .infinity)
                 }
                 .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
                 .scrollIndicators(.hidden)

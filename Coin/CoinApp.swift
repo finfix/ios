@@ -58,13 +58,9 @@ func showErrorAlert(_ title: String, description: String? = nil) {
     @AppStorage("errorTitle") var errorText: String?
     @AppStorage("errorDescription") var errorDescription: String?
     
-    isErrorShowing = true
     errorText = title
     errorDescription = description
-    logger.error("\(title)")
-    if let description {
-        logger.error("\(description)")
-    }
+    isErrorShowing = true
 }
 
 

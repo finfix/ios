@@ -166,7 +166,7 @@ struct EditTransaction: View {
         
         Task {
             do {
-                transaction = transaction.dateTransaction.stripTime()
+                transaction.dateTransaction = transaction.dateTransaction.stripTime()
                 let id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
                     accountFromID: transaction.accountFrom?.id ?? 0,
                     accountToID: transaction.accountTo?.id ?? 0,

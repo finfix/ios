@@ -79,7 +79,7 @@ actor LoadModelActor: ModelActor {
             try modelContext.save()
         } catch {
             logger.error("\(error)")
-            showErrorAlert(error.localizedDescription)
+            showErrorAlert("\(error)")
         }
     }
     
@@ -97,7 +97,7 @@ actor LoadModelActor: ModelActor {
         } catch {
             modelContext.rollback()
             logger.error("\(error)")
-            showErrorAlert(error.localizedDescription)
+            showErrorAlert("\(error)")
         }
     }
     

@@ -51,16 +51,11 @@ class AccountAPI: API {
     }
     
     func UpdateAccount(req: UpdateAccountReq) async throws {
-        do {
-            return try await request(
-                url: basePath + accountBasePath,
-                method: .patch,
-                headers: getBaseHeaders(),
-                reqModel: req
-            )
-        } catch {
-            logger.error("\(error)")
-            showErrorAlert(error.localizedDescription)
-        }
+        return try await request(
+            url: basePath + accountBasePath,
+            method: .patch,
+            headers: getBaseHeaders(),
+            reqModel: req
+        )
     }
 }

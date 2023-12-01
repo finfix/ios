@@ -42,7 +42,6 @@ import SwiftData
         gradualBudgetFilling: Bool = false
     ) {
         self.id = id
-        self.accountGroup = accountGroup
         self.accounting = accounting
         self.budget = budget
         self.iconID = iconID

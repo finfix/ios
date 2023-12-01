@@ -13,9 +13,7 @@ import SwiftData
     @Attribute(.unique) var id: UInt32
     var name: String
     var currency: Currency?
-    
-//    @Relationship(deleteRule: .nullify, inverse: \Account.accountGroup) var accounts: [Account]
-    
+        
     init(
         id: UInt32 = 0,
         name: String = "",
@@ -24,13 +22,11 @@ import SwiftData
         self.id = id
         self.name = name
         self.currency = currency
-//        self.accounts = []
     }
     
     init(_ res: GetAccountGroupsRes, currenciesMap: [String: Currency]) {
         self.id = res.id
         self.name = res.name
         self.currency = currenciesMap[res.currency]
-//        self.accounts = []
     }
 }

@@ -51,10 +51,6 @@ struct TransactionsList: View {
             (searchString.isEmpty ? true : $0.note.localizedStandardContains(searchString)) &&
             (dateFrom == nil ? true : $0.dateTransaction >= dateFrom!) &&
             (dateTo == nil ? true : $0.dateTransaction <= dateTo!)
-            (
-                (accountID == nil ? true : $0.accountToID == accountID!) ||
-                (accountID == nil ? true : $0.accountFromID == accountID!)
-            )
         })
     }
     
