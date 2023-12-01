@@ -12,16 +12,18 @@ class TransactionAPI: API {
         
     let transactionBasePath = "/transaction"
     
-    func GetTransactions(req: GetTransactionReq) async throws -> [Transaction] {
+    func GetTransactions(req: GetTransactionReq) async throws -> [GetTransactionsRes] {
         return try await request(
             url: basePath + transactionBasePath,
             method: .get,
             headers: getBaseHeaders(),
-            query: ["offset": String(req.offset!), "limit": String(req.limit!)],
-            resModel: [Transaction].self)
+//            query: ["offset": String(req.offset!), "limit": String(req.limit!)],
+            resModel: [GetTransactionsRes].self)
     }
     
     func CreateTransaction(req: CreateTransactionReq) async throws -> UInt32 {
+        let format = DateFormatter()
+        format.dateFormat = "YYYY-MM-dd"
         return try await request(
             url: basePath + transactionBasePath,
             method: .post,
@@ -32,6 +34,9 @@ class TransactionAPI: API {
     }
     
     func UpdateTransaction(req: UpdateTransactionReq) async throws {
+        
+        
+        
         return try await request(
             url: basePath + transactionBasePath,
             method: .patch,

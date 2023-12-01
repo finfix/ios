@@ -7,36 +7,23 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "Main")
 
 @main
 struct MyApp: App {
-    
-    @State private var modelData = ModelData()
-    
-    @AppStorage("isDarkMode") var isDarkMode = false
+        
+    @AppStorage("isDarkMode") var isDarkMode = defaultIsDarkMode
     
     @AppStorage("isErrorShowing") var isErrorShowing = false
-    @AppStorage("errorText") var errorText: String = ""
+    @AppStorage("errorTitle") var errorText: String = ""
     @AppStorage("errorDescription") var errorDescription: String = ""
-    
-    var container: ModelContainer
-
-    init() {
-        do {
-            let storeURL = URL.documentsDirectory.appending(path: "database.sqlite")
-            let schema = Schema([Currency.self, User.self])
-            let config = ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .private("coin"))
-            container = try ModelContainer(for: schema, configurations: config)
-        } catch {
-            fatalError("Failed to configure SwiftData container.")
-        }
-    }
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(isDarkMode ? .dark : .light)
-                .environment(modelData)
                 .alert(isPresented: $isErrorShowing) {
                     Alert(title: 
                             Text(errorText),
@@ -54,17 +41,15 @@ struct MyApp: App {
     }
 }
 
-func showErrorAlert(error: ErrorModel) {
+func showErrorAlert(_ title: String, description: String? = nil) {
     
     @AppStorage("isErrorShowing") var isErrorShowing = false
-    @AppStorage("errorText") var errorText: String?
+    @AppStorage("errorTitle") var errorText: String?
     @AppStorage("errorDescription") var errorDescription: String?
     
+    errorText = title
+    errorDescription = description
     isErrorShowing = true
-    errorText = error.humanTextError
-    errorDescription = error.developerTextError
-    debugLog(error.developerTextError)
-    debugLog(error.context ?? "")
 }
 
 

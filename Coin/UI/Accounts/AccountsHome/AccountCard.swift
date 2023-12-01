@@ -20,7 +20,7 @@ struct AccountCard: View {
                     .foregroundColor(.gray)
                 Text(account.name)
             }
-            Text(CurrencyFormatter().string(number: account.remainder, currency: account.currency))
+            Text(CurrencyFormatter().string(number: account.showingRemainder, currency: account.currency))
         }
         .frame(width: size.width, height: 150)
         .background(Color("Gray"))
@@ -29,5 +29,5 @@ struct AccountCard: View {
 }
 
 #Preview {
-    AccountCard(size: CGSize(width: 30, height: 30), account: ModelData().accounts[0])
+    AccountCard(size: CGSize(width: 30, height: 30), account: Account())
 }

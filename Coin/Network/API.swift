@@ -7,6 +7,9 @@
 
 import Foundation
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "API")
 
 class API {
     @AppStorage("basePath") var basePath: String = defaultBasePath
@@ -19,7 +22,7 @@ class API {
     
     enum RequestError: Error {
         case invalidURL
-        case serverError(ErrorModel)
+        case serverError(Error)
         case decodingError(Error)
         case encodingError(Error)
         case requestError(Error)
@@ -74,7 +77,9 @@ class API {
                 
         // Тело
         do {
-            request.httpBody = try JSONEncoder().encode(reqModel)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .formatted(self.dateFormatter)
+            request.httpBody = try encoder.encode(reqModel)
         } catch {
             throw RequestError.encodingError(error)
         }
@@ -117,9 +122,11 @@ class API {
         var urlComponents = URLComponents(string: urlString)
         
         // Параметры строки
-        var urlQueryItems: [URLQueryItem] = []
-        query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
-        urlComponents?.queryItems = urlQueryItems
+        if !query.isEmpty {
+            var urlQueryItems: [URLQueryItem] = []
+            query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
+            urlComponents?.queryItems = urlQueryItems
+        }
         
         guard let url = urlComponents?.url else { throw RequestError.invalidURL }
         
@@ -131,11 +138,13 @@ class API {
         
         // Заголовки
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        headers.forEach { request.setValue($0, forHTTPHeaderField: $1) }
+        headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
                 
         // Тело
         do {
-            request.httpBody = try JSONEncoder().encode(reqModel)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .formatted(self.dateFormatter)
+            request.httpBody = try encoder.encode(reqModel)
         } catch {
             throw RequestError.encodingError(error)
         }
@@ -226,9 +235,11 @@ class API {
         var urlComponents = URLComponents(string: urlString)
         
         // Параметры строки
-        var urlQueryItems: [URLQueryItem] = []
-        query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
-        urlComponents?.queryItems = urlQueryItems
+        if query != [:] {
+            var urlQueryItems: [URLQueryItem] = []
+            query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
+            urlComponents?.queryItems = urlQueryItems
+        }
         
         guard let url = urlComponents?.url else { throw RequestError.invalidURL }
         
@@ -240,7 +251,7 @@ class API {
         
         // Заголовки
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        headers.forEach { request.setValue($0, forHTTPHeaderField: $1) }
+        headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
                 
         var data = Data()
         var response = URLResponse()

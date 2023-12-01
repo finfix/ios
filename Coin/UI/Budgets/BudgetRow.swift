@@ -30,9 +30,5 @@ struct BudgetRow: View {
 }
 
 #Preview {
-    Group {
-        BudgetRow(account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 900, currency: "rub", iconID: 2, name: "Example", remainder: 600, type: .expense, visible: true))
-        BudgetRow(account: Account(id: 1, accountGroupID: 1, accounting: true, budget: 900, currency: "rub", iconID: 2, name: "Example", remainder: 600, type: .expense, visible: true))
-        Spacer()
-    }
+    BudgetRow(account: Account())
 }

@@ -10,9 +10,9 @@ import Foundation
 struct CreateTransactionReq: Encodable {
     var accountFromID: UInt32
     var accountToID: UInt32
-    var amountFrom: Double
-    var amountTo: Double
-    var dateTransaction: String
+    var amountFrom: Decimal
+    var amountTo: Decimal
+    var dateTransaction: Date
     var note: String
     var type: String
     var isExecuted: Bool
@@ -25,8 +25,8 @@ struct CreateTransactionRes: Decodable {
 struct UpdateTransactionReq: Encodable {
     var accountFromID: UInt32?
     var accountToID: UInt32?
-    var amountFrom: Double?
-    var amountTo: Double?
+    var amountFrom: Decimal?
+    var amountTo: Decimal?
     var dateTransaction: Date?
     var note: String?
     var id: UInt32
@@ -40,6 +40,19 @@ struct GetTransactionReq: Encodable {
     var type: String?
     var offset: UInt32?
     var limit: UInt8?
+}
+
+struct GetTransactionsRes: Decodable {
+    var id: UInt32
+    var accounting: Bool
+    var amountFrom: Decimal
+    var amountTo: Decimal
+    var dateTransaction: Date
+    var isExecuted: Bool
+    var note: String
+    var type: TransactionType
+    var accountFromID: UInt32
+    var accountToID: UInt32
 }
 
 struct DeleteTransactionReq: Encodable {

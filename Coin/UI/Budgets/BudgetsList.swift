@@ -6,30 +6,47 @@
 //
 
 import SwiftUI
+import SwiftData
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "BudgetList")
 
 struct BudgetsList: View {
     
-    @Environment(ModelData.self) var modelData
-    
-    var filteredAccounts: [Account] {
-        modelData.accounts.filter {
-            ($0.accountGroupID == modelData.selectedAccountsGroupID) &&
-            $0.visible &&
-            !$0.isChild &&
-            $0.type == .expense &&
-            $0.budget != 0 }
-    }
+    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     
     var body: some View {
+        BudgetsListSubView(accountGroupID: UInt32(selectedAccountsGroupID))
+    }
+}
+
+struct BudgetsListSubView: View {
+        
+    @Query var accounts: [Account]
+    @State var accountType: AccountType = .regular
+    
+    init(accountGroupID: UInt32) {
+        logger.info("Инициализируем BudgetsListSubView")
+        _accounts = Query(filter: #Predicate {
+            $0.visible &&
+//            $0.type.rawValue == accountType.rawValue &&
+            $0.accountGroup?.id == accountGroupID })
+    }
+    
+    func groupAccounts() -> [Account] {
+        logger.info("Группируем счета")
+        return Account.groupAccounts(accounts)
+    }
+        
+    var body: some View {
+        let groupedAccounts = groupAccounts()
         ScrollView {
             VStack(spacing: 0) {
-                Header()
-                if modelData.accountGroups.count > 1 {
-                    AccountsGroupSelector()
-                }
+                QuickStatisticView()
+                AccountGroupSelector()
             }
             VStack {
-                ForEach(filteredAccounts) { account in
+                ForEach(groupedAccounts) { account in
                     BudgetRow(account: account)
                 }
             }
@@ -39,4 +56,5 @@ struct BudgetsList: View {
 
 #Preview {
     BudgetsList()
+        .modelContainer(previewContainer)
 }

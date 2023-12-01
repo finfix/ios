@@ -7,12 +7,15 @@
 
 import Foundation
 import SwiftUI
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "AccountAPI")
 
 let accountBasePath = "/account"
 
 class AccountAPI: API {
     
-    func GetAccounts(req: GetAccountsReq) async throws -> [Account] {
+    func GetAccounts(req: GetAccountsReq) async throws -> [GetAccountsRes] {
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -24,16 +27,16 @@ class AccountAPI: API {
             method: .get,
             headers: getBaseHeaders(),
             query: ["dateFrom": dateFrom, "dateTo": dateTo],
-            resModel: [Account].self
+            resModel: [GetAccountsRes].self
         )
     }
     
-    func GetAccountGroups() async throws -> [AccountGroup] {
+    func GetAccountGroups() async throws -> [GetAccountGroupsRes] {
         return try await request(
             url: basePath + accountBasePath + "/accountGroups",
             method: .get,
             headers: getBaseHeaders(),
-            resModel: [AccountGroup].self
+            resModel: [GetAccountGroupsRes].self
         )
     }
     
@@ -42,6 +45,7 @@ class AccountAPI: API {
             url: basePath + accountBasePath,
             method: .post,
             headers: getBaseHeaders(),
+            reqModel: req,
             resModel: CreateAccountRes.self
         ).id
     }

@@ -11,19 +11,19 @@ class UserAPI: API {
     
     let userBasePath = "/user"
     
-    func GetCurrencies() async throws -> [Currency] {
+    func GetCurrencies() async throws -> [GetCurrenciesRes] {
         return try await request(
             url: basePath + userBasePath + "/currencies",
             method: .get,
             headers: getBaseHeaders(),
-            resModel: [Currency].self)
+            resModel: [GetCurrenciesRes].self)
     }
     
-    func GetUser() async throws -> User {
+    func GetUser() async throws -> GetUserRes {
         return try await request(
             url: basePath + userBasePath + "/",
             method: .get,
             headers: getBaseHeaders(),
-            resModel: User.self)
+            resModel: GetUserRes.self)
     }
 }

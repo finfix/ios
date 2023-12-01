@@ -6,23 +6,35 @@
 //
 
 import Foundation
+import SwiftData
 
-
-class Transaction: Decodable, Identifiable {
-    var accountFromID: UInt32
-    var accountToID: UInt32
+@Model 
+class Transaction {
+    
+    @Attribute(.unique) var id: UInt32
     var accounting: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
     var dateTransaction: Date
-    var id: UInt32
     var isExecuted: Bool
     var note: String
     var type: TransactionType
     
-    init(accountFromID: UInt32 = 0, accountToID: UInt32 = 0, accounting: Bool = true, amountFrom: Decimal = 0, amountTo: Decimal = 0, dateTransaction: Date = Date(), id: UInt32 = 0, isExecuted: Bool = true, note: String = "", type: TransactionType = .consumption) {
-        self.accountFromID = accountFromID
-        self.accountToID = accountToID
+    var accountFrom: Account?
+    var accountTo: Account?
+    
+    init(
+        id: UInt32 = 0,
+        accounting: Bool = true,
+        amountFrom: Decimal = 0,
+        amountTo: Decimal = 0,
+        dateTransaction: Date = Date(),
+        isExecuted: Bool = true,
+        note: String = "",
+        type: TransactionType = .consumption,
+        accountFrom: Account? = nil,
+        accountTo: Account? = nil
+    ) {
         self.accounting = accounting
         self.amountFrom = amountFrom
         self.amountTo = amountTo
@@ -31,9 +43,24 @@ class Transaction: Decodable, Identifiable {
         self.isExecuted = isExecuted
         self.note = note
         self.type = type
+        self.accountFrom = accountFrom
+        self.accountTo = accountTo
+    }
+    
+    init(_ res: GetTransactionsRes, accountsMap: [UInt32: Account]) {
+        self.accounting = res.accounting
+        self.amountFrom = res.amountFrom
+        self.amountTo = res.amountTo
+        self.dateTransaction = res.dateTransaction
+        self.id = res.id
+        self.isExecuted = res.isExecuted
+        self.note = res.note
+        self.type = res.type
+        self.accountFrom = accountsMap[res.accountFromID]
+        self.accountTo = accountsMap[res.accountToID]
     }
 }
 
-enum TransactionType: String, Decodable {
+enum TransactionType: String, Codable {
     case consumption, income, transfer, balancing
 }

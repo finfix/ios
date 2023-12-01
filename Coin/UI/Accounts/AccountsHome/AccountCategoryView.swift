@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import SwiftData
 
-struct AccountTypeDetailsView: View {
+struct AccountCategoryView: View {
     
     @State var header: String
     @State var showingList = false
@@ -37,7 +38,7 @@ struct AccountTypeDetailsView: View {
                 Text(header)
                 Spacer()
                 // TODO: Сделать динамическим
-                Text(currencyFormatter.string(number: totalSum, currency: "RUB"))
+                Text("Сумма")
             }
             .foregroundColor(.primary)
             .padding()
@@ -65,5 +66,5 @@ struct AccountTypeDetailsView: View {
 }
 
 #Preview {
-    AccountTypeDetailsView(header: "Заголовок", accounts: [Account(id: 1, accountGroupID: 1, accounting: true, budget: 0, currency: "Rub", iconID: 3, name: "Some", remainder: 3, type: .expense, visible: true, parentAccountID: nil)])
+    AccountCategoryView(header: "Заголовок", accounts: [])
 }
