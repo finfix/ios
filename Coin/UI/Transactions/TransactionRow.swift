@@ -43,7 +43,7 @@ struct TransactionRow: View {
                 }
                 Spacer()
                 VStack(alignment: .trailing) {
-                    if transaction.amountFrom != transaction.amountTo {
+                    if transaction.amountFrom != transaction.amountTo && transaction.type != .balancing {
                         Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom?.currency))
                             .font(.footnote)
                     }
@@ -51,6 +51,7 @@ struct TransactionRow: View {
                     if transaction.note != "" {
                         Text(transaction.note)
                             .font(.footnote)
+                            .lineLimit(2)
                     }
                 }
             }
@@ -61,5 +62,6 @@ struct TransactionRow: View {
 #Preview {
     List {
         TransactionRow(transaction: Transaction())
+            .modelContainer(previewContainer)
     }
 }
