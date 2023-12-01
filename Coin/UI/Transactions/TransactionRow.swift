@@ -54,10 +54,6 @@ struct TransactionRow: View {
                     }
                 }
             }
-            .padding()
-            Circle()
-                .fill(transaction.isSaved ? .green : .red)
-                .frame(width: 10)
         }
     }
 }
