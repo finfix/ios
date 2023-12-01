@@ -20,17 +20,6 @@ struct MyApp: App {
     @AppStorage("errorTitle") var errorText: String = ""
     @AppStorage("errorDescription") var errorDescription: String = ""
     
-    var container: ModelContainer
-
-    init() {
-        do {
-            let schema = Schema([Currency.self, User.self, Transaction.self, Account.self, AccountGroup.self])
-            container = try ModelContainer(for: schema)
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-    }
-    
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -48,7 +37,7 @@ struct MyApp: App {
                     )
                 }
         }
-        .modelContainer(for: [Currency.self, User.self, Transaction.self, Account.self, AccountGroup.self], isAutosaveEnabled: false)
+        .modelContainer(container)
     }
 }
 

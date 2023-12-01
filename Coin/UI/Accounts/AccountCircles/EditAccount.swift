@@ -18,9 +18,8 @@ enum mode {
 struct EditAccount: View {
     
     @Environment(\.dismiss) var dismiss
-    @Environment(\.modelContext) var modelContext
-    @Query var currencies: [Currency]
-    @Query var accountGroups: [AccountGroup]
+    private var modelContext: ModelContext
+    private var currencies: [Currency] = []
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @Bindable var account: Account
     var oldAccount: Account = Account()
@@ -28,18 +27,32 @@ struct EditAccount: View {
     var mode: mode
     
     init(_ account: Account) {
+        self.init()
         mode = .update
+        
         self.oldAccount = account
-        _account = .init(wrappedValue: account)
+        self.account = modelContext.model(for: account.persistentModelID) as! Account
     }
     
     init(accountType: AccountType) {
+        self.init()        
         mode = .create
+
+        currencies = try! modelContext.fetch(FetchDescriptor<Currency>(sortBy: [SortDescriptor(\.isoCode)]))
+        let accountGroups = try! modelContext.fetch(FetchDescriptor<AccountGroup>())
+        
         _account = .init(wrappedValue: Account(
-                id: UInt32.random(in: 10000..<10000000),
-                type: accountType
-            )
-        )
+            accountGroup: accountGroups.first { $0.id == selectedAccountsGroupID }!,
+            currency: currencies.first { $0.isoCode == "USD" }!,
+            type: accountType
+        ))
+    }
+    
+    private init() {
+        modelContext = ModelContext(container)
+        modelContext.autosaveEnabled = false
+        mode = .create
+        account = Account()
     }
         
     var body: some View {
@@ -47,8 +60,6 @@ struct EditAccount: View {
             Section {
                 
                 TextField("Название счета", text: $account.name)
-                
-                Text(account.accountGroup?.name ?? "")
                                 
                 TextField("Бюджет", value: $account.budget, format: .number)
                     .keyboardType(.decimalPad)
@@ -94,8 +105,8 @@ struct EditAccount: View {
     
     func createAccount() async {
         do {
-            let id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
-                accountGroupID: UInt32(selectedAccountsGroupID),
+            account.id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
+                accountGroupID: account.accountGroup?.id ?? 0,
                 accounting: true,
                 budget: account.budget != 0 ? account.budget : nil,
                 currency: account.currency?.isoCode ?? "",
@@ -105,12 +116,12 @@ struct EditAccount: View {
                 type: account.type.rawValue,
                 gradualBudgetFilling: account.gradualBudgetFilling)
             )
-            account.id = id
+            modelContext.insert(account)
             try modelContext.save()
         } catch {
             modelContext.rollback()
             logger.error("\(error)")
-            showErrorAlert(error.localizedDescription)
+            showErrorAlert("\(error)")
         }
     }
     
@@ -118,18 +129,18 @@ struct EditAccount: View {
         do {
             try await AccountAPI().UpdateAccount(req: UpdateAccountReq(
                 id: account.id,
-                accounting: account.accounting,
-                budget: account.budget,
-                name: account.name,
-                remainder: account.remainder,
-                visible: account.visible,
-                gradualBudgetFilling: account.gradualBudgetFilling)
+                accounting: oldAccount.accounting != account.accounting ? account.accounting : nil,
+                budget: oldAccount.budget != account.budget ? account.budget : nil,
+                name: oldAccount.name != account.name ? account.name : nil,
+                remainder: oldAccount.remainder != account.remainder ? account.remainder : nil,
+                visible: oldAccount.visible != account.visible ? account.visible : nil,
+                gradualBudgetFilling: oldAccount.gradualBudgetFilling != account.gradualBudgetFilling ? account.gradualBudgetFilling : nil)
             )
             try modelContext.save()
         } catch {
             modelContext.rollback()
             logger.error("\(error)")
-            showErrorAlert(error.localizedDescription)
+            showErrorAlert("\(error)")
         }
     }
 }
