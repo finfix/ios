@@ -70,19 +70,25 @@ struct EditTransaction: View {
                     transactionType: transaction.type,
                     excludeAccount: transaction.accountFrom
                 )
-                
+            }
+            .pickerStyle(.wheel)
+            Section {
                 TextField(intercurrency ? "Сумма списания" : "Сумма", value: $transaction.amountFrom, format: .number)
                     .keyboardType(.decimalPad)
                 if intercurrency {
                     TextField("Сумма начисления", value: $transaction.amountTo, format: .number)
                         .keyboardType(.decimalPad)
                 }
-                
+            } footer: {
+                if intercurrency {
+                    Rate(transaction)
+                }
+            }
+            Section {
                 DatePicker(selection: $transaction.dateTransaction, displayedComponents: .date) {
                     Text("Дата транзакции")
                 }
             }
-            .pickerStyle(.wheel)
             Section {
                 TextField("Заметка", text: $transaction.note, axis: .vertical)
             }
@@ -160,6 +166,34 @@ struct EditTransaction: View {
 #Preview {
     EditTransaction(Transaction())
         .modelContainer(previewContainer)
+}
+
+private struct Rate: View {
+    
+    private var rate: Decimal
+    private var symbols: String
+    
+    init(_ transaction: Transaction) {
+        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
+            rate = 0
+            symbols = "\(transaction.accountFrom?.currency?.symbol ?? "")/\(transaction.accountTo?.currency?.symbol ?? "")"
+            return
+        }
+
+        if transaction.amountFrom > transaction.amountTo {
+            rate = transaction.amountFrom / transaction.amountTo
+            symbols = "\(transaction.accountFrom?.currency?.symbol ?? "")/\(transaction.accountTo?.currency?.symbol ?? "")"
+        } else {
+            rate = transaction.amountTo / transaction.amountFrom
+            symbols = "\(transaction.accountTo?.currency?.symbol ?? "")/\(transaction.accountFrom?.currency?.symbol ?? "")"
+        }
+    }
+    
+    private var currencyFormatter = CurrencyFormatter()
+    
+    var body: some View {
+        Text("Курс: \(currencyFormatter.string(number: rate, suffix: symbols))")
+    }
 }
 
 extension Date {
@@ -254,8 +288,13 @@ private struct Pickers: View {
             }
         }
         .onAppear {
-            accountGroup = accountGroups.first ?? AccountGroup()
-            account = accounts.first
+            if let account {
+                self.account = account
+                self.accountGroup = accountGroups.first { $0.accounts.contains(account) }!
+            } else {
+                self.account = accounts.first
+                accountGroup = accountGroups.first ?? AccountGroup()
+            }
         }
         .buttonStyle(.plain)
     }
