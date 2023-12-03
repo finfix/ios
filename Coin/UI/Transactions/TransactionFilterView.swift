@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TransactionFilterView: View {
     
-    @Binding var isShowing: Bool
+    @Environment(\.dismiss) var dissmiss
     @Binding var dateFrom: Date?
     @Binding var dateTo: Date?
     
@@ -27,13 +27,11 @@ struct TransactionFilterView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Готово") { isShowing = false }
+                    Button("Готово") { dissmiss() }
                 }
             }
         }
     }
-    
-    
 }
 
 private struct Сalendar: View {
@@ -59,17 +57,28 @@ private struct Сalendar: View {
                     }
                 }
                 .foregroundStyle(.secondary)
+                if date != nil {
+                    Button {
+                        withAnimation {
+                            date = nil
+                        }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .buttonStyle(.plain)
             if isCalendarShowing {
-                DatePicker(buttonName, 
+                DatePicker(buttonName,
                            selection: Binding<Date>(get: {date ?? Date()}, set: {date = $0}),
                            displayedComponents: .date)
             }
         }
-        .buttonStyle(.plain)
     }
 }
 
 #Preview {
-    TransactionFilterView(isShowing: .constant(true), dateFrom: .constant(Date()), dateTo: .constant(Date()))
+    TransactionFilterView(dateFrom: .constant(Date()), dateTo: .constant(Date()))
 }
