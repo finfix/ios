@@ -15,7 +15,7 @@ struct TransactionsView: View {
     
     @State private var sortOrder = SortDescriptor(\Transaction.dateTransaction, order: .reverse)
     @State private var searchText = ""
-    @State var dateFrom: Date?
+    @State var dateFrom: Date? = Calendar(identifier: .gregorian).date(byAdding: .month, value: -1, to: Date.now)!
     
     @State var dateTo: Date?
     @State var accountID: UInt32?
@@ -32,7 +32,7 @@ struct TransactionsView: View {
                         Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
                     }
                 }
-                .sheet(isPresented: $isFilterOpen) { TransactionFilterView(isShowing: $isFilterOpen, dateFrom: $dateFrom, dateTo: $dateTo) }
+                .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }
                 .navigationTitle("Транзакции")
         }
     }
