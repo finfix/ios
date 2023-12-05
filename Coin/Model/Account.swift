@@ -22,6 +22,7 @@ import SwiftData
     var gradualBudgetFilling: Bool
     var currency: Currency?
     var accountGroup: AccountGroup?
+    var serialNumber: UInt32
 
     @Transient var childrenAccounts: [Account] = []
     @Transient var showingBudget: Decimal = 0
@@ -38,6 +39,7 @@ import SwiftData
         remainder: Decimal = 0,
         type: AccountType = .regular,
         visible: Bool = true,
+        serialNumber: UInt32 = 0,
         parentAccountID: UInt32? = nil,
         gradualBudgetFilling: Bool = false
     ) {
@@ -51,6 +53,7 @@ import SwiftData
         self.visible = visible
         self.parentAccountID = parentAccountID
         self.gradualBudgetFilling = gradualBudgetFilling
+        self.serialNumber = serialNumber
         self.accountGroup = accountGroup
         self.currency = currency
     }
@@ -66,6 +69,7 @@ import SwiftData
         self.visible = res.visible
         self.parentAccountID = res.parentAccountID
         self.gradualBudgetFilling = res.gradualBudgetFilling
+        self.serialNumber = res.serialNumber
         self.accountGroup = accountGroupsMap[res.accountGroupID]!
         self.currency = currenciesMap[res.currency]!
     }

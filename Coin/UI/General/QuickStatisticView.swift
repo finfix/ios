@@ -17,14 +17,15 @@ struct QuickStatisticView: View {
     
             
     var body: some View {
-        Group {}
-//        QuickStatisticSubView(accountGroupID: UInt32(accountGroupID))
+        QuickStatisticSubView(accountGroupID: UInt32(accountGroupID))
     }
 }
 
 struct QuickStatisticSubView: View {
     
-    @Query var accountGroups: [AccountGroup]
+    @Query(sort: [
+        SortDescriptor(\AccountGroup.serialNumber)
+    ]) var accountGroups: [AccountGroup]
     
     init(accountGroupID: UInt32) {
         _accountGroups = Query(filter: #Predicate { $0.id == accountGroupID })
@@ -44,7 +45,9 @@ struct QuickStatisticSubView: View {
 
 struct QuickStatisticSubSubView: View {
     
-    @Query var accounts: [Account]
+    @Query(sort: [
+        SortDescriptor(\Account.serialNumber)
+    ]) var accounts: [Account]
     var currency: Currency
         
     var formatter: CurrencyFormatter

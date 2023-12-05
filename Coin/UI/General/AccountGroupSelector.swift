@@ -13,7 +13,9 @@ private let logger = Logger(subsystem: "Coin", category: "account group selector
 
 struct AccountGroupSelector: View {
     
-    @Query var accountGroups: [AccountGroup]
+    @Query(sort: [
+        SortDescriptor(\AccountGroup.serialNumber)
+    ]) var accountGroups: [AccountGroup]
     @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0 {
         didSet {
             guard accountGroups.count >= selectedAccountGroupIndex + 1 else { return }

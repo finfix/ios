@@ -28,6 +28,7 @@ struct GetAccountsRes: Decodable {
     var gradualBudgetFilling: Bool
     var currency: String
     var accountGroupID: UInt32
+    var serialNumber: UInt32
 }
 
 struct CreateAccountReq: Encodable {
@@ -61,4 +62,5 @@ struct GetAccountGroupsRes: Decodable {
     var id: UInt32
     var name: String
     var currency: String
+    var serialNumber: UInt32
 }

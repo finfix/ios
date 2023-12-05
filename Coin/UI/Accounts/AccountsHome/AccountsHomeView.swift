@@ -11,7 +11,9 @@ import SwiftData
 struct AccountsHomeView: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query var accounts: [Account]
+    @Query(sort: [
+        SortDescriptor(\Account.serialNumber)
+    ]) var accounts: [Account]
     
     var filteredAccounts: [Account] {
         accounts.filter { $0.accountGroup?.id ?? 0 == selectedAccountsGroupID }
