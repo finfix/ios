@@ -43,7 +43,7 @@ struct EditTransaction: View {
     private init() {
         modelContext = ModelContext(container)
         modelContext.autosaveEnabled = false
-        accountGroups = try! modelContext.fetch(FetchDescriptor<AccountGroup>())
+        accountGroups = try! modelContext.fetch(FetchDescriptor<AccountGroup>(sortBy: [SortDescriptor(\.serialNumber)]))
         transaction = Transaction()
         mode = .create
     }
@@ -222,7 +222,6 @@ private struct Pickers: View {
     var excludeAccount: Account?
     
     var accounts: [Account] {
-        
         var subfiltered = accountGroup.accounts.filter { $0.visible && $0.id != excludeAccount?.id ?? 0 }
         
         switch transactionType {
@@ -245,7 +244,7 @@ private struct Pickers: View {
         default:
             subfiltered = []
         }
-        return subfiltered
+        return subfiltered.sorted(by: { $1.serialNumber > $0.serialNumber })
     }
     
     var body: some View {
@@ -280,6 +279,9 @@ private struct Pickers: View {
                                 Spacer()
                                 Text(account.currency!.symbol)
                                     .foregroundColor(.secondary)
+                                if account.parentAccountID != nil {
+                                    Image(systemName: "checkmark")
+                                }
                             }
                             .tag(account as Account?)
                         }
@@ -289,11 +291,11 @@ private struct Pickers: View {
         }
         .onAppear {
             if let account {
-                self.account = account
                 self.accountGroup = accountGroups.first { $0.accounts.contains(account) }!
+                self.account = account
             } else {
-                self.account = accounts.first
                 accountGroup = accountGroups.first ?? AccountGroup()
+                self.account = accounts.first
             }
         }
         .buttonStyle(.plain)

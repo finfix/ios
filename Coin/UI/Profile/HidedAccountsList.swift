@@ -11,8 +11,12 @@ import SwiftData
 struct HidedAccountsList: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query var accounts: [Account]
-    @Query var accountGroups: [AccountGroup]
+    @Query(sort: [
+        SortDescriptor(\Account.serialNumber)
+    ]) var accounts: [Account]
+    @Query(sort: [
+        SortDescriptor(\AccountGroup.serialNumber)
+    ]) var accountGroups: [AccountGroup]
     
     @State var accountType: AccountType = .regular
     

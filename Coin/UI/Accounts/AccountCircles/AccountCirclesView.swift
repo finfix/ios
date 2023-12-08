@@ -29,7 +29,10 @@ struct AccountCirclesSubView: View {
     init(path: NavigationPath, accountGroupID: UInt32) {
         logger.info("Инициализировали AccountCirclesListSubView")
         self.path = path
-        _accounts = Query(filter: #Predicate { $0.accountGroup?.id == accountGroupID && $0.visible } )
+        _accounts = Query(
+            filter: #Predicate { $0.accountGroup?.id == accountGroupID && $0.visible },
+            sort: [SortDescriptor(\Account.serialNumber)]
+        )
     }
     
     let horizontalSpacing: CGFloat = 10

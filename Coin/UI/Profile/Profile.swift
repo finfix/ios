@@ -63,7 +63,8 @@ struct Profile: View {
                             } catch {
                                 showErrorAlert("\(error)")
                             }
-                        }
+                        }                       
+                        accountGroupIndex = 0
                         isLogin = false
                         accessToken = nil
                         refreshToken = nil
