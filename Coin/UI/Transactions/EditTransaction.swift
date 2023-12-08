@@ -279,6 +279,9 @@ private struct Pickers: View {
                                 Spacer()
                                 Text(account.currency!.symbol)
                                     .foregroundColor(.secondary)
+                                if account.parentAccountID != nil {
+                                    Image(systemName: "checkmark")
+                                }
                             }
                             .tag(account as Account?)
                         }
