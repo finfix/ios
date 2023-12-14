@@ -15,31 +15,17 @@ struct AccountCirclesView: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @State var path = NavigationPath()
-    
-    var body: some View {
-        AccountCirclesSubView(path: path, accountGroupID: UInt32(selectedAccountsGroupID))
-    }
-}
-
-struct AccountCirclesSubView: View {
-    
-    @Query var accounts: [Account]
-    @State var path = NavigationPath()
-
-    init(path: NavigationPath, accountGroupID: UInt32) {
-        logger.info("Инициализировали AccountCirclesListSubView")
-        self.path = path
-        _accounts = Query(
-            filter: #Predicate { $0.accountGroup?.id == accountGroupID && $0.visible },
-            sort: [SortDescriptor(\Account.serialNumber)]
-        )
-    }
+    @Query(sort: [SortDescriptor(\Account.serialNumber)]) var accounts: [Account]
     
     let horizontalSpacing: CGFloat = 10
     
     func groupAcccounts() -> [Account] {
-        logger.info("Группируем счета")
-        return Account.groupAccounts(accounts)
+        logger.info("Фильтруем и группируем счета")
+        let filteredAccounts = accounts.filter {
+            $0.accountGroup?.id ?? 0 == selectedAccountsGroupID &&
+            $0.visible
+        }
+        return Account.groupAccounts(filteredAccounts)
     }
     
     var body: some View {
