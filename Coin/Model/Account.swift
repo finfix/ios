@@ -20,9 +20,10 @@ import SwiftData
     var visible: Bool
     var parentAccountID: UInt32?
     var gradualBudgetFilling: Bool
+    var serialNumber: UInt32
+    var isParent: Bool
     var currency: Currency?
     var accountGroup: AccountGroup?
-    var serialNumber: UInt32
 
     @Transient var childrenAccounts: [Account] = []
     @Transient var showingBudget: Decimal = 0
@@ -40,6 +41,7 @@ import SwiftData
         type: AccountType = .regular,
         visible: Bool = true,
         serialNumber: UInt32 = 0,
+        isParent: Bool = false,
         parentAccountID: UInt32? = nil,
         gradualBudgetFilling: Bool = false
     ) {
@@ -54,6 +56,7 @@ import SwiftData
         self.parentAccountID = parentAccountID
         self.gradualBudgetFilling = gradualBudgetFilling
         self.serialNumber = serialNumber
+        self.isParent = isParent
         self.accountGroup = accountGroup
         self.currency = currency
     }
@@ -70,6 +73,7 @@ import SwiftData
         self.parentAccountID = res.parentAccountID
         self.gradualBudgetFilling = res.gradualBudgetFilling
         self.serialNumber = res.serialNumber
+        self.isParent = res.isParent
         self.accountGroup = accountGroupsMap[res.accountGroupID]!
         self.currency = currenciesMap[res.currency]!
     }
@@ -132,9 +136,9 @@ import SwiftData
                 
             } else {
                 // Проверяем, чтобы такого счета уже не было в контейнере
+                account.showingBudget += account.budget
+                account.showingRemainder += account.remainder
                 guard accountsContainer.firstIndex(where: { $0.id == account.id }) == nil else { continue }
-                account.showingBudget = account.budget
-                account.showingRemainder = account.remainder
                 // Добавляем счет в контейнер
                 accountsContainer.append(account)
             }

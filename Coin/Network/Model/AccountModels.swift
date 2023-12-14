@@ -29,6 +29,7 @@ struct GetAccountsRes: Decodable {
     var currency: String
     var accountGroupID: UInt32
     var serialNumber: UInt32
+    var isParent: Bool
 }
 
 struct CreateAccountReq: Encodable {
