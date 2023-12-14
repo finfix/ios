@@ -17,7 +17,6 @@ class TransactionAPI: API {
             url: basePath + transactionBasePath,
             method: .get,
             headers: getBaseHeaders(),
-//            query: ["offset": String(req.offset!), "limit": String(req.limit!)],
             resModel: [GetTransactionsRes].self)
     }
     
@@ -34,9 +33,6 @@ class TransactionAPI: API {
     }
     
     func UpdateTransaction(req: UpdateTransactionReq) async throws {
-        
-        
-        
         return try await request(
             url: basePath + transactionBasePath,
             method: .patch,

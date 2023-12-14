@@ -22,6 +22,7 @@ struct Profile: View {
     @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
     
     @Environment(\.modelContext) var modelContext
+    @State var path = NavigationPath()
 
     var body: some View {
         NavigationStack {
@@ -74,10 +75,11 @@ struct Profile: View {
             }
             .navigationDestination(for: ProfileViews.self) { view in
                 switch view {
+                case .hidedAccounts: HidedAccountsList(path: $path)
                 case .currencyRates: CurrencyRates()
-                case .hidedAccounts: HidedAccountsList()
                 }
             }
+            .navigationDestination(for: Account.self) { EditAccount($0) }
             .navigationTitle("Настройки")
         }
     }

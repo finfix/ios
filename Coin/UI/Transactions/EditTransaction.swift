@@ -222,7 +222,7 @@ private struct Pickers: View {
     var excludeAccount: Account?
     
     var accounts: [Account] {
-        var subfiltered = accountGroup.accounts.filter { $0.visible && $0.id != excludeAccount?.id ?? 0 }
+        var subfiltered = accountGroup.accounts.filter { $0.visible && $0.id != excludeAccount?.id ?? 0 && !$0.isParent }
         
         switch transactionType {
         case .consumption:
@@ -279,9 +279,6 @@ private struct Pickers: View {
                                 Spacer()
                                 Text(account.currency!.symbol)
                                     .foregroundColor(.secondary)
-                                if account.parentAccountID != nil {
-                                    Image(systemName: "checkmark")
-                                }
                             }
                             .tag(account as Account?)
                         }

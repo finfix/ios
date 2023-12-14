@@ -14,32 +14,26 @@ struct HidedAccountsList: View {
     @Query(sort: [
         SortDescriptor(\Account.serialNumber)
     ]) var accounts: [Account]
-    @Query(sort: [
-        SortDescriptor(\AccountGroup.serialNumber)
-    ]) var accountGroups: [AccountGroup]
-    
     @State var accountType: AccountType = .regular
-    
-    @State var path = NavigationPath()
-        
-    init() {
-        _accounts = Query(filter: #Predicate {
-            !$0.visible /* &&
+    @Binding var path: NavigationPath
+    var filteredAccounts: [Account] {
+        accounts.filter {
             $0.type == accountType &&
-            $0.accountGroupID == accountGroups[selectedAccountsGroupIndex].id */ })
+            $0.accountGroup?.id ?? 0 == selectedAccountsGroupID &&
+            !$0.visible
+        }
     }
     
     var body: some View {
-        NavigationStack(path: $path) {
+        VStack(spacing: 0) {
             AccountGroupSelector()
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
-                    ForEach(accounts) { account in
+                    ForEach(filteredAccounts) { account in
                         AccountCircleItem(account, path: $path)
                     }
                 }
             }
-            .navigationDestination(for: Account.self) { EditAccount($0) }
         }
         .contentMargins(.horizontal, 10, for: .automatic)
         .toolbar {
@@ -54,6 +48,6 @@ struct HidedAccountsList: View {
 }
 
 #Preview {
-    HidedAccountsList()
+    HidedAccountsList(path: .constant(NavigationPath()))
         .modelContainer(previewContainer)
 }
