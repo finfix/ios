@@ -19,6 +19,7 @@ class Transaction {
     var isExecuted: Bool
     var note: String
     var type: TransactionType
+    var timeCreate: Date
     
     var accountFrom: Account?
     var accountTo: Account?
@@ -32,6 +33,7 @@ class Transaction {
         isExecuted: Bool = true,
         note: String = "",
         type: TransactionType = .consumption,
+        timeCreate: Date = Date(),
         accountFrom: Account? = nil,
         accountTo: Account? = nil
     ) {
@@ -43,6 +45,7 @@ class Transaction {
         self.isExecuted = isExecuted
         self.note = note
         self.type = type
+        self.timeCreate = timeCreate
         self.accountFrom = accountFrom
         self.accountTo = accountTo
     }
@@ -56,6 +59,7 @@ class Transaction {
         self.isExecuted = res.isExecuted
         self.note = res.note
         self.type = res.type
+        self.timeCreate = Date()
         self.accountFrom = accountsMap[res.accountFromID]
         self.accountTo = accountsMap[res.accountToID]
     }
