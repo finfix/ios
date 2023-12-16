@@ -47,14 +47,16 @@ struct AccountCircleItem: View {
                     isChildrenOpen = true
                 }
             }
-            .onTapGesture(count: 1) {
-                isTransactionOpen = true
-            }
+//            .onTapGesture(count: 1) {
+//                isTransactionOpen = true
+//            }
             .onLongPressGesture {
                 if isAlreadyOpened {
                     dismiss()
                 }
-                path.append(account)
+                if account.name != "Балансировочный" {
+                    path.append(account)
+                }
             }
             Text(formatter.string(number: account.showingRemainder))
                 .lineLimit(1)
