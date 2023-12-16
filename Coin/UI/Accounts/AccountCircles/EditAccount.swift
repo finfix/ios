@@ -21,10 +21,11 @@ struct EditAccount: View {
     private var modelContext: ModelContext
     private var currencies: [Currency] = []
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Bindable var account: Account
-    var oldAccount: Account = Account()
+    @Bindable var account = Account()
+    private var oldAccount = Account()
+    private var accountPermissions = AccountPermissions()
     
-    var mode: mode
+    var mode: mode = .create
     
     init(_ account: Account) {
         self.init()
@@ -32,6 +33,7 @@ struct EditAccount: View {
         
         self.oldAccount = account
         self.account = modelContext.model(for: account.persistentModelID) as! Account
+        self.accountPermissions = GetPermissions(account: account)
     }
     
     init(accountType: AccountType) {
@@ -46,13 +48,13 @@ struct EditAccount: View {
             currency: currencies.first { $0.isoCode == "USD" }!,
             type: accountType
         ))
+        self.accountPermissions = GetPermissions(account: account)
     }
     
     private init() {
+        
         modelContext = ModelContext(container)
         modelContext.autosaveEnabled = false
-        mode = .create
-        account = Account()
     }
         
     var body: some View {
@@ -60,21 +62,28 @@ struct EditAccount: View {
             Section {
                 
                 TextField("Название счета", text: $account.name)
-                                
-                TextField("Бюджет", value: $account.budget, format: .number)
-                    .keyboardType(.decimalPad)
+                               
+                if accountPermissions.changeBudget {
+                    TextField("Бюджет", value: $account.budget, format: .number)
+                        .keyboardType(.decimalPad)
+                }
                 
-                TextField(mode == .create ? "Начальный баланс" : "Баланс", value: $account.remainder, format: .number)
-                    .keyboardType(.decimalPad)
+                if accountPermissions.changeRemainder {
+                    TextField(mode == .create ? "Начальный баланс" : "Баланс", value: $account.remainder, format: .number)
+                        .keyboardType(.decimalPad)
+                }
                 
             }
             Section {
                 
+                Toggle("Учитывать ли счет в шапке", isOn: $account.accounting)
                 if mode == .update {
                     Toggle("Видимость счета", isOn: $account.visible)
                 }
                 
-                Toggle("Плавное заполнение бюджета", isOn: $account.gradualBudgetFilling)
+                if accountPermissions.changeBudget {
+                    Toggle("Плавное заполнение бюджета", isOn: $account.gradualBudgetFilling)
+                }
                 
                 if mode == .create {
                     Picker("Валюта", selection: $account.currency) {
@@ -107,7 +116,7 @@ struct EditAccount: View {
         do {
             account.id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
                 accountGroupID: account.accountGroup?.id ?? 0,
-                accounting: true,
+                accounting: account.accounting,
                 budget: account.budget != 0 ? account.budget : nil,
                 currency: account.currency?.isoCode ?? "",
                 iconID: 1,

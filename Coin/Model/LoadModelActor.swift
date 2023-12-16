@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 import OSLog
+import SwiftUI
 
 private let logger = Logger(subsystem: "Coin", category: "loading data from server")
 
@@ -25,6 +26,11 @@ actor LoadModelActor: ModelActor {
         logger.info("Синхронизируем данные")
         do {
             try await deleteAll(isSave: false)
+            
+            @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0
+            @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
+            selectedAccountGroupID = nil
+            selectedAccountGroupIndex = 0
             
             // Получаем все данные
             async let c = getCurrencies()
@@ -58,6 +64,13 @@ actor LoadModelActor: ModelActor {
                 modelContext.insert(accountGroup)
             }
             
+            var fetchDescriptor = FetchDescriptor<AccountGroup>(sortBy: [SortDescriptor(\.serialNumber)])
+            fetchDescriptor.fetchLimit = 1
+            var firstGroup = try modelContext.fetch(fetchDescriptor)
+            if !firstGroup.isEmpty {
+                selectedAccountGroupID = Int(firstGroup[0].id)
+            }
+                        
             // Сохраняем счета
             logger.info("Получаем счета счетов")
             let accountsRes = try await a
