@@ -13,7 +13,7 @@ struct TransactionRow: View {
         
     var prefix: String {
         switch transaction.type {
-        case .income: return "+ "
+        case .income, .balancing: return "+ "
         case .consumption: return "- "
         default: return ""
         }

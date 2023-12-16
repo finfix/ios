@@ -80,6 +80,16 @@ struct TransactionsList: View {
         Task {
             do {
                 try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
+                switch transaction.type {
+                case .transfer, .consumption:
+                    transaction.accountFrom?.remainder += transaction.amountFrom
+                    transaction.accountTo?.remainder -= transaction.amountTo
+                case .income:
+                    transaction.accountFrom?.remainder -= transaction.amountFrom
+                    transaction.accountTo?.remainder -= transaction.amountTo
+                case .balancing:
+                    transaction.accountTo?.remainder -= transaction.amountTo
+                }
                 modelContext.delete(transaction)
             } catch {
                 showErrorAlert("\(error)")
