@@ -143,6 +143,10 @@ struct EditTransaction: View {
     
     func updateTransaction() {
         
+        if !intercurrency {
+            transaction.amountTo = transaction.amountFrom
+        }
+        
         Task {
             do {
                 transaction.dateTransaction = transaction.dateTransaction.stripTime()
