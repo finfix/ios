@@ -10,7 +10,6 @@ import SwiftUI
 enum AppScreen: Codable, Hashable, Identifiable, CaseIterable {
     case home
     case accountCircles
-    case budgets
     case transactions
     case profile
     
@@ -23,7 +22,6 @@ extension AppScreen {
         switch self {
         case .home: Label("Дом", systemImage: "list.bullet.rectangle.fill")
         case .accountCircles: Label("Счета", systemImage: "2.circle")
-        case .budgets: Label("Бюджеты", systemImage: "ruler.fill")
         case .transactions: Label("Транзакции", systemImage: "3.circle")
         case .profile: Label("Профиль", systemImage: "person.fill")
         }
@@ -34,7 +32,6 @@ extension AppScreen {
         switch self {
         case .home: AccountsHomeView()
         case .accountCircles: AccountCirclesView()
-        case .budgets: BudgetsList()
         case .transactions: TransactionsView()
         case .profile: Profile()
         }

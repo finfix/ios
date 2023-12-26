@@ -82,16 +82,25 @@ struct QuickStatisticSubSubView: View {
                 Spacer()
             }
             Spacer()
-            VStack {
-                Text("Бюджет")
-                    .bold()
-                VStack(alignment: .trailing) {
-                    Text(formatter.string(number: statistic.totalBudget))
-                    Text(formatter.string(number: statistic.totalBudget - statistic.totalExpense))
-                        .foregroundColor(.gray)
+                
+            NavigationLink {
+                BudgetsList()
+            } label: {
+                VStack {
+                    Text("Бюджет")
+                        .bold()
+                    VStack(alignment: .trailing) {
+                        Text(formatter.string(number: statistic.totalBudget))
+                        Text(formatter.string(number: statistic.totalBudget - statistic.totalExpense))
+                            .foregroundColor(.gray)
+                    }
+                    Spacer()
                 }
-                Spacer()
             }
+            .buttonStyle(.plain)
+
+           
+            
             Spacer()
         }
         .font(.caption2)

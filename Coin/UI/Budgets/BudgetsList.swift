@@ -31,16 +31,13 @@ struct BudgetsList: View {
     var body: some View {
         let groupedAccounts = groupAccounts()
         ScrollView {
-            VStack(spacing: 0) {
-                QuickStatisticView()
-                AccountGroupSelector()
-            }
             VStack {
                 ForEach(groupedAccounts) { account in
                     BudgetRow(account: account)
                 }
             }
         }
+        .navigationTitle("Бюджеты")
     }
 }
 
