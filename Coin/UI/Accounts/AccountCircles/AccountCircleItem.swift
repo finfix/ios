@@ -32,7 +32,7 @@ struct AccountCircleItem: View {
             Text(account.name)
                 .lineLimit(1)
             ZStack {
-                if !account.childrenAccounts.isEmpty {
+                if account.isParent {
                     Circle()
                         .fill(.clear)
                         .strokeBorder(account.showingBudget == 0 ? .gray : account.showingBudget >= account.showingRemainder ? .green : .red, lineWidth: 1)
