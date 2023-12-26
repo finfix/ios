@@ -32,7 +32,7 @@ struct AccountCircleItem: View {
             Text(account.name)
                 .lineLimit(1)
             ZStack {
-                if !account.childrenAccounts.isEmpty {
+                if account.isParent {
                     Circle()
                         .fill(.clear)
                         .strokeBorder(account.showingBudget == 0 ? .gray : account.showingBudget >= account.showingRemainder ? .green : .red, lineWidth: 1)
@@ -47,14 +47,16 @@ struct AccountCircleItem: View {
                     isChildrenOpen = true
                 }
             }
-            .onTapGesture(count: 1) {
-                isTransactionOpen = true
-            }
+//            .onTapGesture(count: 1) {
+//                isTransactionOpen = true
+//            }
             .onLongPressGesture {
                 if isAlreadyOpened {
                     dismiss()
                 }
-                path.append(account)
+                if account.name != "Балансировочный" {
+                    path.append(account)
+                }
             }
             Text(formatter.string(number: account.showingRemainder))
                 .lineLimit(1)
