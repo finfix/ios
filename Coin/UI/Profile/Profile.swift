@@ -12,10 +12,6 @@ enum ProfileViews {
     case hidedAccounts, currencyRates
 }
 
-enum PageState {
-    case empty, inProgress, completed
-}
-
 struct Profile: View {
     
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
@@ -24,9 +20,10 @@ struct Profile: View {
     @AppStorage("isLogin") private var isLogin: Bool = false
     @AppStorage("basePath") private var basePath: String = defaultBasePath
     @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
-    
-    @State var state = PageState.empty
-    
+    @State var shouldShowSuccess = false
+    @State var shouldDisableUI = false
+    @State var shouldShowProgress = false
+        
     @Environment(\.modelContext) var modelContext
     @State var path = NavigationPath()
 
@@ -44,9 +41,14 @@ struct Profile: View {
                 Section {
                     Button("Синхронизировать") {
                         Task {
-                            self.state = .inProgress
+                            shouldDisableUI = true
+                            shouldShowProgress = true
                             await LoadModelActor(modelContainer: modelContext.container).sync()
-                            self.state = .empty
+                            shouldShowProgress = false
+                            shouldDisableUI = false
+                            withAnimation(.spring().delay(0.25)) {
+                                self.shouldShowSuccess.toggle()
+                            }
                         }
                     }
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
@@ -67,6 +69,8 @@ struct Profile: View {
                 Section {
                     Button("Выйти", role: .destructive) {
                         Task {
+                            shouldDisableUI = true
+                            defer { shouldDisableUI = false }
                             do {
                                 try await LoadModelActor(modelContainer: modelContext.container).deleteAll()
                             } catch {
@@ -81,7 +85,23 @@ struct Profile: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .disabled(state == .inProgress)
+            .disabled(shouldDisableUI)
+            .overlay {
+                if shouldShowProgress {
+                    ProgressView()
+                }
+                if shouldShowSuccess {
+                    CheckmarkPopover()
+                        .onAppear {
+                            Task {
+                                try await Task.sleep(for: .seconds(1))
+                                withAnimation(.spring()) {
+                                    self.shouldShowSuccess = false
+                                }
+                            }
+                        }
+                }
+            }
             .navigationDestination(for: ProfileViews.self) { view in
                 switch view {
                 case .hidedAccounts: HidedAccountsList(path: $path)
@@ -96,4 +116,5 @@ struct Profile: View {
 
 #Preview {
     Profile()
+        .modelContainer(previewContainer)
 }
