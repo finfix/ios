@@ -35,6 +35,7 @@ struct HidedAccountsList: View {
                 }
             }
         }
+        .navigationDestination(for: Account.self) { EditAccount($0) }
         .contentMargins(.horizontal, 10, for: .automatic)
         .toolbar {
             Picker("Тип счета", selection: $accountType) {

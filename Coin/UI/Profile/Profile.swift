@@ -25,7 +25,7 @@ struct Profile: View {
     @State var path = NavigationPath()
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             Form {
                 
                 Section {
@@ -90,7 +90,6 @@ struct Profile: View {
                 case .settings: Settings()
                 }
             }
-            .navigationDestination(for: Account.self) { EditAccount($0) }
             .toolbar {
                 ToolbarItem {
                     NavigationLink(value: ProfileViews.settings) {
