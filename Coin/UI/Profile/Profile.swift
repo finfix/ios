@@ -12,6 +12,10 @@ enum ProfileViews {
     case hidedAccounts, currencyRates
 }
 
+enum PageState {
+    case empty, inProgress, completed
+}
+
 struct Profile: View {
     
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
@@ -20,6 +24,8 @@ struct Profile: View {
     @AppStorage("isLogin") private var isLogin: Bool = false
     @AppStorage("basePath") private var basePath: String = defaultBasePath
     @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
+    
+    @State var state = PageState.empty
     
     @Environment(\.modelContext) var modelContext
     @State var path = NavigationPath()
@@ -38,7 +44,9 @@ struct Profile: View {
                 Section {
                     Button("Синхронизировать") {
                         Task {
+                            self.state = .inProgress
                             await LoadModelActor(modelContainer: modelContext.container).sync()
+                            self.state = .empty
                         }
                     }
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
@@ -73,6 +81,7 @@ struct Profile: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            .disabled(state == .inProgress)
             .navigationDestination(for: ProfileViews.self) { view in
                 switch view {
                 case .hidedAccounts: HidedAccountsList(path: $path)
