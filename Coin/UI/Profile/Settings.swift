@@ -9,7 +9,6 @@ import SwiftUI
 
 struct Settings: View {
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
-    @AppStorage("basePath") private var basePath: String = defaultBasePath
 
     var body: some View {
         Form {
@@ -21,17 +20,6 @@ struct Settings: View {
                     }
                 }
             }
-            Section {
-                HStack {
-                    TextField(text: $basePath) {
-                        Text("Кастомный URL")
-                    }
-                    Button("По умолчанию") {
-                        basePath = defaultBasePath
-                    }
-                }
-            }
-            .frame(maxWidth: .infinity)
         }
     }
 }

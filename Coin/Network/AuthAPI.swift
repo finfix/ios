@@ -14,7 +14,7 @@ class AuthAPI: API {
     
     func Auth(req: AuthReq) async throws -> AuthRes {
         return try await request(
-            url: basePath + authBasePath + "/signIn",
+            url: serverPath + authBasePath + "/signIn",
             method: .post,
             headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString], 
             reqModel: req,
@@ -24,7 +24,7 @@ class AuthAPI: API {
     
     func Register(req: RegisterReq) async throws -> AuthRes {
         return try await request(
-            url: basePath + authBasePath + "/signUp",
+            url: serverPath + authBasePath + "/signUp",
             method: .post,
             headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
             reqModel: req,
@@ -34,7 +34,7 @@ class AuthAPI: API {
     
     func RefreshToken(req: RefreshTokensReq) async throws -> RefreshTokensRes {
         return try await request(
-            url: basePath + authBasePath + "/refreshTokens",
+            url: serverPath + authBasePath + "/refreshTokens",
             method: .get,
             headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
             query: ["token": req.token],

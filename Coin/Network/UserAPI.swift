@@ -13,7 +13,7 @@ class UserAPI: API {
     
     func GetCurrencies() async throws -> [GetCurrenciesRes] {
         return try await request(
-            url: basePath + userBasePath + "/currencies",
+            url: serverPath + userBasePath + "/currencies",
             method: .get,
             headers: getBaseHeaders(),
             resModel: [GetCurrenciesRes].self)
@@ -21,7 +21,7 @@ class UserAPI: API {
     
     func GetUser() async throws -> GetUserRes {
         return try await request(
-            url: basePath + userBasePath + "/",
+            url: serverPath + userBasePath + "/",
             method: .get,
             headers: getBaseHeaders(),
             resModel: GetUserRes.self)
