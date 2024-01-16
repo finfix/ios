@@ -11,8 +11,9 @@ import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "API")
 
+var serverPath = "https://bonavii.com/api"
+
 class API {
-    @AppStorage("basePath") var basePath: String = defaultBasePath
     
     func getBaseHeaders() throws -> [String: String] {
         @AppStorage("accessToken") var accessToken: String?

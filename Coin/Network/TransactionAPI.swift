@@ -14,7 +14,7 @@ class TransactionAPI: API {
     
     func GetTransactions(req: GetTransactionReq) async throws -> [GetTransactionsRes] {
         return try await request(
-            url: basePath + transactionBasePath,
+            url: serverPath + transactionBasePath,
             method: .get,
             headers: getBaseHeaders(),
             resModel: [GetTransactionsRes].self)
@@ -24,7 +24,7 @@ class TransactionAPI: API {
         let format = DateFormatter()
         format.dateFormat = "YYYY-MM-dd"
         return try await request(
-            url: basePath + transactionBasePath,
+            url: serverPath + transactionBasePath,
             method: .post,
             headers: getBaseHeaders(),
             reqModel: req,
@@ -34,7 +34,7 @@ class TransactionAPI: API {
     
     func UpdateTransaction(req: UpdateTransactionReq) async throws {
         return try await request(
-            url: basePath + transactionBasePath,
+            url: serverPath + transactionBasePath,
             method: .patch,
             headers: getBaseHeaders(),
             reqModel: req
@@ -43,7 +43,7 @@ class TransactionAPI: API {
     
     func DeleteTransaction(req: DeleteTransactionReq) async throws {
         return try await request(
-            url: basePath + transactionBasePath,
+            url: serverPath + transactionBasePath,
             method: .delete,
             headers: getBaseHeaders(),
             query: ["id": String(req.id)]
