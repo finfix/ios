@@ -128,6 +128,7 @@ struct LoginView: View {
                 isLogin = true
                 await LoadModelActor(modelContainer: modelContext.container).sync()
             } catch {
+                showErrorAlert("\(error)")
                 logger.error("\(error)")
             }
         }
@@ -142,6 +143,7 @@ struct LoginView: View {
                 isLogin = true
                 await LoadModelActor(modelContainer: modelContext.container).sync()
             } catch {
+                showErrorAlert("\(error)")
                 logger.error("\(error)")
             }
         }
