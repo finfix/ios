@@ -49,6 +49,7 @@
 		B5E6C1942AF2AF9500097067 /* CurrencyRates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */; };
 		B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8932F28FF090B002AC30C /* SnapCarousel.swift */; };
 		B5E89332290073C5002AC30C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E89331290073C5002AC30C /* LoginView.swift */; };
+		B5F595902B56C3A5004D57A4 /* CheckmarkPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F5958F2B56C3A5004D57A4 /* CheckmarkPopover.swift */; };
 		B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC6228F01CA80037A21A /* CoinApp.swift */; };
 		B5F9CC6728F01CA90037A21A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6628F01CA90037A21A /* Assets.xcassets */; };
 		B5F9CC6A28F01CA90037A21A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6928F01CA90037A21A /* Preview Assets.xcassets */; };
@@ -103,6 +104,7 @@
 		B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyRates.swift; sourceTree = "<group>"; };
 		B5E8932F28FF090B002AC30C /* SnapCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapCarousel.swift; sourceTree = "<group>"; };
 		B5E89331290073C5002AC30C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		B5F5958F2B56C3A5004D57A4 /* CheckmarkPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckmarkPopover.swift; sourceTree = "<group>"; };
 		B5F9CC5F28F01CA80037A21A /* Coin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Coin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5F9CC6228F01CA80037A21A /* CoinApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinApp.swift; sourceTree = "<group>"; };
 		B5F9CC6628F01CA90037A21A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 		B59F0F1C28FDC74000AA33A9 /* Pkg */ = {
 			isa = PBXGroup;
 			children = (
+				B5F5958F2B56C3A5004D57A4 /* CheckmarkPopover.swift */,
 				B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */,
 			);
 			path = Pkg;
@@ -433,6 +436,7 @@
 				B5FF351E2AEC091F007694F9 /* Defaults.swift in Sources */,
 				B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */,
 				B5B950592ADF274E00798F8C /* AccountCard.swift in Sources */,
+				B5F595902B56C3A5004D57A4 /* CheckmarkPopover.swift in Sources */,
 				B5B9504F2ADF235A00798F8C /* Profile.swift in Sources */,
 				B500D3592B025ED40001576B /* LoadModelActor.swift in Sources */,
 				B54B09B72AEED085002914B9 /* User.swift in Sources */,

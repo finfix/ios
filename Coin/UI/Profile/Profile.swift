@@ -20,6 +20,7 @@ struct Profile: View {
     @AppStorage("isLogin") private var isLogin: Bool = false
     @AppStorage("basePath") private var basePath: String = defaultBasePath
     @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
+    @State var shouldShowSuccess = false
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
         
@@ -45,6 +46,9 @@ struct Profile: View {
                             await LoadModelActor(modelContainer: modelContext.container).sync()
                             shouldShowProgress = false
                             shouldDisableUI = false
+                            withAnimation(.spring().delay(0.25)) {
+                                self.shouldShowSuccess.toggle()
+                            }
                         }
                     }
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
@@ -85,6 +89,17 @@ struct Profile: View {
             .overlay {
                 if shouldShowProgress {
                     ProgressView()
+                }
+                if shouldShowSuccess {
+                    CheckmarkPopover()
+                        .onAppear {
+                            Task {
+                                try await Task.sleep(for: .seconds(1))
+                                withAnimation(.spring()) {
+                                    self.shouldShowSuccess = false
+                                }
+                            }
+                        }
                 }
             }
             .navigationDestination(for: ProfileViews.self) { view in
