@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import OSLog
+import CoreData
 
 private let logger = Logger(subsystem: "Coin", category: "Main")
 

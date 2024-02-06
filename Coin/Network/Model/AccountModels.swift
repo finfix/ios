@@ -18,31 +18,42 @@ struct GetAccountsReq: Encodable {
 struct GetAccountsRes: Decodable {
     var id: UInt32
     var accounting: Bool
-    var budget: Decimal
+    var budget: GetAccountBudgetRes
     var iconID: UInt32
     var name: String
     var remainder: Decimal
     var type: AccountType
     var visible: Bool
     var parentAccountID: UInt32?
-    var gradualBudgetFilling: Bool
     var currency: String
     var accountGroupID: UInt32
     var serialNumber: UInt32
     var isParent: Bool
 }
 
+struct GetAccountBudgetRes: Decodable {
+    var amount: Decimal
+    var fixedSum: Decimal
+    var gradualFilling: Bool
+    var daysOffset: UInt8
+}
+
 struct CreateAccountReq: Encodable {
     var accountGroupID: UInt32
     var accounting: Bool
-    var budget: Decimal?
+    var budget: CreateAccountBudgetReq
     var currency: String
     var iconID: UInt32
     var name: String
     var remainder: Decimal?
     var type: String
-    var gradualBudgetFilling: Bool
 }
+
+struct CreateAccountBudgetReq: Encodable {
+    var amount: Decimal
+    var gradualFilling: Bool
+}
+
 
 struct CreateAccountRes: Decodable {
     var id: UInt32
@@ -51,12 +62,17 @@ struct CreateAccountRes: Decodable {
 struct UpdateAccountReq: Encodable {
     var id: UInt32
     var accounting: Bool?
-    var budget: Decimal?
-//    var iconID: UInt32?
     var name: String?
     var remainder: Decimal?
     var visible: Bool?
-    var gradualBudgetFilling: Bool?
+    var budget: UpdateBudgetReq
+}
+
+struct UpdateBudgetReq: Encodable {
+    var amount: Decimal?
+    var fixedSum: Decimal?
+    var daysOffset: UInt8?
+    var gradualFilling: Bool?
 }
 
 struct GetAccountGroupsRes: Decodable {

@@ -108,6 +108,7 @@
 		B5F5958F2B56C3A5004D57A4 /* CheckmarkPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckmarkPopover.swift; sourceTree = "<group>"; };
 		B5F595912B56D35F004D57A4 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		B5F595932B56DBBE004D57A4 /* Coin.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Coin.entitlements; sourceTree = "<group>"; };
+		B5F595942B56F374004D57A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B5F9CC5F28F01CA80037A21A /* Coin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Coin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5F9CC6228F01CA80037A21A /* CoinApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoinApp.swift; sourceTree = "<group>"; };
 		B5F9CC6628F01CA90037A21A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -286,6 +287,7 @@
 		B5F9CC6128F01CA80037A21A /* Coin */ = {
 			isa = PBXGroup;
 			children = (
+				B5F595942B56F374004D57A4 /* Info.plist */,
 				B5F595932B56DBBE004D57A4 /* Coin.entitlements */,
 				B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */,
 				B5B9504A2ADF182100798F8C /* Model */,
@@ -588,6 +590,7 @@
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Coin/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Coin;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -625,6 +628,7 @@
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Coin/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Coin;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
