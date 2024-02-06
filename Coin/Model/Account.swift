@@ -47,7 +47,9 @@ import SwiftData
         visible: Bool = true,
         serialNumber: UInt32 = 0,
         isParent: Bool = false,
-        parentAccountID: UInt32? = nil
+        parentAccountID: UInt32? = nil,
+        showingBudget: Decimal = 0,
+        showingRemainder: Decimal = 0
     ) {
         self.id = id
         self.accounting = accounting
@@ -63,6 +65,8 @@ import SwiftData
         self.parentAccountID = parentAccountID
         self.serialNumber = serialNumber
         self.isParent = isParent
+        self.showingBudget = showingBudget
+        self.showingRemainder = showingRemainder
         self.accountGroup = accountGroup
         self.currency = currency
     }

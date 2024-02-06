@@ -20,6 +20,14 @@ struct BudgetBar: View {
         account.showingRemainder.doubleValue / account.showingBudget.doubleValue
     }
     
+    var partWidthFixed: CGFloat {
+        return CGFloat(account.budgetFixedSum.doubleValue / account.budgetAmount.doubleValue) * width / CGFloat(account.budgetDaysOffset)
+    }
+    
+    var partWidthLeft: CGFloat {
+        return CGFloat(1 - account.budgetFixedSum.doubleValue / account.budgetAmount.doubleValue) * width / CGFloat(daysInMonth - Int(account.budgetDaysOffset))
+    }
+    
     var availableCoef: CGFloat {
         Double(today) / Double(daysInMonth)
     }
@@ -29,10 +37,15 @@ struct BudgetBar: View {
         ZStack(alignment: .leading) {
             // Бюджет
             HStack(spacing: 0) {
-                ForEach(0..<daysInMonth, id: \.self) { index in
+                ForEach(0 ..< Int(account.budgetDaysOffset), id: \.self) { index in
                     Rectangle()
                         .fill(index % 2 == 0 ? .white : Color("LightGray"))
-                        .frame(width: width / CGFloat(daysInMonth), height: height)
+                        .frame(width: partWidthFixed, height: height)
+                }
+                ForEach(Int(account.budgetDaysOffset) ..< daysInMonth, id: \.self) { index in
+                    Rectangle()
+                        .fill(index % 2 == 0 ? .white : Color("LightGray"))
+                        .frame(width: partWidthLeft, height: height)
                 }
             }
             // Уже потрачено
@@ -60,5 +73,5 @@ struct BudgetBar: View {
 }
 
 #Preview {
-    BudgetBar(account: Account(name: "Незаполненный бюджет", remainder: 1))
+    BudgetBar(account: Account(budgetAmount: 1000, budgetFixedSum: 100, budgetDaysOffset: 2, budgetGradualFilling: true, remainder: 100, showingBudget: 1000, showingRemainder: 100))
 }

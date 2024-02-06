@@ -62,11 +62,6 @@ struct EditAccount: View {
             Section {
                 
                 TextField("Название счета", text: $account.name)
-                               
-                if accountPermissions.changeBudget {
-                    TextField("Бюджет", value: $account.budgetAmount, format: .number)
-                        .keyboardType(.decimalPad)
-                }
                 
                 if accountPermissions.changeRemainder {
                     TextField(mode == .create ? "Начальный баланс" : "Баланс", value: $account.remainder, format: .number)
@@ -74,6 +69,19 @@ struct EditAccount: View {
                 }
                 
             }
+            
+            if accountPermissions.changeBudget {
+                Section(header: Text("Бюджет")) {
+                    TextField("Бюджет", value: $account.budgetAmount, format: .number)
+                        .keyboardType(.decimalPad)
+                    TextField("Фиксированная сумма", value: $account.budgetFixedSum, format: .number)
+                        .keyboardType(.decimalPad)
+                    TextField("Отступ в днях", value: $account.budgetDaysOffset, format: .number)
+                        .keyboardType(.numberPad)
+                    Toggle("Плавное заполнение бюджета", isOn: $account.budgetGradualFilling)
+                }
+            }
+            
             Section {
                 
                 Toggle("Учитывать ли счет в шапке", isOn: $account.accounting)
@@ -81,9 +89,7 @@ struct EditAccount: View {
                     Toggle("Видимость счета", isOn: $account.visible)
                 }
                 
-                if accountPermissions.changeBudget {
-                    Toggle("Плавное заполнение бюджета", isOn: $account.budgetGradualFilling)
-                }
+                
                 
                 if mode == .create {
                     Picker("Валюта", selection: $account.currency) {
