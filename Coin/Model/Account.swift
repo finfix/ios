@@ -12,18 +12,20 @@ import SwiftData
     
     @Attribute(.unique) var id: UInt32
     var accounting: Bool
-    var budget: Decimal
     var iconID: UInt32
     var name: String
     var remainder: Decimal
     var type: AccountType
     var visible: Bool
     var parentAccountID: UInt32?
-    var gradualBudgetFilling: Bool
     var serialNumber: UInt32
     var isParent: Bool
     var currency: Currency?
     var accountGroup: AccountGroup?
+    var budgetAmount: Decimal
+    var budgetFixedSum: Decimal
+    var budgetDaysOffset: UInt8
+    var budgetGradualFilling: Bool
 
     @Transient var childrenAccounts: [Account] = []
     @Transient var showingBudget: Decimal = 0
@@ -34,7 +36,10 @@ import SwiftData
         accountGroup: AccountGroup = AccountGroup(),
         currency: Currency = Currency(),
         accounting: Bool = true,
-        budget: Decimal = 0,
+        budgetAmount: Decimal = 0,
+        budgetFixedSum: Decimal = 0,
+        budgetDaysOffset: UInt8 = 0,
+        budgetGradualFilling: Bool = false,
         iconID: UInt32 = 1,
         name: String = "",
         remainder: Decimal = 0,
@@ -42,19 +47,20 @@ import SwiftData
         visible: Bool = true,
         serialNumber: UInt32 = 0,
         isParent: Bool = false,
-        parentAccountID: UInt32? = nil,
-        gradualBudgetFilling: Bool = false
+        parentAccountID: UInt32? = nil
     ) {
         self.id = id
         self.accounting = accounting
-        self.budget = budget
+        self.budgetAmount = budgetAmount
+        self.budgetFixedSum = budgetFixedSum
+        self.budgetDaysOffset = budgetDaysOffset
+        self.budgetGradualFilling = budgetGradualFilling
         self.iconID = iconID
         self.name = name
         self.remainder = remainder
         self.type = type
         self.visible = visible
         self.parentAccountID = parentAccountID
-        self.gradualBudgetFilling = gradualBudgetFilling
         self.serialNumber = serialNumber
         self.isParent = isParent
         self.accountGroup = accountGroup
@@ -64,16 +70,18 @@ import SwiftData
     init(_ res: GetAccountsRes, currenciesMap: [String: Currency], accountGroupsMap: [UInt32: AccountGroup]) {
         self.id = res.id
         self.accounting = res.accounting
-        self.budget = res.budget
         self.iconID = res.iconID
         self.name = res.name
         self.remainder = res.remainder
         self.type = res.type
         self.visible = res.visible
         self.parentAccountID = res.parentAccountID
-        self.gradualBudgetFilling = res.gradualBudgetFilling
         self.serialNumber = res.serialNumber
         self.isParent = res.isParent
+        self.budgetAmount = res.budget.amount
+        self.budgetFixedSum = res.budget.fixedSum
+        self.budgetDaysOffset = res.budget.daysOffset
+        self.budgetGradualFilling = res.budget.gradualFilling
         self.accountGroup = accountGroupsMap[res.accountGroupID]!
         self.currency = currenciesMap[res.currency]!
     }
@@ -120,7 +128,7 @@ import SwiftData
                 // Если счет нужно показывать
                 if account.visible {
                     
-                    account.showingBudget = account.budget
+                    account.showingBudget = account.budgetAmount
                     account.showingRemainder = account.remainder
                     
                     // Добавляем его в дочерние счета родителя
@@ -129,14 +137,14 @@ import SwiftData
                     // Аггрегируем бюджеты и остатки, если необхдоимо
                     if account.accounting {
                         let relation = (parentAccount.currency?.rate ?? 1) / (account.currency?.rate ?? 1)
-                        accountsContainer[parentAccountIndex].showingBudget += account.budget * relation
+                        accountsContainer[parentAccountIndex].showingBudget += account.budgetAmount * relation
                         accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
                     }
                 }
                 
             } else {
                 // Проверяем, чтобы такого счета уже не было в контейнере
-                account.showingBudget += account.budget
+                account.showingBudget += account.budgetAmount
                 account.showingRemainder += account.remainder
                 guard accountsContainer.firstIndex(where: { $0.id == account.id }) == nil else { continue }
                 // Добавляем счет в контейнер
