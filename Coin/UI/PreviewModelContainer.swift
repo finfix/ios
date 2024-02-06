@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import CoreData
 
 @MainActor
 let previewContainer: ModelContainer = {

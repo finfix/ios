@@ -62,11 +62,6 @@ struct EditAccount: View {
             Section {
                 
                 TextField("Название счета", text: $account.name)
-                               
-                if accountPermissions.changeBudget {
-                    TextField("Бюджет", value: $account.budget, format: .number)
-                        .keyboardType(.decimalPad)
-                }
                 
                 if accountPermissions.changeRemainder {
                     TextField(mode == .create ? "Начальный баланс" : "Баланс", value: $account.remainder, format: .number)
@@ -74,6 +69,19 @@ struct EditAccount: View {
                 }
                 
             }
+            
+            if accountPermissions.changeBudget {
+                Section(header: Text("Бюджет")) {
+                    TextField("Бюджет", value: $account.budgetAmount, format: .number)
+                        .keyboardType(.decimalPad)
+                    TextField("Фиксированная сумма", value: $account.budgetFixedSum, format: .number)
+                        .keyboardType(.decimalPad)
+                    TextField("Отступ в днях", value: $account.budgetDaysOffset, format: .number)
+                        .keyboardType(.numberPad)
+                    Toggle("Плавное заполнение бюджета", isOn: $account.budgetGradualFilling)
+                }
+            }
+            
             Section {
                 
                 Toggle("Учитывать ли счет в шапке", isOn: $account.accounting)
@@ -81,9 +89,7 @@ struct EditAccount: View {
                     Toggle("Видимость счета", isOn: $account.visible)
                 }
                 
-                if accountPermissions.changeBudget {
-                    Toggle("Плавное заполнение бюджета", isOn: $account.gradualBudgetFilling)
-                }
+                
                 
                 if mode == .create {
                     Picker("Валюта", selection: $account.currency) {
@@ -117,13 +123,15 @@ struct EditAccount: View {
             account.id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
                 accountGroupID: account.accountGroup?.id ?? 0,
                 accounting: account.accounting,
-                budget: account.budget != 0 ? account.budget : nil,
+                budget: CreateAccountBudgetReq (
+                    amount: account.budgetAmount,
+                    gradualFilling: account.budgetGradualFilling
+                ),
                 currency: account.currency?.isoCode ?? "",
                 iconID: 1,
                 name: account.name,
                 remainder: account.remainder != 0 ? account.remainder : nil,
-                type: account.type.rawValue,
-                gradualBudgetFilling: account.gradualBudgetFilling)
+                type: account.type.rawValue)
             )
             modelContext.insert(account)
             try modelContext.save()
@@ -139,12 +147,15 @@ struct EditAccount: View {
             try await AccountAPI().UpdateAccount(req: UpdateAccountReq(
                 id: account.id,
                 accounting: oldAccount.accounting != account.accounting ? account.accounting : nil,
-                budget: oldAccount.budget != account.budget ? account.budget : nil,
-                name: oldAccount.name != account.name ? account.name : nil,
-                remainder: oldAccount.remainder != account.remainder ? account.remainder : nil,
+                name: oldAccount.name != account.name ? account.name : nil, 
+                remainder: oldAccount.remainder != account.remainder ? account.remainder : nil, 
                 visible: oldAccount.visible != account.visible ? account.visible : nil,
-                gradualBudgetFilling: oldAccount.gradualBudgetFilling != account.gradualBudgetFilling ? account.gradualBudgetFilling : nil)
-            )
+                budget: UpdateBudgetReq(
+                    amount: oldAccount.budgetAmount != account.budgetAmount ? account.budgetAmount : nil,
+                    fixedSum: oldAccount.budgetFixedSum != account.budgetFixedSum ? account.budgetFixedSum : nil,
+                    daysOffset: oldAccount.budgetDaysOffset != account.budgetDaysOffset ? account.budgetDaysOffset : nil,
+                    gradualFilling: oldAccount.budgetGradualFilling != account.budgetGradualFilling ? account.budgetGradualFilling : nil)
+            ))
             try modelContext.save()
         } catch {
             modelContext.rollback()

@@ -66,7 +66,7 @@ actor LoadModelActor: ModelActor {
             
             var fetchDescriptor = FetchDescriptor<AccountGroup>(sortBy: [SortDescriptor(\.serialNumber)])
             fetchDescriptor.fetchLimit = 1
-            var firstGroup = try modelContext.fetch(fetchDescriptor)
+            let firstGroup = try modelContext.fetch(fetchDescriptor)
             if !firstGroup.isEmpty {
                 selectedAccountGroupID = Int(firstGroup[0].id)
             }

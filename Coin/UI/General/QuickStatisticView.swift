@@ -120,7 +120,7 @@ struct QuickStatisticSubSubView: View {
             switch account.type {
             case .expense:
                 tmp.totalExpense += account.remainder * relation
-                tmp.totalBudget += account.budget * relation
+                tmp.totalBudget += account.budgetAmount * relation
             case .earnings:
                 continue
             default:
