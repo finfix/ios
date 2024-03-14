@@ -6,15 +6,22 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model class AccountGroup {
+struct AccountGroup: Identifiable, Hashable {
     
-    @Attribute(.unique) var id: UInt32
+    static func == (lhs: AccountGroup, rhs: AccountGroup) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    var id: UInt32
     var name: String
     var currency: Currency?
     var serialNumber: UInt32
-    @Relationship(deleteRule: .nullify, inverse: \Account.accountGroup) var accounts: [Account]
+    var accounts: [Account]
         
     init(
         id: UInt32 = 0,

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "EditTransaction")
@@ -18,10 +17,9 @@ struct EditTransaction: View {
     }
     
     @Environment (\.dismiss) private var dismiss
-    private var modelContext: ModelContext
     private var oldTransaction: Transaction = Transaction()
-    @Bindable private var transaction: Transaction
-    private var accountGroups: [AccountGroup]
+    @State private var transaction: Transaction
+    private var accountGroups: [AccountGroup] = []
     
     private var mode: Mode
     
@@ -29,7 +27,6 @@ struct EditTransaction: View {
         self.init()
         mode = .update
         self.oldTransaction = transaction
-        self.transaction = modelContext.model(for: transaction.persistentModelID) as! Transaction
     }
     
     init(transactionType: TransactionType) {
@@ -41,9 +38,6 @@ struct EditTransaction: View {
     }
     
     private init() {
-        modelContext = ModelContext(container)
-        modelContext.autosaveEnabled = false
-        accountGroups = try! modelContext.fetch(FetchDescriptor<AccountGroup>(sortBy: [SortDescriptor(\.serialNumber)]))
         transaction = Transaction()
         mode = .create
     }
@@ -123,7 +117,6 @@ struct EditTransaction: View {
                     type: transaction.type.rawValue,
                     isExecuted: true
                 ))
-                modelContext.insert(transaction)
                 switch transaction.type {
                 case .income:
                     transaction.accountFrom!.remainder += transaction.amountFrom
@@ -133,7 +126,6 @@ struct EditTransaction: View {
                     transaction.accountTo!.remainder += transaction.amountTo
                 default: break
                 }
-                try modelContext.save()
             } catch {
                 showErrorAlert("\(error)")
                 logger.error("\(error)")
@@ -158,7 +150,6 @@ struct EditTransaction: View {
                     dateTransaction: transaction.dateTransaction != oldTransaction.dateTransaction ? transaction.dateTransaction : nil,
                     note: transaction.note != oldTransaction.note ? transaction.note : nil,
                     id: transaction.id))
-                try modelContext.save()
             } catch {
                 showErrorAlert("\(error)")
                 logger.error("\(error)")
@@ -169,7 +160,6 @@ struct EditTransaction: View {
 
 #Preview {
     EditTransaction(Transaction())
-        .modelContainer(previewContainer)
 }
 
 private struct Rate: View {

@@ -6,12 +6,19 @@
 //
 
 import Foundation
-import SwiftData
+import SwiftUI
 
-@Model 
-class Transaction {
+class Transaction: Identifiable, Hashable {
     
-    @Attribute(.unique) var id: UInt32
+    static func == (lhs: Transaction, rhs: Transaction) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    var id: UInt32
     var accounting: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
@@ -33,9 +40,7 @@ class Transaction {
         isExecuted: Bool = true,
         note: String = "",
         type: TransactionType = .consumption,
-        timeCreate: Date = Date(),
-        accountFrom: Account? = nil,
-        accountTo: Account? = nil
+        timeCreate: Date = Date()
     ) {
         self.accounting = accounting
         self.amountFrom = amountFrom
@@ -46,8 +51,6 @@ class Transaction {
         self.note = note
         self.type = type
         self.timeCreate = timeCreate
-        self.accountFrom = accountFrom
-        self.accountTo = accountTo
     }
     
     init(_ res: GetTransactionsRes, accountsMap: [UInt32: Account]) {
@@ -60,8 +63,6 @@ class Transaction {
         self.note = res.note
         self.type = res.type
         self.timeCreate = Date()
-        self.accountFrom = accountsMap[res.accountFromID]
-        self.accountTo = accountsMap[res.accountToID]
     }
 }
 

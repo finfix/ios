@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "EditAccount")
@@ -18,43 +17,26 @@ enum mode {
 struct EditAccount: View {
     
     @Environment(\.dismiss) var dismiss
-    private var modelContext: ModelContext
     private var currencies: [Currency] = []
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Bindable var account = Account()
+    @State var account = Account()
     private var oldAccount = Account()
     private var accountPermissions = AccountPermissions()
     
     var mode: mode = .create
     
     init(_ account: Account) {
-        self.init()
         mode = .update
         
         self.oldAccount = account
-        self.account = modelContext.model(for: account.persistentModelID) as! Account
         self.accountPermissions = GetPermissions(account: account)
     }
     
     init(accountType: AccountType) {
-        self.init()        
         mode = .create
 
-        currencies = try! modelContext.fetch(FetchDescriptor<Currency>(sortBy: [SortDescriptor(\.isoCode)]))
-        let accountGroups = try! modelContext.fetch(FetchDescriptor<AccountGroup>())
-        
-        _account = .init(wrappedValue: Account(
-            accountGroup: accountGroups.first { $0.id == selectedAccountsGroupID }!,
-            currency: currencies.first { $0.isoCode == "USD" }!,
-            type: accountType
-        ))
+        let accountGroups = [AccountGroup]()
         self.accountPermissions = GetPermissions(account: account)
-    }
-    
-    private init() {
-        
-        modelContext = ModelContext(container)
-        modelContext.autosaveEnabled = false
     }
         
     var body: some View {
@@ -92,12 +74,12 @@ struct EditAccount: View {
                 
                 
                 if mode == .create {
-                    Picker("Валюта", selection: $account.currency) {
-                        ForEach(currencies) { currency in
-                            Text(currency.isoCode)
-                                .tag(currency as Currency?)
-                        }
-                    }
+//                    Picker("Валюта", selection: $account.currency) {
+//                        ForEach(currencies) { currency in
+//                            Text(currency.isoCode)
+//                                .tag(currency as Currency?)
+//                        }
+//                    }
                 }
             }
             Section {
@@ -127,16 +109,13 @@ struct EditAccount: View {
                     amount: account.budgetAmount,
                     gradualFilling: account.budgetGradualFilling
                 ),
-                currency: account.currency?.isoCode ?? "",
+                currency: account.currency?.id ?? "",
                 iconID: 1,
                 name: account.name,
                 remainder: account.remainder != 0 ? account.remainder : nil,
                 type: account.type.rawValue)
             )
-            modelContext.insert(account)
-            try modelContext.save()
         } catch {
-            modelContext.rollback()
             logger.error("\(error)")
             showErrorAlert("\(error)")
         }
@@ -156,9 +135,7 @@ struct EditAccount: View {
                     daysOffset: oldAccount.budgetDaysOffset != account.budgetDaysOffset ? account.budgetDaysOffset : nil,
                     gradualFilling: oldAccount.budgetGradualFilling != account.budgetGradualFilling ? account.budgetGradualFilling : nil)
             ))
-            try modelContext.save()
         } catch {
-            modelContext.rollback()
             logger.error("\(error)")
             showErrorAlert("\(error)")
         }
@@ -167,5 +144,4 @@ struct EditAccount: View {
 
 #Preview {
     EditAccount(accountType: .regular)
-        .modelContainer(previewContainer)
 }

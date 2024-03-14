@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "BudgetList")
@@ -14,9 +13,7 @@ private let logger = Logger(subsystem: "Coin", category: "BudgetList")
 struct BudgetsList: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query(sort: [
-        SortDescriptor(\Account.serialNumber)
-    ]) var accounts: [Account]
+    var accounts: [Account] = []
         
     func groupAccounts() -> [Account] {
         logger.info("Группируем счета")
@@ -25,7 +22,7 @@ struct BudgetsList: View {
             $0.accountGroup?.id == UInt32(selectedAccountsGroupID) &&
             $0.type == .expense
         }
-        return Account.groupAccounts(accounts).filter { $0.showingBudget != 0 }
+        return Account.groupAccounts(accounts).filter { $0.budgetAmount != 0 }
     }
         
     var body: some View {
@@ -43,5 +40,4 @@ struct BudgetsList: View {
 
 #Preview {
     BudgetsList()
-        .modelContainer(previewContainer)
 }

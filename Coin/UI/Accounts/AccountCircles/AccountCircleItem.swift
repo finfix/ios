@@ -35,11 +35,11 @@ struct AccountCircleItem: View {
                 if account.isParent {
                     Circle()
                         .fill(.clear)
-                        .strokeBorder(account.showingBudget == 0 ? .gray : account.showingBudget >= account.showingRemainder ? .green : .red, lineWidth: 1)
+                        .strokeBorder(account.budgetAmount == 0 ? .gray : account.budgetAmount >= account.remainder ? .green : .red, lineWidth: 1)
                         .frame(width: 35)
                 }
                 Circle()
-                    .fill(account.showingBudget == 0 ? .gray : account.showingBudget >= account.showingRemainder ? .green : .red)
+                    .fill(account.budgetAmount == 0 ? .gray : account.budgetAmount >= account.remainder ? .green : .red)
                     .frame(width: 30)
             }
             .onTapGesture(count: 2) {
@@ -47,9 +47,6 @@ struct AccountCircleItem: View {
                     isChildrenOpen = true
                 }
             }
-//            .onTapGesture(count: 1) {
-//                isTransactionOpen = true
-//            }
             .onLongPressGesture {
                 if isAlreadyOpened {
                     dismiss()
@@ -58,11 +55,11 @@ struct AccountCircleItem: View {
                     path.append(account)
                 }
             }
-            Text(formatter.string(number: account.showingRemainder))
+            Text(formatter.string(number: account.remainder))
                 .lineLimit(1)
             
-            if account.showingBudget != 0 {
-                Text(formatter.string(number: account.showingBudget))
+            if account.budgetAmount != 0 {
+                Text(formatter.string(number: account.budgetAmount))
                     .lineLimit(1)
                     .foregroundColor(.secondary)
             }

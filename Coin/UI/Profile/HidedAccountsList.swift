@@ -6,14 +6,11 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct HidedAccountsList: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query(sort: [
-        SortDescriptor(\Account.serialNumber)
-    ]) var accounts: [Account]
+    var accounts: [Account] = []
     @State var accountType: AccountType = .regular
     @Binding var path: NavigationPath
     var filteredAccounts: [Account] {
@@ -50,5 +47,4 @@ struct HidedAccountsList: View {
 
 #Preview {
     HidedAccountsList(path: .constant(NavigationPath()))
-        .modelContainer(previewContainer)
 }

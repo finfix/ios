@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "AccountCirclesView")
@@ -15,7 +14,7 @@ struct AccountCirclesView: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @State var path = NavigationPath()
-    @Query(sort: [SortDescriptor(\Account.serialNumber)]) var accounts: [Account]
+    var accounts: [Account] = []
     
     let horizontalSpacing: CGFloat = 10
     
@@ -81,5 +80,4 @@ struct AccountCirclesView: View {
 
 #Preview {
     AccountCirclesView()
-        .modelContainer(previewContainer)
 }

@@ -40,7 +40,6 @@
 		B5B950572ADF261700798F8C /* QuickStatisticView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950562ADF261700798F8C /* QuickStatisticView.swift */; };
 		B5B950592ADF274E00798F8C /* AccountCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950582ADF274E00798F8C /* AccountCard.swift */; };
 		B5C0C31C2AEAD9E70016990E /* HidedAccountsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C0C31B2AEAD9E70016990E /* HidedAccountsList.swift */; };
-		B5CF4C652B0354B700CA0CEC /* PreviewModelContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CF4C642B0354B700CA0CEC /* PreviewModelContainer.swift */; };
 		B5CF7D342AE57A9B0086C0B6 /* CurrencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */; };
 		B5D143B22906A64000875037 /* ErrorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B12906A64000875037 /* ErrorModel.swift */; };
 		B5D143B42906A66400875037 /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B32906A66400875037 /* AuthModels.swift */; };
@@ -96,7 +95,6 @@
 		B5B950562ADF261700798F8C /* QuickStatisticView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickStatisticView.swift; sourceTree = "<group>"; };
 		B5B950582ADF274E00798F8C /* AccountCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCard.swift; sourceTree = "<group>"; };
 		B5C0C31B2AEAD9E70016990E /* HidedAccountsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HidedAccountsList.swift; sourceTree = "<group>"; };
-		B5CF4C642B0354B700CA0CEC /* PreviewModelContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewModelContainer.swift; sourceTree = "<group>"; };
 		B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatter.swift; sourceTree = "<group>"; };
 		B5D143B12906A64000875037 /* ErrorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorModel.swift; sourceTree = "<group>"; };
 		B5D143B32906A66400875037 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
@@ -254,7 +252,6 @@
 		B5E8933829007C53002AC30C /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				B5CF4C642B0354B700CA0CEC /* PreviewModelContainer.swift */,
 				B56361A22B04FBE60044CDD8 /* Navigation */,
 				B559E9D42B00FA1700A430D2 /* General */,
 				B5B9504D2ADF234F00798F8C /* Profile */,
@@ -426,7 +423,6 @@
 				B5B9504C2ADF18BC00798F8C /* QuickStatistic.swift in Sources */,
 				B5D143B62906B4EC00875037 /* AuthAPI.swift in Sources */,
 				B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */,
-				B5CF4C652B0354B700CA0CEC /* PreviewModelContainer.swift in Sources */,
 				B5B950452ADF16FF00798F8C /* Line.swift in Sources */,
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
@@ -605,7 +601,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = ilyaivanov.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -643,7 +639,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = ilyaivanov.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

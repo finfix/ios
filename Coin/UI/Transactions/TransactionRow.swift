@@ -62,6 +62,5 @@ struct TransactionRow: View {
 #Preview {
     List {
         TransactionRow(transaction: Transaction())
-            .modelContainer(previewContainer)
     }
 }

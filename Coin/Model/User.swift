@@ -6,28 +6,24 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model class User {
+struct User {
     
-    @Attribute(.unique) var id: UInt32
+    var id: UInt32
     var name: String
     var email: String
     var timeCreate: Date
-    var currency: Currency?
     
     init(
         id: UInt32 = 0,
         name: String = "",
         email: String = "",
-        timeCreate: Date = Date(),
-        currency: Currency? = nil
+        timeCreate: Date = Date()
     ) {
         self.id = id
         self.name = name
         self.email = email
         self.timeCreate = timeCreate
-        self.currency = currency
     }
     
     init(_ res: GetUserRes, currenciesMap: [String: Currency]) {
@@ -35,6 +31,5 @@ import SwiftData
         self.name = res.name
         self.email = res.email
         self.timeCreate = Date()
-        self.currency = currenciesMap[res.defaultCurrency]
     }
 }

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "quick statistic")
@@ -14,54 +13,18 @@ private let logger = Logger(subsystem: "Coin", category: "quick statistic")
 struct QuickStatisticView: View {
     
     @AppStorage("accountGroupID") var accountGroupID: Int = 0
-    
-            
-    var body: some View {
-        QuickStatisticSubView(accountGroupID: UInt32(accountGroupID))
-    }
-}
 
-struct QuickStatisticSubView: View {
-    
-    @Query(sort: [
-        SortDescriptor(\AccountGroup.serialNumber)
-    ]) var accountGroups: [AccountGroup]
-    
-    init(accountGroupID: UInt32) {
-        _accountGroups = Query(filter: #Predicate { $0.id == accountGroupID })
-    }
-    
     var accountGroup: AccountGroup {
-        if let accountGroup = accountGroups.first {
-            return accountGroup
-        }
         return AccountGroup()
     }
     
-    var body: some View {
-        QuickStatisticSubSubView(accountGroup: accountGroup)
-    }
-}
-
-struct QuickStatisticSubSubView: View {
+    var accounts: [Account] = []
+    var currency: Currency = Currency()
+    var formatter: CurrencyFormatter = CurrencyFormatter()
     
-    @Query(sort: [
-        SortDescriptor(\Account.serialNumber)
-    ]) var accounts: [Account]
-    var currency: Currency
-        
-    var formatter: CurrencyFormatter
-    
-    init(accountGroup: AccountGroup) {
-        self.formatter = CurrencyFormatter(currency: accountGroup.currency, maximumFractionDigits: 0)
-        self.currency = accountGroup.currency ?? Currency()
-        let accountGroupID = accountGroup.id
-        _accounts = Query(filter: #Predicate {
-            $0.accountGroup?.id == accountGroupID &&
-            $0.accounting &&
-            $0.visible
-        })
-    }
+//    init() {
+//        self.formatter = CurrencyFormatter(currency: accountGroup.currency, maximumFractionDigits: 0)
+//    }
     
     var body: some View {
         let statistic = calculateStatistic(accounts: accounts, targetCurrency: currency)
@@ -125,18 +88,15 @@ struct QuickStatisticSubSubView: View {
             
             switch account.type {
             case .expense:
-                tmp.totalExpense += account.showingRemainder * relation
-                tmp.totalBudget += account.showingBudget * relation
-                if account.showingBudget != 0 && account.showingBudget > account.showingRemainder {
-                    print(account.name)
-                    print(account.showingBudget)
-                    print(account.showingRemainder)
-                    tmp.periodRemainder += (account.showingBudget - account.showingRemainder) * relation
+                tmp.totalExpense += account.remainder * relation
+                tmp.totalBudget += account.budgetAmount * relation
+                if account.budgetAmount != 0 && account.budgetAmount > account.remainder {
+                    tmp.periodRemainder += (account.budgetAmount - account.remainder) * relation
                 }
             case .earnings:
                 continue
             default:
-                tmp.totalRemainder += account.showingRemainder * relation
+                tmp.totalRemainder += account.remainder * relation
             }
         }
         return tmp
@@ -150,5 +110,4 @@ struct QuickStatisticSubSubView: View {
         QuickStatisticView()
         Spacer()
     }
-    .modelContainer(previewContainer)
 }

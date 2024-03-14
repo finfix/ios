@@ -33,7 +33,7 @@ class CurrencyFormatter: NumberFormatter {
         self.groupingSeparator = "."
         self.usesGroupingSeparator = true
         if let currency = currency {
-            self.currencyCode = currency.isoCode
+            self.currencyCode = currency.id
             self.currencySymbol = currency.symbol
         }
         self.withUnits = withUnits
@@ -43,7 +43,7 @@ class CurrencyFormatter: NumberFormatter {
     func string(number: Decimal, currency: Currency? = nil, suffix: String? = nil) -> String {
         
         if let currency = currency {
-            self.currencyCode = currency.isoCode
+            self.currencyCode = currency.id
             self.currencySymbol = currency.symbol
         }
         self.userSuffix = suffix

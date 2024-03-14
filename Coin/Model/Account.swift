@@ -6,11 +6,18 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model class Account {
+class Account: Identifiable, Hashable {
     
-    @Attribute(.unique) var id: UInt32
+    static func == (lhs: Account, rhs: Account) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    var id: UInt32
     var accounting: Bool
     var iconID: UInt32
     var name: String
@@ -27,9 +34,7 @@ import SwiftData
     var budgetDaysOffset: UInt8
     var budgetGradualFilling: Bool
 
-    @Transient var childrenAccounts: [Account] = []
-    @Transient var showingBudget: Decimal = 0
-    @Transient var showingRemainder: Decimal = 0
+    var childrenAccounts: [Account] = []
     
     init(
         id: UInt32 = 0,
@@ -47,9 +52,7 @@ import SwiftData
         visible: Bool = true,
         serialNumber: UInt32 = 0,
         isParent: Bool = false,
-        parentAccountID: UInt32? = nil,
-        showingBudget: Decimal = 0,
-        showingRemainder: Decimal = 0
+        parentAccountID: UInt32? = nil
     ) {
         self.id = id
         self.accounting = accounting
@@ -65,8 +68,6 @@ import SwiftData
         self.parentAccountID = parentAccountID
         self.serialNumber = serialNumber
         self.isParent = isParent
-        self.showingBudget = showingBudget
-        self.showingRemainder = showingRemainder
         self.accountGroup = accountGroup
         self.currency = currency
     }
@@ -91,10 +92,6 @@ import SwiftData
     }
     
     static func groupAccounts(_ accounts: [Account]) -> [Account] {
-                    
-        for account in accounts {
-            account.clearTransientData()
-        }
 
         // Делаем контейнер для сбора счетов и счетов с аггрегацией
         var accountsContainer = [Account]()
@@ -131,37 +128,26 @@ import SwiftData
                 
                 // Если счет нужно показывать
                 if account.visible {
-                    
-                    account.showingBudget = account.budgetAmount
-                    account.showingRemainder = account.remainder
-                    
+                                        
                     // Добавляем его в дочерние счета родителя
                     accountsContainer[parentAccountIndex].childrenAccounts.append(account)
                     
                     // Аггрегируем бюджеты и остатки, если необхдоимо
                     if account.accounting {
                         let relation = (parentAccount.currency?.rate ?? 1) / (account.currency?.rate ?? 1)
-                        accountsContainer[parentAccountIndex].showingBudget += account.budgetAmount * relation
-                        accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
+                        accountsContainer[parentAccountIndex].budgetAmount += account.budgetAmount * relation
+                        accountsContainer[parentAccountIndex].remainder += account.remainder * relation
                     }
                 }
                 
             } else {
                 // Проверяем, чтобы такого счета уже не было в контейнере
-                account.showingBudget += account.budgetAmount
-                account.showingRemainder += account.remainder
                 guard accountsContainer.firstIndex(where: { $0.id == account.id }) == nil else { continue }
                 // Добавляем счет в контейнер
                 accountsContainer.append(account)
             }
         }
         return accountsContainer
-    }
-    
-    func clearTransientData() {
-        self.childrenAccounts = []
-        self.showingBudget = 0
-        self.showingRemainder = 0
     }
 }
 

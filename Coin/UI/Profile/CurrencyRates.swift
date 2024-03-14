@@ -6,21 +6,17 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct CurrencyRates: View {
     
-    @Query(sort: [
-        SortDescriptor(\Currency.isoCode)
-    ]) var currencies: [Currency]
-    @Environment(\.modelContext) var modelContext
+    var currencies: [Currency] = []
     
     var currencyFormatter = CurrencyFormatter()
     
     var body: some View {
         List(currencies) { currency in
             HStack {
-                Text(currency.isoCode)
+                Text(currency.id)
                 Spacer()
                 Text(currencyFormatter.string(number: currency.rate, currency: currency))
             }
@@ -30,5 +26,4 @@ struct CurrencyRates: View {
 
 #Preview {
     CurrencyRates()
-        .modelContainer(previewContainer)
 }

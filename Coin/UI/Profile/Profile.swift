@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 
 enum ProfileViews {
     case hidedAccounts, currencyRates, settings
@@ -21,7 +20,6 @@ struct Profile: View {
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     
-    @Environment(\.modelContext) var modelContext
     @State var path = NavigationPath()
     
     var body: some View {
@@ -37,7 +35,6 @@ struct Profile: View {
                         Task {
                             shouldDisableUI = true
                             shouldShowProgress = true
-                            await LoadModelActor(modelContainer: modelContext.container).sync()
                             shouldShowProgress = false
                             shouldDisableUI = false
                             withAnimation(.spring().delay(0.25)) {
@@ -52,11 +49,6 @@ struct Profile: View {
                         Task {
                             shouldDisableUI = true
                             defer { shouldDisableUI = false }
-                            do {
-                                try await LoadModelActor(modelContainer: modelContext.container).deleteAll()
-                            } catch {
-                                showErrorAlert("\(error)")
-                            }
                         }
                         accountGroupIndex = 0
                         isLogin = false
@@ -104,5 +96,4 @@ struct Profile: View {
 
 #Preview {
     Profile()
-        .modelContainer(container)
 }

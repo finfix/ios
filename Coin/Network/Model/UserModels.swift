@@ -8,7 +8,7 @@
 import Foundation
 
 struct GetCurrenciesRes: Decodable {
-    var isoCode: String
+    var id: String
     var rate: Decimal
     var name: String
     var symbol: String

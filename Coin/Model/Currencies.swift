@@ -6,24 +6,31 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model class Currency {
+struct Currency: Identifiable, Hashable {
     
-    @Attribute(.unique) var isoCode: String
+    static func == (lhs: Currency, rhs: Currency) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    var id: String
     var name: String
     var rate: Decimal
     var symbol: String
     
-    init(isoCode: String = "", name: String = "", rate: Decimal = 1, symbol: String = "") {
-        self.isoCode = isoCode
+    init(id: String = "", name: String = "", rate: Decimal = 1, symbol: String = "") {
+        self.id = id
         self.name = name
         self.rate = rate
         self.symbol = symbol
     }
     
     init(_ res: GetCurrenciesRes) {
-        self.isoCode = res.isoCode
+        self.id = res.id
         self.name = res.name
         self.symbol = res.symbol
         self.rate = res.rate

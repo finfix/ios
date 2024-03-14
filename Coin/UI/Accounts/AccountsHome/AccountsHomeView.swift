@@ -6,14 +6,11 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct AccountsHomeView: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query(sort: [
-        SortDescriptor(\Account.serialNumber)
-    ]) var accounts: [Account]
+    var accounts: [Account] = []
     
     var filteredAccounts: [Account] {
         accounts.filter { $0.accountGroup?.id ?? 0 == selectedAccountsGroupID }
@@ -100,5 +97,4 @@ struct CircleTypeTransaction: View {
     
 #Preview {
     AccountsHomeView()
-        .modelContainer(previewContainer)
 }
