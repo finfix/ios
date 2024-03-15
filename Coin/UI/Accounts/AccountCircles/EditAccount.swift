@@ -109,7 +109,7 @@ struct EditAccount: View {
                     amount: account.budgetAmount,
                     gradualFilling: account.budgetGradualFilling
                 ),
-                currency: account.currency?.id ?? "",
+                currency: account.currency?.code ?? "",
                 iconID: 1,
                 name: account.name,
                 remainder: account.remainder != 0 ? account.remainder : nil,

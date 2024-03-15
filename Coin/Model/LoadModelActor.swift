@@ -11,43 +11,38 @@ import SwiftUI
 
 private let logger = Logger(subsystem: "Coin", category: "loading data from server")
 
-//actor LoadModelActor: ModelActor {
-//    let modelContainer: ModelContainer
-//    let modelExecutor: any ModelExecutor
-//    
-//    init(modelContainer: ModelContainer) {
-//        self.modelContainer = modelContainer
-//        let context = ModelContext(modelContainer)
-//        modelExecutor = DefaultSerialModelExecutor(modelContext: context)
-//    }
-//    
-//    func sync() async {
-//        logger.info("Синхронизируем данные")
-//        do {
+    func sync() async {
+        logger.info("Синхронизируем данные")
+        do {
+            
+            let db = LocalDatabase.shared
 //            try await deleteAll(isSave: false)
-//            
-//            @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0
-//            @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
-//            selectedAccountGroupID = nil
-//            selectedAccountGroupIndex = 0
-//            
-//            // Получаем все данные
-//            async let c = getCurrencies()
+            
+            @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0
+            @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
+            selectedAccountGroupID = nil
+            selectedAccountGroupIndex = 0
+            
+            // Получаем все данные
+            async let c = getCurrencies()
 //            async let u = getUser()
 //            async let ag = getAccountGroups()
 //            async let a = getAccounts()
 //            async let t = getTransactions()
-//                        
-//            // Сохраняем валюты
-//            logger.info("Получаем валюты")
-//            let currenciesRes = try await c
+                        
+            // Сохраняем валюты
+            logger.info("Получаем валюты")
+            let currenciesRes = try await c
+            var currencies = [Currency]()
 //            var currenciesMap: [String: Currency] = [:]
-//            for currencyRes in currenciesRes {
-//                let currency = Currency(currencyRes)
+            for currencyRes in currenciesRes {
+                let currency = Currency(currencyRes)
+                currencies.append(currency)
 //                currenciesMap[currency.isoCode] = currency
-//                modelContext.insert(currency)
-//            }
-//            
+            }
+            
+            try await db.importCurrencies(currencies)
+//
 //            // Сохраняем юзера
 //            logger.info("Получаем пользователя")
 //            let userRes = try await u
@@ -90,12 +85,12 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
 //            
 //            logger.info("Все сохраняем")
 //            try modelContext.save()
-//        } catch {
-//            logger.error("\(error)")
-//            showErrorAlert("\(error)")
-//        }
-//    }
-//    
+        } catch {
+            logger.error("\(error)")
+            showErrorAlert("\(error)")
+        }
+    }
+    
 //    func deleteAll(isSave: Bool = true) async throws {
 //        logger.info("Удаляем все данные")
 //        try modelContext.delete(model: User.self)
@@ -107,28 +102,28 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
 //            try modelContext.save()
 //        }
 //    }
-//    
-//    private func getCurrencies() async throws -> [GetCurrenciesRes] {
-//        return try await UserAPI().GetCurrencies()
-//    }
-//    
-//    private func getTransactions() async throws -> [GetTransactionsRes] {
-//        return try await TransactionAPI().GetTransactions(req: GetTransactionReq())
-//    }
-//    
-//    private func getAccountGroups() async throws -> [GetAccountGroupsRes] {
-//        return try await AccountAPI().GetAccountGroups()
-//    }
-//    
-//    private func getAccounts() async throws -> [GetAccountsRes] {
-//        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-//        let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
-//        let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
-//        
-//        return try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
-//    }
-//    
-//    private func getUser() async throws -> GetUserRes {
-//        return try await UserAPI().GetUser()
-//    }
-//}
+    
+    private func getCurrencies() async throws -> [GetCurrenciesRes] {
+        return try await UserAPI().GetCurrencies()
+    }
+    
+    private func getTransactions() async throws -> [GetTransactionsRes] {
+        return try await TransactionAPI().GetTransactions(req: GetTransactionReq())
+    }
+    
+    private func getAccountGroups() async throws -> [GetAccountGroupsRes] {
+        return try await AccountAPI().GetAccountGroups()
+    }
+    
+    private func getAccounts() async throws -> [GetAccountsRes] {
+        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
+        let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+        
+        return try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
+    }
+    
+    private func getUser() async throws -> GetUserRes {
+        return try await UserAPI().GetUser()
+    }
+

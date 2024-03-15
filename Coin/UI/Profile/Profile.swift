@@ -34,9 +34,12 @@ struct Profile: View {
                     Button("Синхронизировать") {
                         Task {
                             shouldDisableUI = true
+                            defer { shouldDisableUI = false }
                             shouldShowProgress = true
-                            shouldShowProgress = false
-                            shouldDisableUI = false
+                            defer { shouldShowProgress = false }
+                            
+                            await sync()
+                            
                             withAnimation(.spring().delay(0.25)) {
                                 self.shouldShowSuccess.toggle()
                             }

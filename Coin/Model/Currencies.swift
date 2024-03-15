@@ -6,33 +6,37 @@
 //
 
 import Foundation
+import GRDB
 
-struct Currency: Identifiable, Hashable {
+struct Currency: Hashable, Codable {
     
     static func == (lhs: Currency, rhs: Currency) -> Bool {
-        return lhs.id == rhs.id
+        return lhs.code == rhs.code
     }
     
     func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
+        hasher.combine(code)
     }
     
-    var id: String
+    var code: String
     var name: String
     var rate: Decimal
     var symbol: String
     
-    init(id: String = "", name: String = "", rate: Decimal = 1, symbol: String = "") {
-        self.id = id
+    init(code: String = "", name: String = "", rate: Decimal = 1, symbol: String = "") {
+        self.code = code
         self.name = name
         self.rate = rate
         self.symbol = symbol
     }
     
     init(_ res: GetCurrenciesRes) {
-        self.id = res.id
+        self.code = res.isoCode
         self.name = res.name
         self.symbol = res.symbol
         self.rate = res.rate
     }
 }
+
+extension Currency: TableRecord, FetchableRecord, EncodableRecord, PersistableRecord {}
+

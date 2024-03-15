@@ -12,9 +12,9 @@ extension LocalDatabase {
     var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
 
-//        #if DEBUG
+        #if DEBUG
         migrator.eraseDatabaseOnSchemaChange = true
-//        #endif
+        #endif
 
         migrator.registerMigration("v1") { db in
             try createTables(db)
@@ -26,8 +26,8 @@ extension LocalDatabase {
 
     private func createTables(_ db: GRDB.Database) throws {
         
-        try db.create(table: "currencies") { table in
-            table.primaryKey("id", .integer)
+        try db.create(table: "currency") { table in
+            table.primaryKey("code", .text)
             table.column("name", .text).notNull()
             table.column("rate", .double).notNull()
             table.column("symbol", .text).notNull()

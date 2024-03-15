@@ -6,17 +6,18 @@
 //
 
 import SwiftUI
+import Combine
 
 struct CurrencyRates: View {
     
-    var currencies: [Currency] = []
-    
     var currencyFormatter = CurrencyFormatter()
     
+    @StateObject private var viewModel = CurrencyRatesViewModel()
+    
     var body: some View {
-        List(currencies) { currency in
+        List(viewModel.currencies, id: \.code) { currency in
             HStack {
-                Text(currency.id)
+                Text(currency.code)
                 Spacer()
                 Text(currencyFormatter.string(number: currency.rate, currency: currency))
             }
@@ -26,4 +27,28 @@ struct CurrencyRates: View {
 
 #Preview {
     CurrencyRates()
+}
+
+class CurrencyRatesViewModel: ObservableObject {
+    
+    @Published var currencies: [Currency] = []
+    
+    private let db = LocalDatabase.shared
+    
+    init() {
+        db
+            .observeCurrencies()
+            .catch { err in
+                return Just([])
+            }
+            .assign(to: &$currencies)
+    }
+    
+    func createCurrency() async {
+        do {
+            try await db.importCurrencies([Currency(code: "cst", name: "custom", rate: 1, symbol: "£")])
+        } catch {
+            print(error)
+        }
+    }
 }
