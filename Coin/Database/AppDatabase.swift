@@ -55,16 +55,31 @@ extension AppDatabase {
         migrator.registerMigration("createCurrency") { db in
             try db.create(table: "currency") { table in
                 table.primaryKey("code", .text)
-                table.column("name", .text).notNull()
-                table.column("rate", .double).notNull()
-                table.column("symbol", .text).notNull()
+                
+                table.column("name", .text)
+                    .notNull()
+                    .unique()
+                table.column("rate", .double)
+                    .notNull()
+                table.column("symbol", .text)
+                    .notNull()
             }
         }
         
-        // Migrations for future application versions will be inserted here:
-        // migrator.registerMigration(...) { db in
-        //     ...
-        // }
+        migrator.registerMigration("createUser") { db in
+            try db.create(table: "user") { table in
+                table.primaryKey("id", .integer)
+                
+                table.column("name", .text)
+                    .notNull()
+                table.column("email", .double)
+                    .notNull()
+                    .unique()
+                
+                table.belongsTo("defaultCurrency", inTable: "currency")
+                    .notNull()
+            }
+        }
         
         return migrator
     }
@@ -95,10 +110,17 @@ extension AppDatabase {
         }
     }
     
+    func importUser(_ user: User) throws {
+        try dbWriter.write { db in
+            try user.save(db)
+        }
+    }
+    
     /// Delete all data of application on device
     func deleteAllData() throws {
         try dbWriter.write { db in
             _ = try Currency.deleteAll(db)
+            _ = try User.deleteAll(db)
         }
     }
 }
@@ -113,6 +135,12 @@ extension AppDatabase {
     /// Provides a read-only access to the database
     var reader: DatabaseReader {
         dbWriter
+    }
+    
+    func getCurrencyForUser(_ user: User) async throws -> Currency {
+        try await reader.read { db in
+            return try user.currency.fetchOne(db)!
+        }
     }
 }
 

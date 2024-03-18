@@ -44,7 +44,7 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
             // Сохраняем юзера
             logger.info("Получаем пользователя")
             let userRes = try await u
-//            try await db.importUser(User(userRes))
+            try db.importUser(User(userRes))
 
 //            // Сохраняем группы счетов
 //            logger.info("Получаем группы счетов")

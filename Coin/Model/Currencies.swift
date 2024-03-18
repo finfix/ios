@@ -6,7 +6,9 @@
 //
 
 import Foundation
+import Combine
 import GRDB
+import GRDBQuery
 
 struct Currency {
     
@@ -47,7 +49,6 @@ extension Currency: Hashable {
 }
 
 // MARK: - Persistence
-
 extension Currency: Codable, FetchableRecord, PersistableRecord {
     fileprivate enum Columns {
         static let code = Column(CodingKeys.code)
@@ -58,7 +59,6 @@ extension Currency: Codable, FetchableRecord, PersistableRecord {
 }
 
 // MARK: - Currency Database Requests
-
 extension DerivableRequest<Currency> {
     func orderedByCode() -> Self {
         order(
@@ -67,3 +67,28 @@ extension DerivableRequest<Currency> {
     }
 }
 
+// MARK: - Currency @Query
+struct CurrencyRequest: Queryable {
+    enum Ordering {
+        case byCode
+    }
+    
+    var ordering: Ordering
+    
+    // MARK: - Queryable Implementation
+    
+    static var defaultValue: [Currency] { [] }
+    
+    func publisher(in appDatabase: AppDatabase) -> AnyPublisher<[Currency], Error> {
+        ValueObservation
+            .tracking(fetchValue(_:))
+            .publisher(
+                in: appDatabase.reader,
+                scheduling: .immediate)
+            .eraseToAnyPublisher()
+    }
+    
+    func fetchValue(_ db: Database) throws -> [Currency] {
+        return try Currency.all().fetchAll(db)
+    }
+}
