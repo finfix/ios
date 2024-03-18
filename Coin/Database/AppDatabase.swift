@@ -81,6 +81,20 @@ extension AppDatabase {
             }
         }
         
+        migrator.registerMigration("createAccountGroup") { db in
+            try db.create(table: "accountGroup") { table in
+                table.primaryKey("id", .integer)
+                
+                table.column("name", .text)
+                    .notNull()
+                table.column("serialNumber", .integer)
+                    .notNull()
+                
+                table.belongsTo("currency", inTable: "currency")
+                    .notNull()
+            }
+        }
+        
         return migrator
     }
 }
@@ -101,7 +115,7 @@ extension AppDatabase {
 //        }
 //    }
     
-    /// Add all currencies to local database from server
+// MARK: - imports
     func importCurrencies(_ currencies: [Currency]) throws {
         try dbWriter.write { db in
             for currency in currencies {
@@ -116,7 +130,15 @@ extension AppDatabase {
         }
     }
     
-    /// Delete all data of application on device
+    func importAccountGroups(_ accountGroups: [AccountGroup]) throws {
+        try dbWriter.write { db in
+            for accountGroup in accountGroups {
+                try accountGroup.save(db)
+            }
+        }
+    }
+    
+// MARK: - deletes
     func deleteAllData() throws {
         try dbWriter.write { db in
             _ = try Currency.deleteAll(db)

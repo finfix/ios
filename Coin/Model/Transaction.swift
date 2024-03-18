@@ -28,8 +28,8 @@ class Transaction: Identifiable, Hashable {
     var type: TransactionType
     var timeCreate: Date
     
-    var accountFrom: Account?
-    var accountTo: Account?
+    var accountFrom: Account
+    var accountTo: Account
     
     init(
         id: UInt32 = 0,
@@ -51,9 +51,11 @@ class Transaction: Identifiable, Hashable {
         self.note = note
         self.type = type
         self.timeCreate = timeCreate
+        self.accountFrom = Account()
+        self.accountTo = Account()
     }
     
-    init(_ res: GetTransactionsRes, accountsMap: [UInt32: Account]) {
+    init(_ res: GetTransactionsRes) {
         self.accounting = res.accounting
         self.amountFrom = res.amountFrom
         self.amountTo = res.amountTo
@@ -63,6 +65,8 @@ class Transaction: Identifiable, Hashable {
         self.note = res.note
         self.type = res.type
         self.timeCreate = Date()
+        self.accountFrom = Account()
+        self.accountTo = Account()
     }
 }
 

@@ -16,7 +16,6 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
         do {
             
             let db = AppDatabase.shared
-//            try await deleteAll(isSave: false)
             
             @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0
             @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
@@ -26,7 +25,7 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
             // Получаем все данные
             async let c = getCurrencies()
             async let u = getUser()
-//            async let ag = getAccountGroups()
+            async let ag = getAccountGroups()
 //            async let a = getAccounts()
 //            async let t = getTransactions()
                         
@@ -38,7 +37,6 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
                 let currency = Currency(currencyRes)
                 currencies.append(currency)
             }
-            
             try db.importCurrencies(currencies)
 
             // Сохраняем юзера
@@ -46,15 +44,15 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
             let userRes = try await u
             try db.importUser(User(userRes))
 
-//            // Сохраняем группы счетов
-//            logger.info("Получаем группы счетов")
-//            let accountGroupsRes = try await ag
-//            var accountGroupsMap: [UInt32: AccountGroup] = [:]
-//            for accountGroupRes in accountGroupsRes {
-//                let accountGroup = AccountGroup(accountGroupRes, currenciesMap: currenciesMap)
-//                accountGroupsMap[accountGroup.id] = accountGroup
-//                modelContext.insert(accountGroup)
-//            }
+            // Сохраняем группы счетов
+            logger.info("Получаем группы счетов")
+            let accountGroupsRes = try await ag
+            var accountGroups = [AccountGroup]()
+            for accountGroupRes in accountGroupsRes {
+                let accountGroup = AccountGroup(accountGroupRes)
+                accountGroups.append(accountGroup)
+            }
+            try db.importAccountGroups(accountGroups)
             
 //            var fetchDescriptor = FetchDescriptor<AccountGroup>(sortBy: [SortDescriptor(\.serialNumber)])
 //            fetchDescriptor.fetchLimit = 1
@@ -88,18 +86,6 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
             showErrorAlert("\(error)")
         }
     }
-    
-//    func deleteAll(isSave: Bool = true) async throws {
-//        logger.info("Удаляем все данные")
-//        try modelContext.delete(model: User.self)
-//        try modelContext.delete(model: Transaction.self)
-//        try modelContext.delete(model: AccountGroup.self)
-//        try modelContext.delete(model: Account.self)
-//        try modelContext.delete(model: Currency.self)
-//        if isSave {
-//            try modelContext.save()
-//        }
-//    }
     
     private func getCurrencies() async throws -> [GetCurrenciesRes] {
         return try await UserAPI().GetCurrencies()

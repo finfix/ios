@@ -62,21 +62,20 @@ extension Currency: Codable, FetchableRecord, PersistableRecord {
 extension DerivableRequest<Currency> {
     func orderedByCode() -> Self {
         order(
-            Currency.Columns.code.desc
+            Currency.Columns.code.asc
         )
     }
 }
 
 // MARK: - Currency @Query
 struct CurrencyRequest: Queryable {
+    
     enum Ordering {
         case byCode
     }
-    
+
     var ordering: Ordering
-    
-    // MARK: - Queryable Implementation
-    
+        
     static var defaultValue: [Currency] { [] }
     
     func publisher(in appDatabase: AppDatabase) -> AnyPublisher<[Currency], Error> {
@@ -89,6 +88,9 @@ struct CurrencyRequest: Queryable {
     }
     
     func fetchValue(_ db: Database) throws -> [Currency] {
-        return try Currency.all().fetchAll(db)
+        switch ordering {
+        case .byCode:
+            return try Currency.all().orderedByCode().fetchAll(db)
+        }
     }
 }

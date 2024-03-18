@@ -13,13 +13,13 @@ private let logger = Logger(subsystem: "Coin", category: "EditTransaction")
 struct EditTransaction: View {
     
     private enum Mode {
-    case create, update
+        case create, update
     }
     
     @Environment (\.dismiss) private var dismiss
     private var oldTransaction: Transaction = Transaction()
     @State private var transaction: Transaction
-    private var accountGroups: [AccountGroup] = []
+    private var accounts: [Account] = []
     
     private var mode: Mode
     
@@ -43,7 +43,7 @@ struct EditTransaction: View {
     }
     
     private var intercurrency: Bool {
-        return transaction.accountFrom?.currency != transaction.accountTo?.currency
+        return transaction.accountFrom.currency != transaction.accountTo.currency
     }
     
     var body: some View {
@@ -52,14 +52,14 @@ struct EditTransaction: View {
                 Pickers(
                     buttonName: "Счет списания",
                     account: $transaction.accountFrom,
-                    accountGroups: accountGroups,
+                    accounts: accounts,
                     position: .up,
                     transactionType: transaction.type
                 )
                 Pickers(
                     buttonName: "Счет пополнения",
                     account: $transaction.accountTo,
-                    accountGroups: accountGroups,
+                    accounts: accounts,
                     position: .down,
                     transactionType: transaction.type,
                     excludeAccount: transaction.accountFrom
@@ -108,8 +108,8 @@ struct EditTransaction: View {
             do {
                 transaction.dateTransaction = transaction.dateTransaction.stripTime()
                 transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
-                    accountFromID: transaction.accountFrom?.id ?? 0,
-                    accountToID: transaction.accountTo?.id ?? 0,
+                    accountFromID: transaction.accountFrom.id,
+                    accountToID: transaction.accountTo.id,
                     amountFrom: transaction.amountFrom,
                     amountTo: transaction.amountTo,
                     dateTransaction: transaction.dateTransaction,
@@ -119,11 +119,11 @@ struct EditTransaction: View {
                 ))
                 switch transaction.type {
                 case .income:
-                    transaction.accountFrom!.remainder += transaction.amountFrom
-                    transaction.accountTo!.remainder += transaction.amountTo
+                    transaction.accountFrom.remainder += transaction.amountFrom
+                    transaction.accountTo.remainder += transaction.amountTo
                 case .transfer, .consumption:
-                    transaction.accountFrom!.remainder -= transaction.amountFrom
-                    transaction.accountTo!.remainder += transaction.amountTo
+                    transaction.accountFrom.remainder -= transaction.amountFrom
+                    transaction.accountTo.remainder += transaction.amountTo
                 default: break
                 }
             } catch {
@@ -143,8 +143,8 @@ struct EditTransaction: View {
             do {
                 transaction.dateTransaction = transaction.dateTransaction.stripTime()
                 try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
-                    accountFromID: transaction.accountFrom?.id != oldTransaction.accountFrom?.id ? transaction.accountFrom?.id : nil,
-                    accountToID: transaction.accountTo?.id != oldTransaction.accountTo?.id ? transaction.accountTo?.id : nil,
+                    accountFromID: transaction.accountFrom.id != oldTransaction.accountFrom.id ? transaction.accountFrom.id : nil,
+                    accountToID: transaction.accountTo.id != oldTransaction.accountTo.id ? transaction.accountTo.id : nil,
                     amountFrom: transaction.amountFrom != oldTransaction.amountFrom ? transaction.amountFrom : nil,
                     amountTo: transaction.amountTo != oldTransaction.amountTo ? transaction.amountTo : nil,
                     dateTransaction: transaction.dateTransaction != oldTransaction.dateTransaction ? transaction.dateTransaction : nil,
@@ -170,16 +170,16 @@ private struct Rate: View {
     init(_ transaction: Transaction) {
         guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
             rate = 0
-            symbols = "\(transaction.accountFrom?.currency?.symbol ?? "")/\(transaction.accountTo?.currency?.symbol ?? "")"
+            symbols = "\(transaction.accountFrom.currency?.symbol ?? "")/\(transaction.accountTo.currency?.symbol ?? "")"
             return
         }
-
+        
         if transaction.amountFrom > transaction.amountTo {
             rate = transaction.amountFrom / transaction.amountTo
-            symbols = "\(transaction.accountFrom?.currency?.symbol ?? "")/\(transaction.accountTo?.currency?.symbol ?? "")"
+            symbols = "\(transaction.accountFrom.currency?.symbol ?? "")/\(transaction.accountTo.currency?.symbol ?? "")"
         } else {
             rate = transaction.amountTo / transaction.amountFrom
-            symbols = "\(transaction.accountTo?.currency?.symbol ?? "")/\(transaction.accountFrom?.currency?.symbol ?? "")"
+            symbols = "\(transaction.accountTo.currency?.symbol ?? "")/\(transaction.accountFrom.currency?.symbol ?? "")"
         }
     }
     
@@ -191,13 +191,13 @@ private struct Rate: View {
 }
 
 extension Date {
-
+    
     func stripTime() -> Date {
         let components = Calendar.current.dateComponents([.year, .month, .day], from: self)
         let date = Calendar.current.date(from: components)
         return date!
     }
-
+    
 }
 
 private struct Pickers: View {
@@ -208,15 +208,14 @@ private struct Pickers: View {
     
     @State private var isPickerShowing = false
     var buttonName: String
-    @Binding var account: Account?
-    var accountGroups: [AccountGroup]
-    @State private var accountGroup = AccountGroup()
+    @Binding var account: Account
+    var accounts: [Account]
     var position: Position
     var transactionType: TransactionType
     var excludeAccount: Account?
     
-    var accounts: [Account] {
-        var subfiltered = accountGroup.accounts.filter { $0.visible && $0.id != excludeAccount?.id ?? 0 && !$0.isParent }
+    var accountsToShow: [Account] {
+        var subfiltered = accounts.filter { $0.visible && $0.id != excludeAccount?.id ?? 0 && !$0.isParent }
         
         switch transactionType {
         case .consumption:
@@ -250,43 +249,23 @@ private struct Pickers: View {
             } label: {
                 Text(buttonName)
                 Spacer()
-                Text(account?.name ?? "Счет не выбран")
+                Text(account.name)
                     .foregroundStyle(.secondary)
-                Text(account?.currency?.symbol ?? "?")
+                Text(account.currency?.symbol ?? "?")
                     .foregroundColor(.secondary)
             }
             if isPickerShowing {
-                HStack(spacing: 0) {
-                    Picker("", selection: $accountGroup) {
-                        ForEach (accountGroups) { accountGroup in
-                            Text(accountGroup.name)
-                                .tag(accountGroup)
+                Picker("", selection: $account) {
+                    ForEach (accounts) { account in
+                        HStack {
+                            Text(account.name)
+                            Spacer()
+                            Text(account.currency!.symbol)
+                                .foregroundColor(.secondary)
                         }
-                    }
-                    .onChange(of: accountGroup) {
-                        account = accountGroup.accounts.first
-                    }
-                    Picker("", selection: $account) {
-                        ForEach (accounts) { account in
-                            HStack {
-                                Text(account.name)
-                                Spacer()
-                                Text(account.currency!.symbol)
-                                    .foregroundColor(.secondary)
-                            }
-                            .tag(account as Account?)
-                        }
+                        .tag(account as Account?)
                     }
                 }
-            }
-        }
-        .onAppear {
-            if let account {
-                self.accountGroup = accountGroups.first { $0.accounts.contains(account) }!
-                self.account = account
-            } else {
-                accountGroup = accountGroups.first ?? AccountGroup()
-                self.account = accounts.first
             }
         }
         .buttonStyle(.plain)

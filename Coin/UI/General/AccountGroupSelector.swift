@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+import GRDBQuery
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "account group selector")
 
 struct AccountGroupSelector: View {
     
-    var accountGroups: [AccountGroup] = []
+    @Query(AccountGroupRequest(ordering: .bySerialNumber)) private var accountGroups: [AccountGroup]
     @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0 {
         didSet {
             guard accountGroups.count >= selectedAccountGroupIndex + 1 else { return }

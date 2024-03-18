@@ -68,13 +68,13 @@ struct TransactionsList: View {
                 try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
                 switch transaction.type {
                 case .transfer, .consumption:
-                    transaction.accountFrom?.remainder += transaction.amountFrom
-                    transaction.accountTo?.remainder -= transaction.amountTo
+                    transaction.accountFrom.remainder += transaction.amountFrom
+                    transaction.accountTo.remainder -= transaction.amountTo
                 case .income:
-                    transaction.accountFrom?.remainder -= transaction.amountFrom
-                    transaction.accountTo?.remainder -= transaction.amountTo
+                    transaction.accountFrom.remainder -= transaction.amountFrom
+                    transaction.accountTo.remainder -= transaction.amountTo
                 case .balancing:
-                    transaction.accountTo?.remainder -= transaction.amountTo
+                    transaction.accountTo.remainder -= transaction.amountTo
                 }
             } catch {
                 showErrorAlert("\(error)")

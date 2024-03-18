@@ -141,8 +141,8 @@
 		B514D48B2BA477580019AED6 /* Database */ = {
 			isa = PBXGroup;
 			children = (
-				B514D4912BA477A30019AED6 /* Persistense.swift */,
 				B5B707232BA59A3700A07DB6 /* AppDatabase.swift */,
+				B514D4912BA477A30019AED6 /* Persistense.swift */,
 			);
 			path = Database;
 			sourceTree = "<group>";
