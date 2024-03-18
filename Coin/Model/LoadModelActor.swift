@@ -15,7 +15,7 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
         logger.info("Синхронизируем данные")
         do {
             
-            let db = LocalDatabase.shared
+            let db = AppDatabase.shared
 //            try await deleteAll(isSave: false)
             
             @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0
@@ -25,7 +25,7 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
             
             // Получаем все данные
             async let c = getCurrencies()
-//            async let u = getUser()
+            async let u = getUser()
 //            async let ag = getAccountGroups()
 //            async let a = getAccounts()
 //            async let t = getTransactions()
@@ -34,20 +34,18 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
             logger.info("Получаем валюты")
             let currenciesRes = try await c
             var currencies = [Currency]()
-//            var currenciesMap: [String: Currency] = [:]
             for currencyRes in currenciesRes {
                 let currency = Currency(currencyRes)
                 currencies.append(currency)
-//                currenciesMap[currency.isoCode] = currency
             }
             
-            try await db.importCurrencies(currencies)
-//
-//            // Сохраняем юзера
-//            logger.info("Получаем пользователя")
-//            let userRes = try await u
-//            modelContext.insert(User(userRes, currenciesMap: currenciesMap))
-//            
+            try db.importCurrencies(currencies)
+
+            // Сохраняем юзера
+            logger.info("Получаем пользователя")
+            let userRes = try await u
+//            try await db.importUser(User(userRes))
+
 //            // Сохраняем группы счетов
 //            logger.info("Получаем группы счетов")
 //            let accountGroupsRes = try await ag
@@ -57,14 +55,14 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
 //                accountGroupsMap[accountGroup.id] = accountGroup
 //                modelContext.insert(accountGroup)
 //            }
-//            
+            
 //            var fetchDescriptor = FetchDescriptor<AccountGroup>(sortBy: [SortDescriptor(\.serialNumber)])
 //            fetchDescriptor.fetchLimit = 1
 //            let firstGroup = try modelContext.fetch(fetchDescriptor)
 //            if !firstGroup.isEmpty {
 //                selectedAccountGroupID = Int(firstGroup[0].id)
 //            }
-//                        
+                        
 //            // Сохраняем счета
 //            logger.info("Получаем счета счетов")
 //            let accountsRes = try await a
@@ -74,7 +72,7 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
 //                accountsMap[account.id] = account
 //                modelContext.insert(account)
 //            }
-//            
+            
 //            // Сохраняем транзакции
 //            logger.info("Получаем транзакции")
 //            let transactionsRes = try await t
@@ -82,7 +80,7 @@ private let logger = Logger(subsystem: "Coin", category: "loading data from serv
 //                let transaction = Transaction(transactionRes, accountsMap: accountsMap)
 //                modelContext.insert(transaction)
 //            }
-//            
+            
 //            logger.info("Все сохраняем")
 //            try modelContext.save()
         } catch {

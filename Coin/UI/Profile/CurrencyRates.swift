@@ -6,16 +6,18 @@
 //
 
 import SwiftUI
-import Combine
+import GRDBQuery
 
 struct CurrencyRates: View {
     
+    @Environment(\.appDatabase) private var appDatabase
+    
+    @Query(CurrencyRequest(ordering: .byCode)) private var currencies: [Currency]
+    
     var currencyFormatter = CurrencyFormatter()
-    
-    @StateObject private var viewModel = CurrencyRatesViewModel()
-    
+        
     var body: some View {
-        List(viewModel.currencies, id: \.code) { currency in
+        List(currencies, id: \.code) { currency in
             HStack {
                 Text(currency.code)
                 Spacer()
@@ -27,28 +29,4 @@ struct CurrencyRates: View {
 
 #Preview {
     CurrencyRates()
-}
-
-class CurrencyRatesViewModel: ObservableObject {
-    
-    @Published var currencies: [Currency] = []
-    
-    private let db = LocalDatabase.shared
-    
-    init() {
-        db
-            .observeCurrencies()
-            .catch { err in
-                return Just([])
-            }
-            .assign(to: &$currencies)
-    }
-    
-    func createCurrency() async {
-        do {
-            try await db.importCurrencies([Currency(code: "cst", name: "custom", rate: 1, symbol: "£")])
-        } catch {
-            print(error)
-        }
-    }
 }

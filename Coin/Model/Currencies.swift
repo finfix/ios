@@ -8,22 +8,19 @@
 import Foundation
 import GRDB
 
-struct Currency: Hashable, Codable {
-    
-    static func == (lhs: Currency, rhs: Currency) -> Bool {
-        return lhs.code == rhs.code
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(code)
-    }
+struct Currency {
     
     var code: String
     var name: String
     var rate: Decimal
     var symbol: String
     
-    init(code: String = "", name: String = "", rate: Decimal = 1, symbol: String = "") {
+    init(
+        code: String = "",
+        name: String = "",
+        rate: Decimal = 1,
+        symbol: String = ""
+    ) {
         self.code = code
         self.name = name
         self.rate = rate
@@ -38,5 +35,35 @@ struct Currency: Hashable, Codable {
     }
 }
 
-extension Currency: TableRecord, FetchableRecord, EncodableRecord, PersistableRecord {}
+
+extension Currency: Hashable {
+    static func == (lhs: Currency, rhs: Currency) -> Bool {
+        return lhs.code == rhs.code
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(code)
+    }
+}
+
+// MARK: - Persistence
+
+extension Currency: Codable, FetchableRecord, PersistableRecord {
+    fileprivate enum Columns {
+        static let code = Column(CodingKeys.code)
+        static let name = Column(CodingKeys.name)
+        static let rate = Column(CodingKeys.rate)
+        static let symbol = Column(CodingKeys.symbol)
+    }
+}
+
+// MARK: - Currency Database Requests
+
+extension DerivableRequest<Currency> {
+    func orderedByCode() -> Self {
+        order(
+            Currency.Columns.code.desc
+        )
+    }
+}
 
