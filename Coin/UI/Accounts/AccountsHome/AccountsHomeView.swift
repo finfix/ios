@@ -13,7 +13,7 @@ struct AccountsHomeView: View {
     var accounts: [Account] = []
     
     var filteredAccounts: [Account] {
-        accounts.filter { $0.accountGroup?.id ?? 0 == selectedAccountsGroupID }
+        accounts.filter { $0.accountGroup.id == selectedAccountsGroupID }
     }
     
     @State var showDebts = false

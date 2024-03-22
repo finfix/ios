@@ -6,72 +6,38 @@
 //
 
 import Foundation
-import Combine
-import GRDB
-import GRDBQuery
 
-struct User: Identifiable {
-    
+struct User {
     var id: UInt32
     var name: String
     var email: String
-    var defaultCurrencyCode: String
+    var defaultCurrency: Currency
     
     init(
         id: UInt32 = 0,
         name: String = "",
         email: String = "",
-        defaultCurrencyCode: String = ""
+        defaultCurrency: Currency = Currency()
     ) {
         self.id = id
         self.name = name
         self.email = email
-        self.defaultCurrencyCode = defaultCurrencyCode
+        self.defaultCurrency = defaultCurrency
     }
     
-    init(_ res: GetUserRes) {
-        self.id = res.id
-        self.name = res.name
-        self.email = res.email
-        self.defaultCurrencyCode = res.defaultCurrency
-    }
-}
-
-// MARK: - belongs
-extension User {
-    static let currency = belongsTo(Currency.self)
-    var currency: QueryInterfaceRequest<Currency> {
-        request(for: User.currency)
-    }
-}
-
-// MARK: - Persistence
-extension User: Codable, FetchableRecord, PersistableRecord {
-    fileprivate enum Columns {
-        static let id = Column(CodingKeys.id)
-        static let name = Column(CodingKeys.name)
-        static let email = Column(CodingKeys.email)
-        static let defaultCurrencyCode = Column(CodingKeys.defaultCurrencyCode)
-    }
-}
-
-// MARK: - User @Query
-struct UserRequest: Queryable {
-    
-    // MARK: - Queryable Implementation
-    
-    static var defaultValue: [User] { [] }
-    
-    func publisher(in appDatabase: AppDatabase) -> AnyPublisher<[User], Error> {
-        ValueObservation
-            .tracking(fetchValue(_:))
-            .publisher(
-                in: appDatabase.reader,
-                scheduling: .immediate)
-            .eraseToAnyPublisher()
+    // Инициализатор из модели базы данных
+    init(_ dbModel: UserDB, currenciesMap: [String: Currency]?) {
+        self.id = dbModel.id
+        self.name = dbModel.name
+        self.email = dbModel.email
+        self.defaultCurrency = currenciesMap?[dbModel.defaultCurrencyCode]! ?? Currency()
     }
     
-    func fetchValue(_ db: Database) throws -> [User] {
-        return try User.all().fetchAll(db)
+    static func convertFromDBModel(_ usersDB: [UserDB], currenciesMap: [String: Currency]?) -> [User] {
+        var users: [User] = []
+        for userDB in usersDB {
+            users.append(User(userDB, currenciesMap: currenciesMap))
+        }
+        return users
     }
 }

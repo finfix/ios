@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import GRDBQuery
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "Main")
@@ -23,7 +22,6 @@ struct MyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.appDatabase, .shared)
                 .preferredColorScheme(isDarkMode ? .dark : .light)
                 .alert(isPresented: $isErrorShowing) {
                     Alert(title: 
@@ -50,21 +48,4 @@ func showErrorAlert(_ title: String, description: String? = nil) {
     errorText = title
     errorDescription = description
     isErrorShowing = true
-}
-
-private struct AppDatabaseKey: EnvironmentKey {
-    static var defaultValue: AppDatabase { .empty() }
-}
-
-extension EnvironmentValues {
-    var appDatabase: AppDatabase {
-        get { self[AppDatabaseKey.self] }
-        set { self[AppDatabaseKey.self] = newValue }
-    }
-}
-
-extension Query where Request.DatabaseContext == AppDatabase {
-    init(_ request: Request) {
-        self.init(request, in: \.appDatabase)
-    }
 }

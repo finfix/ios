@@ -51,37 +51,40 @@ struct TransactionsList: View {
                             TransactionRow(transaction: transaction)
                         }
                     }
-                    .onDelete {
-                        for i in $0.makeIterator() {
-                            deleteTransaction(groupedTransactionByDate[date]![i])
-                        }
-                    }
+//                    .onDelete {
+//                        for i in $0.makeIterator() {
+//                            deleteTransaction(groupedTransactionByDate[date]![i])
+//                        }
+//                    }
                 }
             }
         }
         .listStyle(.grouped)
     }
     
-    func deleteTransaction(_ transaction: Transaction) {
-        Task {
-            do {
-                try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
-                switch transaction.type {
-                case .transfer, .consumption:
-                    transaction.accountFrom.remainder += transaction.amountFrom
-                    transaction.accountTo.remainder -= transaction.amountTo
-                case .income:
-                    transaction.accountFrom.remainder -= transaction.amountFrom
-                    transaction.accountTo.remainder -= transaction.amountTo
-                case .balancing:
-                    transaction.accountTo.remainder -= transaction.amountTo
-                }
-            } catch {
-                showErrorAlert("\(error)")
-                logger.error("\(error)")
-            }
-        }
-    }
+//    func deleteTransaction(_ transaction: Transaction) {
+//        Task {
+//            do {
+//                guard let accountFrom = transaction.accountFrom else { return }
+//                guard let accountTo = transaction.accountFrom else { return }
+//
+//                try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
+//                switch transaction.type {
+//                case .transfer, .consumption:
+//                    transaction.accountFrom?.remainder += ransaction.amountFrom
+//                    transaction.accountTo.remainder -= transaction.amountTo
+//                case .income:
+//                    transaction.accountFrom.remainder -= transaction.amountFrom
+//                    transaction.accountTo.remainder -= transaction.amountTo
+//                case .balancing:
+//                    transaction.accountTo.remainder -= transaction.amountTo
+//                }
+//            } catch {
+//                showErrorAlert("\(error)")
+//                logger.error("\(error)")
+//            }
+//        }
+//    }
 }
 
 #Preview {

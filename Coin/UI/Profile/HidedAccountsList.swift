@@ -16,7 +16,7 @@ struct HidedAccountsList: View {
     var filteredAccounts: [Account] {
         accounts.filter {
             $0.type == accountType &&
-            $0.accountGroup?.id ?? 0 == selectedAccountsGroupID &&
+            $0.accountGroup.id == selectedAccountsGroupID &&
             !$0.visible
         }
     }

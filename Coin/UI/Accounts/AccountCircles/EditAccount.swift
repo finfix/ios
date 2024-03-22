@@ -103,13 +103,13 @@ struct EditAccount: View {
     func createAccount() async {
         do {
             account.id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
-                accountGroupID: account.accountGroup?.id ?? 0,
+                accountGroupID: account.accountGroup.id,
                 accounting: account.accounting,
                 budget: CreateAccountBudgetReq (
                     amount: account.budgetAmount,
                     gradualFilling: account.budgetGradualFilling
                 ),
-                currency: account.currency?.code ?? "",
+                currency: account.currency.code,
                 iconID: 1,
                 name: account.name,
                 remainder: account.remainder != 0 ? account.remainder : nil,

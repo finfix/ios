@@ -36,8 +36,6 @@ extension AppDatabase {
         
             NSLog("Database stored at \(databaseURL.path)")
 
-        let writer = try DatabaseQueue(path: databaseURL.path)
-
             let dbPool = try DatabasePool(
                 path: databaseURL.path,
                 // Use default AppDatabase configuration
@@ -48,13 +46,9 @@ extension AppDatabase {
             return appDatabase
 
         } catch {
+            showErrorAlert("\(error)")
             fatalError("ERROR: \(error)")
         }
-    }
-    
-    static func empty() -> AppDatabase {
-        let dbQueue = try! DatabaseQueue(configuration: AppDatabase.makeConfiguration())
-        return try! AppDatabase(dbQueue)
     }
 }
 

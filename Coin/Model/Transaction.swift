@@ -6,18 +6,8 @@
 //
 
 import Foundation
-import SwiftUI
 
-class Transaction: Identifiable, Hashable {
-    
-    static func == (lhs: Transaction, rhs: Transaction) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
+struct Transaction: Identifiable {
     var id: UInt32
     var accounting: Bool
     var amountFrom: Decimal
@@ -27,9 +17,8 @@ class Transaction: Identifiable, Hashable {
     var note: String
     var type: TransactionType
     var timeCreate: Date
-    
-    var accountFrom: Account
-    var accountTo: Account
+    var accountFrom: Account?
+    var accountTo: Account?
     
     init(
         id: UInt32 = 0,
@@ -40,7 +29,9 @@ class Transaction: Identifiable, Hashable {
         isExecuted: Bool = true,
         note: String = "",
         type: TransactionType = .consumption,
-        timeCreate: Date = Date()
+        timeCreate: Date = Date(),
+        accountFrom: Account? = nil,
+        accountTo: Account? = nil
     ) {
         self.accounting = accounting
         self.amountFrom = amountFrom
@@ -51,22 +42,45 @@ class Transaction: Identifiable, Hashable {
         self.note = note
         self.type = type
         self.timeCreate = timeCreate
-        self.accountFrom = Account()
-        self.accountTo = Account()
+        self.accountFrom = accountFrom
+        self.accountTo = accountTo
+    }
+}
+
+// Инициализатор из модели базы данных
+extension Transaction {
+    init(_ dbModel: TransactionDB, accountsMap: [UInt32: Account]?) {
+        self.accounting = dbModel.accounting
+        self.amountFrom = dbModel.amountFrom
+        self.amountTo = dbModel.amountTo
+        self.dateTransaction = dbModel.dateTransaction
+        self.id = dbModel.id
+        self.isExecuted = dbModel.isExecuted
+        self.note = dbModel.note
+        self.type = dbModel.type
+        self.timeCreate = Date()
+//        if let accountsMap = accountsMap {
+//            self.accountFrom = accountsMap[dbModel.accountFromId ?? 0]
+//            self.accountTo = accountsMap[dbModel.accountToId ?? 0]
+//        }
     }
     
-    init(_ res: GetTransactionsRes) {
-        self.accounting = res.accounting
-        self.amountFrom = res.amountFrom
-        self.amountTo = res.amountTo
-        self.dateTransaction = res.dateTransaction
-        self.id = res.id
-        self.isExecuted = res.isExecuted
-        self.note = res.note
-        self.type = res.type
-        self.timeCreate = Date()
-        self.accountFrom = Account()
-        self.accountTo = Account()
+    static func convertFromDBModel(_ transactionsDB: [TransactionDB], accountsMap: [UInt32: Account]?) -> [Transaction] {
+        var transactions: [Transaction] = []
+        for transactionDB in transactionsDB {
+            transactions.append(Transaction(transactionDB, accountsMap: accountsMap))
+        }
+        return transactions
+    }
+}
+
+extension Transaction: Hashable {
+    static func == (lhs: Transaction, rhs: Transaction) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

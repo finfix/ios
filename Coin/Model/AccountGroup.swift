@@ -6,34 +6,39 @@
 //
 
 import Foundation
-import Combine
-import GRDB
-import GRDBQuery
 
 struct AccountGroup: Identifiable {
-    
     var id: UInt32
     var name: String
     var serialNumber: UInt32
-    var currencyCode: String
-        
+    var currency: Currency
+    
     init(
         id: UInt32 = 0,
         name: String = "",
         serialNumber: UInt32 = 0,
-        currencyCode: String = ""
+        currency: Currency = Currency()
     ) {
         self.id = id
         self.name = name
         self.serialNumber = serialNumber
-        self.currencyCode = currencyCode
+        self.currency = currency
     }
     
-    init(_ res: GetAccountGroupsRes) {
-        self.id = res.id
-        self.name = res.name
-        self.serialNumber = res.serialNumber
-        self.currencyCode = res.currency
+    // Инициализатор из модели базы данных
+    init(_ dbModel: AccountGroupDB, currenciesMap: [String: Currency]?) {
+        self.id = dbModel.id
+        self.name = dbModel.name
+        self.serialNumber = dbModel.serialNumber
+        self.currency = currenciesMap?[dbModel.currencyCode]! ?? Currency()
+    }
+    
+    static func convertFromDBModel(_ transactionsDB: [TransactionDB], accountsMap: [UInt32: Account]?) -> [Transaction] {
+        var transactions: [Transaction] = []
+        for transactionDB in transactionsDB {
+            transactions.append(Transaction(transactionDB, accountsMap: accountsMap))
+        }
+        return transactions
     }
 }
 
@@ -46,59 +51,3 @@ extension AccountGroup: Hashable {
         hasher.combine(id)
     }
 }
-
-// MARK: - belongs
-extension AccountGroup {
-    static let currency = belongsTo(Currency.self)
-    var currency: QueryInterfaceRequest<Currency> {
-        request(for: AccountGroup.currency)
-    }
-}
-
-// MARK: - Persistence
-extension AccountGroup: Codable, FetchableRecord, PersistableRecord {
-    fileprivate enum Columns {
-        static let id = Column(CodingKeys.id)
-        static let name = Column(CodingKeys.name)
-        static let currencyCode = Column(CodingKeys.currencyCode)
-        static let serialNumber = Column(CodingKeys.serialNumber)
-    }
-}
-
-// MARK: - Currency Database Requests
-extension DerivableRequest<AccountGroup> {
-    func orderedBySerialNumber() -> Self {
-        order(
-            AccountGroup.Columns.serialNumber.asc
-        )
-    }
-}
-
-// MARK: - AccountGroup @Query
-struct AccountGroupRequest: Queryable {
-    
-    enum Ordering {
-        case bySerialNumber
-    }
-
-    var ordering: Ordering
-        
-    static var defaultValue: [AccountGroup] { [] }
-    
-    func publisher(in appDatabase: AppDatabase) -> AnyPublisher<[AccountGroup], Error> {
-        ValueObservation
-            .tracking(fetchValue(_:))
-            .publisher(
-                in: appDatabase.reader,
-                scheduling: .immediate)
-            .eraseToAnyPublisher()
-    }
-    
-    func fetchValue(_ db: Database) throws -> [AccountGroup] {
-        switch ordering {
-        case .bySerialNumber:
-            return try AccountGroup.all().orderedBySerialNumber().fetchAll(db)
-        }
-    }
-}
-

@@ -73,5 +73,5 @@ struct BudgetBar: View {
 }
 
 #Preview {
-    BudgetBar(account: Account(budgetAmount: 1000, budgetFixedSum: 100, budgetDaysOffset: 2, budgetGradualFilling: true, remainder: 100))
+    BudgetBar(account: Account())
 }

@@ -22,9 +22,9 @@ struct QuickStatisticView: View {
     var currency: Currency = Currency()
     var formatter: CurrencyFormatter = CurrencyFormatter()
     
-//    init() {
-//        self.formatter = CurrencyFormatter(currency: accountGroup.currency, maximumFractionDigits: 0)
-//    }
+    init() {
+        self.formatter = CurrencyFormatter(currency: accountGroup.currency, maximumFractionDigits: 0)
+    }
     
     var body: some View {
         let statistic = calculateStatistic(accounts: accounts, targetCurrency: currency)
@@ -74,7 +74,7 @@ struct QuickStatisticView: View {
     func calculateStatistic(accounts a: [Account], targetCurrency: Currency) -> QuickStatistic {
         logger.info("Считаем статистику для шапки")
                 
-        let tmp = QuickStatistic(currency: currency)
+        var tmp = QuickStatistic(currency: currency)
         
         let accounts = Account.groupAccounts(a)
         
@@ -84,7 +84,7 @@ struct QuickStatisticView: View {
                 continue
             }
                         
-            let relation = targetCurrency.rate / (account.currency?.rate ?? 1)
+            let relation = targetCurrency.rate / (account.currency.rate)
             
             switch account.type {
             case .expense:

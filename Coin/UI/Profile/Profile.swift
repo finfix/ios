@@ -12,6 +12,9 @@ enum ProfileViews {
 }
 
 struct Profile: View {
+    
+    @State var vm = ProfileViewModel()
+    
     @AppStorage("accessToken") private var accessToken: String?
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
@@ -38,7 +41,7 @@ struct Profile: View {
                             shouldShowProgress = true
                             defer { shouldShowProgress = false }
                             
-                            await sync()
+                            await vm.sync()
                             
                             withAnimation(.spring().delay(0.25)) {
                                 self.shouldShowSuccess.toggle()

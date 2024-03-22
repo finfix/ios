@@ -19,7 +19,7 @@ struct BudgetsList: View {
         logger.info("Группируем счета")
         let accounts = accounts.filter {
             $0.visible &&
-            $0.accountGroup?.id == UInt32(selectedAccountsGroupID) &&
+            $0.accountGroup.id == UInt32(selectedAccountsGroupID) &&
             $0.type == .expense
         }
         return Account.groupAccounts(accounts).filter { $0.budgetAmount != 0 }

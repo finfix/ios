@@ -21,7 +21,7 @@ struct AccountCirclesView: View {
     func groupAcccounts() -> [Account] {
         logger.info("Фильтруем и группируем счета")
         let filteredAccounts = accounts.filter {
-            $0.accountGroup?.id ?? 0 == selectedAccountsGroupID &&
+            $0.accountGroup.id == selectedAccountsGroupID &&
             $0.visible
         }
         return Account.groupAccounts(filteredAccounts)

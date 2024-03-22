@@ -11,7 +11,7 @@ import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "API")
 
-var serverPath = "https://bonavii.com/api"
+var serverPath = "http://192.168.1.8:8080"
 
 class API {
     
