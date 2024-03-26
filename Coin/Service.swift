@@ -79,15 +79,15 @@ extension Service {
         async let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
                     
         // Сохраняем данные в базу данных
-        logger.info("Получаем валюты")
+        logger.info("Сохраняем валюты")
         try db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
-        logger.info("Получаем пользователя")
+        logger.info("Сохраняем пользователя")
         try db.importUser(UserDB(try await user))
-        logger.info("Получаем группы счетов")
+        logger.info("Сохраняем группы счетов")
         try db.importAccountGroups(AccountGroupDB.convertFromApiModel(try await accountGroups))
-        logger.info("Получаем счета")
+        logger.info("Сохраняем счета")
         try db.importAccounts(AccountDB.convertFromApiModel(try await accounts))
-        logger.info("Получаем транзакции")
+        logger.info("Сохраняем транзакции")
         try db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
     }
 }
