@@ -43,7 +43,7 @@ struct EditTransaction: View {
     }
     
     private var intercurrency: Bool {
-        return transaction.accountFrom?.currency != transaction.accountTo?.currency
+        return transaction.accountFrom.currency != transaction.accountTo.currency
     }
     
     var body: some View {
@@ -108,8 +108,8 @@ struct EditTransaction: View {
             do {
                 transaction.dateTransaction = transaction.dateTransaction.stripTime()
                 transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
-                    accountFromID: transaction.accountFrom?.id ?? 0,
-                    accountToID: transaction.accountTo?.id ?? 0,
+                    accountFromID: transaction.accountFrom.id,
+                    accountToID: transaction.accountTo.id,
                     amountFrom: transaction.amountFrom,
                     amountTo: transaction.amountTo,
                     dateTransaction: transaction.dateTransaction,
@@ -143,8 +143,8 @@ struct EditTransaction: View {
             do {
                 transaction.dateTransaction = transaction.dateTransaction.stripTime()
                 try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
-                    accountFromID: transaction.accountFrom?.id != oldTransaction.accountFrom?.id ? transaction.accountFrom?.id : nil,
-                    accountToID: transaction.accountTo?.id != oldTransaction.accountTo?.id ? transaction.accountTo?.id : nil,
+                    accountFromID: transaction.accountFrom.id != oldTransaction.accountFrom.id ? transaction.accountFrom.id : nil,
+                    accountToID: transaction.accountTo.id != oldTransaction.accountTo.id ? transaction.accountTo.id : nil,
                     amountFrom: transaction.amountFrom != oldTransaction.amountFrom ? transaction.amountFrom : nil,
                     amountTo: transaction.amountTo != oldTransaction.amountTo ? transaction.amountTo : nil,
                     dateTransaction: transaction.dateTransaction != oldTransaction.dateTransaction ? transaction.dateTransaction : nil,
@@ -170,16 +170,16 @@ private struct Rate: View {
     init(_ transaction: Transaction) {
         guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
             rate = 0
-            symbols = "\(transaction.accountFrom?.currency.symbol ?? "")/\(transaction.accountTo?.currency.symbol ?? "")"
+            symbols = "\(transaction.accountFrom.currency.symbol)/\(transaction.accountTo.currency.symbol)"
             return
         }
         
         if transaction.amountFrom > transaction.amountTo {
             rate = transaction.amountFrom / transaction.amountTo
-            symbols = "\(transaction.accountFrom?.currency.symbol ?? "")/\(transaction.accountTo?.currency.symbol ?? "")"
+            symbols = "\(transaction.accountFrom.currency.symbol)/\(transaction.accountTo.currency.symbol)"
         } else {
             rate = transaction.amountTo / transaction.amountFrom
-            symbols = "\(transaction.accountTo?.currency.symbol ?? "")/\(transaction.accountFrom?.currency.symbol ?? "")"
+            symbols = "\(transaction.accountTo.currency.symbol)/\(transaction.accountFrom.currency.symbol)"
         }
     }
     

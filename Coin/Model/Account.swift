@@ -83,7 +83,7 @@ struct Account: Identifiable {
         self.budgetDaysOffset = dbModel.budgetDaysOffset
         self.budgetGradualFilling = dbModel.budgetGradualFilling
         
-//        self.parentAccountID = dbModel.parentAccountId
+        self.parentAccountID = dbModel.parentAccountId
         
         self.accountGroup = accountGroupsMap?[dbModel.accountGroupId]! ?? AccountGroup()
         self.currency = currenciesMap?[dbModel.currencyCode]! ?? Currency()

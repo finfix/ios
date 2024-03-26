@@ -7,7 +7,7 @@
 
 import Foundation
 import GRDB
-//import os.log
+import os.log
 
 struct AppDatabase {
     init(_ dbWriter: any DatabaseWriter) throws {
@@ -21,18 +21,18 @@ struct AppDatabase {
 // MARK: - Database Configuration
 
 extension AppDatabase {
-//    private static let sqlLogger = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "SQL")
+    private static let sqlLogger = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "SQL")
     
     public static func makeConfiguration(_ base: Configuration = Configuration()) -> Configuration {
         var config = base
                 
-//        if ProcessInfo.processInfo.environment["SQL_TRACE"] != nil {
-//            config.prepareDatabase { db in
-//                db.trace {
-//                    os_log("%{public}@", log: sqlLogger, type: .debug, String(describing: $0))
-//                }
-//            }
-//        }
+        if ProcessInfo.processInfo.environment["SQL_TRACE"] != nil {
+            config.prepareDatabase { db in
+                db.trace {
+                    os_log("%{public}@", log: sqlLogger, type: .debug, String(describing: $0))
+                }
+            }
+        }
         
         #if DEBUG
         config.publicStatementArguments = true
@@ -148,8 +148,10 @@ extension AppDatabase {
                 table.column("timeCreate", .datetime)
                     .notNull()
                 
-//                table.belongsTo("accountFrom", inTable: "accountDB")
-//                table.belongsTo("accountTo", inTable: "accountDB")
+                table.belongsTo("accountFrom", inTable: "accountDB")
+                    .notNull()
+                table.belongsTo("accountTo", inTable: "accountDB")
+                    .notNull()
             }
         }
         

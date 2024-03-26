@@ -17,8 +17,8 @@ struct Transaction: Identifiable {
     var note: String
     var type: TransactionType
     var timeCreate: Date
-    var accountFrom: Account?
-    var accountTo: Account?
+    var accountFrom: Account
+    var accountTo: Account
     
     init(
         id: UInt32 = 0,
@@ -30,8 +30,8 @@ struct Transaction: Identifiable {
         note: String = "",
         type: TransactionType = .consumption,
         timeCreate: Date = Date(),
-        accountFrom: Account? = nil,
-        accountTo: Account? = nil
+        accountFrom: Account = Account(),
+        accountTo: Account = Account()
     ) {
         self.accounting = accounting
         self.amountFrom = amountFrom
@@ -59,10 +59,8 @@ extension Transaction {
         self.note = dbModel.note
         self.type = dbModel.type
         self.timeCreate = Date()
-//        if let accountsMap = accountsMap {
-//            self.accountFrom = accountsMap[dbModel.accountFromId ?? 0]
-//            self.accountTo = accountsMap[dbModel.accountToId ?? 0]
-//        }
+        self.accountFrom = accountsMap?[dbModel.accountFromId] ?? Account()
+        self.accountTo = accountsMap?[dbModel.accountToId] ?? Account()
     }
     
     static func convertFromDBModel(_ transactionsDB: [TransactionDB], accountsMap: [UInt32: Account]?) -> [Transaction] {

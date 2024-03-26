@@ -19,8 +19,8 @@ struct TransactionDB {
     var note: String
     var type: TransactionType
     var timeCreate: Date
-//    var accountFromId: UInt32?
-//    var accountToId: UInt32?
+    var accountFromId: UInt32
+    var accountToId: UInt32
     
     // Инициализатор из сетевой модели
     init(_ res: GetTransactionsRes) {
@@ -33,8 +33,8 @@ struct TransactionDB {
         self.note = res.note
         self.type = res.type
         self.timeCreate = Date()
-//        self.accountFromId = res.accountFromID
-//        self.accountToId = res.accountToID
+        self.accountFromId = res.accountFromID
+        self.accountToId = res.accountToID
     }
     
     static func convertFromApiModel(_ transactions: [GetTransactionsRes]) -> [TransactionDB] {
@@ -58,8 +58,8 @@ extension TransactionDB: Codable, FetchableRecord, PersistableRecord {
         static let note = Column(CodingKeys.note)
         static let type = Column(CodingKeys.type)
         static let timeCreate = Column(CodingKeys.timeCreate)
-//        static let accountFromId = Column(CodingKeys.accountFromId)
-//        static let accountToId = Column(CodingKeys.accountToId)
+        static let accountFromId = Column(CodingKeys.accountFromId)
+        static let accountToId = Column(CodingKeys.accountToId)
     }
 }
 
