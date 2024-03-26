@@ -12,18 +12,18 @@ private let logger = Logger(subsystem: "Coin", category: "account group selector
 
 struct AccountGroupSelector: View {
     
-    private var accountGroups: [AccountGroup] = []
+    private var vm = AccountGroupSelectorViewModel()
     @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0 {
         didSet {
-            guard accountGroups.count >= selectedAccountGroupIndex + 1 else { return }
-            logger.info("Выбрали группу счетов \(accountGroups[selectedAccountGroupIndex].name, privacy: .private)")
-            selectedAccountGroupID = Int(accountGroups[selectedAccountGroupIndex].id)
+            guard vm.accountGroups.count >= selectedAccountGroupIndex + 1 else { return }
+            logger.info("Выбрали группу счетов \(vm.accountGroups[selectedAccountGroupIndex].name, privacy: .private)")
+            selectedAccountGroupID = Int(vm.accountGroups[selectedAccountGroupIndex].id)
         }
     }
     @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
     
     var canForward: Bool {
-        selectedAccountGroupIndex + 1 < accountGroups.count
+        selectedAccountGroupIndex + 1 < vm.accountGroups.count
     }
     
     var canBackward: Bool {
@@ -41,7 +41,7 @@ struct AccountGroupSelector: View {
                     .foregroundColor(canBackward ? .primary : .gray)
             }
             
-            Text(accountGroups.count > 0 ? accountGroups[selectedAccountGroupIndex].name : "")
+            Text(vm.accountGroups.count > 0 ? vm.accountGroups[selectedAccountGroupIndex].name : "")
                 .frame(width: 100)
             
             Button {
@@ -52,6 +52,9 @@ struct AccountGroupSelector: View {
                 Image(systemName: "chevron.right")
                     .foregroundColor(canForward ? .primary : .gray)
             }
+        }
+        .task {
+            vm.load()
         }
         .padding()
     }

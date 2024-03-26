@@ -60,6 +60,7 @@
 		B5D143B62906B4EC00875037 /* AuthAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B52906B4EC00875037 /* AuthAPI.swift */; };
 		B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B72906B4F800875037 /* AccountAPI.swift */; };
 		B5D6DE222BB1D21E00A06D67 /* AccountHomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE212BB1D21E00A06D67 /* AccountHomeViewModel.swift */; };
+		B5D6DE242BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE232BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift */; };
 		B5D6DE262BB1DBA800A06D67 /* TransactionsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */; };
 		B5D6DE282BB1E04000A06D67 /* AccountCirclesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */; };
 		B5E6C1942AF2AF9500097067 /* CurrencyRates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */; };
@@ -129,6 +130,7 @@
 		B5D143B52906B4EC00875037 /* AuthAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthAPI.swift; sourceTree = "<group>"; };
 		B5D143B72906B4F800875037 /* AccountAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAPI.swift; sourceTree = "<group>"; };
 		B5D6DE212BB1D21E00A06D67 /* AccountHomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountHomeViewModel.swift; sourceTree = "<group>"; };
+		B5D6DE232BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroupSelectorViewModel.swift; sourceTree = "<group>"; };
 		B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListViewModel.swift; sourceTree = "<group>"; };
 		B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCirclesViewModel.swift; sourceTree = "<group>"; };
 		B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyRates.swift; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 			isa = PBXGroup;
 			children = (
 				B59F0F2828FDD4C200AA33A9 /* AccountGroupSelector.swift */,
+				B5D6DE232BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift */,
 				B5E8932F28FF090B002AC30C /* SnapCarousel.swift */,
 				B5B950562ADF261700798F8C /* QuickStatisticView.swift */,
 				B5B950442ADF16FF00798F8C /* Line.swift */,
@@ -496,6 +499,7 @@
 				B5D6DE282BB1E04000A06D67 /* AccountCirclesViewModel.swift in Sources */,
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
+				B5D6DE242BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift in Sources */,
 				B5B068E82BAC6E0400AEEC98 /* AccountGroup.swift in Sources */,
 				B5B068E22BAC6DC200AEEC98 /* Transaction.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,

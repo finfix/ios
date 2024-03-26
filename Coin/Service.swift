@@ -40,6 +40,10 @@ extension Service {
         return Account.convertFromDBModel(try db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
     }
     
+    
+    func getSimpleAccountGroups() throws -> [AccountGroup] {
+        return AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: nil)
+    }
     func getFullTransactionsPage(page: Int) throws -> [Transaction] {
         let limit = 100
         
