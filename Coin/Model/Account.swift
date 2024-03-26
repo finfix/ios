@@ -98,6 +98,9 @@ struct Account: Identifiable {
         }
         return accounts
     }
+    
+    static func convertToMap(_ accounts: [Account]) -> [UInt32: Account] {
+        return Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
     }
 }
 

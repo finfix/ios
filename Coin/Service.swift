@@ -39,6 +39,15 @@ extension Service {
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
         return Account.convertFromDBModel(try db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
     }
+    
+    func getFullTransactionsPage(page: Int) throws -> [Transaction] {
+        let limit = 100
+        
+        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
+        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: nil))
+        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
+        return Transaction.convertFromDBModel(try db.getTransactionsWithPagination(offset: limit * page, limit: limit), accountsMap: accountsMap)
+    }
 }
 
 // MARK: - Sync

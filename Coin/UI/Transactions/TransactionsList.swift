@@ -38,10 +38,10 @@ struct TransactionsView: View {
 
 struct TransactionsList: View {
     
-    var transactions: [Transaction] = []
+    var vm = TransactionsListViewModel()
     
     var body: some View {
-        let groupedTransactionByDate = Dictionary(grouping: transactions, by: { $0.dateTransaction })
+        let groupedTransactionByDate = Dictionary(grouping: vm.transactions, by: { $0.dateTransaction })
         
         List {
             ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
@@ -58,6 +58,11 @@ struct TransactionsList: View {
 //                    }
                 }
             }
+            Text("Загрузка...")
+                .task {
+                    vm.load()
+                    vm.page += 1
+                }
         }
         .listStyle(.grouped)
     }

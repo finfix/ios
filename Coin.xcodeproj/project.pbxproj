@@ -60,6 +60,7 @@
 		B5D143B62906B4EC00875037 /* AuthAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B52906B4EC00875037 /* AuthAPI.swift */; };
 		B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B72906B4F800875037 /* AccountAPI.swift */; };
 		B5D6DE222BB1D21E00A06D67 /* AccountHomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE212BB1D21E00A06D67 /* AccountHomeViewModel.swift */; };
+		B5D6DE262BB1DBA800A06D67 /* TransactionsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */; };
 		B5E6C1942AF2AF9500097067 /* CurrencyRates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */; };
 		B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8932F28FF090B002AC30C /* SnapCarousel.swift */; };
 		B5E89332290073C5002AC30C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E89331290073C5002AC30C /* LoginView.swift */; };
@@ -127,6 +128,7 @@
 		B5D143B52906B4EC00875037 /* AuthAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthAPI.swift; sourceTree = "<group>"; };
 		B5D143B72906B4F800875037 /* AccountAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountAPI.swift; sourceTree = "<group>"; };
 		B5D6DE212BB1D21E00A06D67 /* AccountHomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountHomeViewModel.swift; sourceTree = "<group>"; };
+		B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListViewModel.swift; sourceTree = "<group>"; };
 		B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyRates.swift; sourceTree = "<group>"; };
 		B5E8932F28FF090B002AC30C /* SnapCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapCarousel.swift; sourceTree = "<group>"; };
 		B5E89331290073C5002AC30C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -363,6 +365,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */,
+				B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */,
 				B5B950542ADF258700798F8C /* TransactionRow.swift */,
 				B593F9542AE1CCB000378E17 /* EditTransaction.swift */,
 				B54254842AF5218C008ECC33 /* TransactionFilterView.swift */,
@@ -493,6 +496,7 @@
 				B5B068E22BAC6DC200AEEC98 /* Transaction.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
 				B5C0C31C2AEAD9E70016990E /* HidedAccountsList.swift in Sources */,
+				B5D6DE262BB1DBA800A06D67 /* TransactionsListViewModel.swift in Sources */,
 				B593F9552AE1CCB000378E17 /* EditTransaction.swift in Sources */,
 				B5D143B42906A66400875037 /* AuthModels.swift in Sources */,
 				B5B068EA2BAC6E1B00AEEC98 /* Currency.swift in Sources */,

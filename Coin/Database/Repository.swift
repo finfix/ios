@@ -86,4 +86,14 @@ extension AppDatabase {
             }
         }
     }
+    
+    func getTransactionsWithPagination(offset: Int, limit: Int) throws -> [TransactionDB] {
+        try reader.read { db in
+            return try TransactionDB
+                .order(Column("dateTransaction").desc)
+                .limit(limit, offset: offset)
+                .fetchAll(db)
+                
+        }
+    }
 }
