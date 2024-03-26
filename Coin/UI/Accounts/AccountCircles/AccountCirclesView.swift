@@ -71,7 +71,7 @@ struct AccountCirclesView: View {
                 .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
                 .scrollIndicators(.hidden)
                 .navigationDestination(for: Account.self) { EditAccount($0) }
-                .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0) }
+                .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0, accountGroup: AccountGroup(id: UInt32(selectedAccountsGroupID))) }
             }
             Spacer()
         }

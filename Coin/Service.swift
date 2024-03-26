@@ -55,9 +55,9 @@ extension Service {
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
     func deleteTransaction(_ t: Transaction) async throws {
         var transaction = t
-
+        
         try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
-
+        
         let accounts = try getAccounts(ids: [transaction.accountFrom.id, transaction.accountTo.id])
         guard accounts.count == 2 else {
             showErrorAlert("Не нашли оба счета транзакции в базе данных")
@@ -66,7 +66,7 @@ extension Service {
         
         transaction.accountFrom = accounts.first { $0.id == transaction.accountFrom.id }!
         transaction.accountTo = accounts.first { $0.id == transaction.accountTo.id }!
-
+        
         switch transaction.type {
         case .transfer, .consumption:
             transaction.accountFrom.remainder += transaction.amountFrom
@@ -79,6 +79,44 @@ extension Service {
         }
         
         try db.deleteTransactionAndChangeBalances(transaction)
+    }
+    
+    func createAccount(_ a: Account) async throws {
+        var account = a
+        account.id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
+            accountGroupID: account.accountGroup.id,
+            accounting: account.accounting,
+            budget: CreateAccountBudgetReq (
+                amount: account.budgetAmount,
+                gradualFilling: account.budgetGradualFilling
+            ),
+            currency: account.currency.code,
+            iconID: 1,
+            name: account.name,
+            remainder: account.remainder != 0 ? account.remainder : nil,
+            type: account.type.rawValue,
+            isParent: false)
+        )
+        
+        try db.createAccount(account)
+    }
+    
+    func updateAccount(newAccount: Account, oldAccount: Account) async throws {
+        
+        try await AccountAPI().UpdateAccount(req: UpdateAccountReq(
+            id: newAccount.id,
+            accounting: oldAccount.accounting != newAccount.accounting ? newAccount.accounting : nil,
+            name: oldAccount.name != newAccount.name ? newAccount.name : nil,
+            remainder: oldAccount.remainder != newAccount.remainder ? newAccount.remainder : nil,
+            visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
+            budget: UpdateBudgetReq(
+                amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
+                fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
+                daysOffset: oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ? newAccount.budgetDaysOffset : nil,
+                gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
+        ))
+        
+        try db.updateAccount(newAccount)
     }
 }
 

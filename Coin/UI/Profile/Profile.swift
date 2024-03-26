@@ -60,6 +60,7 @@ struct Profile: View {
                         Task {
                             shouldDisableUI = true
                             defer { shouldDisableUI = false }
+                            vm.deleteAll()
                         }
                         accountGroupIndex = 0
                         isLogin = false

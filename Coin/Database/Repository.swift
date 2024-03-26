@@ -66,6 +66,18 @@ extension AppDatabase {
             _ = try AccountDB(transaction.accountTo).update(db)
         }
     }
+    
+    func createAccount(_ account: Account) throws {
+        try dbWriter.write { db in
+            _ = try AccountDB(account).insert(db)
+        }
+    }
+    
+    func updateAccount(_ account: Account) throws {
+        try dbWriter.write { db in
+            _ = try AccountDB(account).update(db)
+        }
+    }
 }
 
 // MARK: - Reads

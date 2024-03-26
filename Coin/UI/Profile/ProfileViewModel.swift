@@ -23,4 +23,12 @@ class ProfileViewModel {
             showErrorAlert("\(error)")
         }
     }
+    
+    func deleteAll() {
+        do {
+            try service.deleteAllData()
+        } catch {
+            showErrorAlert("\(error)")
+        }
+    }
 }
