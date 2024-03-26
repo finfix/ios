@@ -33,6 +33,11 @@ struct Profile: View {
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
                     NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
                 }
+                // TODO: Убрать
+                Section {
+                    TempAccountGroupSelector()
+                }
+                //
                 Section {
                     Button("Синхронизировать") {
                         Task {

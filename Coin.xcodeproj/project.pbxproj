@@ -63,6 +63,7 @@
 		B5D6DE242BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE232BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift */; };
 		B5D6DE262BB1DBA800A06D67 /* TransactionsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */; };
 		B5D6DE282BB1E04000A06D67 /* AccountCirclesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */; };
+		B5D6DE2C2BB28B2200A06D67 /* TempAccountGroupSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE2B2BB28B2200A06D67 /* TempAccountGroupSelector.swift */; };
 		B5E6C1942AF2AF9500097067 /* CurrencyRates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */; };
 		B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8932F28FF090B002AC30C /* SnapCarousel.swift */; };
 		B5E89332290073C5002AC30C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E89331290073C5002AC30C /* LoginView.swift */; };
@@ -133,6 +134,7 @@
 		B5D6DE232BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroupSelectorViewModel.swift; sourceTree = "<group>"; };
 		B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListViewModel.swift; sourceTree = "<group>"; };
 		B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCirclesViewModel.swift; sourceTree = "<group>"; };
+		B5D6DE2B2BB28B2200A06D67 /* TempAccountGroupSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TempAccountGroupSelector.swift; sourceTree = "<group>"; };
 		B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyRates.swift; sourceTree = "<group>"; };
 		B5E8932F28FF090B002AC30C /* SnapCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapCarousel.swift; sourceTree = "<group>"; };
 		B5E89331290073C5002AC30C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -291,6 +293,7 @@
 			children = (
 				B5B9504E2ADF235A00798F8C /* Profile.swift */,
 				B5B068F02BAC70A100AEEC98 /* ProfileViewModel.swift */,
+				B5D6DE2B2BB28B2200A06D67 /* TempAccountGroupSelector.swift */,
 				B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */,
 				B51CE1FD2BAC478D00682D48 /* CurrencyRatesViewModel.swift */,
 				B5C0C31B2AEAD9E70016990E /* HidedAccountsList.swift */,
@@ -505,6 +508,7 @@
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
 				B5C0C31C2AEAD9E70016990E /* HidedAccountsList.swift in Sources */,
 				B5D6DE262BB1DBA800A06D67 /* TransactionsListViewModel.swift in Sources */,
+				B5D6DE2C2BB28B2200A06D67 /* TempAccountGroupSelector.swift in Sources */,
 				B593F9552AE1CCB000378E17 /* EditTransaction.swift in Sources */,
 				B5D143B42906A66400875037 /* AuthModels.swift in Sources */,
 				B5B068EA2BAC6E1B00AEEC98 /* Currency.swift in Sources */,
