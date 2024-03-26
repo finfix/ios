@@ -47,7 +47,7 @@ struct QuickStatisticView: View {
             Spacer()
                 
             NavigationLink {
-                BudgetsList()
+                BudgetsList(accountGroup: AccountGroup(id: UInt32(accountGroupID)))
             } label: {
                 VStack {
                     Text("Бюджет")

@@ -32,11 +32,18 @@ extension Service {
     
     func getAccounts(
         ids: [UInt32]? = nil,
-        accountGroup: AccountGroup? = nil
+        accountGroup: AccountGroup? = nil,
+        visible: Bool? = nil,
+        types: [AccountType]? = nil
     ) throws -> [Account] {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
-        return Account.convertFromDBModel(try db.getAccounts(ids: ids, accountGroupID: accountGroup?.id), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
+        return Account.convertFromDBModel(try db.getAccounts(
+            ids: ids,
+            accountGroupID: accountGroup?.id,
+            visible: visible,
+            types: types
+        ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
     }
     
     func getAccountGroups() throws -> [AccountGroup] {

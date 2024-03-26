@@ -116,7 +116,9 @@ extension AppDatabase {
     
     func getAccounts(
         ids: [UInt32]? = nil,
-        accountGroupID: UInt32? = nil
+        accountGroupID: UInt32? = nil,
+        visible: Bool? = nil,
+        types: [AccountType]? = nil
     ) throws -> [AccountDB] {
         try reader.read { db in
             var request = AccountDB
@@ -128,6 +130,18 @@ extension AppDatabase {
             
             if let accountGroupID = accountGroupID {
                 request = request.filter(Column("accountGroupId") == accountGroupID)
+            }
+            
+            if let visible = visible {
+                request = request.filter(Column("visible") == visible)
+            }
+            
+            if let types = types {
+                var typesString = [String]()
+                for type in types {
+                    typesString.append(type.rawValue)
+                }
+                request = request.filter(typesString.contains(Column("type")))
             }
             
             return try request.fetchAll(db)
