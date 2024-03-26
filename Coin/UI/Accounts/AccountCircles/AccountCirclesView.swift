@@ -14,13 +14,13 @@ struct AccountCirclesView: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
     @State var path = NavigationPath()
-    var accounts: [Account] = []
+    var vm = AccountCirclesViewModel()
     
     let horizontalSpacing: CGFloat = 10
     
     func groupAcccounts() -> [Account] {
         logger.info("Фильтруем и группируем счета")
-        let filteredAccounts = accounts.filter {
+        let filteredAccounts = vm.accounts.filter {
             $0.accountGroup.id == selectedAccountsGroupID &&
             $0.visible
         }
@@ -34,7 +34,7 @@ struct AccountCirclesView: View {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
                     QuickStatisticView()
-                    AccountGroupSelector()
+//                    AccountGroupSelector()
                 }
                 VStack {
                     ScrollView(.horizontal) {
@@ -74,6 +74,9 @@ struct AccountCirclesView: View {
                 .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0) }
             }
             Spacer()
+        }
+        .task {
+            vm.load()
         }
     }
 }
