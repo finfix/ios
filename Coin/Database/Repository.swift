@@ -51,8 +51,19 @@ extension AppDatabase {
     
     func deleteAllData() throws {
         try dbWriter.write { db in
-            _ = try CurrencyDB.deleteAll(db)
+            _ = try TransactionDB.deleteAll(db)
+            _ = try AccountDB.deleteAll(db)
+            _ = try AccountGroupDB.deleteAll(db)
             _ = try UserDB.deleteAll(db)
+            _ = try CurrencyDB.deleteAll(db)
+        }
+    }
+    
+    func deleteTransactionAndChangeBalances(_ transaction: Transaction) throws {
+        try dbWriter.write { db in
+            _ = try TransactionDB(transaction).delete(db)
+            _ = try AccountDB(transaction.accountFrom).update(db)
+            _ = try AccountDB(transaction.accountTo).update(db)
         }
     }
 }
@@ -79,11 +90,18 @@ extension AppDatabase {
         }
     }
     
-    func getAccounts() throws -> [AccountDB] {
+    func getAccounts(
+        ids: [UInt32]? = nil
+    ) throws -> [AccountDB] {
         try reader.read { db in
-            return try AccountDB.fetchAll(db).sorted { i, j in
-                i.serialNumber < j.serialNumber
+            var request = AccountDB
+                .order(Column("serialNumber"))
+            
+            if let ids = ids {
+                request = request.filter(keys: ids)
             }
+            
+            return try request.fetchAll(db)
         }
     }
     

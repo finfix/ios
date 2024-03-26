@@ -22,10 +22,6 @@ class Service {
 }
 
 extension Service {
-    func isDatabaseEmpty() async -> Bool {
-        return true
-    }
-    
     func getCurrencies() throws -> [Currency] {
         return Currency.convertFromDBModel(try db.getCurrencies())
     }
@@ -34,23 +30,55 @@ extension Service {
         try db.deleteAllData()
     }
     
-    func getFilledAccounts() throws -> [Account] {
+    func getAccounts(
+        ids: [UInt32]? = nil
+    ) throws -> [Account] {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
-        return Account.convertFromDBModel(try db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
+        return Account.convertFromDBModel(try db.getAccounts(ids: ids), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
     }
     
     
-    func getSimpleAccountGroups() throws -> [AccountGroup] {
-        return AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: nil)
+    func getAccountGroups() throws -> [AccountGroup] {
+        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
+        return AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap)
     }
     func getFullTransactionsPage(page: Int) throws -> [Transaction] {
         let limit = 100
         
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
-        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: nil))
+        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
         let accountsMap = Account.convertToMap(Account.convertFromDBModel(try db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
         return Transaction.convertFromDBModel(try db.getTransactionsWithPagination(offset: limit * page, limit: limit), accountsMap: accountsMap)
+    }
+    
+    // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
+    func deleteTransaction(_ t: Transaction) async throws {
+        var transaction = t
+
+        try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
+
+        let accounts = try getAccounts(ids: [transaction.accountFrom.id, transaction.accountTo.id])
+        guard accounts.count == 2 else {
+            showErrorAlert("Не нашли оба счета транзакции в базе данных")
+            return
+        }
+        
+        transaction.accountFrom = accounts.first { $0.id == transaction.accountFrom.id }!
+        transaction.accountTo = accounts.first { $0.id == transaction.accountTo.id }!
+
+        switch transaction.type {
+        case .transfer, .consumption:
+            transaction.accountFrom.remainder += transaction.amountFrom
+            transaction.accountTo.remainder -= transaction.amountTo
+        case .income:
+            transaction.accountFrom.remainder -= transaction.amountFrom
+            transaction.accountTo.remainder -= transaction.amountTo
+        case .balancing:
+            transaction.accountTo.remainder -= transaction.amountTo
+        }
+        
+        try db.deleteTransactionAndChangeBalances(transaction)
     }
 }
 

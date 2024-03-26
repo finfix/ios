@@ -47,6 +47,27 @@ struct AccountDB {
         self.currencyCode = res.currency
     }
     
+    // Инициализатор из бизнес модели
+    init(_ model: Account) {
+        self.id = model.id
+        self.accounting = model.accounting
+        self.iconID = model.iconID
+        self.name = model.name
+        self.remainder = model.remainder
+        self.type = model.type
+        self.visible = model.visible
+        self.parentAccountId = model.parentAccountID
+        self.serialNumber = model.serialNumber
+        self.isParent = model.isParent
+        self.budgetAmount = model.budgetAmount
+        self.budgetFixedSum = model.budgetFixedSum
+        self.budgetDaysOffset = model.budgetDaysOffset
+        self.budgetGradualFilling = model.budgetGradualFilling
+        self.accountGroupId = model.accountGroup.id
+        self.currencyCode = model.currency.code
+    }
+    
+    
     static func convertFromApiModel(_ accounts: [GetAccountsRes]) -> [AccountDB] {
         var accountsDB: [AccountDB] = []
         for account in accounts {

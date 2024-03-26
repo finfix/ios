@@ -22,4 +22,17 @@ class TransactionsListViewModel {
             showErrorAlert("\(error)")
         }
     }
+    
+    func deleteTransaction(_ transaction: Transaction) async {
+        do {
+            guard let index = transactions.firstIndex(of: transaction) else {
+                showErrorAlert("Не смогли найти позицию транзакции №\(transaction.id) в массиве")
+                return
+            }
+            _ = transactions.remove(at: index)
+            try await service.deleteTransaction(transaction)
+        } catch {
+            showErrorAlert("\(error)")
+        }
+    }
 }

@@ -15,7 +15,7 @@ class AccountGroupSelectorViewModel {
     
     func load() {
         do {
-            accountGroups = try service.getSimpleAccountGroups()
+            accountGroups = try service.getAccountGroups()
         } catch {
             showErrorAlert("\(error)")
         }

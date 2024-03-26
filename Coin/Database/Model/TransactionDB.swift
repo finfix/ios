@@ -37,6 +37,21 @@ struct TransactionDB {
         self.accountToId = res.accountToID
     }
     
+    // Инициализатор из бизнес модели
+    init(_ model: Transaction) {
+        self.accounting = model.accounting
+        self.amountFrom = model.amountFrom
+        self.amountTo = model.amountTo
+        self.dateTransaction = model.dateTransaction
+        self.id = model.id
+        self.isExecuted = model.isExecuted
+        self.note = model.note
+        self.type = model.type
+        self.timeCreate = model.dateTransaction
+        self.accountFromId = model.accountFrom.id
+        self.accountToId = model.accountTo.id
+    }
+    
     static func convertFromApiModel(_ transactions: [GetTransactionsRes]) -> [TransactionDB] {
         var transactionsDB: [TransactionDB] = []
         for transaction in transactions {
