@@ -33,12 +33,16 @@ struct AccountGroup: Identifiable {
         self.currency = currenciesMap?[dbModel.currencyCode]! ?? Currency()
     }
     
-    static func convertFromDBModel(_ transactionsDB: [TransactionDB], accountsMap: [UInt32: Account]?) -> [Transaction] {
-        var transactions: [Transaction] = []
-        for transactionDB in transactionsDB {
-            transactions.append(Transaction(transactionDB, accountsMap: accountsMap))
+    static func convertFromDBModel(_ accountGroupsDB: [AccountGroupDB], currenciesMap: [String: Currency]?) -> [AccountGroup] {
+        var accountGroups: [AccountGroup] = []
+        for accountGroupDB in accountGroupsDB {
+            accountGroups.append(AccountGroup(accountGroupDB, currenciesMap: currenciesMap))
         }
-        return transactions
+        return accountGroups
+    }
+    
+    static func convertToMap(_ accountGroups: [AccountGroup]) -> [UInt32: AccountGroup] {
+        return Dictionary(uniqueKeysWithValues: accountGroups.map{ ($0.id, $0) })
     }
 }
 

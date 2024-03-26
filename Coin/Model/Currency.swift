@@ -40,6 +40,10 @@ struct Currency {
         }
         return currencies
     }
+    
+    static func convertToMap(_ currencies: [Currency]) -> [String: Currency] {
+        return Dictionary(uniqueKeysWithValues: currencies.map{ ($0.code, $0) })
+    }
 }
 
 extension Currency: Hashable {

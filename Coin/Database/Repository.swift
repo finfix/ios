@@ -70,4 +70,20 @@ extension AppDatabase {
             }
         }
     }
+    
+    func getAccountGroups() throws -> [AccountGroupDB] {
+        try reader.read { db in
+            return try AccountGroupDB.fetchAll(db).sorted { i, j in
+                i.serialNumber < j.serialNumber
+            }
+        }
+    }
+    
+    func getAccounts() throws -> [AccountDB] {
+        try reader.read { db in
+            return try AccountDB.fetchAll(db).sorted { i, j in
+                i.serialNumber < j.serialNumber
+            }
+        }
+    }
 }

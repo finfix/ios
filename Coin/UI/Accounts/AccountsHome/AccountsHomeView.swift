@@ -10,10 +10,10 @@ import SwiftUI
 struct AccountsHomeView: View {
     
     @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    var accounts: [Account] = []
+    @State var vm = AccountHomeViewModel()
     
     var filteredAccounts: [Account] {
-        accounts.filter { $0.accountGroup.id == selectedAccountsGroupID }
+        vm.accounts.filter { $0.accountGroup.id == selectedAccountsGroupID }
     }
     
     @State var showDebts = false
@@ -27,7 +27,7 @@ struct AccountsHomeView: View {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
                         QuickStatisticView()
-                        AccountGroupSelector()
+//                        AccountGroupSelector()
                     }
                     ScrollView {
                         Text("Карты и счета")
@@ -74,6 +74,9 @@ struct AccountsHomeView: View {
                 .onDisappear { chooseBlurIsOpened = false }
             }
             .navigationDestination(for: TransactionType.self ) { EditTransaction(transactionType: $0) }
+        }
+        .task {
+            vm.load()
         }
     }
 }

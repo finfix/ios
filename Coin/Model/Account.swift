@@ -91,12 +91,13 @@ struct Account: Identifiable {
         self.childrenAccounts = []
     }
     
-    static func convertFromDBModel(_ transactionsDB: [TransactionDB], accountsMap: [UInt32: Account]?) -> [Transaction] {
-        var transactions: [Transaction] = []
-        for transactionDB in transactionsDB {
-            transactions.append(Transaction(transactionDB, accountsMap: accountsMap))
+    static func convertFromDBModel(_ accountsDB: [AccountDB], currenciesMap: [String: Currency]?, accountGroupsMap: [UInt32: AccountGroup]?) -> [Account] {
+        var accounts: [Account] = []
+        for accountDB in accountsDB {
+            accounts.append(Account(accountDB, currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
         }
-        return transactions
+        return accounts
+    }
     }
 }
 

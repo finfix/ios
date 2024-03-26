@@ -33,6 +33,12 @@ extension Service {
     func deleteAllData() throws {
         try db.deleteAllData()
     }
+    
+    func getFilledAccounts() throws -> [Account] {
+        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
+        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
+        return Account.convertFromDBModel(try db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
+    }
 }
 
 // MARK: - Sync
