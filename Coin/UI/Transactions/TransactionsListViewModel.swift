@@ -11,13 +11,34 @@ import Foundation
 class TransactionsListViewModel {
     private let service = Service.shared
     
-    var transactions: [Transaction] = []
+    private var transactions: [Transaction] = []
+    var groupedTransactionByDate: [Date: [Transaction]] = [:]
     
     var page = 0
+    var transactionsCancelled = false
     
-    func load() {
+    func load(refresh: Bool) {
         do {
-            transactions.append(contentsOf: try service.getFullTransactionsPage(page: page))
+            if refresh {
+                page = 0
+                transactionsCancelled = false
+            }
+            
+            let newTransactions = try service.getTransactions(page: page)
+            
+            if newTransactions.isEmpty {
+                transactionsCancelled = true
+            }
+            
+            if refresh {
+                transactions = newTransactions
+            } else {
+                transactions.append(contentsOf: newTransactions)
+            }
+
+            page += 1
+            
+            groupedTransactionByDate = Dictionary(grouping: transactions, by: { $0.dateTransaction })
         } catch {
             showErrorAlert("\(error)")
         }

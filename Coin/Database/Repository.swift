@@ -78,6 +78,18 @@ extension AppDatabase {
             _ = try AccountDB(account).update(db)
         }
     }
+    
+    func createTransaction(_ transaction: Transaction) throws {
+        try dbWriter.write { db in
+            _ = try TransactionDB(transaction).insert(db)
+        }
+    }
+    
+    func updateTransaction(_ transaction: Transaction) throws {
+        try dbWriter.write { db in
+            _ = try TransactionDB(transaction).update(db)
+        }
+    }
 }
 
 // MARK: - Reads
@@ -103,7 +115,8 @@ extension AppDatabase {
     }
     
     func getAccounts(
-        ids: [UInt32]? = nil
+        ids: [UInt32]? = nil,
+        accountGroupID: UInt32? = nil
     ) throws -> [AccountDB] {
         try reader.read { db in
             var request = AccountDB
@@ -111,6 +124,10 @@ extension AppDatabase {
             
             if let ids = ids {
                 request = request.filter(keys: ids)
+            }
+            
+            if let accountGroupID = accountGroupID {
+                request = request.filter(Column("accountGroupId") == accountGroupID)
             }
             
             return try request.fetchAll(db)

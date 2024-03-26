@@ -73,7 +73,7 @@ struct AccountsHomeView: View {
                 }
                 .onDisappear { chooseBlurIsOpened = false }
             }
-            .navigationDestination(for: TransactionType.self ) { EditTransaction(transactionType: $0) }
+            .navigationDestination(for: TransactionType.self ) { EditTransaction(transactionType: $0, accountGroup: AccountGroup(id: UInt32(selectedAccountsGroupID))) }
         }
         .task {
             vm.load()

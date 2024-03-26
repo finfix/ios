@@ -12,6 +12,8 @@ private let logger = Logger(subsystem: "Coin", category: "TransactionList")
 
 struct TransactionsView: View {
     
+    @State private var vm = TransactionsListViewModel()
+    
     @State private var searchText = ""
     @State var dateFrom: Date? = Calendar(identifier: .gregorian).date(byAdding: .month, value: -1, to: Date.now)!
     
@@ -21,52 +23,45 @@ struct TransactionsView: View {
     
     var body: some View {
         NavigationStack {
-            TransactionsList()
-                .navigationDestination(for: Transaction.self) { EditTransaction($0) }
-                .searchable(text: $searchText)
-                .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
-                        // Фильтры
-                        Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
-                    }
-                }
-                .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }
-                .navigationTitle("Транзакции")
-        }
-    }
-}
-
-struct TransactionsList: View {
-    
-    var vm = TransactionsListViewModel()
-    
-    var body: some View {
-        let groupedTransactionByDate = Dictionary(grouping: vm.transactions, by: { $0.dateTransaction })
-        
-        List {
-            ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
-                Section(header: Text(date, style: .date).font(.headline)) {
-                    ForEach(groupedTransactionByDate[date]!) { transaction in
-                        NavigationLink(value: transaction) {
-                            TransactionRow(transaction: transaction)
+            List {
+                ForEach(vm.groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
+                    Section(header: Text(date, style: .date).font(.headline)) {
+                        ForEach(vm.groupedTransactionByDate[date]!) { transaction in
+                            NavigationLink(value: transaction) {
+                                TransactionRow(transaction: transaction)
+                            }
                         }
-                    }
-                    .onDelete {
-                        for i in $0.makeIterator() {
-                            Task {
-                                await vm.deleteTransaction(groupedTransactionByDate[date]![i])
+                        .onDelete {
+                            for i in $0.makeIterator() {
+                                Task {
+                                    await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i])
+                                }
                             }
                         }
                     }
                 }
-            }
-            Text("Загрузка...")
-                .task {
-                    vm.load()
-                    vm.page += 1
+                if !vm.transactionsCancelled {
+                    Text("Загрузка...")
+                        .task {
+                            vm.load(refresh: false)
+                        }
                 }
+            }
+            .navigationDestination(for: Transaction.self) { EditTransaction($0) }
+            .listStyle(.grouped)
+            .refreshable {
+                vm.load(refresh: true)
+            }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    // Фильтры
+                    Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
+                }
+            }
+            .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }
+            .navigationTitle("Транзакции")
+
         }
-        .listStyle(.grouped)
     }
 }
 

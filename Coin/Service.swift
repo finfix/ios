@@ -31,19 +31,20 @@ extension Service {
     }
     
     func getAccounts(
-        ids: [UInt32]? = nil
+        ids: [UInt32]? = nil,
+        accountGroup: AccountGroup? = nil
     ) throws -> [Account] {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
-        return Account.convertFromDBModel(try db.getAccounts(ids: ids), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
+        return Account.convertFromDBModel(try db.getAccounts(ids: ids, accountGroupID: accountGroup?.id), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
     }
-    
     
     func getAccountGroups() throws -> [AccountGroup] {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
         return AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap)
     }
-    func getFullTransactionsPage(page: Int) throws -> [Transaction] {
+    
+    func getTransactions(page: Int) throws -> [Transaction] {
         let limit = 100
         
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
@@ -117,6 +118,57 @@ extension Service {
         ))
         
         try db.updateAccount(newAccount)
+    }
+    
+    func createTransaction(_ t: Transaction) async throws {
+        var transaction = t
+        
+        if transaction.accountFrom.currency == transaction.accountTo.currency {
+            transaction.amountTo = transaction.amountFrom
+        }
+        
+        transaction.dateTransaction = transaction.dateTransaction.stripTime()
+        transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
+            accountFromID: transaction.accountFrom.id,
+            accountToID: transaction.accountTo.id,
+            amountFrom: transaction.amountFrom,
+            amountTo: transaction.amountTo,
+            dateTransaction: transaction.dateTransaction,
+            note: transaction.note,
+            type: transaction.type.rawValue,
+            isExecuted: true
+        ))
+        switch transaction.type {
+        case .income:
+            transaction.accountFrom.remainder += transaction.amountFrom
+            transaction.accountTo.remainder += transaction.amountTo
+        case .transfer, .consumption:
+            transaction.accountFrom.remainder -= transaction.amountFrom
+            transaction.accountTo.remainder += transaction.amountTo
+        default: break
+        }
+        
+        try db.createTransaction(transaction)
+    }
+    
+    func updateTransaction(newTransaction t: Transaction, oldTransaction: Transaction) async throws {
+        var newTransaction = t
+        
+        if newTransaction.accountFrom.currency == newTransaction.accountTo.currency {
+            newTransaction.amountTo = newTransaction.amountFrom
+        }
+        
+        newTransaction.dateTransaction = newTransaction.dateTransaction.stripTime()
+        try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
+            accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
+            accountToID: newTransaction.accountTo.id != oldTransaction.accountTo.id ? newTransaction.accountTo.id : nil,
+            amountFrom: newTransaction.amountFrom != oldTransaction.amountFrom ? newTransaction.amountFrom : nil,
+            amountTo: newTransaction.amountTo != oldTransaction.amountTo ? newTransaction.amountTo : nil,
+            dateTransaction: newTransaction.dateTransaction != oldTransaction.dateTransaction ? newTransaction.dateTransaction : nil,
+            note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
+            id: newTransaction.id))
+        
+        try db.updateTransaction(newTransaction)
     }
 }
 

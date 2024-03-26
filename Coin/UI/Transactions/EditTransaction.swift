@@ -12,148 +12,82 @@ private let logger = Logger(subsystem: "Coin", category: "EditTransaction")
 
 struct EditTransaction: View {
     
-    private enum Mode {
-        case create, update
-    }
-    
     @Environment (\.dismiss) private var dismiss
-    private var oldTransaction: Transaction = Transaction()
-    @State private var transaction: Transaction
-    private var accounts: [Account] = []
-    
-    private var mode: Mode
-    
+    @State private var vm: EditTransactionViewModel
+        
     init(_ transaction: Transaction) {
-        self.init()
-        mode = .update
-        self.oldTransaction = transaction
+        vm = EditTransactionViewModel(
+            currentTransaction: transaction,
+            oldTransaction: transaction,
+            accountGroup: transaction.accountFrom.accountGroup,
+            mode: .update
+        )
     }
     
-    init(transactionType: TransactionType) {
-        self.init()
-        mode = .create
-        _transaction = .init(wrappedValue: Transaction(
-            type: transactionType
-        ))
-    }
-    
-    private init() {
-        transaction = Transaction()
-        mode = .create
-    }
-    
-    private var intercurrency: Bool {
-        return transaction.accountFrom.currency != transaction.accountTo.currency
+    init(transactionType: TransactionType, accountGroup: AccountGroup) {
+        vm = EditTransactionViewModel(
+            currentTransaction: Transaction(
+                type: transactionType
+            ),
+            accountGroup: accountGroup,
+            mode: .create
+        )
     }
     
     var body: some View {
         Form {
             Section {
-//                Pickers(
-//                    buttonName: "Счет списания",
-//                    account: $transaction.accountFrom,
-//                    accounts: accounts,
-//                    position: .up,
-//                    transactionType: transaction.type
-//                )
-//                Pickers(
-//                    buttonName: "Счет пополнения",
-//                    account: $transaction.accountTo,
-//                    accounts: accounts,
-//                    position: .down,
-//                    transactionType: transaction.type,
-//                    excludeAccount: transaction.accountFrom
-//                )
+                Pickers(
+                    buttonName: "Счет списания",
+                    account: $vm.currentTransaction.accountFrom,
+                    accounts: vm.accounts,
+                    position: .up,
+                    transactionType: vm.currentTransaction.type
+                )
+                Pickers(
+                    buttonName: "Счет пополнения",
+                    account: $vm.currentTransaction.accountTo,
+                    accounts: vm.accounts,
+                    position: .down,
+                    transactionType: vm.currentTransaction.type,
+                    excludeAccount: vm.currentTransaction.accountFrom
+                )
             }
             .pickerStyle(.wheel)
             Section {
-                TextField(intercurrency ? "Сумма списания" : "Сумма", value: $transaction.amountFrom, format: .number)
+                TextField(vm.intercurrency ? "Сумма списания" : "Сумма", value: $vm.currentTransaction.amountFrom, format: .number)
                     .keyboardType(.decimalPad)
-                if intercurrency {
-                    TextField("Сумма начисления", value: $transaction.amountTo, format: .number)
+                if vm.intercurrency {
+                    TextField("Сумма начисления", value: $vm.currentTransaction.amountTo, format: .number)
                         .keyboardType(.decimalPad)
                 }
             } footer: {
-                if intercurrency {
-                    Rate(transaction)
+                if vm.intercurrency {
+                    Rate(vm.currentTransaction)
                 }
             }
             Section {
-                DatePicker(selection: $transaction.dateTransaction, displayedComponents: .date) {
+                DatePicker(selection: $vm.currentTransaction.dateTransaction, displayedComponents: .date) {
                     Text("Дата транзакции")
                 }
             }
             Section {
-                TextField("Заметка", text: $transaction.note, axis: .vertical)
+                TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
             }
             Section {
                 Button("Сохранить") {
-                    switch mode {
-                    case .create: createTransaction()
-                    case .update: updateTransaction()
+                    Task {
+                        switch vm.mode {
+                        case .create: await vm.createTransaction()
+                        case .update: await vm.updateTransaction()
+                        }
+                        dismiss()
                     }
-                    dismiss()
                 }
             }
         }
-    }
-    
-    func createTransaction() {
-        
-        if !intercurrency {
-            transaction.amountTo = transaction.amountFrom
-        }
-        
-        Task {
-            do {
-                transaction.dateTransaction = transaction.dateTransaction.stripTime()
-                transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
-                    accountFromID: transaction.accountFrom.id,
-                    accountToID: transaction.accountTo.id,
-                    amountFrom: transaction.amountFrom,
-                    amountTo: transaction.amountTo,
-                    dateTransaction: transaction.dateTransaction,
-                    note: transaction.note,
-                    type: transaction.type.rawValue,
-                    isExecuted: true
-                ))
-//                switch transaction.type {
-//                case .income:
-//                    transaction.accountFrom.remainder += transaction.amountFrom
-//                    transaction.accountTo.remainder += transaction.amountTo
-//                case .transfer, .consumption:
-//                    transaction.accountFrom.remainder -= transaction.amountFrom
-//                    transaction.accountTo.remainder += transaction.amountTo
-//                default: break
-//                }
-            } catch {
-                showErrorAlert("\(error)")
-                logger.error("\(error)")
-            }
-        }
-    }
-    
-    func updateTransaction() {
-        
-        if !intercurrency {
-            transaction.amountTo = transaction.amountFrom
-        }
-        
-        Task {
-            do {
-                transaction.dateTransaction = transaction.dateTransaction.stripTime()
-                try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
-                    accountFromID: transaction.accountFrom.id != oldTransaction.accountFrom.id ? transaction.accountFrom.id : nil,
-                    accountToID: transaction.accountTo.id != oldTransaction.accountTo.id ? transaction.accountTo.id : nil,
-                    amountFrom: transaction.amountFrom != oldTransaction.amountFrom ? transaction.amountFrom : nil,
-                    amountTo: transaction.amountTo != oldTransaction.amountTo ? transaction.amountTo : nil,
-                    dateTransaction: transaction.dateTransaction != oldTransaction.dateTransaction ? transaction.dateTransaction : nil,
-                    note: transaction.note != oldTransaction.note ? transaction.note : nil,
-                    id: transaction.id))
-            } catch {
-                showErrorAlert("\(error)")
-                logger.error("\(error)")
-            }
+        .task {
+            vm.load()
         }
     }
 }
@@ -200,74 +134,79 @@ extension Date {
     
 }
 
-//private struct Pickers: View {
-//    
-//    enum Position {
-//        case up, down
-//    }
-//    
-//    @State private var isPickerShowing = false
-//    var buttonName: String
-//    @Binding var account: Account
-//    var accounts: [Account]
-//    var position: Position
-//    var transactionType: TransactionType
-//    var excludeAccount: Account?
-//    
-//    var accountsToShow: [Account] {
-//        var subfiltered = accounts.filter { $0.visible && $0.id != excludeAccount?.id ?? 0 && !$0.isParent }
-//        
-//        switch transactionType {
-//        case .consumption:
-//            switch position {
-//            case .up:
-//                subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
-//            case .down:
-//                subfiltered = subfiltered.filter { $0.type == .expense }
-//            }
-//        case .transfer:
-//            subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
-//        case .income:
-//            switch position {
-//            case .up:
-//                subfiltered = subfiltered.filter { $0.type == .earnings }
-//            case .down:
-//                subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
-//            }
-//        default:
-//            subfiltered = []
-//        }
-//        return subfiltered.sorted(by: { $1.serialNumber > $0.serialNumber })
-//    }
-//    
-//    var body: some View {
-//        Group {
-//            Button {
-//                withAnimation {
-//                    isPickerShowing.toggle()
-//                }
-//            } label: {
-//                Text(buttonName)
-//                Spacer()
-//                Text(account.name)
-//                    .foregroundStyle(.secondary)
-//                Text(account.currency.symbol)
-//                    .foregroundColor(.secondary)
-//            }
-//            if isPickerShowing {
-//                Picker("", selection: $account) {
-//                    ForEach (accounts) { account in
-//                        HStack {
-//                            Text(account.name)
-//                            Spacer()
-//                            Text(account.currency!.symbol)
-//                                .foregroundColor(.secondary)
-//                        }
-//                        .tag(account as Account?)
-//                    }
-//                }
-//            }
-//        }
-//        .buttonStyle(.plain)
-//    }
-//}
+enum Position {
+    case up, down
+}
+
+func getAccountsForShowingInCreate(accounts: [Account], position: Position, transactionType: TransactionType, excludedAccount: Account?) -> [Account] {
+    var subfiltered = accounts.filter { $0.visible && $0.id != excludedAccount?.id ?? 0 && !$0.isParent }
+    
+    switch transactionType {
+    case .consumption:
+        switch position {
+        case .up:
+            subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
+        case .down:
+            subfiltered = subfiltered.filter { $0.type == .expense }
+        }
+    case .transfer:
+        subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
+    case .income:
+        switch position {
+        case .up:
+            subfiltered = subfiltered.filter { $0.type == .earnings }
+        case .down:
+            subfiltered = subfiltered.filter { $0.type == .regular || $0.type == .debt }
+        }
+    default:
+        subfiltered = []
+    }
+    return subfiltered.sorted(by: { $1.serialNumber > $0.serialNumber })
+}
+
+private struct Pickers: View {
+    
+    
+    @State private var isPickerShowing = false
+    var buttonName: String
+    @Binding var account: Account
+    var accounts: [Account]
+    var position: Position
+    var transactionType: TransactionType
+    var excludeAccount: Account?
+    
+    var accountsToShow: [Account] {
+        getAccountsForShowingInCreate(accounts: accounts, position: position, transactionType: transactionType, excludedAccount: excludeAccount)
+    }
+    
+    var body: some View {
+        Group {
+            Button {
+                withAnimation {
+                    isPickerShowing.toggle()
+                }
+            } label: {
+                Text(buttonName)
+                Spacer()
+                Text(account.name)
+                    .foregroundStyle(.secondary)
+                Text(account.currency.symbol)
+                    .foregroundColor(.secondary)
+            }
+            if isPickerShowing {
+                Picker("", selection: $account) {
+                    ForEach (accountsToShow) { account in
+                        HStack {
+                            Text(account.name)
+                            Spacer()
+                            Text(account.currency.symbol)
+                                .foregroundColor(.secondary)
+                        }
+                        .tag(account)
+                    }
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
