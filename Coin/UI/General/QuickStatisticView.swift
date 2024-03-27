@@ -91,7 +91,7 @@ struct QuickStatisticSubSubView: View {
                         .bold()
                     VStack(alignment: .trailing) {
                         Text(formatter.string(number: statistic.totalBudget))
-                        Text(formatter.string(number: statistic.totalBudget - statistic.totalExpense))
+                        Text(formatter.string(number: statistic.periodRemainder))
                             .foregroundColor(.gray)
                     }
                     Spacer()
@@ -108,23 +108,35 @@ struct QuickStatisticSubSubView: View {
         .frame(height: 40)
     }
     
-    func calculateStatistic(accounts: [Account], targetCurrency: Currency) -> QuickStatistic {
+    func calculateStatistic(accounts a: [Account], targetCurrency: Currency) -> QuickStatistic {
         logger.info("Считаем статистику для шапки")
                 
         let tmp = QuickStatistic(currency: currency)
         
+        let accounts = Account.groupAccounts(a)
+        
         for account in accounts {
+            
+            if account.parentAccountID != nil {
+                continue
+            }
                         
             let relation = targetCurrency.rate / (account.currency?.rate ?? 1)
             
             switch account.type {
             case .expense:
-                tmp.totalExpense += account.remainder * relation
-                tmp.totalBudget += account.budgetAmount * relation
+                tmp.totalExpense += account.showingRemainder * relation
+                tmp.totalBudget += account.showingBudget * relation
+                if account.showingBudget != 0 && account.showingBudget > account.showingRemainder {
+                    print(account.name)
+                    print(account.showingBudget)
+                    print(account.showingRemainder)
+                    tmp.periodRemainder += (account.showingBudget - account.showingRemainder) * relation
+                }
             case .earnings:
                 continue
             default:
-                tmp.totalRemainder += account.remainder * relation
+                tmp.totalRemainder += account.showingRemainder * relation
             }
         }
         return tmp
