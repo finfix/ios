@@ -13,16 +13,19 @@ class QuickStatistic {
     var totalRemainder: Decimal
     var totalExpense: Decimal
     var totalBudget: Decimal
+    var periodRemainder: Decimal
     
     init(
         currency: Currency, 
         totalRemainder: Decimal = 0,
         totalExpense: Decimal = 0,
-        totalBudget: Decimal = 0
+        totalBudget: Decimal = 0,
+        periodRemainder: Decimal = 0
     ) {
         self.currency = currency
         self.totalRemainder = totalRemainder
         self.totalExpense = totalExpense
         self.totalBudget = totalBudget
+        self.periodRemainder = periodRemainder
     }
 }
