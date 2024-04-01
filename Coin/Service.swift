@@ -8,6 +8,7 @@
 import Foundation
 import OSLog
 import SwiftUI
+import Combine
 
 private let logger = Logger(subsystem: "Coin", category: "Service")
 
@@ -18,6 +19,16 @@ class Service {
     static let shared = makeShared()
     static func makeShared() -> Service {
         return Service()
+    }
+    
+    var changes: any Publisher<Change, Never> {
+        changesSubject.eraseToAnyPublisher()
+    }
+    
+    private let changesSubject = PassthroughSubject<Change, Never>()
+    
+    enum Change {
+        case account(Account)
     }
 }
 
@@ -124,7 +135,9 @@ extension Service {
                 gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
         ))
         
-        try db.updateAccount(newAccount)
+        if let accountDB = try db.updateAccount(newAccount) {
+            changesSubject.send(.account(Account(accountDB, currenciesMap: nil, accountGroupsMap: nil)))
+        }
     }
     
     func createTransaction(_ t: Transaction) async throws {

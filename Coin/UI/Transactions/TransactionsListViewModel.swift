@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 @Observable
 class TransactionsListViewModel {
@@ -16,6 +17,15 @@ class TransactionsListViewModel {
     
     var page = 0
     var transactionsCancelled = false
+    
+    private var disposeBag: Set<AnyCancellable> = []
+    
+    init() {
+        service.changes.sink { [weak self] change in
+            self?.load(refresh: true)
+        }
+        .store(in: &disposeBag)
+    }
     
     func load(refresh: Bool) {
         do {

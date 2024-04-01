@@ -73,9 +73,10 @@ extension AppDatabase {
         }
     }
     
-    func updateAccount(_ account: Account) throws {
+    @discardableResult
+    func updateAccount(_ account: Account) throws -> AccountDB? {
         try dbWriter.write { db in
-            _ = try AccountDB(account).update(db)
+            return try AccountDB(account).updateAndFetch(db)
         }
     }
     
