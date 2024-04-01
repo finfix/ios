@@ -9,25 +9,25 @@ import SwiftUI
 
 struct HidedAccountsList: View {
     
-    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
+    @Binding var selectedAccountGroup: AccountGroup
     var accounts: [Account] = []
     @State var accountType: AccountType = .regular
     @Binding var path: NavigationPath
     var filteredAccounts: [Account] {
         accounts.filter {
             $0.type == accountType &&
-            $0.accountGroup.id == selectedAccountsGroupID &&
+            $0.accountGroup == selectedAccountGroup &&
             !$0.visible
         }
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            AccountGroupSelector()
+            AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
                     ForEach(filteredAccounts) { account in
-                        AccountCircleItem(account, path: $path)
+                        AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                     }
                 }
             }
@@ -46,5 +46,5 @@ struct HidedAccountsList: View {
 }
 
 #Preview {
-    HidedAccountsList(path: .constant(NavigationPath()))
+    HidedAccountsList(selectedAccountGroup: .constant(AccountGroup()), path: .constant(NavigationPath()))
 }

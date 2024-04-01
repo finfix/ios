@@ -12,7 +12,7 @@ private let logger = Logger(subsystem: "Coin", category: "AccountCirclesView")
 
 struct AccountCirclesView: View {
     
-    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
+    @Binding var selectedAccountGroup: AccountGroup
     @State var path = NavigationPath()
     var vm = AccountCirclesViewModel()
     
@@ -21,7 +21,7 @@ struct AccountCirclesView: View {
     func groupAcccounts() -> [Account] {
         logger.info("Фильтруем и группируем счета")
         let filteredAccounts = vm.accounts.filter {
-            $0.accountGroup.id == selectedAccountsGroupID &&
+            $0.accountGroup == selectedAccountGroup &&
             $0.visible
         }
         return Account.groupAccounts(filteredAccounts)
@@ -34,13 +34,13 @@ struct AccountCirclesView: View {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
                     QuickStatisticView()
-//                    AccountGroupSelector()
+                    AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
                 }
                 VStack {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .earnings }) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
                             PlusNewAccount(accountType: .earnings)
                         }
@@ -51,7 +51,7 @@ struct AccountCirclesView: View {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .regular }) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
                             PlusNewAccount(accountType: .regular)
                         }
@@ -62,7 +62,7 @@ struct AccountCirclesView: View {
                     ScrollView(.horizontal) {
                         LazyHGrid(rows: [GridItem(.adaptive(minimum: 100))], alignment: .top, spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .expense }) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
                             PlusNewAccount(accountType: .expense)
                         }
@@ -71,7 +71,7 @@ struct AccountCirclesView: View {
                 .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
                 .scrollIndicators(.hidden)
                 .navigationDestination(for: Account.self) { EditAccount($0) }
-                .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0, accountGroup: AccountGroup(id: UInt32(selectedAccountsGroupID))) }
+                .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0, accountGroup: selectedAccountGroup) }
             }
             Spacer()
         }
@@ -82,5 +82,5 @@ struct AccountCirclesView: View {
 }
 
 #Preview {
-    AccountCirclesView()
+    AccountCirclesView(selectedAccountGroup: .constant(AccountGroup()))
 }

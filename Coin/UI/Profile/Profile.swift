@@ -15,10 +15,11 @@ struct Profile: View {
     
     @State var vm = ProfileViewModel()
     
+    @Binding var selectedAccountGroup: AccountGroup
+    
     @AppStorage("accessToken") private var accessToken: String?
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
-    @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
     @State var shouldShowSuccess = false
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
@@ -33,11 +34,6 @@ struct Profile: View {
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
                     NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
                 }
-                // TODO: Убрать
-                Section {
-                    TempAccountGroupSelector()
-                }
-                //
                 Section {
                     Button("Синхронизировать") {
                         Task {
@@ -62,7 +58,6 @@ struct Profile: View {
                             defer { shouldDisableUI = false }
                             vm.deleteAll()
                         }
-                        accountGroupIndex = 0
                         isLogin = false
                         accessToken = nil
                         refreshToken = nil
@@ -89,7 +84,7 @@ struct Profile: View {
             }
             .navigationDestination(for: ProfileViews.self) { view in
                 switch view {
-                case .hidedAccounts: HidedAccountsList(path: $path)
+                case .hidedAccounts: HidedAccountsList(selectedAccountGroup: $selectedAccountGroup, path: $path)
                 case .currencyRates: CurrencyRates()
                 case .settings: Settings()
                 }
@@ -107,5 +102,5 @@ struct Profile: View {
 }
 
 #Preview {
-    Profile()
+    Profile(selectedAccountGroup: .constant(AccountGroup()))
 }

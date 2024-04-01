@@ -10,11 +10,10 @@ import SwiftUI
 struct ContentView: View {
     
     @AppStorage("isLogin") var isLogin: Bool = false
-    @State private var selection: AppScreen? = .home
     
     var body: some View {
         if isLogin {
-            AppTabView(selection: $selection)
+            AppTabView()
         } else {
             LoginView()
         }

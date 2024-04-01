@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 @Observable
 class AccountGroupSelectorViewModel {
@@ -13,11 +14,13 @@ class AccountGroupSelectorViewModel {
     
     var accountGroups: [AccountGroup] = []
     
-    func load() {
+    func load() -> AccountGroup {
         do {
             accountGroups = try service.getAccountGroups()
+            return accountGroups.first ?? AccountGroup()
         } catch {
             showErrorAlert("\(error)")
         }
+        return AccountGroup()
     }
 }

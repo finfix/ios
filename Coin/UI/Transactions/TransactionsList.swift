@@ -13,6 +13,7 @@ private let logger = Logger(subsystem: "Coin", category: "TransactionList")
 struct TransactionsView: View {
     
     @State private var vm = TransactionsListViewModel()
+    @Binding var selectedAccountGroup: AccountGroup
     
     @State private var searchText = ""
     @State var dateFrom: Date? = Calendar(identifier: .gregorian).date(byAdding: .month, value: -1, to: Date.now)!
@@ -66,5 +67,5 @@ struct TransactionsView: View {
 }
 
 #Preview {
-    TransactionsView()
+    TransactionsView(selectedAccountGroup: .constant(AccountGroup()))
 }

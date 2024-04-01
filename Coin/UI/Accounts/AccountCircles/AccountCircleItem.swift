@@ -15,15 +15,22 @@ struct AccountCircleItem: View {
     @State var isChildrenOpen = false
     @State var isTransactionOpen = false
     @Binding var path: NavigationPath
+    @Binding var selectedAccountGroup: AccountGroup
     var isAlreadyOpened: Bool
     
     var formatter: CurrencyFormatter
     
-    init(_ account: Account, isAlreadyOpened: Bool = false, path: Binding<NavigationPath>) {
+    init(
+        _ account: Account,
+        isAlreadyOpened: Bool = false,
+        path: Binding<NavigationPath>,
+        selectedAccountGroup: Binding<AccountGroup>
+    ) {
         self.formatter = CurrencyFormatter(currency: account.currency)
         self.account = account
         self.isAlreadyOpened = isAlreadyOpened
         self._path = path
+        self._selectedAccountGroup = selectedAccountGroup
     }
     
     
@@ -41,6 +48,9 @@ struct AccountCircleItem: View {
                 Circle()
                     .fill(account.budgetAmount == 0 ? .gray : account.budgetAmount >= account.remainder ? .green : .red)
                     .frame(width: 30)
+            }
+            .onTapGesture(count: 1) {
+                isTransactionOpen.toggle()
             }
             .onTapGesture(count: 2) {
                 if !account.childrenAccounts.isEmpty {
@@ -69,17 +79,20 @@ struct AccountCircleItem: View {
         .opacity(account.accounting ? 1 : 0.5)
         .popover(isPresented: $isChildrenOpen) {
             ForEach(account.childrenAccounts) { account in
-                AccountCircleItem(account, isAlreadyOpened: true, path: $path)
+                AccountCircleItem(account, 
+                                  isAlreadyOpened: true,
+                                  path: $path,
+                                  selectedAccountGroup: $selectedAccountGroup)
             }
             .presentationCompactAdaptation(.popover)
             .padding()
         }
         .navigationDestination(isPresented: $isTransactionOpen) {
-            TransactionsView(accountID: account.id)
+            TransactionsView(selectedAccountGroup: $selectedAccountGroup, accountID: account.id)
         }
     }
 }
 
 #Preview {
-    AccountCircleItem(Account(), path: .constant(NavigationPath()))
+    AccountCircleItem(Account(), path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup()))
 }
