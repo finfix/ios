@@ -59,11 +59,9 @@ extension AppDatabase {
         }
     }
     
-    func deleteTransactionAndChangeBalances(_ transaction: Transaction) throws {
+    func deleteTransaction(_ transaction: Transaction) throws {
         try dbWriter.write { db in
             _ = try TransactionDB(transaction).delete(db)
-            _ = try AccountDB(transaction.accountFrom).update(db)
-            _ = try AccountDB(transaction.accountTo).update(db)
         }
     }
     
@@ -76,6 +74,14 @@ extension AppDatabase {
     func updateAccount(_ account: Account) throws {
         try dbWriter.write { db in
             _ = try AccountDB(account).update(db)
+        }
+    }
+    
+    func updateBalance(id: UInt32, newBalance: Decimal) throws {
+        try dbWriter.write { db in
+            _ = try AccountDB
+                .filter(Column("id") == id)
+                .updateAll(db, Column("remainder").set(to: newBalance))
         }
     }
     
@@ -111,6 +117,48 @@ extension AppDatabase {
             return try AccountGroupDB.fetchAll(db).sorted { i, j in
                 i.serialNumber < j.serialNumber
             }
+        }
+    }
+    
+    func getBalanceForAccount(
+        _ account: Account,
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil
+    ) throws -> Decimal? {
+        try reader.read { db in
+            
+            var dateFilter = ""
+            var args: StatementArguments = ["id": account.id]
+            
+            if let dateFrom = dateFrom {
+                dateFilter += "AND dateTransaction >= :dateFrom"
+                _ = args.append(contentsOf: ["dateFrom": dateFrom])
+            }
+            
+            if let dateTo = dateTo {
+                dateFilter += "\nAND dateTransaction < :dateTo"
+                _ = args.append(contentsOf: ["dateTo": dateTo])
+            }
+            
+            let req = """
+                SELECT
+                  (
+                    SELECT COALESCE(SUM(amountTo),0)
+                    FROM transactionDB
+                    WHERE accountToId = :id
+                    \(dateFilter)
+                  ) - (
+                    SELECT COALESCE(SUM(amountFrom),0)
+                    FROM transactionDB
+                    WHERE accountFromId = :id
+                    \(dateFilter)
+                  ) AS remainder
+                """
+            
+            if let row = try Row.fetchOne(db, sql: req, arguments: args) {
+                return row["remainder"]
+            }
+            return nil
         }
     }
     

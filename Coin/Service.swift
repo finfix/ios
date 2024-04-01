@@ -22,6 +22,26 @@ class Service {
 }
 
 extension Service {
+    private func recalculateAccountBalance(_ accounts: [Account]) throws {
+        for account in accounts {
+            var balance: Decimal?
+            switch account.type {
+            case .regular, .debt:
+                balance = try db.getBalanceForAccount(account)
+            case .expense, .earnings:
+                let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+                let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
+                let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+                balance = try db.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
+            }
+            guard var balance = balance else {
+                showErrorAlert("Не смогли посчитать баланс счета \(account.id)")
+                return
+            }
+            try db.updateBalance(id: account.id, newBalance: balance)
+        }
+    }
+    
     func getCurrencies() throws -> [Currency] {
         return Currency.convertFromDBModel(try db.getCurrencies())
     }
@@ -61,32 +81,10 @@ extension Service {
     }
     
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
-    func deleteTransaction(_ t: Transaction) async throws {
-        var transaction = t
-        
+    func deleteTransaction(_ transaction: Transaction) async throws {
         try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
-        
-        let accounts = try getAccounts(ids: [transaction.accountFrom.id, transaction.accountTo.id])
-        guard accounts.count == 2 else {
-            showErrorAlert("Не нашли оба счета транзакции в базе данных")
-            return
-        }
-        
-        transaction.accountFrom = accounts.first { $0.id == transaction.accountFrom.id }!
-        transaction.accountTo = accounts.first { $0.id == transaction.accountTo.id }!
-        
-        switch transaction.type {
-        case .transfer, .consumption:
-            transaction.accountFrom.remainder += transaction.amountFrom
-            transaction.accountTo.remainder -= transaction.amountTo
-        case .income:
-            transaction.accountFrom.remainder -= transaction.amountFrom
-            transaction.accountTo.remainder -= transaction.amountTo
-        case .balancing:
-            transaction.accountTo.remainder -= transaction.amountTo
-        }
-        
-        try db.deleteTransactionAndChangeBalances(transaction)
+        try db.deleteTransaction(transaction)
+        try recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
     }
     
     func createAccount(_ a: Account) async throws {
@@ -134,28 +132,19 @@ extension Service {
             transaction.amountTo = transaction.amountFrom
         }
         
-        transaction.dateTransaction = transaction.dateTransaction.stripTime()
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
             accountFromID: transaction.accountFrom.id,
             accountToID: transaction.accountTo.id,
             amountFrom: transaction.amountFrom,
             amountTo: transaction.amountTo,
-            dateTransaction: transaction.dateTransaction,
+            dateTransaction: transaction.dateTransaction.stripTime(),
             note: transaction.note,
             type: transaction.type.rawValue,
             isExecuted: true
         ))
-        switch transaction.type {
-        case .income:
-            transaction.accountFrom.remainder += transaction.amountFrom
-            transaction.accountTo.remainder += transaction.amountTo
-        case .transfer, .consumption:
-            transaction.accountFrom.remainder -= transaction.amountFrom
-            transaction.accountTo.remainder += transaction.amountTo
-        default: break
-        }
         
         try db.createTransaction(transaction)
+        try recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
     }
     
     func updateTransaction(newTransaction t: Transaction, oldTransaction: Transaction) async throws {
@@ -176,6 +165,7 @@ extension Service {
             id: newTransaction.id))
         
         try db.updateTransaction(newTransaction)
+        try recalculateAccountBalance([oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
     }
 }
 
