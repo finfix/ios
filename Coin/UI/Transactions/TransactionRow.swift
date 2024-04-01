@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TransactionRow: View {
         
-    @State var transaction: Transaction
+    let transaction: Transaction
         
     var prefix: String {
         switch transaction.type {
