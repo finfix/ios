@@ -11,8 +11,10 @@ import Foundation
 class TransactionsListViewModel {
     private let service = Service.shared
     
-    private var transactions: [Transaction] = []
-    var groupedTransactionByDate: [Date: [Transaction]] = [:]
+    var transactions: [Transaction] = []
+    var groupedTransactionByDate: [Date: [Transaction]] {
+        Dictionary(grouping: transactions, by: { $0.dateTransaction })
+    }
     
     var page = 0
     var transactionsCancelled = false
@@ -37,8 +39,6 @@ class TransactionsListViewModel {
             }
 
             page += 1
-            
-            groupedTransactionByDate = Dictionary(grouping: transactions, by: { $0.dateTransaction })
         } catch {
             showErrorAlert("\(error)")
         }

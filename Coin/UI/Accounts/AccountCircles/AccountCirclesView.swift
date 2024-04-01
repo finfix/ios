@@ -14,7 +14,7 @@ struct AccountCirclesView: View {
     
     @Binding var selectedAccountGroup: AccountGroup
     @State var path = NavigationPath()
-    var vm = AccountCirclesViewModel()
+    @State var vm = AccountCirclesViewModel()
     
     let horizontalSpacing: CGFloat = 10
     

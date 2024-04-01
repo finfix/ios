@@ -85,8 +85,8 @@ struct Account: Identifiable {
         
         self.parentAccountID = dbModel.parentAccountId
         
-        self.accountGroup = accountGroupsMap?[dbModel.accountGroupId]! ?? AccountGroup()
-        self.currency = currenciesMap?[dbModel.currencyCode]! ?? Currency()
+        self.accountGroup = accountGroupsMap?[dbModel.accountGroupId] ?? AccountGroup()
+        self.currency = currenciesMap?[dbModel.currencyCode] ?? Currency()
         
         self.childrenAccounts = []
     }
