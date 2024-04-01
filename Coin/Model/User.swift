@@ -6,35 +6,38 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model class User {
-    
-    @Attribute(.unique) var id: UInt32
+struct User {
+    var id: UInt32
     var name: String
     var email: String
-    var timeCreate: Date
-    var currency: Currency?
+    var defaultCurrency: Currency
     
     init(
         id: UInt32 = 0,
         name: String = "",
         email: String = "",
-        timeCreate: Date = Date(),
-        currency: Currency? = nil
+        defaultCurrency: Currency = Currency()
     ) {
         self.id = id
         self.name = name
         self.email = email
-        self.timeCreate = timeCreate
-        self.currency = currency
+        self.defaultCurrency = defaultCurrency
     }
     
-    init(_ res: GetUserRes, currenciesMap: [String: Currency]) {
-        self.id = res.id
-        self.name = res.name
-        self.email = res.email
-        self.timeCreate = Date()
-        self.currency = currenciesMap[res.defaultCurrency]
+    // Инициализатор из модели базы данных
+    init(_ dbModel: UserDB, currenciesMap: [String: Currency]?) {
+        self.id = dbModel.id
+        self.name = dbModel.name
+        self.email = dbModel.email
+        self.defaultCurrency = currenciesMap?[dbModel.defaultCurrencyCode]! ?? Currency()
+    }
+    
+    static func convertFromDBModel(_ usersDB: [UserDB], currenciesMap: [String: Currency]?) -> [User] {
+        var users: [User] = []
+        for userDB in usersDB {
+            users.append(User(userDB, currenciesMap: currenciesMap))
+        }
+        return users
     }
 }

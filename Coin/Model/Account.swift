@@ -6,95 +6,121 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model class Account {
-    
-    @Attribute(.unique) var id: UInt32
+struct Account: Identifiable {
+    var id: UInt32
     var accounting: Bool
     var iconID: UInt32
     var name: String
     var remainder: Decimal
     var type: AccountType
     var visible: Bool
-    var parentAccountID: UInt32?
     var serialNumber: UInt32
     var isParent: Bool
-    var currency: Currency?
-    var accountGroup: AccountGroup?
     var budgetAmount: Decimal
     var budgetFixedSum: Decimal
     var budgetDaysOffset: UInt8
     var budgetGradualFilling: Bool
-
-    @Transient var childrenAccounts: [Account] = []
-    @Transient var showingBudget: Decimal = 0
-    @Transient var showingRemainder: Decimal = 0
+    
+    var parentAccountID: UInt32?
+    
+    var accountGroup: AccountGroup
+    var currency: Currency
+    
+    var childrenAccounts: [Account]
     
     init(
-        id: UInt32 = 0,
-        accountGroup: AccountGroup = AccountGroup(),
-        currency: Currency = Currency(),
-        accounting: Bool = true,
-        budgetAmount: Decimal = 0,
-        budgetFixedSum: Decimal = 0,
-        budgetDaysOffset: UInt8 = 0,
-        budgetGradualFilling: Bool = false,
-        iconID: UInt32 = 1,
-        name: String = "",
-        remainder: Decimal = 0,
-        type: AccountType = .regular,
-        visible: Bool = true,
-        serialNumber: UInt32 = 0,
-        isParent: Bool = false,
-        parentAccountID: UInt32? = nil,
-        showingBudget: Decimal = 0,
-        showingRemainder: Decimal = 0
-    ) {
-        self.id = id
-        self.accounting = accounting
-        self.budgetAmount = budgetAmount
-        self.budgetFixedSum = budgetFixedSum
-        self.budgetDaysOffset = budgetDaysOffset
-        self.budgetGradualFilling = budgetGradualFilling
-        self.iconID = iconID
-        self.name = name
-        self.remainder = remainder
-        self.type = type
-        self.visible = visible
-        self.parentAccountID = parentAccountID
-        self.serialNumber = serialNumber
-        self.isParent = isParent
-        self.showingBudget = showingBudget
-        self.showingRemainder = showingRemainder
-        self.accountGroup = accountGroup
-        self.currency = currency
-    }
-    
-    init(_ res: GetAccountsRes, currenciesMap: [String: Currency], accountGroupsMap: [UInt32: AccountGroup]) {
-        self.id = res.id
-        self.accounting = res.accounting
-        self.iconID = res.iconID
-        self.name = res.name
-        self.remainder = res.remainder
-        self.type = res.type
-        self.visible = res.visible
-        self.parentAccountID = res.parentAccountID
-        self.serialNumber = res.serialNumber
-        self.isParent = res.isParent
-        self.budgetAmount = res.budget.amount
-        self.budgetFixedSum = res.budget.fixedSum
-        self.budgetDaysOffset = res.budget.daysOffset
-        self.budgetGradualFilling = res.budget.gradualFilling
-        self.accountGroup = accountGroupsMap[res.accountGroupID]!
-        self.currency = currenciesMap[res.currency]!
-    }
-    
-    static func groupAccounts(_ accounts: [Account]) -> [Account] {
-                    
-        for account in accounts {
-            account.clearTransientData()
+            id: UInt32 = 0,
+            accounting: Bool = true,
+            iconID: UInt32 = 1,
+            name: String = "",
+            remainder: Decimal = 0,
+            type: AccountType = .regular,
+            visible: Bool = true,
+            serialNumber: UInt32 = 0,
+            isParent: Bool = false,
+            budgetAmount: Decimal = 0,
+            budgetFixedSum: Decimal = 0,
+            budgetDaysOffset: UInt8 = 0,
+            budgetGradualFilling: Bool = false,
+            parentAccountID: UInt32? = nil,
+            accountGroup: AccountGroup = AccountGroup(),
+            currency: Currency = Currency(),
+            childrenAccounts: [Account] = []
+        ) {
+            self.id = id
+            self.accounting = accounting
+            self.iconID = iconID
+            self.name = name
+            self.remainder = remainder
+            self.type = type
+            self.visible = visible
+            self.parentAccountID = parentAccountID
+            self.serialNumber = serialNumber
+            self.isParent = isParent
+            self.budgetAmount = budgetAmount
+            self.budgetFixedSum = budgetFixedSum
+            self.budgetDaysOffset = budgetDaysOffset
+            self.budgetGradualFilling = budgetGradualFilling
+            self.accountGroup = accountGroup
+            self.currency = currency
+            self.childrenAccounts = childrenAccounts
         }
+    
+    // Инициализатор из модели базы данных
+    init(_ dbModel: AccountDB, currenciesMap: [String: Currency]?, accountGroupsMap: [UInt32: AccountGroup]?) {
+        self.id = dbModel.id
+        self.accounting = dbModel.accounting
+        self.iconID = dbModel.iconID
+        self.name = dbModel.name
+        self.remainder = dbModel.remainder
+        self.type = dbModel.type
+        self.visible = dbModel.visible
+        self.serialNumber = dbModel.serialNumber
+        self.isParent = dbModel.isParent
+        self.budgetAmount = dbModel.budgetAmount
+        self.budgetFixedSum = dbModel.budgetFixedSum
+        self.budgetDaysOffset = dbModel.budgetDaysOffset
+        self.budgetGradualFilling = dbModel.budgetGradualFilling
+        
+        self.parentAccountID = dbModel.parentAccountId
+        
+        self.accountGroup = accountGroupsMap?[dbModel.accountGroupId] ?? AccountGroup()
+        self.currency = currenciesMap?[dbModel.currencyCode] ?? Currency()
+        
+        self.childrenAccounts = []
+    }
+    
+    static func convertFromDBModel(_ accountsDB: [AccountDB], currenciesMap: [String: Currency]?, accountGroupsMap: [UInt32: AccountGroup]?) -> [Account] {
+        var accounts: [Account] = []
+        for accountDB in accountsDB {
+            accounts.append(Account(accountDB, currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
+        }
+        return accounts
+    }
+    
+    static func convertToMap(_ accounts: [Account]) -> [UInt32: Account] {
+        return Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
+    }
+}
+
+extension Account: Hashable {
+    
+    static func == (lhs: Account, rhs: Account) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
+enum AccountType: String, Codable, CaseIterable {
+    case expense, earnings, debt, regular
+}
+
+extension Account {
+    static func groupAccounts(_ accounts: [Account]) -> [Account] {
 
         // Делаем контейнер для сбора счетов и счетов с аггрегацией
         var accountsContainer = [Account]()
@@ -131,25 +157,20 @@ import SwiftData
                 
                 // Если счет нужно показывать
                 if account.visible {
-                    
-                    account.showingBudget = account.budgetAmount
-                    account.showingRemainder = account.remainder
-                    
+                                        
                     // Добавляем его в дочерние счета родителя
                     accountsContainer[parentAccountIndex].childrenAccounts.append(account)
                     
                     // Аггрегируем бюджеты и остатки, если необхдоимо
                     if account.accounting {
-                        let relation = (parentAccount.currency?.rate ?? 1) / (account.currency?.rate ?? 1)
-                        accountsContainer[parentAccountIndex].showingBudget += account.budgetAmount * relation
-                        accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
+                        let relation = (parentAccount.currency.rate) / (account.currency.rate)
+                        accountsContainer[parentAccountIndex].budgetAmount += account.budgetAmount * relation
+                        accountsContainer[parentAccountIndex].remainder += account.remainder * relation
                     }
                 }
                 
             } else {
                 // Проверяем, чтобы такого счета уже не было в контейнере
-                account.showingBudget += account.budgetAmount
-                account.showingRemainder += account.remainder
                 guard accountsContainer.firstIndex(where: { $0.id == account.id }) == nil else { continue }
                 // Добавляем счет в контейнер
                 accountsContainer.append(account)
@@ -157,82 +178,4 @@ import SwiftData
         }
         return accountsContainer
     }
-    
-    func clearTransientData() {
-        self.childrenAccounts = []
-        self.showingBudget = 0
-        self.showingRemainder = 0
-    }
-}
-
-enum AccountType: String, Codable, CaseIterable {
-    case expense, earnings, debt, regular
-}
-
-
-
-
-struct AccountPermissions {
-    var changeBudget: Bool = true
-    var changeRemainder: Bool = true
-    var linkToParentAccount: Bool = true
-}
-
-private let typeToPermissions: [AccountType: AccountPermissions] = [
-    // Разрешения для счетов долгов - нельзя менять только бюджеты
-    .debt: AccountPermissions(
-        changeBudget: false,
-        changeRemainder: true,
-        linkToParentAccount: true
-    ),
-    // Разрешения для счетов доходов - нельзя менять только остатки счетов
-    .earnings: AccountPermissions(
-        changeBudget: true,
-        changeRemainder: false,
-        linkToParentAccount: true
-    ),
-    // Разрешения для обычных счетов - нельзя менять только бюджеты
-    .regular: AccountPermissions(
-        changeBudget: false,
-        changeRemainder: true,
-        linkToParentAccount: true
-    ),
-    // Разрешения для счетов расходов - нельзя менять только остатки счетов
-    .expense: AccountPermissions(
-        changeBudget: true,
-        changeRemainder: false,
-        linkToParentAccount: true
-    )
-]
-
-private let isParentToPermissions: [Bool: AccountPermissions] = [
-    // Разрешения для дочерних счетов - все разрешения
-    false: AccountPermissions(
-        changeBudget: true,
-        changeRemainder: true,
-        linkToParentAccount: true
-    ),
-    // Разрешения для родительских счетов - нельзя менять остатки счетов, создавать транзакции и привязывать к родительским счетам
-    true: AccountPermissions(
-        changeBudget: true,
-        changeRemainder: true,
-        linkToParentAccount: true
-    )
-]
-
-func GetPermissions(account: Account) -> AccountPermissions {
-    return joinPermissions(permissions: [
-        typeToPermissions[account.type]!,
-        isParentToPermissions[account.isParent]!
-    ])
-}
-
-private func joinPermissions(permissions: [AccountPermissions]) -> AccountPermissions {
-    var joinedPermissions = AccountPermissions()
-    for permission in permissions {
-        joinedPermissions.changeBudget = joinedPermissions.changeBudget && permission.changeBudget
-        joinedPermissions.changeRemainder = joinedPermissions.changeRemainder && permission.changeRemainder
-        joinedPermissions.linkToParentAccount = joinedPermissions.linkToParentAccount && permission.linkToParentAccount
-    }
-    return joinedPermissions
 }

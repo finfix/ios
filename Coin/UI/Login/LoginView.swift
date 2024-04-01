@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "Login")
@@ -24,7 +23,6 @@ struct LoginView: View {
     @AppStorage("isLogin") var isLogin: Bool = false
     @AppStorage("accessToken") var accessToken: String?
     @AppStorage("refreshToken") var refreshToken: String?
-    @Environment(\.modelContext) var modelContext
     @FocusState private var focusedField: Field?
     
     @State private var mode: Mode = .login
@@ -126,7 +124,6 @@ struct LoginView: View {
                 accessToken = response.token.accessToken
                 refreshToken = response.token.refreshToken
                 isLogin = true
-                await LoadModelActor(modelContainer: modelContext.container).sync()
             } catch {
                 showErrorAlert("\(error)")
                 logger.error("\(error)")
@@ -141,7 +138,6 @@ struct LoginView: View {
                 accessToken = response.token.accessToken
                 refreshToken = response.token.refreshToken
                 isLogin = true
-                await LoadModelActor(modelContainer: modelContext.container).sync()
             } catch {
                 showErrorAlert("\(error)")
                 logger.error("\(error)")

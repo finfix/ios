@@ -18,6 +18,5 @@ struct GetUserRes: Decodable {
     var id: UInt32
     var name: String
     var email: String
-//    var timeCreate: Date
     var defaultCurrency: String
 }

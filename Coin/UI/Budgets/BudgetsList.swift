@@ -6,42 +6,33 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "BudgetList")
 
 struct BudgetsList: View {
-    
-    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query(sort: [
-        SortDescriptor(\Account.serialNumber)
-    ]) var accounts: [Account]
         
-    func groupAccounts() -> [Account] {
-        logger.info("Группируем счета")
-        let accounts = accounts.filter {
-            $0.visible &&
-            $0.accountGroup?.id == UInt32(selectedAccountsGroupID) &&
-            $0.type == .expense
-        }
-        return Account.groupAccounts(accounts).filter { $0.showingBudget != 0 }
+    @State private var vm: BudgetsListViewModel
+    
+    init(accountGroup: AccountGroup) {
+        vm = BudgetsListViewModel(accountGroup: accountGroup)
     }
         
     var body: some View {
-        let groupedAccounts = groupAccounts()
         ScrollView {
             VStack {
-                ForEach(groupedAccounts) { account in
+                ForEach(vm.accounts) { account in
                     BudgetRow(account: account)
                 }
             }
         }
         .navigationTitle("Бюджеты")
+        .task {
+            vm.load()
+        }
     }
 }
 
 #Preview {
-    BudgetsList()
-        .modelContainer(previewContainer)
+    BudgetsList(accountGroup: AccountGroup(id: 1))
 }

@@ -47,6 +47,7 @@ struct CreateAccountReq: Encodable {
     var name: String
     var remainder: Decimal?
     var type: String
+    var isParent: Bool
 }
 
 struct CreateAccountBudgetReq: Encodable {

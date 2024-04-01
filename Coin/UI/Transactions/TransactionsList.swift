@@ -6,14 +6,15 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "TransactionList")
 
 struct TransactionsView: View {
     
-    @State private var sortOrder = SortDescriptor(\Transaction.dateTransaction, order: .reverse)
+    @State private var vm = TransactionsListViewModel()
+    @Binding var selectedAccountGroup: AccountGroup
+    
     @State private var searchText = ""
     @State var dateFrom: Date? = Calendar(identifier: .gregorian).date(byAdding: .month, value: -1, to: Date.now)!
     
@@ -23,83 +24,48 @@ struct TransactionsView: View {
     
     var body: some View {
         NavigationStack {
-            TransactionsList(searchString: searchText, dateFrom: dateFrom, dateTo: dateTo, accountID: accountID)
-                .navigationDestination(for: Transaction.self) { EditTransaction($0) }
-                .searchable(text: $searchText)
-                .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
-                        // Фильтры
-                        Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
+            List {
+                ForEach(vm.groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
+                    Section(header: Text(date, style: .date).font(.headline)) {
+                        ForEach(vm.groupedTransactionByDate[date] ?? []) { transaction in
+                            NavigationLink(value: transaction) {
+                                TransactionRow(transaction: transaction)
+                            }
+                        }
+                        .onDelete {
+                            for i in $0.makeIterator() {
+                                Task {
+                                    await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i])
+                                }
+                            }
+                        }
                     }
                 }
-                .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }
-                .navigationTitle("Транзакции")
-        }
-    }
-}
+                if !vm.transactionsCancelled {
+                    Text("Загрузка...")
+                        .task {
+                            vm.load(refresh: false)
+                        }
+                }
+            }
+            .navigationDestination(for: Transaction.self) { EditTransaction($0) }
+            .listStyle(.grouped)
+            .refreshable {
+                vm.load(refresh: true)
+            }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    // Фильтры
+                    Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
+                }
+            }
+            .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }
+            .navigationTitle("Транзакции")
 
-struct TransactionsList: View {
-    
-    @Environment(\.modelContext) var modelContext
-    @Query(sort: [
-        SortDescriptor(\Transaction.dateTransaction, order: .reverse)
-    ]) var transactions: [Transaction]
-        
-    init(searchString: String = "", dateFrom: Date? = nil, dateTo: Date? = nil, accountID: UInt32? = nil) {
-        logger.info("Фильтруем транзакции")
-        _transactions = Query(filter: #Predicate {
-            (searchString.isEmpty ? true : $0.note.localizedStandardContains(searchString)) &&
-            (dateFrom == nil ? true : $0.dateTransaction >= dateFrom!) &&
-            (dateTo == nil ? true : $0.dateTransaction <= dateTo!)
-        })
-    }
-    
-    var body: some View {
-        let groupedTransactionByDate = Dictionary(grouping: transactions, by: { $0.dateTransaction })
-        
-        List {
-            ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
-                Section(header: Text(date, style: .date).font(.headline)) {
-                    ForEach(groupedTransactionByDate[date]!) { transaction in
-                        NavigationLink(value: transaction) {
-                            TransactionRow(transaction: transaction)
-                        }
-                    }
-                    .onDelete {
-                        for i in $0.makeIterator() {
-                            deleteTransaction(groupedTransactionByDate[date]![i])
-                        }
-                    }
-                }
-            }
-        }
-        .listStyle(.grouped)
-    }
-    
-    func deleteTransaction(_ transaction: Transaction) {
-        Task {
-            do {
-                try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
-                switch transaction.type {
-                case .transfer, .consumption:
-                    transaction.accountFrom?.remainder += transaction.amountFrom
-                    transaction.accountTo?.remainder -= transaction.amountTo
-                case .income:
-                    transaction.accountFrom?.remainder -= transaction.amountFrom
-                    transaction.accountTo?.remainder -= transaction.amountTo
-                case .balancing:
-                    transaction.accountTo?.remainder -= transaction.amountTo
-                }
-                modelContext.delete(transaction)
-            } catch {
-                showErrorAlert("\(error)")
-                logger.error("\(error)")
-            }
         }
     }
 }
 
 #Preview {
-    TransactionsView()
-        .modelContainer(previewContainer)
+    TransactionsView(selectedAccountGroup: .constant(AccountGroup()))
 }

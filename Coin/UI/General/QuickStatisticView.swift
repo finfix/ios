@@ -6,66 +6,23 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "quick statistic")
 
 struct QuickStatisticView: View {
     
-    @AppStorage("accountGroupID") var accountGroupID: Int = 0
-    
-            
-    var body: some View {
-        QuickStatisticSubView(accountGroupID: UInt32(accountGroupID))
-    }
-}
-
-struct QuickStatisticSubView: View {
-    
-    @Query(sort: [
-        SortDescriptor(\AccountGroup.serialNumber)
-    ]) var accountGroups: [AccountGroup]
-    
-    init(accountGroupID: UInt32) {
-        _accountGroups = Query(filter: #Predicate { $0.id == accountGroupID })
-    }
-    
-    var accountGroup: AccountGroup {
-        if let accountGroup = accountGroups.first {
-            return accountGroup
-        }
-        return AccountGroup()
-    }
-    
-    var body: some View {
-        QuickStatisticSubSubView(accountGroup: accountGroup)
-    }
-}
-
-struct QuickStatisticSubSubView: View {
-    
-    @Query(sort: [
-        SortDescriptor(\Account.serialNumber)
-    ]) var accounts: [Account]
-    var currency: Currency
+    private let service = Service.shared
         
-    var formatter: CurrencyFormatter
-    
-    init(accountGroup: AccountGroup) {
-        self.formatter = CurrencyFormatter(currency: accountGroup.currency, maximumFractionDigits: 0)
-        self.currency = accountGroup.currency ?? Currency()
-        let accountGroupID = accountGroup.id
-        _accounts = Query(filter: #Predicate {
-            $0.accountGroup?.id == accountGroupID &&
-            $0.accounting &&
-            $0.visible
-        })
-    }
-    
-    var body: some View {
-        let statistic = calculateStatistic(accounts: accounts, targetCurrency: currency)
+    var selectedAccountGroup: AccountGroup
+    @State var accounts: [Account] = []
+    @State var statistic = QuickStatistic()
         
+    var formatter: CurrencyFormatter {
+        CurrencyFormatter(currency: selectedAccountGroup.currency, maximumFractionDigits: 0)
+    }
+        
+    var body: some View {
         HStack {
             Spacer()
             VStack {
@@ -84,7 +41,7 @@ struct QuickStatisticSubSubView: View {
             Spacer()
                 
             NavigationLink {
-                BudgetsList()
+                BudgetsList(accountGroup: selectedAccountGroup)
             } label: {
                 VStack {
                     Text("Бюджет")
@@ -98,20 +55,30 @@ struct QuickStatisticSubSubView: View {
                 }
             }
             .buttonStyle(.plain)
-
-           
-            
             Spacer()
+        }
+        .task {
+            load()
+        }
+        .onChange(of: selectedAccountGroup) {
+            load()
         }
         .font(.caption2)
         .frame(maxWidth: .infinity)
         .frame(height: 40)
     }
     
+    func load() {
+        do {
+            accounts = try service.getAccounts(accountGroup: selectedAccountGroup, accounting: true)
+            statistic = calculateStatistic(accounts: accounts, targetCurrency: selectedAccountGroup.currency)
+        } catch {
+            showErrorAlert("\(error)")
+        }
+    }
+    
     func calculateStatistic(accounts a: [Account], targetCurrency: Currency) -> QuickStatistic {
-        logger.info("Считаем статистику для шапки")
-                
-        let tmp = QuickStatistic(currency: currency)
+        var tmp = QuickStatistic(currency: targetCurrency)
         
         let accounts = Account.groupAccounts(a)
         
@@ -121,22 +88,19 @@ struct QuickStatisticSubSubView: View {
                 continue
             }
                         
-            let relation = targetCurrency.rate / (account.currency?.rate ?? 1)
+            let relation = targetCurrency.rate / (account.currency.rate)
             
             switch account.type {
             case .expense:
-                tmp.totalExpense += account.showingRemainder * relation
-                tmp.totalBudget += account.showingBudget * relation
-                if account.showingBudget != 0 && account.showingBudget > account.showingRemainder {
-                    print(account.name)
-                    print(account.showingBudget)
-                    print(account.showingRemainder)
-                    tmp.periodRemainder += (account.showingBudget - account.showingRemainder) * relation
+                tmp.totalExpense += account.remainder * relation
+                tmp.totalBudget += account.budgetAmount * relation
+                if account.budgetAmount != 0 && account.budgetAmount > account.remainder {
+                    tmp.periodRemainder += (account.budgetAmount - account.remainder) * relation
                 }
             case .earnings:
                 continue
             default:
-                tmp.totalRemainder += account.showingRemainder * relation
+                tmp.totalRemainder += account.remainder * relation
             }
         }
         return tmp
@@ -147,8 +111,7 @@ struct QuickStatisticSubSubView: View {
 
 #Preview {
     Group {
-        QuickStatisticView()
+        QuickStatisticView(selectedAccountGroup: AccountGroup())
         Spacer()
     }
-    .modelContainer(previewContainer)
 }

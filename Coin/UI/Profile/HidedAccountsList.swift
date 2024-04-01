@@ -6,31 +6,26 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct HidedAccountsList: View {
     
-    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query(sort: [
-        SortDescriptor(\Account.serialNumber)
-    ]) var accounts: [Account]
-    @State var accountType: AccountType = .regular
+    @State private var vm = HidedAccountViewModel()
+    @Binding var selectedAccountGroup: AccountGroup
     @Binding var path: NavigationPath
-    var filteredAccounts: [Account] {
-        accounts.filter {
-            $0.type == accountType &&
-            $0.accountGroup?.id ?? 0 == selectedAccountsGroupID &&
-            !$0.visible
+    
+    var accounts: [Account] {
+        vm.accounts.filter {
+            $0.accountGroup == selectedAccountGroup
         }
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            AccountGroupSelector()
+            AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
-                    ForEach(filteredAccounts) { account in
-                        AccountCircleItem(account, path: $path)
+                    ForEach(accounts) { account in
+                        AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                     }
                 }
             }
@@ -38,17 +33,22 @@ struct HidedAccountsList: View {
         .navigationDestination(for: Account.self) { EditAccount($0) }
         .contentMargins(.horizontal, 10, for: .automatic)
         .toolbar {
-            Picker("Тип счета", selection: $accountType) {
+            Picker("Тип счета", selection: $vm.type) {
                 ForEach(AccountType.allCases, id: \.self) { value in
                     Text(value.rawValue)
                         .tag(value)
                 }
+            }        
+            .onChange(of: vm.type) {
+                vm.load()
             }
+        }
+        .task {
+            vm.load()
         }
     }
 }
 
 #Preview {
-    HidedAccountsList(path: .constant(NavigationPath()))
-        .modelContainer(previewContainer)
+    HidedAccountsList(selectedAccountGroup: .constant(AccountGroup()), path: .constant(NavigationPath()))
 }

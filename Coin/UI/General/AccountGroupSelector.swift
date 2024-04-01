@@ -6,61 +6,32 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "account group selector")
 
 struct AccountGroupSelector: View {
     
-    @Query(sort: [
-        SortDescriptor(\AccountGroup.serialNumber)
-    ]) var accountGroups: [AccountGroup]
-    @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0 {
-        didSet {
-            guard accountGroups.count >= selectedAccountGroupIndex + 1 else { return }
-            logger.info("Выбрали группу счетов \(accountGroups[selectedAccountGroupIndex].name, privacy: .private)")
-            selectedAccountGroupID = Int(accountGroups[selectedAccountGroupIndex].id)
-        }
-    }
-    @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
-    
-    var canForward: Bool {
-        selectedAccountGroupIndex + 1 < accountGroups.count
-    }
-    
-    var canBackward: Bool {
-        selectedAccountGroupIndex > 0
-    }
+    @State private var vm = AccountGroupSelectorViewModel()
+    @Binding var selectedAccountGroup: AccountGroup
     
     var body: some View {
-        HStack(spacing: 80) {
-            Button {
-                if canBackward {
-                    selectedAccountGroupIndex -= 1
-                }
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundColor(canBackward ? .primary : .gray)
-            }
-            
-            Text(accountGroups.count > 0 ? accountGroups[selectedAccountGroupIndex].name : "")
-                .frame(width: 100)
-            
-            Button {
-                if canForward {
-                    selectedAccountGroupIndex += 1
-                }
-            } label: {
-                Image(systemName: "chevron.right")
-                    .foregroundColor(canForward ? .primary : .gray)
+        Picker("", selection: $selectedAccountGroup) {
+            ForEach(vm.accountGroups) { accountGroup in
+                Text(accountGroup.name)
+                    .tag(accountGroup)
             }
         }
-        .padding()
+        .pickerStyle(.menu)
+        .task {
+            let firstAccountGroup = vm.load()
+            if selectedAccountGroup.id == 0 {
+                selectedAccountGroup = firstAccountGroup
+            }
+        }
     }
 }
 
 #Preview {
-    AccountGroupSelector()
-        .modelContainer(previewContainer)
+    AccountGroupSelector(selectedAccountGroup: .constant(AccountGroup()))
 }

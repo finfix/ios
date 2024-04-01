@@ -6,22 +6,24 @@
 //
 
 import SwiftUI
-import SwiftData
 
 enum ProfileViews {
     case hidedAccounts, currencyRates, settings
 }
 
 struct Profile: View {
+    
+    @State var vm = ProfileViewModel()
+    
+    @Binding var selectedAccountGroup: AccountGroup
+    
     @AppStorage("accessToken") private var accessToken: String?
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
-    @AppStorage("accountGroupIndex") var accountGroupIndex: Int = 0
     @State var shouldShowSuccess = false
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     
-    @Environment(\.modelContext) var modelContext
     @State var path = NavigationPath()
     
     var body: some View {
@@ -36,10 +38,12 @@ struct Profile: View {
                     Button("Синхронизировать") {
                         Task {
                             shouldDisableUI = true
+                            defer { shouldDisableUI = false }
                             shouldShowProgress = true
-                            await LoadModelActor(modelContainer: modelContext.container).sync()
-                            shouldShowProgress = false
-                            shouldDisableUI = false
+                            defer { shouldShowProgress = false }
+                            
+                            await vm.sync()
+                            
                             withAnimation(.spring().delay(0.25)) {
                                 self.shouldShowSuccess.toggle()
                             }
@@ -52,13 +56,8 @@ struct Profile: View {
                         Task {
                             shouldDisableUI = true
                             defer { shouldDisableUI = false }
-                            do {
-                                try await LoadModelActor(modelContainer: modelContext.container).deleteAll()
-                            } catch {
-                                showErrorAlert("\(error)")
-                            }
+                            vm.deleteAll()
                         }
-                        accountGroupIndex = 0
                         isLogin = false
                         accessToken = nil
                         refreshToken = nil
@@ -85,7 +84,7 @@ struct Profile: View {
             }
             .navigationDestination(for: ProfileViews.self) { view in
                 switch view {
-                case .hidedAccounts: HidedAccountsList(path: $path)
+                case .hidedAccounts: HidedAccountsList(selectedAccountGroup: $selectedAccountGroup, path: $path)
                 case .currencyRates: CurrencyRates()
                 case .settings: Settings()
                 }
@@ -103,6 +102,5 @@ struct Profile: View {
 }
 
 #Preview {
-    Profile()
-        .modelContainer(container)
+    Profile(selectedAccountGroup: .constant(AccountGroup()))
 }
