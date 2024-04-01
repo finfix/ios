@@ -54,6 +54,7 @@ extension Service {
         ids: [UInt32]? = nil,
         accountGroup: AccountGroup? = nil,
         visible: Bool? = nil,
+        accounting: Bool? = nil,
         types: [AccountType]? = nil
     ) throws -> [Account] {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
@@ -62,6 +63,7 @@ extension Service {
             ids: ids,
             accountGroupID: accountGroup?.id,
             visible: visible,
+            accounting: accounting,
             types: types
         ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
     }

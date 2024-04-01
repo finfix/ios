@@ -18,18 +18,13 @@ struct AccountCirclesView: View {
     
     let horizontalSpacing: CGFloat = 10
     
-    func groupAcccounts() -> [Account] {
-        logger.info("Фильтруем и группируем счета")
-        let filteredAccounts = vm.accounts.filter {
-            $0.accountGroup == selectedAccountGroup &&
-            $0.visible
+    var groupedAccounts: [Account] {
+        vm.accounts.filter {
+            $0.accountGroup == selectedAccountGroup
         }
-        return Account.groupAccounts(filteredAccounts)
     }
     
     var body: some View {
-        let groupedAccounts = groupAcccounts()
-        
         NavigationStack(path: $path) {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {

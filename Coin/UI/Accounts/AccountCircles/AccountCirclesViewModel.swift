@@ -15,7 +15,7 @@ class AccountCirclesViewModel {
         
     func load() {
         do {
-            accounts = try service.getAccounts()
+            accounts = Account.groupAccounts(try service.getAccounts(visible: true))
         } catch {
             showErrorAlert("\(error)")
         }

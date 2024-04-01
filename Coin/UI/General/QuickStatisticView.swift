@@ -70,7 +70,7 @@ struct QuickStatisticView: View {
     
     func load() {
         do {
-            accounts = try service.getAccounts()
+            accounts = try service.getAccounts(accountGroup: selectedAccountGroup, accounting: true)
             statistic = calculateStatistic(accounts: accounts, targetCurrency: selectedAccountGroup.currency)
         } catch {
             showErrorAlert("\(error)")

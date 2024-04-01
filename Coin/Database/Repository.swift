@@ -166,6 +166,7 @@ extension AppDatabase {
         ids: [UInt32]? = nil,
         accountGroupID: UInt32? = nil,
         visible: Bool? = nil,
+        accounting: Bool? = nil,
         types: [AccountType]? = nil
     ) throws -> [AccountDB] {
         try reader.read { db in
@@ -182,6 +183,10 @@ extension AppDatabase {
             
             if let visible = visible {
                 request = request.filter(Column("visible") == visible)
+            }
+            
+            if let accounting = accounting {
+                request = request.filter(Column("accounting") == accounting)
             }
             
             if let types = types {
