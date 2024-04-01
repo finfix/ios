@@ -33,7 +33,7 @@ struct AccountCirclesView: View {
         NavigationStack(path: $path) {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
-                    QuickStatisticView()
+                    QuickStatisticView(selectedAccountGroup: selectedAccountGroup)
                     AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
                 }
                 VStack {

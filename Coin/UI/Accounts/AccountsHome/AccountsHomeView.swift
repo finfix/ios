@@ -26,7 +26,7 @@ struct AccountsHomeView: View {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
-                        QuickStatisticView()
+                        QuickStatisticView(selectedAccountGroup: selectedAccountGroup)
                         AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
                     }
                     ScrollView {

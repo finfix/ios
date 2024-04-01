@@ -12,23 +12,17 @@ private let logger = Logger(subsystem: "Coin", category: "quick statistic")
 
 struct QuickStatisticView: View {
     
-    @AppStorage("accountGroupID") var accountGroupID: Int = 0
-
-    var accountGroup: AccountGroup {
-        return AccountGroup()
-    }
-    
-    var accounts: [Account] = []
-    var currency: Currency = Currency()
-    var formatter: CurrencyFormatter = CurrencyFormatter()
-    
-    init() {
-        self.formatter = CurrencyFormatter(currency: accountGroup.currency, maximumFractionDigits: 0)
-    }
-    
-    var body: some View {
-        let statistic = calculateStatistic(accounts: accounts, targetCurrency: currency)
+    private let service = Service.shared
         
+    var selectedAccountGroup: AccountGroup
+    @State var accounts: [Account] = []
+    @State var statistic = QuickStatistic()
+        
+    var formatter: CurrencyFormatter {
+        CurrencyFormatter(currency: selectedAccountGroup.currency, maximumFractionDigits: 0)
+    }
+        
+    var body: some View {
         HStack {
             Spacer()
             VStack {
@@ -47,7 +41,7 @@ struct QuickStatisticView: View {
             Spacer()
                 
             NavigationLink {
-                BudgetsList(accountGroup: AccountGroup(id: UInt32(accountGroupID)))
+                BudgetsList(accountGroup: selectedAccountGroup)
             } label: {
                 VStack {
                     Text("Бюджет")
@@ -61,20 +55,30 @@ struct QuickStatisticView: View {
                 }
             }
             .buttonStyle(.plain)
-
-           
-            
             Spacer()
+        }
+        .task {
+            load()
+        }
+        .onChange(of: selectedAccountGroup) {
+            load()
         }
         .font(.caption2)
         .frame(maxWidth: .infinity)
         .frame(height: 40)
     }
     
+    func load() {
+        do {
+            accounts = try service.getAccounts()
+            statistic = calculateStatistic(accounts: accounts, targetCurrency: selectedAccountGroup.currency)
+        } catch {
+            showErrorAlert("\(error)")
+        }
+    }
+    
     func calculateStatistic(accounts a: [Account], targetCurrency: Currency) -> QuickStatistic {
-        logger.info("Считаем статистику для шапки")
-                
-        var tmp = QuickStatistic(currency: currency)
+        var tmp = QuickStatistic(currency: targetCurrency)
         
         let accounts = Account.groupAccounts(a)
         
@@ -107,7 +111,7 @@ struct QuickStatisticView: View {
 
 #Preview {
     Group {
-        QuickStatisticView()
+        QuickStatisticView(selectedAccountGroup: AccountGroup())
         Spacer()
     }
 }
