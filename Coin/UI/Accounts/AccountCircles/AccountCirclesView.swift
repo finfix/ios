@@ -6,42 +6,36 @@
 //
 
 import SwiftUI
-import SwiftData
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "AccountCirclesView")
 
 struct AccountCirclesView: View {
     
-    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
+    @Binding var selectedAccountGroup: AccountGroup
     @State var path = NavigationPath()
-    @Query(sort: [SortDescriptor(\Account.serialNumber)]) var accounts: [Account]
+    @State var vm = AccountCirclesViewModel()
     
     let horizontalSpacing: CGFloat = 10
     
-    func groupAcccounts() -> [Account] {
-        logger.info("Фильтруем и группируем счета")
-        let filteredAccounts = accounts.filter {
-            $0.accountGroup?.id ?? 0 == selectedAccountsGroupID &&
-            $0.visible
+    var groupedAccounts: [Account] {
+        vm.accounts.filter {
+            $0.accountGroup == selectedAccountGroup
         }
-        return Account.groupAccounts(filteredAccounts)
     }
     
     var body: some View {
-        let groupedAccounts = groupAcccounts()
-        
         NavigationStack(path: $path) {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
-                    QuickStatisticView()
-                    AccountGroupSelector()
+                    QuickStatisticView(selectedAccountGroup: selectedAccountGroup)
+                    AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
                 }
                 VStack {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .earnings }) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
                             PlusNewAccount(accountType: .earnings)
                         }
@@ -52,7 +46,7 @@ struct AccountCirclesView: View {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .regular }) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
                             PlusNewAccount(accountType: .regular)
                         }
@@ -63,7 +57,7 @@ struct AccountCirclesView: View {
                     ScrollView(.horizontal) {
                         LazyHGrid(rows: [GridItem(.adaptive(minimum: 100))], alignment: .top, spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .expense }) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
                             PlusNewAccount(accountType: .expense)
                         }
@@ -72,14 +66,16 @@ struct AccountCirclesView: View {
                 .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
                 .scrollIndicators(.hidden)
                 .navigationDestination(for: Account.self) { EditAccount($0) }
-                .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0) }
+                .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0, accountGroup: selectedAccountGroup) }
             }
             Spacer()
+        }
+        .task {
+            vm.load()
         }
     }
 }
 
 #Preview {
-    AccountCirclesView()
-        .modelContainer(previewContainer)
+    AccountCirclesView(selectedAccountGroup: .constant(AccountGroup()))
 }

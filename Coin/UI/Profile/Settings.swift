@@ -9,6 +9,20 @@ import SwiftUI
 
 struct Settings: View {
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
+    
+    func getAppVersion() -> String {
+        if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            return appVersion
+        }
+        return "Unknown"
+    }
+
+    func getBuildNumber() -> String {
+        if let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+            return buildNumber
+        }
+        return "Unknown"
+    }
 
     var body: some View {
         Form {
@@ -20,6 +34,11 @@ struct Settings: View {
                     }
                 }
             }
+            Section(footer: HStack {
+                Text("Version \(getAppVersion()) (Build \(getBuildNumber()))")
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity)
+            }) {}
         }
     }
 }

@@ -6,12 +6,9 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model 
-class Transaction {
-    
-    @Attribute(.unique) var id: UInt32
+struct Transaction: Identifiable {
+    var id: UInt32
     var accounting: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
@@ -20,9 +17,8 @@ class Transaction {
     var note: String
     var type: TransactionType
     var timeCreate: Date
-    
-    var accountFrom: Account?
-    var accountTo: Account?
+    var accountFrom: Account
+    var accountTo: Account
     
     init(
         id: UInt32 = 0,
@@ -34,8 +30,8 @@ class Transaction {
         note: String = "",
         type: TransactionType = .consumption,
         timeCreate: Date = Date(),
-        accountFrom: Account? = nil,
-        accountTo: Account? = nil
+        accountFrom: Account = Account(),
+        accountTo: Account = Account()
     ) {
         self.accounting = accounting
         self.amountFrom = amountFrom
@@ -49,19 +45,40 @@ class Transaction {
         self.accountFrom = accountFrom
         self.accountTo = accountTo
     }
-    
-    init(_ res: GetTransactionsRes, accountsMap: [UInt32: Account]) {
-        self.accounting = res.accounting
-        self.amountFrom = res.amountFrom
-        self.amountTo = res.amountTo
-        self.dateTransaction = res.dateTransaction
-        self.id = res.id
-        self.isExecuted = res.isExecuted
-        self.note = res.note
-        self.type = res.type
+}
+
+// Инициализатор из модели базы данных
+extension Transaction {
+    init(_ dbModel: TransactionDB, accountsMap: [UInt32: Account]?) {
+        self.accounting = dbModel.accounting
+        self.amountFrom = dbModel.amountFrom
+        self.amountTo = dbModel.amountTo
+        self.dateTransaction = dbModel.dateTransaction
+        self.id = dbModel.id
+        self.isExecuted = dbModel.isExecuted
+        self.note = dbModel.note
+        self.type = dbModel.type
         self.timeCreate = Date()
-        self.accountFrom = accountsMap[res.accountFromID]
-        self.accountTo = accountsMap[res.accountToID]
+        self.accountFrom = accountsMap?[dbModel.accountFromId] ?? Account()
+        self.accountTo = accountsMap?[dbModel.accountToId] ?? Account()
+    }
+    
+    static func convertFromDBModel(_ transactionsDB: [TransactionDB], accountsMap: [UInt32: Account]?) -> [Transaction] {
+        var transactions: [Transaction] = []
+        for transactionDB in transactionsDB {
+            transactions.append(Transaction(transactionDB, accountsMap: accountsMap))
+        }
+        return transactions
+    }
+}
+
+extension Transaction: Hashable {
+    static func == (lhs: Transaction, rhs: Transaction) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
 

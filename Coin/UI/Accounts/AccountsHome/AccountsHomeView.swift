@@ -6,17 +6,14 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct AccountsHomeView: View {
     
-    @AppStorage("accountGroupID") var selectedAccountsGroupID: Int = 0
-    @Query(sort: [
-        SortDescriptor(\Account.serialNumber)
-    ]) var accounts: [Account]
+    @State var vm = AccountHomeViewModel()
+    @Binding var selectedAccountGroup: AccountGroup
     
     var filteredAccounts: [Account] {
-        accounts.filter { $0.accountGroup?.id ?? 0 == selectedAccountsGroupID }
+        vm.accounts.filter { $0.accountGroup == selectedAccountGroup }
     }
     
     @State var showDebts = false
@@ -29,8 +26,8 @@ struct AccountsHomeView: View {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
-                        QuickStatisticView()
-                        AccountGroupSelector()
+                        QuickStatisticView(selectedAccountGroup: selectedAccountGroup)
+                        AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
                     }
                     ScrollView {
                         Text("Карты и счета")
@@ -76,7 +73,10 @@ struct AccountsHomeView: View {
                 }
                 .onDisappear { chooseBlurIsOpened = false }
             }
-            .navigationDestination(for: TransactionType.self ) { EditTransaction(transactionType: $0) }
+            .navigationDestination(for: TransactionType.self ) { EditTransaction(transactionType: $0, accountGroup: selectedAccountGroup) }
+        }
+        .task {
+            vm.load()
         }
     }
 }
@@ -99,6 +99,5 @@ struct CircleTypeTransaction: View {
 }
     
 #Preview {
-    AccountsHomeView()
-        .modelContainer(previewContainer)
+    AccountsHomeView(selectedAccountGroup: .constant(AccountGroup()))
 }

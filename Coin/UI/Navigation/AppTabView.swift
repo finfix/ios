@@ -9,19 +9,38 @@ import SwiftUI
 
 struct AppTabView: View {
     
-    @Binding var selection: AppScreen?
+    @State var selectedAccountGroup = AccountGroup()
     
     var body: some View {
-        TabView(selection: $selection) {
-            ForEach(AppScreen.allCases) { screen in
-                screen.destination
-                    .tag(screen as AppScreen?)
-                    .tabItem { screen.label }
-            }
+        TabView {
+            AccountsHomeView(selectedAccountGroup: $selectedAccountGroup)
+                .tag(1)
+                .tabItem {
+                    Image(systemName: "list.bullet.rectangle.fill")
+                    Text("Счета")
+                }
+            AccountCirclesView(selectedAccountGroup: $selectedAccountGroup)
+                .tag(2)
+                .tabItem {
+                    Image(systemName: "2.circle")
+                    Text("Счета 2")
+                }
+            TransactionsView(selectedAccountGroup: $selectedAccountGroup)
+                .tag(3)
+                .tabItem {
+                    Image(systemName: "3.circle")
+                    Text("Транзакции")
+                }
+            Profile(selectedAccountGroup: $selectedAccountGroup)
+                .tag(5)
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Профиль")
+                }
         }
     }
 }
 
 #Preview {
-    AppTabView(selection: .constant(AppScreen.home))
+    AppTabView()
 }

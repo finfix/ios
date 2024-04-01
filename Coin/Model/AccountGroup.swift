@@ -6,35 +6,52 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model class AccountGroup {
-    
-    @Attribute(.unique) var id: UInt32
+struct AccountGroup: Identifiable {
+    var id: UInt32
     var name: String
-    var currency: Currency?
     var serialNumber: UInt32
-    @Relationship(deleteRule: .nullify, inverse: \Account.accountGroup) var accounts: [Account]
-        
+    var currency: Currency
+    
     init(
         id: UInt32 = 0,
         name: String = "",
         serialNumber: UInt32 = 0,
-        currency: Currency? = nil,
-        accounts: [Account] = []
+        currency: Currency = Currency()
     ) {
         self.id = id
         self.name = name
         self.serialNumber = serialNumber
         self.currency = currency
-        self.accounts = accounts
     }
     
-    init(_ res: GetAccountGroupsRes, currenciesMap: [String: Currency]) {
-        self.id = res.id
-        self.name = res.name
-        self.serialNumber = res.serialNumber
-        self.accounts = []
-        self.currency = currenciesMap[res.currency]
+    // Инициализатор из модели базы данных
+    init(_ dbModel: AccountGroupDB, currenciesMap: [String: Currency]?) {
+        self.id = dbModel.id
+        self.name = dbModel.name
+        self.serialNumber = dbModel.serialNumber
+        self.currency = currenciesMap?[dbModel.currencyCode]! ?? Currency()
+    }
+    
+    static func convertFromDBModel(_ accountGroupsDB: [AccountGroupDB], currenciesMap: [String: Currency]?) -> [AccountGroup] {
+        var accountGroups: [AccountGroup] = []
+        for accountGroupDB in accountGroupsDB {
+            accountGroups.append(AccountGroup(accountGroupDB, currenciesMap: currenciesMap))
+        }
+        return accountGroups
+    }
+    
+    static func convertToMap(_ accountGroups: [AccountGroup]) -> [UInt32: AccountGroup] {
+        return Dictionary(uniqueKeysWithValues: accountGroups.map{ ($0.id, $0) })
+    }
+}
+
+extension AccountGroup: Hashable {
+    static func == (lhs: AccountGroup, rhs: AccountGroup) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
