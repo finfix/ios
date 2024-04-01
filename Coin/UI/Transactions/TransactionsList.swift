@@ -27,7 +27,7 @@ struct TransactionsView: View {
             List {
                 ForEach(vm.groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                     Section(header: Text(date, style: .date).font(.headline)) {
-                        ForEach(vm.groupedTransactionByDate[date]!) { transaction in
+                        ForEach(vm.groupedTransactionByDate[date] ?? []) { transaction in
                             NavigationLink(value: transaction) {
                                 TransactionRow(transaction: transaction)
                             }

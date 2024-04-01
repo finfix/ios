@@ -49,9 +49,9 @@ struct AccountCircleItem: View {
                     .fill(account.budgetAmount == 0 ? .gray : account.budgetAmount >= account.remainder ? .green : .red)
                     .frame(width: 30)
             }
-            .onTapGesture(count: 1) {
-                isTransactionOpen.toggle()
-            }
+//            .onTapGesture(count: 1) {
+//                isTransactionOpen.toggle()
+//            }
             .onTapGesture(count: 2) {
                 if !account.childrenAccounts.isEmpty {
                     isChildrenOpen = true
