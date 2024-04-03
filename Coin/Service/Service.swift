@@ -34,7 +34,7 @@ extension Service {
                 let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
                 balance = try db.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
             }
-            guard var balance = balance else {
+            guard let balance = balance else {
                 showErrorAlert("Не смогли посчитать баланс счета \(account.id)")
                 return
             }
@@ -134,12 +134,14 @@ extension Service {
             transaction.amountTo = transaction.amountFrom
         }
         
+        transaction.dateTransaction = transaction.dateTransaction.stripTime()
+        
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
             accountFromID: transaction.accountFrom.id,
             accountToID: transaction.accountTo.id,
             amountFrom: transaction.amountFrom,
             amountTo: transaction.amountTo,
-            dateTransaction: transaction.dateTransaction.stripTime(),
+            dateTransaction: transaction.dateTransaction,
             note: transaction.note,
             type: transaction.type.rawValue,
             isExecuted: true
@@ -175,18 +177,9 @@ extension Service {
 extension Service {
     func sync() async throws {
         logger.info("Синхронизируем данные")
-        
-        // Сбрасываем указатель на текущую группу счета
-        @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0
-        @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
-        selectedAccountGroupID = nil
-        selectedAccountGroupIndex = 0
-        
+                
         // Получаем данные текущего месяца для запроса
-        // TODO: Убрать
-        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-        let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
-        let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+        let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
         
         // Получаем все данные с сервера
         async let currencies = try await UserAPI().GetCurrencies()
@@ -194,7 +187,10 @@ extension Service {
         async let accountGroups = try await AccountAPI().GetAccountGroups()
         async let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
         async let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
-                    
+        
+        // Удаляем все данные в базе данных
+        try db.deleteAllData()
+        
         // Сохраняем данные в базу данных
         logger.info("Сохраняем валюты")
         try db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
