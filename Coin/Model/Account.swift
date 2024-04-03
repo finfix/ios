@@ -116,7 +116,7 @@ extension Account: Hashable {
 }
 
 enum AccountType: String, Codable, CaseIterable {
-    case expense, earnings, debt, regular
+    case expense, earnings, debt, regular, balancing
 }
 
 extension Account {

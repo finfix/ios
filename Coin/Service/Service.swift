@@ -33,6 +33,8 @@ extension Service {
                 let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
                 let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
                 balance = try db.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
+            case .balancing:
+                return
             }
             guard let balance = balance else {
                 showErrorAlert("Не смогли посчитать баланс счета \(account.id)")
@@ -154,7 +156,7 @@ extension Service {
     func updateTransaction(newTransaction t: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = t
         
-        if newTransaction.accountFrom.currency == newTransaction.accountTo.currency {
+        if (newTransaction.accountFrom.currency == newTransaction.accountTo.currency) && newTransaction.type != .balancing {
             newTransaction.amountTo = newTransaction.amountFrom
         }
         

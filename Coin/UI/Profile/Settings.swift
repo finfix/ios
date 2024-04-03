@@ -18,14 +18,14 @@ struct Settings: View {
         }
         return "Unknown"
     }
-
+    
     func getBuildNumber() -> String {
         if let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
             return buildNumber
         }
         return "Unknown"
     }
-
+    
     var body: some View {
         Form {
             Section {
@@ -34,14 +34,12 @@ struct Settings: View {
                         .foregroundColor(.primary)
                 }
             }
-            Section {
+            Section(header: Text("Инструменты разработчика")) {
                 Toggle(isOn: $isDevMode) {
                     Label("Режим разработчика", systemImage: "hammer.fill")
                         .foregroundColor(.primary)
                 }
-            }
-            if isDevMode {
-                Section(header: Text("Инструменты разработчика")) {
+                if isDevMode {
                     HStack {
                         TextField("", text: $apiBasePath)
                         Button { apiBasePath = defaultApiBasePath } label: { Text("По умолчанию") }
@@ -50,8 +48,8 @@ struct Settings: View {
             }
             Section(footer: HStack {
                 Text("Version \(getAppVersion()) (Build \(getBuildNumber()))")
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity)
             }) {}
         }
     }

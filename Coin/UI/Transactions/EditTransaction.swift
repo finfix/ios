@@ -36,33 +36,37 @@ struct EditTransaction: View {
     
     var body: some View {
         Form {
-            Section {
-                Pickers(
-                    buttonName: "Счет списания",
-                    account: $vm.currentTransaction.accountFrom,
-                    accounts: vm.accounts,
-                    position: .up,
-                    transactionType: vm.currentTransaction.type
-                )
-                Pickers(
-                    buttonName: "Счет пополнения",
-                    account: $vm.currentTransaction.accountTo,
-                    accounts: vm.accounts,
-                    position: .down,
-                    transactionType: vm.currentTransaction.type,
-                    excludeAccount: vm.currentTransaction.accountFrom
-                )
+            if vm.currentTransaction.type != .balancing {
+                Section {
+                    Pickers(
+                        buttonName: "Счет списания",
+                        account: $vm.currentTransaction.accountFrom,
+                        accounts: vm.accounts,
+                        position: .up,
+                        transactionType: vm.currentTransaction.type
+                    )
+                    Pickers(
+                        buttonName: "Счет пополнения",
+                        account: $vm.currentTransaction.accountTo,
+                        accounts: vm.accounts,
+                        position: .down,
+                        transactionType: vm.currentTransaction.type,
+                        excludeAccount: vm.currentTransaction.accountFrom
+                    )
+                }
+                .pickerStyle(.wheel)
             }
-            .pickerStyle(.wheel)
             Section {
-                TextField(vm.intercurrency ? "Сумма списания" : "Сумма", value: $vm.currentTransaction.amountFrom, format: .number)
-                    .keyboardType(.decimalPad)
-                if vm.intercurrency {
+                if vm.currentTransaction.type != .balancing {
+                    TextField(vm.intercurrency ? "Сумма списания" : "Сумма", value: $vm.currentTransaction.amountFrom, format: .number)
+                        .keyboardType(.decimalPad)
+                }
+                if vm.intercurrency || vm.currentTransaction.type == .balancing {
                     TextField("Сумма начисления", value: $vm.currentTransaction.amountTo, format: .number)
                         .keyboardType(.decimalPad)
                 }
             } footer: {
-                if vm.intercurrency {
+                if vm.intercurrency && vm.currentTransaction.type != .balancing {
                     Rate(vm.currentTransaction)
                 }
             }
