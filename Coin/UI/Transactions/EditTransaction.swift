@@ -124,16 +124,6 @@ private struct Rate: View {
     }
 }
 
-extension Date {
-    
-    func stripTime() -> Date {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: self)
-        let date = Calendar.current.date(from: components)
-        return date!
-    }
-    
-}
-
 enum Position {
     case up, down
 }

@@ -34,7 +34,7 @@ extension Service {
                 let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
                 balance = try db.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
             }
-            guard var balance = balance else {
+            guard let balance = balance else {
                 showErrorAlert("Не смогли посчитать баланс счета \(account.id)")
                 return
             }
@@ -177,18 +177,9 @@ extension Service {
 extension Service {
     func sync() async throws {
         logger.info("Синхронизируем данные")
-        
-        // Сбрасываем указатель на текущую группу счета
-        @AppStorage("accountGroupIndex") var selectedAccountGroupIndex: Int = 0
-        @AppStorage("accountGroupID") var selectedAccountGroupID: Int?
-        selectedAccountGroupID = nil
-        selectedAccountGroupIndex = 0
-        
+                
         // Получаем данные текущего месяца для запроса
-        // TODO: Убрать
-        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-        let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
-        let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+        let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
         
         // Получаем все данные с сервера
         async let currencies = try await UserAPI().GetCurrencies()

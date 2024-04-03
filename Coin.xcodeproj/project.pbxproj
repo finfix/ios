@@ -29,6 +29,8 @@
 		B529280D2B0614D100C192CA /* UserModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B529280C2B0614D100C192CA /* UserModels.swift */; };
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54254842AF5218C008ECC33 /* TransactionFilterView.swift */; };
+		B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */; };
+		B54DA3AA2BBD81D9008A9FD1 /* StripTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */; };
 		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
@@ -104,6 +106,8 @@
 		B529280C2B0614D100C192CA /* UserModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModels.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B54254842AF5218C008ECC33 /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
+		B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMonthPeriodFromDate.swift; sourceTree = "<group>"; };
+		B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripTime.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
@@ -193,6 +197,14 @@
 			path = Model;
 			sourceTree = "<group>";
 		};
+		B54DA3A62BBD7996008A9FD1 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				B51CE1EA2BAC37A000682D48 /* Service.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
 		B559E9D42B00FA1700A430D2 /* General */ = {
 			isa = PBXGroup;
 			children = (
@@ -254,6 +266,8 @@
 			children = (
 				B5F5958F2B56C3A5004D57A4 /* CheckmarkPopover.swift */,
 				B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */,
+				B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */,
+				B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */,
 			);
 			path = Pkg;
 			sourceTree = "<group>";
@@ -353,10 +367,10 @@
 		B5F9CC6128F01CA80037A21A /* Coin */ = {
 			isa = PBXGroup;
 			children = (
-				B51CE1EA2BAC37A000682D48 /* Service.swift */,
 				B5F9CC6228F01CA80037A21A /* CoinApp.swift */,
 				B5E8933829007C53002AC30C /* UI */,
 				B5B9504A2ADF182100798F8C /* Model */,
+				B54DA3A62BBD7996008A9FD1 /* Service */,
 				B514D48B2BA477580019AED6 /* Database */,
 				B5610F0228FC9A270063AFEB /* Network */,
 				B59F0F1C28FDC74000AA33A9 /* Pkg */,
@@ -497,6 +511,7 @@
 				B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */,
 				B51CE1F02BAC3FB100682D48 /* AccountDB.swift in Sources */,
 				B51CE1EB2BAC37A000682D48 /* Service.swift in Sources */,
+				B54DA3AA2BBD81D9008A9FD1 /* StripTime.swift in Sources */,
 				B529280D2B0614D100C192CA /* UserModels.swift in Sources */,
 				B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */,
 				B51CE1EE2BAC3F2700682D48 /* TransactionDB.swift in Sources */,
@@ -538,6 +553,7 @@
 				B5D6DE222BB1D21E00A06D67 /* AccountHomeViewModel.swift in Sources */,
 				B5B950572ADF261700798F8C /* QuickStatisticView.swift in Sources */,
 				B5B950432ADF16B300798F8C /* BudgetRow.swift in Sources */,
+				B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */,
 				B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */,
 				B59F0F2628FDD30F00AA33A9 /* AccountCirclesView.swift in Sources */,
 				B51710082BB2D61000950EE0 /* EditAccountViewModel.swift in Sources */,
