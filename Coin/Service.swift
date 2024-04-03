@@ -194,7 +194,10 @@ extension Service {
         async let accountGroups = try await AccountAPI().GetAccountGroups()
         async let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
         async let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
-                    
+        
+        // Удаляем все данные в базе данных
+        try db.deleteAllData()
+        
         // Сохраняем данные в базу данных
         logger.info("Сохраняем валюты")
         try db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
