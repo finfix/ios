@@ -134,12 +134,14 @@ extension Service {
             transaction.amountTo = transaction.amountFrom
         }
         
+        transaction.dateTransaction = transaction.dateTransaction.stripTime()
+        
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
             accountFromID: transaction.accountFrom.id,
             accountToID: transaction.accountTo.id,
             amountFrom: transaction.amountFrom,
             amountTo: transaction.amountTo,
-            dateTransaction: transaction.dateTransaction.stripTime(),
+            dateTransaction: transaction.dateTransaction,
             note: transaction.note,
             type: transaction.type.rawValue,
             isExecuted: true
