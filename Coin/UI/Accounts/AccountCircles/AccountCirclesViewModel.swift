@@ -20,4 +20,5 @@ class AccountCirclesViewModel {
             showErrorAlert("\(error)")
         }
     }
+    
 }
