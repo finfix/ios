@@ -26,19 +26,11 @@ struct TransactionRow: View {
                     if transaction.type != .balancing {
                         HStack {
                             Text(transaction.accountFrom.name)
-                            Text(transaction.accountFrom.currency.symbol)
-                                .foregroundColor(.secondary)
-                            Text(transaction.accountFrom.accountGroup.name)
-                                .foregroundColor(.secondary)
                         }
                         .font(.footnote)
                     }
                     HStack {
                         Text(transaction.accountTo.name)
-                        Text(transaction.accountTo.currency.symbol)
-                            .foregroundColor(.secondary)
-                        Text(transaction.accountTo.accountGroup.name)
-                            .foregroundColor(.secondary)
                     }
                 }
                 Spacer()
