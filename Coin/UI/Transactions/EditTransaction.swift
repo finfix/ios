@@ -14,7 +14,10 @@ struct EditTransaction: View {
     
     @Environment (\.dismiss) private var dismiss
     @State private var vm: EditTransactionViewModel
-        
+    
+    @State var shouldDisableUI = false
+    @State var shouldShowProgress = false
+    
     init(_ transaction: Transaction) {
         vm = EditTransactionViewModel(
             currentTransaction: transaction,
@@ -36,33 +39,37 @@ struct EditTransaction: View {
     
     var body: some View {
         Form {
-            Section {
-                Pickers(
-                    buttonName: "Счет списания",
-                    account: $vm.currentTransaction.accountFrom,
-                    accounts: vm.accounts,
-                    position: .up,
-                    transactionType: vm.currentTransaction.type
-                )
-                Pickers(
-                    buttonName: "Счет пополнения",
-                    account: $vm.currentTransaction.accountTo,
-                    accounts: vm.accounts,
-                    position: .down,
-                    transactionType: vm.currentTransaction.type,
-                    excludeAccount: vm.currentTransaction.accountFrom
-                )
+            if vm.currentTransaction.type != .balancing {
+                Section {
+                    Pickers(
+                        buttonName: "Счет списания",
+                        account: $vm.currentTransaction.accountFrom,
+                        accounts: vm.accounts,
+                        position: .up,
+                        transactionType: vm.currentTransaction.type
+                    )
+                    Pickers(
+                        buttonName: "Счет пополнения",
+                        account: $vm.currentTransaction.accountTo,
+                        accounts: vm.accounts,
+                        position: .down,
+                        transactionType: vm.currentTransaction.type,
+                        excludeAccount: vm.currentTransaction.accountFrom
+                    )
+                }
+                .pickerStyle(.wheel)
             }
-            .pickerStyle(.wheel)
             Section {
-                TextField(vm.intercurrency ? "Сумма списания" : "Сумма", value: $vm.currentTransaction.amountFrom, format: .number)
-                    .keyboardType(.decimalPad)
-                if vm.intercurrency {
+                if vm.currentTransaction.type != .balancing {
+                    TextField(vm.intercurrency ? "Сумма списания" : "Сумма", value: $vm.currentTransaction.amountFrom, format: .number)
+                        .keyboardType(.decimalPad)
+                }
+                if vm.intercurrency || vm.currentTransaction.type == .balancing {
                     TextField("Сумма начисления", value: $vm.currentTransaction.amountTo, format: .number)
                         .keyboardType(.decimalPad)
                 }
             } footer: {
-                if vm.intercurrency {
+                if vm.intercurrency && vm.currentTransaction.type != .balancing {
                     Rate(vm.currentTransaction)
                 }
             }
@@ -75,20 +82,40 @@ struct EditTransaction: View {
                 TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
             }
             Section {
-                Button("Сохранить") {
+                Button {
                     Task {
+                        shouldDisableUI = true
+                        shouldShowProgress = true
+                        
                         switch vm.mode {
                         case .create: await vm.createTransaction()
                         case .update: await vm.updateTransaction()
                         }
+                        
+                        shouldDisableUI = false
+                        shouldShowProgress = false
+                        
                         dismiss()
                     }
+                } label: {
+                    if shouldShowProgress {
+                        ProgressView()
+                    } else {
+                        Text("Сохранить")
+                    }
                 }
+                .frame(maxWidth: .infinity)
             }
+            if vm.currentTransaction.id != 0 {
+                Section(footer: 
+                    Text("ID: \(vm.currentTransaction.id)")
+                ) {}
+			}
         }
         .task {
             vm.load()
         }
+		.disabled(shouldDisableUI)
     }
 }
 
@@ -122,16 +149,6 @@ private struct Rate: View {
     var body: some View {
         Text("Курс: \(currencyFormatter.string(number: rate, suffix: symbols))")
     }
-}
-
-extension Date {
-    
-    func stripTime() -> Date {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: self)
-        let date = Calendar.current.date(from: components)
-        return date!
-    }
-    
 }
 
 enum Position {

@@ -14,21 +14,21 @@ extension AppDatabase {
     func importCurrencies(_ currencies: [CurrencyDB]) throws {
         try dbWriter.write { db in
             for currency in currencies {
-                try currency.save(db)
+                try currency.insert(db)
             }
         }
     }
     
     func importUser(_ user: UserDB) throws {
         try dbWriter.write { db in
-            try user.save(db)
+            try user.insert(db)
         }
     }
     
     func importAccountGroups(_ accountGroups: [AccountGroupDB]) throws {
         try dbWriter.write { db in
             for accountGroup in accountGroups {
-                try accountGroup.save(db)
+                try accountGroup.insert(db)
             }
         }
     }
@@ -36,7 +36,7 @@ extension AppDatabase {
     func importAccounts(_ accounts: [AccountDB]) throws {
         try dbWriter.write { db in
             for account in accounts {
-                try account.save(db)
+                try account.insert(db)
             }
         }
     }
@@ -44,7 +44,7 @@ extension AppDatabase {
     func importTransactions(_ transactions: [TransactionDB]) throws {
         try dbWriter.write { db in
             for transaction in transactions {
-                try transaction.save(db)
+                try transaction.insert(db)
             }
         }
     }
@@ -204,7 +204,7 @@ extension AppDatabase {
     func getTransactionsWithPagination(offset: Int, limit: Int) throws -> [TransactionDB] {
         try reader.read { db in
             return try TransactionDB
-                .order(Column("dateTransaction").desc)
+                .order(Column("dateTransaction").desc, Column("id").desc)
                 .limit(limit, offset: offset)
                 .fetchAll(db)
                 

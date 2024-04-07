@@ -40,7 +40,9 @@ class EditAccountViewModel {
         do {
             currencies = try service.getCurrencies()
             accountGroups = try service.getAccountGroups()
-            currentAccount.currency = currencies.first ?? Currency()
+            if mode == .create {
+                currentAccount.currency = currencies.first ?? Currency()
+            }
         } catch {
             showErrorAlert("\(error)")
         }

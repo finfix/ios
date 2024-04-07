@@ -18,6 +18,7 @@ struct Account: Identifiable {
     var serialNumber: UInt32
     var isParent: Bool
     var budgetAmount: Decimal
+    var showingBudgetAmount: Decimal
     var budgetFixedSum: Decimal
     var budgetDaysOffset: UInt8
     var budgetGradualFilling: Bool
@@ -40,6 +41,7 @@ struct Account: Identifiable {
             serialNumber: UInt32 = 0,
             isParent: Bool = false,
             budgetAmount: Decimal = 0,
+            showingBudgetAmount: Decimal = 0,
             budgetFixedSum: Decimal = 0,
             budgetDaysOffset: UInt8 = 0,
             budgetGradualFilling: Bool = false,
@@ -59,6 +61,7 @@ struct Account: Identifiable {
             self.serialNumber = serialNumber
             self.isParent = isParent
             self.budgetAmount = budgetAmount
+            self.showingBudgetAmount = showingBudgetAmount
             self.budgetFixedSum = budgetFixedSum
             self.budgetDaysOffset = budgetDaysOffset
             self.budgetGradualFilling = budgetGradualFilling
@@ -79,6 +82,7 @@ struct Account: Identifiable {
         self.serialNumber = dbModel.serialNumber
         self.isParent = dbModel.isParent
         self.budgetAmount = dbModel.budgetAmount
+        self.showingBudgetAmount = 0
         self.budgetFixedSum = dbModel.budgetFixedSum
         self.budgetDaysOffset = dbModel.budgetDaysOffset
         self.budgetGradualFilling = dbModel.budgetGradualFilling
@@ -116,7 +120,7 @@ extension Account: Hashable {
 }
 
 enum AccountType: String, Codable, CaseIterable {
-    case expense, earnings, debt, regular
+    case expense, earnings, debt, regular, balancing
 }
 
 extension Account {
@@ -125,7 +129,8 @@ extension Account {
         // Делаем контейнер для сбора счетов и счетов с аггрегацией
         var accountsContainer = [Account]()
             
-        for account in accounts {
+        for a in accounts {
+            var account = a
             
             // Если у элемента исходного массива есть родитель
             if let parentAccountID = account.parentAccountID {
@@ -134,7 +139,7 @@ extension Account {
                 var parentAccountIndex: Int = 0
                 
                 // Ищем индекс родителя в контейнере
-                if let index = accountsContainer.firstIndex(where: { $0.id == parentAccountID }) {
+                if var index = accountsContainer.firstIndex(where: { $0.id == parentAccountID }) {
                     // Если находим, присваиваем переменной
                     parentAccountIndex = index
                     
@@ -148,7 +153,7 @@ extension Account {
                         // Получаем его индекс
                         parentAccountIndex = accountsContainer.firstIndex(where: { $0.id == parentAccountID })!
                     } else {
-                        continue
+                        print("Родительский счет (id: \(parentAccountID)) для (name: \(account.name), id: \(account.id) отсутствует")
                     }
                 }
                 
@@ -157,6 +162,8 @@ extension Account {
                 
                 // Если счет нужно показывать
                 if account.visible {
+                    
+                    account.showingBudgetAmount += account.budgetAmount
                                         
                     // Добавляем его в дочерние счета родителя
                     accountsContainer[parentAccountIndex].childrenAccounts.append(account)
@@ -164,16 +171,21 @@ extension Account {
                     // Аггрегируем бюджеты и остатки, если необхдоимо
                     if account.accounting {
                         let relation = (parentAccount.currency.rate) / (account.currency.rate)
-                        accountsContainer[parentAccountIndex].budgetAmount += account.budgetAmount * relation
+                        accountsContainer[parentAccountIndex].showingBudgetAmount += account.budgetAmount * relation
                         accountsContainer[parentAccountIndex].remainder += account.remainder * relation
                     }
                 }
                 
             } else {
-                // Проверяем, чтобы такого счета уже не было в контейнере
-                guard accountsContainer.firstIndex(where: { $0.id == account.id }) == nil else { continue }
-                // Добавляем счет в контейнер
-                accountsContainer.append(account)
+                account.showingBudgetAmount = account.budgetAmount
+                // Если такой счет уже есть в контейнере
+                if let index = accountsContainer.firstIndex(where: { $0.id == account.id }) {
+                    // Добавляем к показываемому бюджету счета его собственный бюджет
+                    accountsContainer[index].showingBudgetAmount += account.showingBudgetAmount
+                } else { // Если такого счета в контейнере нет
+                    // Добавляем счет в контейнер
+                    accountsContainer.append(account)
+                }
             }
         }
         return accountsContainer

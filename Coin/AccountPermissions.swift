@@ -10,48 +10,38 @@ import Foundation
 struct AccountPermissions {
     var changeBudget: Bool = true
     var changeRemainder: Bool = true
+    var changeCurrency: Bool = true
     var linkToParentAccount: Bool = true
 }
 
 private let typeToPermissions: [AccountType: AccountPermissions] = [
-    // Разрешения для счетов долгов - нельзя менять только бюджеты
+    // Запреты для счетов долгов - нельзя менять только бюджеты
     .debt: AccountPermissions(
-        changeBudget: false,
-        changeRemainder: true,
-        linkToParentAccount: true
+        changeBudget: false
     ),
-    // Разрешения для счетов доходов - нельзя менять только остатки счетов
+    // Запреты для счетов доходов - нельзя менять только остатки счетов
     .earnings: AccountPermissions(
-        changeBudget: true,
-        changeRemainder: false,
-        linkToParentAccount: true
+        changeRemainder: false
     ),
-    // Разрешения для обычных счетов - нельзя менять только бюджеты
+    // Запреты для обычных счетов - нельзя менять только бюджеты
     .regular: AccountPermissions(
-        changeBudget: false,
-        changeRemainder: true,
-        linkToParentAccount: true
+        changeBudget: false
     ),
-    // Разрешения для счетов расходов - нельзя менять только остатки счетов
+    // Запреты для счетов расходов - нельзя менять только остатки счетов
     .expense: AccountPermissions(
-        changeBudget: true,
-        changeRemainder: false,
-        linkToParentAccount: true
+        changeRemainder: false
     )
 ]
 
 private let isParentToPermissions: [Bool: AccountPermissions] = [
-    // Разрешения для дочерних счетов - все разрешения
+    // Запреты для дочерних счетов - нельзя менять валюту
     false: AccountPermissions(
-        changeBudget: true,
-        changeRemainder: true,
-        linkToParentAccount: true
+        changeCurrency: false
     ),
-    // Разрешения для родительских счетов - нельзя менять остатки счетов, создавать транзакции и привязывать к родительским счетам
+    // Запреты для родительских счетов - нельзя менять остатки счетов и привязывать к родительским счетам
     true: AccountPermissions(
-        changeBudget: true,
-        changeRemainder: true,
-        linkToParentAccount: true
+        changeRemainder: false,
+        linkToParentAccount: false
     )
 ]
 
@@ -67,6 +57,7 @@ private func joinPermissions(permissions: [AccountPermissions]) -> AccountPermis
     for permission in permissions {
         joinedPermissions.changeBudget = joinedPermissions.changeBudget && permission.changeBudget
         joinedPermissions.changeRemainder = joinedPermissions.changeRemainder && permission.changeRemainder
+        joinedPermissions.changeCurrency = joinedPermissions.changeCurrency && permission.changeCurrency
         joinedPermissions.linkToParentAccount = joinedPermissions.linkToParentAccount && permission.linkToParentAccount
     }
     return joinedPermissions

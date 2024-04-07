@@ -19,9 +19,9 @@ struct AccountCirclesView: View {
     let horizontalSpacing: CGFloat = 10
     
     var groupedAccounts: [Account] {
-        vm.accounts.filter {
+        Account.groupAccounts(vm.accounts.filter {
             $0.accountGroup == selectedAccountGroup
-        }
+        })
     }
     
     var body: some View {
@@ -69,10 +69,11 @@ struct AccountCirclesView: View {
                 .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0, accountGroup: selectedAccountGroup) }
             }
             Spacer()
+                .task {
+                    vm.load()
+                }
         }
-        .task {
-            vm.load()
-        }
+        
     }
 }
 

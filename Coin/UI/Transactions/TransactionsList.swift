@@ -15,6 +15,11 @@ struct TransactionsView: View {
     @State private var vm = TransactionsListViewModel()
     @Binding var selectedAccountGroup: AccountGroup
     
+    var groupedTransactionByDate: [Date: [Transaction]] {
+        let filteredTransactions = vm.transactions.filter { $0.accountFrom.accountGroup == selectedAccountGroup }
+        return Dictionary(grouping: filteredTransactions, by: { $0.dateTransaction })
+    }
+    
     @State private var searchText = ""
     @State var dateFrom: Date? = Calendar(identifier: .gregorian).date(byAdding: .month, value: -1, to: Date.now)!
     
@@ -25,9 +30,9 @@ struct TransactionsView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(vm.groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
+                ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                     Section(header: Text(date, style: .date).font(.headline)) {
-                        ForEach(vm.groupedTransactionByDate[date] ?? []) { transaction in
+                        ForEach(groupedTransactionByDate[date] ?? []) { transaction in
                             NavigationLink(value: transaction) {
                                 TransactionRow(transaction: transaction)
                             }
@@ -35,7 +40,7 @@ struct TransactionsView: View {
                         .onDelete {
                             for i in $0.makeIterator() {
                                 Task {
-                                    await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i])
+                                    await vm.deleteTransaction(groupedTransactionByDate[date]![i])
                                 }
                             }
                         }
@@ -48,15 +53,20 @@ struct TransactionsView: View {
                         }
                 }
             }
+            .task {
+                if vm.transactions.count != 0 {
+                    vm.load(refresh: true)
+                }
+            }
             .navigationDestination(for: Transaction.self) { EditTransaction($0) }
             .listStyle(.grouped)
-            .refreshable {
-                vm.load(refresh: true)
-            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     // Фильтры
                     Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
+                }
+                ToolbarItem(placement: .topBarLeading) {
+                    AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
                 }
             }
             .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }

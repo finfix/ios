@@ -42,11 +42,11 @@ struct AccountCircleItem: View {
                 if account.isParent {
                     Circle()
                         .fill(.clear)
-                        .strokeBorder(account.budgetAmount == 0 ? .gray : account.budgetAmount >= account.remainder ? .green : .red, lineWidth: 1)
+                        .strokeBorder(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.remainder ? .green : .red, lineWidth: 1)
                         .frame(width: 35)
                 }
                 Circle()
-                    .fill(account.budgetAmount == 0 ? .gray : account.budgetAmount >= account.remainder ? .green : .red)
+                    .fill(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.remainder ? .green : .red)
                     .frame(width: 30)
             }
 //            .onTapGesture(count: 1) {
@@ -61,15 +61,15 @@ struct AccountCircleItem: View {
                 if isAlreadyOpened {
                     dismiss()
                 }
-                if account.name != "Балансировочный" {
+                if account.type != .balancing {
                     path.append(account)
                 }
             }
             Text(formatter.string(number: account.remainder))
                 .lineLimit(1)
             
-            if account.budgetAmount != 0 {
-                Text(formatter.string(number: account.budgetAmount))
+            if account.showingBudgetAmount != 0 {
+                Text(formatter.string(number: account.showingBudgetAmount))
                     .lineLimit(1)
                     .foregroundColor(.secondary)
             }

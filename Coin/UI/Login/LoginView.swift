@@ -30,6 +30,8 @@ struct LoginView: View {
     @State private var password = ""
     @State private var name = ""
     @State var isShowPassword = false
+    @State private var shouldDisableUI = false
+    @State private var shouldShowProgress = false
     
     var body: some View {
         NavigationStack {
@@ -62,9 +64,17 @@ struct LoginView: View {
                         .focused($focusedField, equals: .password)
                         .textContentType(.password)
                         .onSubmit {
-                            switch mode {
-                            case .login: auth()
-                            case .register: register()
+                            Task {
+                                shouldDisableUI = true
+                                shouldShowProgress = true
+                                
+                                switch mode {
+                                case .login: await auth()
+                                case .register: await register()
+                                }
+                                
+                                shouldDisableUI = false
+                                shouldShowProgress = false
                             }
                         }
                         
@@ -79,10 +89,24 @@ struct LoginView: View {
                     }
                 }
                 Section {
-                    Button(mode == .login ? "Войти" : "Зарегистрироваться") {
-                        switch mode {
-                        case .login: auth()
-                        case .register: register()
+                    Button {
+                        Task {
+                            shouldDisableUI = true
+                            shouldShowProgress = true
+                            
+                            switch mode {
+                            case .login: await auth()
+                            case .register: await register()
+                            }
+                            
+                            shouldDisableUI = false
+                            shouldShowProgress = false
+                        }
+                    } label: {
+                        if !shouldShowProgress{
+                            Text(mode == .login ? "Войти" : "Зарегистрироваться")
+                        } else {
+                            ProgressView()
                         }
                     }
                 } footer: {
@@ -115,33 +139,30 @@ struct LoginView: View {
                 }
             }
         }
+        .disabled(shouldDisableUI)
     }
     
-    func auth() {
-        Task {
-            do {
-                let response = try await AuthAPI().Auth(req: AuthReq(email: login, password: password))
-                accessToken = response.token.accessToken
-                refreshToken = response.token.refreshToken
-                isLogin = true
-            } catch {
-                showErrorAlert("\(error)")
-                logger.error("\(error)")
-            }
+    func auth() async {
+        do {
+            let response = try await AuthAPI().Auth(req: AuthReq(email: login, password: password))
+            accessToken = response.token.accessToken
+            refreshToken = response.token.refreshToken
+            isLogin = true
+        } catch {
+            showErrorAlert("\(error)")
+            logger.error("\(error)")
         }
     }
     
-    func register() {
-        Task {
-            do {
-                let response = try await AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name))
-                accessToken = response.token.accessToken
-                refreshToken = response.token.refreshToken
-                isLogin = true
-            } catch {
-                showErrorAlert("\(error)")
-                logger.error("\(error)")
-            }
+    func register() async {
+        do {
+            let response = try await AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name))
+            accessToken = response.token.accessToken
+            refreshToken = response.token.refreshToken
+            isLogin = true
+        } catch {
+            showErrorAlert("\(error)")
+            logger.error("\(error)")
         }
     }
 }
