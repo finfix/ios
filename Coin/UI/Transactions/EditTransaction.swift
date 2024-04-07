@@ -106,11 +106,16 @@ struct EditTransaction: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .task {
-                vm.load()
-            }
-            .disabled(shouldDisableUI)
+            if vm.currentTransaction.id != 0 {
+                Section(footer: 
+                    Text("ID: \(vm.currentTransaction.id)")
+                ) {}
+			}
         }
+        .task {
+            vm.load()
+        }
+		.disabled(shouldDisableUI)
     }
 }
 

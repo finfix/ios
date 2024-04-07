@@ -107,6 +107,11 @@ struct EditAccount: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            if vm.currentAccount.id != 0 {
+                Section(footer:
+                    Text("ID: \(vm.currentAccount.id)")
+                ) {}
+            }
         }
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
         .task {
