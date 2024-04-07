@@ -46,11 +46,11 @@ struct Settings: View {
                     }
                 }
             }
-            Section(footer: HStack {
+            Section(footer:
                 Text("Version \(getAppVersion()) (Build \(getBuildNumber()))")
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity)
-            }) {}
+            ) {}
         }
     }
 }
