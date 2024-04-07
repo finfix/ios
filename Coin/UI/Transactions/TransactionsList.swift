@@ -48,11 +48,13 @@ struct TransactionsView: View {
                         }
                 }
             }
+            .task {
+                if vm.transactions.count != 0 {
+                    vm.load(refresh: true)
+                }
+            }
             .navigationDestination(for: Transaction.self) { EditTransaction($0) }
             .listStyle(.grouped)
-            .refreshable {
-                vm.load(refresh: true)
-            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     // Фильтры
