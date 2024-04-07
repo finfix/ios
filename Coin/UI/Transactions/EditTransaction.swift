@@ -14,7 +14,10 @@ struct EditTransaction: View {
     
     @Environment (\.dismiss) private var dismiss
     @State private var vm: EditTransactionViewModel
-        
+    
+    @State var shouldDisableUI = false
+    @State var shouldShowProgress = false
+    
     init(_ transaction: Transaction) {
         vm = EditTransactionViewModel(
             currentTransaction: transaction,
@@ -79,19 +82,34 @@ struct EditTransaction: View {
                 TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
             }
             Section {
-                Button("Сохранить") {
+                Button {
                     Task {
+                        shouldDisableUI = true
+                        shouldShowProgress = true
+                        
                         switch vm.mode {
                         case .create: await vm.createTransaction()
                         case .update: await vm.updateTransaction()
                         }
+                        
+                        shouldDisableUI = false
+                        shouldShowProgress = false
+                        
                         dismiss()
                     }
+                } label: {
+                    if shouldShowProgress {
+                        ProgressView()
+                    } else {
+                        Text("Сохранить")
+                    }
                 }
+                .frame(maxWidth: .infinity)
             }
-        }
-        .task {
-            vm.load()
+            .task {
+                vm.load()
+            }
+            .disabled(shouldDisableUI)
         }
     }
 }
