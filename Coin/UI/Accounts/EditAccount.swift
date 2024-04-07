@@ -11,6 +11,9 @@ struct EditAccount: View {
     
     @Environment(\.dismiss) var dismiss
     @State private var vm: EditAccountViewModel
+    
+    @State var shouldDisableUI = false
+    @State var shouldShowProgress = false
         
     init(_ account: Account) {
         vm = EditAccountViewModel(
@@ -74,24 +77,38 @@ struct EditAccount: View {
                 }
             }
             Section {
-                Button("Сохранить") {
+                Button {
                     Task {
+                        shouldDisableUI = true
+                        shouldShowProgress = true
+                        
                         switch vm.mode {
                         case .create:
                             await vm.createAccount()
                         case .update:
                             await vm.updateAccount()
                         }
+                        
+                        shouldDisableUI = false
+                        shouldShowProgress = false
+                        
                         dismiss()
                     }
+                } label: {
+                    if shouldShowProgress {
+                        ProgressView()
+                    } else {
+                        Text("Сохранить")
+                    }
                 }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
         }
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
         .task {
             vm.load()
         }
+        .disabled(shouldDisableUI)
     }
 }
 
