@@ -23,7 +23,7 @@ class AccountAPI: API {
         let dateTo = dateFormatter.string(from: req.dateTo!)
                 
         return try await request(
-            url: serverPath + accountBasePath,
+            url: apiBasePath + accountBasePath,
             method: .get,
             headers: getBaseHeaders(),
             query: ["dateFrom": dateFrom, "dateTo": dateTo],
@@ -33,7 +33,7 @@ class AccountAPI: API {
     
     func GetAccountGroups() async throws -> [GetAccountGroupsRes] {
         return try await request(
-            url: serverPath + accountBasePath + "/accountGroups",
+            url: apiBasePath + accountBasePath + "/accountGroups",
             method: .get,
             headers: getBaseHeaders(),
             resModel: [GetAccountGroupsRes].self
@@ -42,7 +42,7 @@ class AccountAPI: API {
     
     func CreateAccount(req: CreateAccountReq) async throws -> UInt32 {
         return try await request(
-            url: serverPath + accountBasePath,
+            url: apiBasePath + accountBasePath,
             method: .post,
             headers: getBaseHeaders(),
             reqModel: req,
@@ -52,7 +52,7 @@ class AccountAPI: API {
     
     func UpdateAccount(req: UpdateAccountReq) async throws {
         return try await request(
-            url: serverPath + accountBasePath,
+            url: apiBasePath + accountBasePath,
             method: .patch,
             headers: getBaseHeaders(),
             reqModel: req

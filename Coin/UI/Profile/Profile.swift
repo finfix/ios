@@ -35,18 +35,24 @@ struct Profile: View {
                     NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
                 }
                 Section {
-                    Button("Синхронизировать") {
+                    Button {
                         Task {
                             shouldDisableUI = true
-                            defer { shouldDisableUI = false }
                             shouldShowProgress = true
-                            defer { shouldShowProgress = false }
                             
                             await vm.sync()
                             
+                            shouldShowProgress = false
+                            shouldDisableUI = false
                             withAnimation(.spring().delay(0.25)) {
                                 self.shouldShowSuccess.toggle()
                             }
+                        }
+                    } label: {
+                        if !shouldShowProgress {
+                            Text("Синхронизировать")
+                        } else {
+                            ProgressView()
                         }
                     }
                 }
@@ -54,8 +60,6 @@ struct Profile: View {
                 Section {
                     Button("Выйти", role: .destructive) {
                         Task {
-                            shouldDisableUI = true
-                            defer { shouldDisableUI = false }
                             vm.deleteAll()
                         }
                         isLogin = false
@@ -67,9 +71,6 @@ struct Profile: View {
             }
             .disabled(shouldDisableUI)
             .overlay {
-                if shouldShowProgress {
-                    ProgressView()
-                }
                 if shouldShowSuccess {
                     CheckmarkPopover()
                         .onAppear {
