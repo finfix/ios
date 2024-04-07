@@ -12,9 +12,6 @@ class TransactionsListViewModel {
     private let service = Service.shared
     
     var transactions: [Transaction] = []
-    var groupedTransactionByDate: [Date: [Transaction]] {
-        Dictionary(grouping: transactions, by: { $0.dateTransaction })
-    }
     
     var page = 0
     var transactionsCancelled = false
