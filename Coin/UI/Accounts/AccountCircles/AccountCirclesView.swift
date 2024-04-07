@@ -69,10 +69,11 @@ struct AccountCirclesView: View {
                 .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0, accountGroup: selectedAccountGroup) }
             }
             Spacer()
+                .task {
+                    vm.load()
+                }
         }
-        .task {
-            vm.load()
-        }
+        
     }
 }
 

@@ -76,13 +76,13 @@ struct EditAccount: View {
             Section {
                 Button("Сохранить") {
                     Task {
-                        dismiss()
                         switch vm.mode {
                         case .create:
                             await vm.createAccount()
                         case .update:
                             await vm.updateAccount()
                         }
+                        dismiss()
                     }
                 }
             }
