@@ -18,27 +18,34 @@ class TransactionsListViewModel {
     
     var page = 0
     var transactionsCancelled = false
+    let pageSize = 100
     
     func load(refresh: Bool) {
         do {
+            var offset = 0
+            var limit = 0
+            
             if refresh {
-                page = 0
-                transactionsCancelled = false
+                offset = 0
+                limit = page * pageSize
+            } else {
+                offset = page * pageSize
+                limit = pageSize
+                page += 1
             }
             
-            let newTransactions = try service.getTransactions(page: page)
+            let transactions = try service.getTransactions(limit: limit, offset: offset)
             
-            if newTransactions.isEmpty {
+            if transactions.isEmpty {
                 transactionsCancelled = true
             }
             
             if refresh {
-                transactions = newTransactions
+                self.transactions = transactions
             } else {
-                transactions.append(contentsOf: newTransactions)
+                self.transactions.append(contentsOf: transactions)
             }
 
-            page += 1
         } catch {
             showErrorAlert("\(error)")
         }
