@@ -19,9 +19,9 @@ struct AccountCirclesView: View {
     let horizontalSpacing: CGFloat = 10
     
     var groupedAccounts: [Account] {
-        vm.accounts.filter {
+        Account.groupAccounts(vm.accounts.filter {
             $0.accountGroup == selectedAccountGroup
-        }
+        })
     }
     
     var body: some View {
