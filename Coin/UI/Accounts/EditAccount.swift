@@ -48,6 +48,10 @@ struct EditAccount: View {
             
             if vm.permissions.changeBudget {
                 Section(header: Text("Бюджет")) {
+                    if vm.currentAccount.showingBudgetAmount != vm.currentAccount.budgetAmount {
+                        Text(vm.currentAccount.showingBudgetAmount, format: .number)
+                            .foregroundColor(.secondary)
+                    }
                     TextField("Бюджет", value: $vm.currentAccount.budgetAmount, format: .number)
                         .keyboardType(.decimalPad)
                     TextField("Фиксированная сумма", value: $vm.currentAccount.budgetFixedSum, format: .number)
