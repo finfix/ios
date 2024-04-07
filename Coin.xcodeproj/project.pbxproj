@@ -221,6 +221,8 @@
 		B559E9D52B00FA9400A430D2 /* Accounts */ = {
 			isa = PBXGroup;
 			children = (
+				B5024EB12AE1A20F00F60449 /* EditAccount.swift */,
+				B51710072BB2D61000950EE0 /* EditAccountViewModel.swift */,
 				B5B950482ADF17C400798F8C /* AccountCircles */,
 				B5FB6AA528F3D67800C2A2AC /* AccountsHome */,
 			);
@@ -290,8 +292,6 @@
 				B59F0F2528FDD30F00AA33A9 /* AccountCirclesView.swift */,
 				B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */,
 				B5B950522ADF24A900798F8C /* AccountCircleItem.swift */,
-				B5024EB12AE1A20F00F60449 /* EditAccount.swift */,
-				B51710072BB2D61000950EE0 /* EditAccountViewModel.swift */,
 				B504B7E62AE526DA0078643A /* PlusNewAccount.swift */,
 			);
 			path = AccountCircles;

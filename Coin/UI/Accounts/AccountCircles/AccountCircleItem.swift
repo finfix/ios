@@ -61,7 +61,7 @@ struct AccountCircleItem: View {
                 if isAlreadyOpened {
                     dismiss()
                 }
-                if account.name != "Балансировочный" {
+                if account.type != .balancing {
                     path.append(account)
                 }
             }
