@@ -10,19 +10,12 @@ import Foundation
 @Observable
 class QuickStatisticViewModel {
     private let service = Service.shared
-    
-    init(selectedAccountGroup: AccountGroup) {
-        self.selectedAccountGroup = selectedAccountGroup
-    }
         
-    var selectedAccountGroup: AccountGroup
     var accounts: [Account] = []
-    var statistic = QuickStatistic()
     
     func load() {
         do {
-            accounts = try service.getAccounts()
-            statistic = calculateStatistic(accounts: accounts, targetCurrency: selectedAccountGroup.currency)
+            accounts = try service.getAccounts(accounting: true)
         } catch {
             showErrorAlert("\(error)")
         }

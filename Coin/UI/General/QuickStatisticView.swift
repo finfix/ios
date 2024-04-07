@@ -12,11 +12,12 @@ private let logger = Logger(subsystem: "Coin", category: "quick statistic")
 
 struct QuickStatisticView: View {
     
-    private let service = Service.shared
-        
+    @State private var vm = QuickStatisticViewModel()
     var selectedAccountGroup: AccountGroup
-    @State var accounts: [Account] = []
-    @State var statistic = QuickStatistic()
+    var statistic: QuickStatistic {
+        let filteredAccounts = vm.accounts.filter { $0.accountGroup == selectedAccountGroup }
+        return vm.calculateStatistic(accounts: filteredAccounts, targetCurrency: selectedAccountGroup.currency)
+    }
         
     var formatter: CurrencyFormatter {
         CurrencyFormatter(currency: selectedAccountGroup.currency, maximumFractionDigits: 0)
@@ -58,52 +59,11 @@ struct QuickStatisticView: View {
             Spacer()
         }
         .task {
-            load()
-        }
-        .onChange(of: selectedAccountGroup) {
-            load()
+            vm.load()
         }
         .font(.caption2)
         .frame(maxWidth: .infinity)
         .frame(height: 40)
-    }
-    
-    func load() {
-        do {
-            accounts = try service.getAccounts(accountGroup: selectedAccountGroup, accounting: true)
-            statistic = calculateStatistic(accounts: accounts, targetCurrency: selectedAccountGroup.currency)
-        } catch {
-            showErrorAlert("\(error)")
-        }
-    }
-    
-    func calculateStatistic(accounts a: [Account], targetCurrency: Currency) -> QuickStatistic {
-        var tmp = QuickStatistic(currency: targetCurrency)
-        
-        let accounts = Account.groupAccounts(a)
-        
-        for account in accounts {
-            
-            if account.parentAccountID != nil {
-                continue
-            }
-                        
-            let relation = targetCurrency.rate / (account.currency.rate)
-            
-            switch account.type {
-            case .expense:
-                tmp.totalExpense += account.remainder * relation
-                tmp.totalBudget += account.budgetAmount * relation
-                if account.budgetAmount != 0 && account.budgetAmount > account.remainder {
-                    tmp.periodRemainder += (account.budgetAmount - account.remainder) * relation
-                }
-            case .earnings:
-                continue
-            default:
-                tmp.totalRemainder += account.remainder * relation
-            }
-        }
-        return tmp
     }
 }
 
