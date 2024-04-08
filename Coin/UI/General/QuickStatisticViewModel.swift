@@ -37,9 +37,9 @@ class QuickStatisticViewModel {
             switch account.type {
             case .expense:
                 tmp.totalExpense += account.remainder * relation
-                tmp.totalBudget += account.budgetAmount * relation
-                if account.budgetAmount != 0 && account.budgetAmount > account.remainder {
-                    tmp.periodRemainder += (account.budgetAmount - account.remainder) * relation
+                tmp.totalBudget += account.showingBudgetAmount * relation
+                if account.showingBudgetAmount != 0 && account.showingBudgetAmount > account.remainder {
+                    tmp.periodRemainder += (account.showingBudgetAmount - account.remainder) * relation
                 }
             case .earnings:
                 continue

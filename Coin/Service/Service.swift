@@ -92,7 +92,7 @@ extension Service {
     
     func createAccount(_ a: Account) async throws {
         var account = a
-        account.id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
+        let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
             accounting: account.accounting,
             budget: CreateAccountBudgetReq (
@@ -104,8 +104,10 @@ extension Service {
             name: account.name,
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
-            isParent: false)
+            isParent: account.isParent)
         )
+        account.id = accountRes.id
+        account.serialNumber = accountRes.serialNumber
         
         try db.createAccount(account)
     }
@@ -200,7 +202,11 @@ extension Service {
         logger.info("Сохраняем группы счетов")
         try db.importAccountGroups(AccountGroupDB.convertFromApiModel(try await accountGroups))
         logger.info("Сохраняем счета")
-        try db.importAccounts(AccountDB.convertFromApiModel(try await accounts))
+        // Cортируем счета, чтобы сначала были родительские
+        let sortedAccountsDB = AccountDB.convertFromApiModel(try await accounts).sorted { l, _ in
+            l.isParent
+        }
+        try db.importAccounts(sortedAccountsDB)
         logger.info("Сохраняем транзакции")
         try db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
     }
