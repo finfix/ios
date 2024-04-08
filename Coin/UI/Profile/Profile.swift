@@ -20,6 +20,10 @@ struct Profile: View {
     @AppStorage("accessToken") private var accessToken: String?
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
+    @AppStorage("apiBasePath") private var apiBasePath = defaultApiBasePath
+    var isProdAPI: Bool {
+        apiBasePath == defaultApiBasePath
+    }
     @State var shouldShowSuccess = false
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
@@ -29,7 +33,12 @@ struct Profile: View {
     var body: some View {
         NavigationStack(path: $path) {
             Form {
-                
+                #if DEBUG
+                Section {
+                    Text(isProdAPI ? "Продакшн окружение" : "Тестовое окружение")
+                        .foregroundColor(isProdAPI ? .red : .yellow)
+                }
+                #endif
                 Section {
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
                     NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
