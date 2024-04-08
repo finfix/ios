@@ -202,7 +202,11 @@ extension Service {
         logger.info("Сохраняем группы счетов")
         try db.importAccountGroups(AccountGroupDB.convertFromApiModel(try await accountGroups))
         logger.info("Сохраняем счета")
-        try db.importAccounts(AccountDB.convertFromApiModel(try await accounts))
+        // Cортируем счета, чтобы сначала были родительские
+        let sortedAccountsDB = AccountDB.convertFromApiModel(try await accounts).sorted { l, _ in
+            l.isParent
+        }
+        try db.importAccounts(sortedAccountsDB)
         logger.info("Сохраняем транзакции")
         try db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
     }
