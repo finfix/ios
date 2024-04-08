@@ -106,6 +106,8 @@ extension Service {
             type: account.type.rawValue,
             isParent: false)
         )
+        account.id = accountRes.id
+        account.serialNumber = accountRes.serialNumber
         
         try db.createAccount(account)
     }
