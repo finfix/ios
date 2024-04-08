@@ -35,6 +35,17 @@ struct EditAccount: View {
         
     var body: some View {
         Form {
+            if vm.mode == .create {
+                Section {
+                    Picker("", selection: $vm.currentAccount.isParent) {
+                        Text("Обычный счет")
+                            .tag(false)
+                        Text("Родительский счет")
+                            .tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
             Section {
                 
                 TextField("Название счета", text: $vm.currentAccount.name)
@@ -69,9 +80,7 @@ struct EditAccount: View {
                     Toggle("Видимость счета", isOn: $vm.currentAccount.visible)
                 }
                 
-                
-                
-                if vm.mode == .create {
+                if vm.mode == .create || vm.permissions.changeCurrency {
                     Picker("Валюта", selection: $vm.currentAccount.currency) {
                         ForEach(vm.currencies, id: \.code) { currency in
                             Text(currency.code)

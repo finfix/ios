@@ -92,7 +92,7 @@ extension Service {
     
     func createAccount(_ a: Account) async throws {
         var account = a
-        account.id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
+        let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
             accounting: account.accounting,
             budget: CreateAccountBudgetReq (
@@ -104,7 +104,7 @@ extension Service {
             name: account.name,
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
-            isParent: false)
+            isParent: account.isParent)
         )
         account.id = accountRes.id
         account.serialNumber = accountRes.serialNumber

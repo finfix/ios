@@ -31,10 +31,11 @@ class EditAccountViewModel {
         self.currentAccount = currentAccount
         self.oldAccount = oldAccount
         self.mode = mode
-        self.permissions = GetPermissions(account: currentAccount)
     }
     
-    var permissions: AccountPermissions
+    var permissions: AccountPermissions {
+        GetPermissions(account: currentAccount)
+    }
         
     func load() {
         do {
