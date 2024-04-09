@@ -67,6 +67,7 @@ struct UpdateAccountReq: Encodable {
     var name: String?
     var remainder: Decimal?
     var visible: Bool?
+    var currencyCode: String?
     var budget: UpdateBudgetReq
 }
 

@@ -120,6 +120,7 @@ extension Service {
             name: oldAccount.name != newAccount.name ? newAccount.name : nil,
             remainder: oldAccount.remainder != newAccount.remainder ? newAccount.remainder : nil,
             visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
+            currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
             budget: UpdateBudgetReq(
                 amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
                 fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
