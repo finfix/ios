@@ -20,6 +20,8 @@ struct LoginView: View {
         case name, login, password
     }
     
+    @State private var service = Service.shared
+    
     @AppStorage("isLogin") var isLogin: Bool = false
     @AppStorage("accessToken") var accessToken: String?
     @AppStorage("refreshToken") var refreshToken: String?
@@ -128,6 +130,14 @@ struct LoginView: View {
             .contentMargins(.top, 200)
             .navigationTitle(mode == .login ? "Вход" : "Регистрация")
             .toolbar {
+                ToolbarItem {
+                    NavigationLink {
+                        Settings()
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+
+                }
                 if mode == .register {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Назад") {
@@ -147,10 +157,10 @@ struct LoginView: View {
             let response = try await AuthAPI().Auth(req: AuthReq(email: login, password: password))
             accessToken = response.token.accessToken
             refreshToken = response.token.refreshToken
+            try await service.sync()
             isLogin = true
         } catch {
             showErrorAlert("\(error)")
-            logger.error("\(error)")
         }
     }
     
@@ -159,10 +169,10 @@ struct LoginView: View {
             let response = try await AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name))
             accessToken = response.token.accessToken
             refreshToken = response.token.refreshToken
+            try await service.sync()
             isLogin = true
         } catch {
             showErrorAlert("\(error)")
-            logger.error("\(error)")
         }
     }
 }
