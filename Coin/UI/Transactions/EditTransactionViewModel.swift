@@ -49,19 +49,11 @@ class EditTransactionViewModel {
         }
     }
     
-    func createTransaction() async {
-        do {
-            try await service.createTransaction(currentTransaction)
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func createTransaction() async throws {
+        try await service.createTransaction(currentTransaction)
     }
     
-    func updateTransaction() async {
-        do {
-            try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func updateTransaction() async throws {
+        try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
     }
 }

@@ -51,19 +51,11 @@ class EditAccountViewModel {
         }
     }
     
-    func createAccount() async {
-        do {           
-            try await service.createAccount(currentAccount)
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func createAccount() async throws {
+        try await service.createAccount(currentAccount)
     }
     
-    func updateAccount() async {
-        do {
-            try await service.updateAccount(newAccount: currentAccount, oldAccount: oldAccount)
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func updateAccount() async throws {
+        try await service.updateAccount(newAccount: currentAccount, oldAccount: oldAccount)
     }
 }
