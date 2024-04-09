@@ -68,6 +68,7 @@ struct UpdateAccountReq: Encodable {
     var remainder: Decimal?
     var visible: Bool?
     var currencyCode: String?
+    var parentAccountID: UInt32?
     var budget: UpdateBudgetReq
 }
 

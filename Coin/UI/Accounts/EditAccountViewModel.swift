@@ -17,6 +17,7 @@ class EditAccountViewModel {
     
     var currencies: [Currency] = []
     var accountGroups: [AccountGroup] = []
+    var accounts: [Account] = []
     
     var currentAccount = Account()
     var oldAccount = Account()
@@ -41,6 +42,7 @@ class EditAccountViewModel {
         do {
             currencies = try service.getCurrencies()
             accountGroups = try service.getAccountGroups()
+            accounts = try service.getAccounts(visible: true, types:[currentAccount.type], isParent: true)
             if mode == .create {
                 currentAccount.currency = currencies.first ?? Currency()
             }
