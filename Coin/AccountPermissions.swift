@@ -11,6 +11,7 @@ struct AccountPermissions {
     var changeBudget: Bool = true
     var changeRemainder: Bool = true
     var changeCurrency: Bool = true
+    var changeParentAccountID: Bool = true
     var linkToParentAccount: Bool = true
 }
 
@@ -41,6 +42,7 @@ private let isParentToPermissions: [Bool: AccountPermissions] = [
     // Запреты для родительских счетов - нельзя менять остатки счетов и привязывать к родительским счетам
     true: AccountPermissions(
         changeRemainder: false,
+        changeParentAccountID: false,
         linkToParentAccount: false
     )
 ]
@@ -58,6 +60,7 @@ private func joinPermissions(permissions: [AccountPermissions]) -> AccountPermis
         joinedPermissions.changeBudget = joinedPermissions.changeBudget && permission.changeBudget
         joinedPermissions.changeRemainder = joinedPermissions.changeRemainder && permission.changeRemainder
         joinedPermissions.changeCurrency = joinedPermissions.changeCurrency && permission.changeCurrency
+        joinedPermissions.changeParentAccountID = joinedPermissions.changeParentAccountID && permission.changeParentAccountID
         joinedPermissions.linkToParentAccount = joinedPermissions.linkToParentAccount && permission.linkToParentAccount
     }
     return joinedPermissions
