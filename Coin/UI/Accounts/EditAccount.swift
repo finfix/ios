@@ -115,16 +115,22 @@ struct EditAccount: View {
                     Task {
                         shouldDisableUI = true
                         shouldShowProgress = true
-                        
-                        switch vm.mode {
-                        case .create:
-                            await vm.createAccount()
-                        case .update:
-                            await vm.updateAccount()
+                        defer {
+                            shouldDisableUI = false
+                            shouldShowProgress = false
                         }
                         
-                        shouldDisableUI = false
-                        shouldShowProgress = false
+                        do {
+                            switch vm.mode {
+                            case .create:
+                                try await vm.createAccount()
+                            case .update:
+                                try await vm.updateAccount()
+                            }
+                        } catch {
+                            showErrorAlert("\(error)")
+                            return
+                        }
                         
                         dismiss()
                     }
