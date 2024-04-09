@@ -78,14 +78,16 @@ struct AccountCircleItem: View {
         .frame(width: 80, height: 100)
         .opacity(account.accounting ? 1 : 0.5)
         .popover(isPresented: $isChildrenOpen) {
-            ForEach(account.childrenAccounts) { account in
-                AccountCircleItem(account, 
-                                  isAlreadyOpened: true,
-                                  path: $path,
-                                  selectedAccountGroup: $selectedAccountGroup)
+            ScrollView {
+                ForEach(account.childrenAccounts) { account in
+                    AccountCircleItem(account, 
+                                      isAlreadyOpened: true,
+                                      path: $path,
+                                      selectedAccountGroup: $selectedAccountGroup)
+                }
+                .presentationCompactAdaptation(.popover)
+                .padding()
             }
-            .presentationCompactAdaptation(.popover)
-            .padding()
         }
         .navigationDestination(isPresented: $isTransactionOpen) {
             TransactionsView(selectedAccountGroup: $selectedAccountGroup, accountID: account.id)

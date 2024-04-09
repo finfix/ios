@@ -58,6 +58,7 @@ struct CreateAccountBudgetReq: Encodable {
 
 struct CreateAccountRes: Decodable {
     var id: UInt32
+    var serialNumber: UInt32
 }
 
 struct UpdateAccountReq: Encodable {
@@ -66,6 +67,8 @@ struct UpdateAccountReq: Encodable {
     var name: String?
     var remainder: Decimal?
     var visible: Bool?
+    var currencyCode: String?
+    var parentAccountID: UInt32?
     var budget: UpdateBudgetReq
 }
 

@@ -57,7 +57,8 @@ extension Service {
         accountGroup: AccountGroup? = nil,
         visible: Bool? = nil,
         accounting: Bool? = nil,
-        types: [AccountType]? = nil
+        types: [AccountType]? = nil,
+        isParent: Bool? = nil
     ) throws -> [Account] {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
@@ -66,7 +67,8 @@ extension Service {
             accountGroupID: accountGroup?.id,
             visible: visible,
             accounting: accounting,
-            types: types
+            types: types,
+            isParent: isParent
         ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
     }
     
@@ -92,7 +94,7 @@ extension Service {
     
     func createAccount(_ a: Account) async throws {
         var account = a
-        account.id = try await AccountAPI().CreateAccount(req: CreateAccountReq(
+        let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
             accounting: account.accounting,
             budget: CreateAccountBudgetReq (
@@ -104,8 +106,10 @@ extension Service {
             name: account.name,
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
-            isParent: false)
+            isParent: account.isParent)
         )
+        account.id = accountRes.id
+        account.serialNumber = accountRes.serialNumber
         
         try db.createAccount(account)
     }
@@ -118,12 +122,20 @@ extension Service {
             name: oldAccount.name != newAccount.name ? newAccount.name : nil,
             remainder: oldAccount.remainder != newAccount.remainder ? newAccount.remainder : nil,
             visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
+            currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
+            parentAccountID: oldAccount.parentAccountID != newAccount.parentAccountID ? newAccount.parentAccountID : nil,
             budget: UpdateBudgetReq(
                 amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
                 fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
                 daysOffset: oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ? newAccount.budgetDaysOffset : nil,
                 gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
         ))
+        
+        var newAccount = newAccount
+        
+        if newAccount.parentAccountID == 0 {
+            newAccount.parentAccountID = nil
+        }
         
         try db.updateAccount(newAccount)
     }
@@ -200,7 +212,11 @@ extension Service {
         logger.info("Сохраняем группы счетов")
         try db.importAccountGroups(AccountGroupDB.convertFromApiModel(try await accountGroups))
         logger.info("Сохраняем счета")
-        try db.importAccounts(AccountDB.convertFromApiModel(try await accounts))
+        // Cортируем счета, чтобы сначала были родительские
+        let sortedAccountsDB = AccountDB.convertFromApiModel(try await accounts).sorted { l, _ in
+            l.isParent
+        }
+        try db.importAccounts(sortedAccountsDB)
         logger.info("Сохраняем транзакции")
         try db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
     }

@@ -86,14 +86,20 @@ struct EditTransaction: View {
                     Task {
                         shouldDisableUI = true
                         shouldShowProgress = true
-                        
-                        switch vm.mode {
-                        case .create: await vm.createTransaction()
-                        case .update: await vm.updateTransaction()
+                        defer {
+                            shouldDisableUI = false
+                            shouldShowProgress = false
                         }
                         
-                        shouldDisableUI = false
-                        shouldShowProgress = false
+                        do {
+                            switch vm.mode {
+                            case .create: try await vm.createTransaction()
+                            case .update: try await vm.updateTransaction()
+                            }
+                        } catch {
+                            showErrorAlert("\(error)")
+                            return
+                        }
                         
                         dismiss()
                     }

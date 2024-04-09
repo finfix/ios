@@ -14,13 +14,21 @@ struct EditAccount: View {
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
+    var selectedAccountGroup: AccountGroup
+    
+    var accounts: [Account] {
+        vm.accounts.filter {
+            $0.accountGroup == selectedAccountGroup
+        }
+    }
         
-    init(_ account: Account) {
+    init(_ account: Account, selectedAccountGroup: AccountGroup) {
         vm = EditAccountViewModel(
             currentAccount: account,
             oldAccount: account,
             mode: .update
         )
+        self.selectedAccountGroup = selectedAccountGroup
     }
     
     init(accountType: AccountType, accountGroup: AccountGroup) {
@@ -31,10 +39,22 @@ struct EditAccount: View {
             ),
             mode: .create
         )
+        self.selectedAccountGroup = accountGroup
     }
         
     var body: some View {
         Form {
+            if vm.mode == .create {
+                Section {
+                    Picker("", selection: $vm.currentAccount.isParent) {
+                        Text("Обычный счет")
+                            .tag(false)
+                        Text("Родительский счет")
+                            .tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
             Section {
                 
                 TextField("Название счета", text: $vm.currentAccount.name)
@@ -69,13 +89,23 @@ struct EditAccount: View {
                     Toggle("Видимость счета", isOn: $vm.currentAccount.visible)
                 }
                 
-                
-                
-                if vm.mode == .create {
+                if vm.mode == .create || vm.permissions.changeCurrency {
                     Picker("Валюта", selection: $vm.currentAccount.currency) {
                         ForEach(vm.currencies, id: \.code) { currency in
                             Text(currency.code)
                                 .tag(currency)
+                        }
+                    }
+                }
+            }
+            if vm.permissions.changeParentAccountID {
+                Section {
+                    Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
+                        Text("Не выбрано")
+                            .tag(0 as UInt32?)
+                        ForEach(accounts) { account in
+                            Text(account.name)
+                                .tag(account.id as UInt32?)
                         }
                     }
                 }
@@ -85,16 +115,22 @@ struct EditAccount: View {
                     Task {
                         shouldDisableUI = true
                         shouldShowProgress = true
-                        
-                        switch vm.mode {
-                        case .create:
-                            await vm.createAccount()
-                        case .update:
-                            await vm.updateAccount()
+                        defer {
+                            shouldDisableUI = false
+                            shouldShowProgress = false
                         }
                         
-                        shouldDisableUI = false
-                        shouldShowProgress = false
+                        do {
+                            switch vm.mode {
+                            case .create:
+                                try await vm.createAccount()
+                            case .update:
+                                try await vm.updateAccount()
+                            }
+                        } catch {
+                            showErrorAlert("\(error)")
+                            return
+                        }
                         
                         dismiss()
                     }

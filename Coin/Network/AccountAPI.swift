@@ -40,14 +40,14 @@ class AccountAPI: API {
         )
     }
     
-    func CreateAccount(req: CreateAccountReq) async throws -> UInt32 {
+    func CreateAccount(req: CreateAccountReq) async throws -> CreateAccountRes {
         return try await request(
             url: apiBasePath + accountBasePath,
             method: .post,
             headers: getBaseHeaders(),
             reqModel: req,
             resModel: CreateAccountRes.self
-        ).id
+        )
     }
     
     func UpdateAccount(req: UpdateAccountReq) async throws {

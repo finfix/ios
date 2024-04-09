@@ -17,6 +17,7 @@ class EditAccountViewModel {
     
     var currencies: [Currency] = []
     var accountGroups: [AccountGroup] = []
+    var accounts: [Account] = []
     
     var currentAccount = Account()
     var oldAccount = Account()
@@ -31,15 +32,17 @@ class EditAccountViewModel {
         self.currentAccount = currentAccount
         self.oldAccount = oldAccount
         self.mode = mode
-        self.permissions = GetPermissions(account: currentAccount)
     }
     
-    var permissions: AccountPermissions
+    var permissions: AccountPermissions {
+        GetPermissions(account: currentAccount)
+    }
         
     func load() {
         do {
             currencies = try service.getCurrencies()
             accountGroups = try service.getAccountGroups()
+            accounts = try service.getAccounts(visible: true, types:[currentAccount.type], isParent: true)
             if mode == .create {
                 currentAccount.currency = currencies.first ?? Currency()
             }
@@ -48,19 +51,11 @@ class EditAccountViewModel {
         }
     }
     
-    func createAccount() async {
-        do {           
-            try await service.createAccount(currentAccount)
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func createAccount() async throws {
+        try await service.createAccount(currentAccount)
     }
     
-    func updateAccount() async {
-        do {
-            try await service.updateAccount(newAccount: currentAccount, oldAccount: oldAccount)
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func updateAccount() async throws {
+        try await service.updateAccount(newAccount: currentAccount, oldAccount: oldAccount)
     }
 }

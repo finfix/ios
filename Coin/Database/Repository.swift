@@ -167,7 +167,8 @@ extension AppDatabase {
         accountGroupID: UInt32? = nil,
         visible: Bool? = nil,
         accounting: Bool? = nil,
-        types: [AccountType]? = nil
+        types: [AccountType]? = nil,
+        isParent: Bool? = nil
     ) throws -> [AccountDB] {
         try reader.read { db in
             var request = AccountDB
@@ -187,6 +188,10 @@ extension AppDatabase {
             
             if let accounting = accounting {
                 request = request.filter(Column("accounting") == accounting)
+            }
+            
+            if let isParent = isParent {
+                request = request.filter(Column("isParent") == isParent)
             }
             
             if let types = types {
