@@ -14,13 +14,21 @@ struct EditAccount: View {
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
+    var selectedAccountGroup: AccountGroup
+    
+    var accounts: [Account] {
+        vm.accounts.filter {
+            $0.accountGroup == selectedAccountGroup
+        }
+    }
         
-    init(_ account: Account) {
+    init(_ account: Account, selectedAccountGroup: AccountGroup) {
         vm = EditAccountViewModel(
             currentAccount: account,
             oldAccount: account,
             mode: .update
         )
+        self.selectedAccountGroup = selectedAccountGroup
     }
     
     init(accountType: AccountType, accountGroup: AccountGroup) {
@@ -31,6 +39,7 @@ struct EditAccount: View {
             ),
             mode: .create
         )
+        self.selectedAccountGroup = accountGroup
     }
         
     var body: some View {
@@ -85,6 +94,18 @@ struct EditAccount: View {
                         ForEach(vm.currencies, id: \.code) { currency in
                             Text(currency.code)
                                 .tag(currency)
+                        }
+                    }
+                }
+            }
+            if vm.permissions.changeParentAccountID {
+                Section {
+                    Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
+                        Text("Не выбрано")
+                            .tag(0 as UInt32?)
+                        ForEach(accounts) { account in
+                            Text(account.name)
+                                .tag(account.id as UInt32?)
                         }
                     }
                 }

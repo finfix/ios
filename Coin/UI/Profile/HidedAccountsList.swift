@@ -30,7 +30,7 @@ struct HidedAccountsList: View {
                 }
             }
         }
-        .navigationDestination(for: Account.self) { EditAccount($0) }
+        .navigationDestination(for: Account.self) { EditAccount($0, selectedAccountGroup: selectedAccountGroup) }
         .contentMargins(.horizontal, 10, for: .automatic)
         .toolbar {
             Picker("Тип счета", selection: $vm.type) {
