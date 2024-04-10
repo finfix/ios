@@ -80,12 +80,20 @@ extension Service {
         return AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap)
     }
     
-    func getTransactions(limit: Int, offset: Int) throws -> [Transaction] {
+    func getTransactions(
+        limit: Int,
+        offset: Int,
+        accountID: UInt32? = nil
+    ) throws -> [Transaction] {
         
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
         let accountsMap = Account.convertToMap(Account.convertFromDBModel(try db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
-        return Transaction.convertFromDBModel(try db.getTransactionsWithPagination(offset: offset, limit: limit), accountsMap: accountsMap)
+        return Transaction.convertFromDBModel(try db.getTransactionsWithPagination(
+            offset: offset,
+            limit: limit,
+            accountID: accountID
+        ), accountsMap: accountsMap)
     }
     
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных

@@ -223,10 +223,21 @@ extension AppDatabase {
         }
     }
     
-    func getTransactionsWithPagination(offset: Int, limit: Int) throws -> [TransactionDB] {
+    func getTransactionsWithPagination(
+        offset: Int,
+        limit: Int,
+        accountID: UInt32? = nil
+    ) throws -> [TransactionDB] {
         try reader.read { db in
-            return try TransactionDB
+            
+            var request = TransactionDB
                 .order(Column("dateTransaction").desc, Column("id").desc)
+                
+            if let accountID = accountID {
+                request = request.filter(Column("accountFromId") == accountID || Column("accountToId") == accountID)
+            }
+                    
+            return try request
                 .limit(limit, offset: offset)
                 .fetchAll(db)
                 

@@ -61,9 +61,9 @@ struct AccountCircleItem: View {
                     .foregroundColor(.secondary)
             }
         }
-//        .onTapGesture(count: 1) {
-//            isTransactionOpen.toggle()
-//        }
+        .onTapGesture(count: 1) {
+            isTransactionOpen.toggle()
+        }
         .onTapGesture(count: 2) {
             if !account.childrenAccounts.isEmpty && account.type != .balancing {
                 isChildrenOpen = true
