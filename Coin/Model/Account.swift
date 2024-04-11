@@ -24,6 +24,7 @@ struct Account: Identifiable {
     var budgetGradualFilling: Bool
     
     var parentAccountID: UInt32?
+//    var parentAccount: Account?
     
     var accountGroup: AccountGroup
     var currency: Currency
@@ -46,6 +47,7 @@ struct Account: Identifiable {
             budgetDaysOffset: UInt8 = 0,
             budgetGradualFilling: Bool = false,
             parentAccountID: UInt32? = nil,
+//            parentAccount: Account? = nil,
             accountGroup: AccountGroup = AccountGroup(),
             currency: Currency = Currency(),
             childrenAccounts: [Account] = []
@@ -58,6 +60,7 @@ struct Account: Identifiable {
             self.type = type
             self.visible = visible
             self.parentAccountID = parentAccountID
+//            self.parentAccount = parentAccount
             self.serialNumber = serialNumber
             self.isParent = isParent
             self.budgetAmount = budgetAmount
@@ -88,6 +91,7 @@ struct Account: Identifiable {
         self.budgetGradualFilling = dbModel.budgetGradualFilling
         
         self.parentAccountID = dbModel.parentAccountId
+//        self.parentAccount = nil
         
         self.accountGroup = accountGroupsMap?[dbModel.accountGroupId] ?? AccountGroup()
         self.currency = currenciesMap?[dbModel.currencyCode] ?? Currency()
@@ -154,26 +158,25 @@ extension Account {
                         parentAccountIndex = accountsContainer.firstIndex(where: { $0.id == parentAccountID })!
                     } else {
                         print("Родительский счет (id: \(parentAccountID)) для (name: \(account.name), id: \(account.id) отсутствует")
+                        accountsContainer.append(account)
+                        continue
                     }
                 }
                 
                 // Получаем родителя
                 let parentAccount = accountsContainer[parentAccountIndex]
                 
-                // Если счет нужно показывать
-                if account.visible {
-                    
-                    account.showingBudgetAmount += account.budgetAmount
-                                        
-                    // Добавляем его в дочерние счета родителя
-                    accountsContainer[parentAccountIndex].childrenAccounts.append(account)
-                    
-                    // Аггрегируем бюджеты и остатки, если необхдоимо
-                    if account.accounting {
-                        let relation = (parentAccount.currency.rate) / (account.currency.rate)
-                        accountsContainer[parentAccountIndex].showingBudgetAmount += account.budgetAmount * relation
-                        accountsContainer[parentAccountIndex].remainder += account.remainder * relation
-                    }
+//                // Добавляем родителя в счет
+//                account.parentAccount = parentAccount
+                
+                // Добавляем его в дочерние счета родителя
+                accountsContainer[parentAccountIndex].childrenAccounts.append(account)
+                
+                // Аггрегируем бюджеты и остатки, если необхдоимо
+                if account.accounting {
+                    let relation = (parentAccount.currency.rate) / (account.currency.rate)
+                    accountsContainer[parentAccountIndex].showingBudgetAmount += account.budgetAmount * relation
+                    accountsContainer[parentAccountIndex].remainder += account.remainder * relation
                 }
                 
             } else {

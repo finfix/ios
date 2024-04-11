@@ -22,11 +22,12 @@ struct EditAccount: View {
         }
     }
         
-    init(_ account: Account, selectedAccountGroup: AccountGroup) {
+    init(_ account: Account, selectedAccountGroup: AccountGroup, isHiddenView: Bool = false) {
         vm = EditAccountViewModel(
             currentAccount: account,
             oldAccount: account,
-            mode: .update
+            mode: .update,
+            isHiddenView: isHiddenView
         )
         self.selectedAccountGroup = selectedAccountGroup
     }
@@ -85,6 +86,7 @@ struct EditAccount: View {
             Section {
                 
                 Toggle("Учитывать ли счет в шапке", isOn: $vm.currentAccount.accounting)
+                    .disabled(!vm.currentAccount.visible)
                 if vm.mode == .update {
                     Toggle("Видимость счета", isOn: $vm.currentAccount.visible)
                 }
@@ -102,7 +104,7 @@ struct EditAccount: View {
                 Section {
                     Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
                         Text("Не выбрано")
-                            .tag(0 as UInt32?)
+                            .tag(nil as UInt32?)
                         ForEach(accounts) { account in
                             Text(account.name)
                                 .tag(account.id as UInt32?)
@@ -147,6 +149,11 @@ struct EditAccount: View {
                 Section(footer:
                     Text("ID: \(vm.currentAccount.id)")
                 ) {}
+            }
+        }
+        .onChange(of: vm.currentAccount.visible) { _, newValue in
+            if !newValue {
+                vm.currentAccount.accounting = false
             }
         }
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")

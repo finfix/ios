@@ -27,6 +27,42 @@ struct AccountDB {
     var budgetDaysOffset: UInt8
     var budgetGradualFilling: Bool
     
+    init(
+        id: UInt32,
+        accounting: Bool,
+        iconID: UInt32,
+        name: String,
+        remainder: Decimal,
+        type: AccountType,
+        visible: Bool,
+        parentAccountId: UInt32?,
+        serialNumber: UInt32,
+        isParent: Bool,
+        currencyCode: String,
+        accountGroupId: UInt32,
+        budgetAmount: Decimal,
+        budgetFixedSum: Decimal,
+        budgetDaysOffset: UInt8,
+        budgetGradualFilling: Bool
+    ) {
+        self.id = id
+        self.accounting = accounting
+        self.iconID = iconID
+        self.name = name
+        self.remainder = remainder
+        self.type = type
+        self.visible = visible
+        self.parentAccountId = parentAccountId
+        self.serialNumber = serialNumber
+        self.isParent = isParent
+        self.currencyCode = currencyCode
+        self.accountGroupId = accountGroupId
+        self.budgetAmount = budgetAmount
+        self.budgetFixedSum = budgetFixedSum
+        self.budgetDaysOffset = budgetDaysOffset
+        self.budgetGradualFilling = budgetGradualFilling
+    }
+    
     // Инициализатор из сетевой модели
     init(_ res: GetAccountsRes) {
         self.id = res.id
@@ -65,6 +101,7 @@ struct AccountDB {
         self.budgetGradualFilling = model.budgetGradualFilling
         self.accountGroupId = model.accountGroup.id
         self.currencyCode = model.currency.code
+        self.parentAccountId = model.parentAccountID
     }
     
     

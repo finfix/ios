@@ -71,6 +71,12 @@ extension AppDatabase {
         }
     }
     
+    func createAccountAndReturn(_ account: Account) throws -> AccountDB {
+        try dbWriter.write { db in
+            return try AccountDB(account).insertAndFetch(db)!
+        }
+    }
+    
     func updateAccount(_ account: Account) throws {
         try dbWriter.write { db in
             _ = try AccountDB(account).update(db)
@@ -102,6 +108,12 @@ extension AppDatabase {
 extension AppDatabase {
     var reader: DatabaseReader {
         dbWriter
+    }
+    
+    func getAvailableIDForAccount() throws -> UInt32 {
+        try reader.read { db in
+            return try Row.fetchOne(db, sql: "SELECT MAX(id) + 1 as max FROM AccountDB")!["max"]
+        }
     }
     
     func getCurrencies() throws -> [CurrencyDB] {
@@ -168,6 +180,7 @@ extension AppDatabase {
         visible: Bool? = nil,
         accounting: Bool? = nil,
         types: [AccountType]? = nil,
+        currencyCode: String? = nil,
         isParent: Bool? = nil
     ) throws -> [AccountDB] {
         try reader.read { db in
@@ -188,6 +201,10 @@ extension AppDatabase {
             
             if let accounting = accounting {
                 request = request.filter(Column("accounting") == accounting)
+            }
+            
+            if let currencyCode = currencyCode {
+                request = request.filter(Column("currencyCode") == currencyCode)
             }
             
             if let isParent = isParent {

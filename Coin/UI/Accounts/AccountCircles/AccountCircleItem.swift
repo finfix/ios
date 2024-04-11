@@ -28,6 +28,9 @@ struct AccountCircleItem: View {
     ) {
         self.formatter = CurrencyFormatter(currency: account.currency)
         self.account = account
+        if account.type == .balancing && account.remainder < 0 && account.isParent {
+            self.account.remainder *= -1
+        }
         self.isAlreadyOpened = isAlreadyOpened
         self._path = path
         self._selectedAccountGroup = selectedAccountGroup
@@ -39,7 +42,7 @@ struct AccountCircleItem: View {
             Text(account.name)
                 .lineLimit(1)
             ZStack {
-                if account.isParent {
+                if account.isParent && account.type != .balancing {
                     Circle()
                         .fill(.clear)
                         .strokeBorder(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.remainder ? .green : .red, lineWidth: 1)
@@ -49,22 +52,6 @@ struct AccountCircleItem: View {
                     .fill(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.remainder ? .green : .red)
                     .frame(width: 30)
             }
-//            .onTapGesture(count: 1) {
-//                isTransactionOpen.toggle()
-//            }
-            .onTapGesture(count: 2) {
-                if !account.childrenAccounts.isEmpty {
-                    isChildrenOpen = true
-                }
-            }
-            .onLongPressGesture {
-                if isAlreadyOpened {
-                    dismiss()
-                }
-                if account.type != .balancing {
-                    path.append(account)
-                }
-            }
             Text(formatter.string(number: account.remainder))
                 .lineLimit(1)
             
@@ -72,6 +59,22 @@ struct AccountCircleItem: View {
                 Text(formatter.string(number: account.showingBudgetAmount))
                     .lineLimit(1)
                     .foregroundColor(.secondary)
+            }
+        }
+//        .onTapGesture(count: 1) {
+//            isTransactionOpen.toggle()
+//        }
+        .onTapGesture(count: 2) {
+            if !account.childrenAccounts.isEmpty && account.type != .balancing {
+                isChildrenOpen = true
+            }
+        }
+        .onLongPressGesture {
+            if isAlreadyOpened {
+                dismiss()
+            }
+            if account.type != .balancing {
+                path.append(account)
             }
         }
         .font(.caption)
