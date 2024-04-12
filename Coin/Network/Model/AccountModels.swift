@@ -59,6 +59,13 @@ struct CreateAccountBudgetReq: Encodable {
 struct CreateAccountRes: Decodable {
     var id: UInt32
     var serialNumber: UInt32
+    var balancingTransactionID: UInt32?
+}
+
+struct UpdateAccountRes: Decodable {
+    var balancingTransactionID: UInt32?
+    var balancingAccountID: UInt32?
+    var balancingAccountSerialNumber: UInt32?
 }
 
 struct UpdateAccountReq: Encodable {

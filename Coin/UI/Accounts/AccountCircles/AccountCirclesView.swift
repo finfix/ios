@@ -34,7 +34,7 @@ struct AccountCirclesView: View {
                 VStack {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
-                            ForEach(groupedAccounts.filter { $0.type == .earnings }) { account in
+                            ForEach(groupedAccounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.remainder > 0) }) { account in
                                 AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
                             PlusNewAccount(accountType: .earnings)
@@ -56,7 +56,7 @@ struct AccountCirclesView: View {
                     
                     ScrollView(.horizontal) {
                         LazyHGrid(rows: [GridItem(.adaptive(minimum: 100))], alignment: .top, spacing: horizontalSpacing) {
-                            ForEach(groupedAccounts.filter { $0.type == .expense }) { account in
+                            ForEach(groupedAccounts.filter { $0.type == .expense || ($0.type == .balancing && $0.remainder < 0)}) { account in
                                 AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
                             PlusNewAccount(accountType: .expense)

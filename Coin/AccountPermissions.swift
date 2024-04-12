@@ -31,6 +31,14 @@ private let typeToPermissions: [AccountType: AccountPermissions] = [
     // Запреты для счетов расходов - нельзя менять только остатки счетов
     .expense: AccountPermissions(
         changeRemainder: false
+    ),
+    // Запреты для балансировочных счетов - можно только менять валюту
+    .balancing: AccountPermissions(
+        changeBudget: false,
+        changeRemainder: false,
+        changeCurrency: true,
+        changeParentAccountID: false,
+        linkToParentAccount: false
     )
 ]
 
