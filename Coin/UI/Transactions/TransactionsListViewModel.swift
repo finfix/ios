@@ -16,6 +16,11 @@ class TransactionsListViewModel {
     var page = 0
     var transactionsCancelled = false
     let pageSize = 100
+    var accountID: UInt32? = nil
+    
+    init(accountID: UInt32? = nil) {
+        self.accountID = accountID
+    }
     
     func load(refresh: Bool) {
         do {
@@ -31,7 +36,11 @@ class TransactionsListViewModel {
                 page += 1
             }
             
-            let transactions = try service.getTransactions(limit: limit, offset: offset)
+            let transactions = try service.getTransactions(
+                limit: limit,
+                offset: offset,
+                accountID: accountID
+            )
             
             if transactions.isEmpty {
                 transactionsCancelled = true
