@@ -38,6 +38,13 @@ struct Profile: View {
                     Text(isProdAPI ? "Продакшн окружение" : "Тестовое окружение")
                         .foregroundColor(isProdAPI ? .red : .yellow)
                 }
+                #else
+                if !isProdAPI {
+                    Section {
+                        Text("Тестовое окружение")
+                            .foregroundColor(.yellow)
+                    }
+                }
                 #endif
                 Section {
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
