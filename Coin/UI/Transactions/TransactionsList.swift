@@ -14,10 +14,10 @@ struct TransactionsView: View {
     
     init(
         selectedAccountGroup: Binding<AccountGroup>,
-        accountID: UInt32? = nil
+        account: Account? = nil
     ) {
         self._selectedAccountGroup = selectedAccountGroup
-        vm = TransactionsListViewModel(accountID: accountID)
+        vm = TransactionsListViewModel(account: account)
     }
     
     @State private var vm: TransactionsListViewModel
@@ -72,7 +72,7 @@ struct TransactionsView: View {
                     // Фильтры
                     Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
                 }
-                if vm.accountID == nil {
+                if vm.accountIDs.isEmpty {
                     ToolbarItem(placement: .topBarLeading) {
                         AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
                     }

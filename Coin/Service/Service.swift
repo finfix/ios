@@ -83,7 +83,7 @@ extension Service {
     func getTransactions(
         limit: Int,
         offset: Int,
-        accountID: UInt32? = nil
+        accountIDs: [UInt32] = []
     ) throws -> [Transaction] {
         
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
@@ -92,7 +92,7 @@ extension Service {
         return Transaction.convertFromDBModel(try db.getTransactionsWithPagination(
             offset: offset,
             limit: limit,
-            accountID: accountID
+            accountIDs: accountIDs
         ), accountsMap: accountsMap)
     }
     

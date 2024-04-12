@@ -61,22 +61,21 @@ struct AccountCircleItem: View {
                     .foregroundColor(.secondary)
             }
         }
-        .onTapGesture(count: 1) {
-            isTransactionOpen.toggle()
-        }
         .onTapGesture(count: 2) {
-            if !account.childrenAccounts.isEmpty && account.type != .balancing {
+            if !account.childrenAccounts.isEmpty {
                 isChildrenOpen = true
             }
         }
+//        .onTapGesture(count: 1) {
+//            isTransactionOpen = true
+//        }
         .onLongPressGesture {
             if isAlreadyOpened {
                 dismiss()
             }
-            if account.type != .balancing {
-                path.append(account)
-            }
+            path.append(account)
         }
+
         .font(.caption)
         .frame(width: 80, height: 100)
         .opacity(account.accounting ? 1 : 0.5)
@@ -93,7 +92,7 @@ struct AccountCircleItem: View {
             }
         }
         .navigationDestination(isPresented: $isTransactionOpen) {
-            TransactionsView(selectedAccountGroup: $selectedAccountGroup, accountID: account.id)
+            TransactionsView(selectedAccountGroup: $selectedAccountGroup, account: account)
         }
     }
 }
