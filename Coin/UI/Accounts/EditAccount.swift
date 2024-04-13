@@ -61,7 +61,7 @@ struct EditAccount: View {
                 TextField("Название счета", text: $vm.currentAccount.name)
                 
                 if vm.permissions.changeRemainder {
-                    TextField(vm.mode == .create ? "Начальный баланс" : "Баланс", value: $vm.currentAccount.remainder, format: .number)
+                    TextField(vm.mode == .create ? "Начальный баланс" : "Баланс", value: $vm.currentAccount.showingRemainder, format: .number)
                         .keyboardType(.decimalPad)
                 }
                 
