@@ -83,6 +83,12 @@ extension AppDatabase {
         }
     }
     
+    func deleteAccount(_ account: Account) throws {
+        try dbWriter.write { db in
+            _ = try AccountDB(account).delete(db)
+        }
+    }
+    
     func updateBalance(id: UInt32, newBalance: Decimal) throws {
         try dbWriter.write { db in
             _ = try AccountDB

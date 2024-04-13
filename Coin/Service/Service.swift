@@ -272,6 +272,21 @@ extension Service {
         try db.updateAccount(newAccount)
     }
     
+    func deleteAccount(_ account: Account) async throws {
+        
+        try await AccountAPI().DeleteAccount(req: DeleteAccountReq(id: account.id))
+        
+        // Если у счета есть дочерние счета
+        for childAccount in account.childrenAccounts {
+            var childAccount = childAccount
+            childAccount.parentAccountID = nil
+            try db.updateAccount(childAccount)
+        }
+        
+        // Удаляем счет
+        try db.deleteAccount(account)
+    }
+    
     func createTransaction(_ t: Transaction) async throws {
         var transaction = t
         
@@ -299,7 +314,7 @@ extension Service {
     func updateTransaction(newTransaction t: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = t
         
-        if (newTransaction.accountFrom.currency == newTransaction.accountTo.currency) && newTransaction.type != .balancing {
+        if newTransaction.accountFrom.currency == newTransaction.accountTo.currency{
             newTransaction.amountTo = newTransaction.amountFrom
         }
         

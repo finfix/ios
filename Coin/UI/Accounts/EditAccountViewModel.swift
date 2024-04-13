@@ -65,4 +65,8 @@ class EditAccountViewModel {
     func updateAccount() async throws {
         try await service.updateAccount(newAccount: currentAccount, oldAccount: oldAccount)
     }
+    
+    func deleteAccount() async throws {
+        try await service.deleteAccount(currentAccount)
+    }
 }
