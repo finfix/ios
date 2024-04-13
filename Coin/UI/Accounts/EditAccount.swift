@@ -145,6 +145,34 @@ struct EditAccount: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+            Section {
+                Button(role: .destructive) {
+                    Task {
+                        shouldDisableUI = true
+                        shouldShowProgress = true
+                        defer {
+                            shouldDisableUI = false
+                            shouldShowProgress = false
+                        }
+                        
+                        do {
+                            try await vm.deleteAccount()
+                        } catch {
+                            showErrorAlert("\(error)")
+                            return
+                        }
+                        
+                        dismiss()
+                    }
+                } label: {
+                    if shouldShowProgress {
+                        ProgressView()
+                    } else {
+                        Text("Удалить")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
             if vm.currentAccount.id != 0 {
                 Section(footer:
                     Text("ID: \(vm.currentAccount.id)")

@@ -93,3 +93,7 @@ struct GetAccountGroupsRes: Decodable {
     var currency: String
     var serialNumber: UInt32
 }
+
+struct DeleteAccountReq: Encodable {
+    var id: UInt32
+}
