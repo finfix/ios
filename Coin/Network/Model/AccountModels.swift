@@ -48,6 +48,7 @@ struct CreateAccountReq: Encodable {
     var remainder: Decimal?
     var type: String
     var isParent: Bool
+    var parentAccountID: UInt32?
 }
 
 struct CreateAccountBudgetReq: Encodable {

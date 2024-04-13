@@ -117,7 +117,8 @@ extension Service {
             name: account.name,
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
-            isParent: account.isParent)
+            isParent: account.isParent,
+            parentAccountID: account.parentAccountID)
         )
         account.id = accountRes.id
         account.serialNumber = accountRes.serialNumber
