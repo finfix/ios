@@ -50,12 +50,22 @@ class AccountAPI: API {
         )
     }
     
-    func UpdateAccount(req: UpdateAccountReq) async throws {
+    func UpdateAccount(req: UpdateAccountReq) async throws -> UpdateAccountRes {
         return try await request(
             url: apiBasePath + accountBasePath,
             method: .patch,
             headers: getBaseHeaders(),
-            reqModel: req
+            reqModel: req,
+            resModel: UpdateAccountRes.self
+        )
+    }
+    
+    func DeleteAccount(req: DeleteAccountReq) async throws {
+        return try await request(
+            url: apiBasePath + accountBasePath,
+            method: .delete,
+            headers: getBaseHeaders(),
+            query: ["id": String(req.id)]
         )
     }
 }

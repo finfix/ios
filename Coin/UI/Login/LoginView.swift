@@ -60,6 +60,8 @@ struct LoginView: View {
                                 SecureField("Password", text: $password)
                             } else {
                                 TextField("Password", text: $password)
+                                    .autocapitalization(.none)
+                                    .disableAutocorrection(true)
                             }
                         }
                         .submitLabel(.go)

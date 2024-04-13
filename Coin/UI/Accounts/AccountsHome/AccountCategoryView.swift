@@ -15,7 +15,7 @@ struct AccountCategoryView: View {
     var totalSum: Decimal {
         var total: Decimal = 0
         for account in accounts {
-            total += account.remainder
+            total += account.showingRemainder
         }
         return total
     }
@@ -51,7 +51,7 @@ struct AccountCategoryView: View {
                         Text(account.name)
                             .lineLimit(1)
                         Spacer()
-                        Text(CurrencyFormatter().string(number: account.remainder, currency: account.currency))
+                        Text(CurrencyFormatter().string(number: account.showingRemainder, currency: account.currency))
                     }
                     .padding()
                     .frame(width: 340, height: 60)

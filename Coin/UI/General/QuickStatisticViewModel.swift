@@ -27,6 +27,7 @@ class QuickStatisticViewModel {
         let accounts = Account.groupAccounts(a)
         
         for account in accounts {
+            var account = account
             
             if account.parentAccountID != nil {
                 continue
@@ -35,16 +36,23 @@ class QuickStatisticViewModel {
             let relation = targetCurrency.rate / (account.currency.rate)
             
             switch account.type {
-            case .expense:
-                tmp.totalExpense += account.remainder * relation
+            case .expense, .balancing:
+                if account.type == .balancing {
+                    if account.showingRemainder < 0 {
+                        account.showingRemainder *= -1
+                    } else {
+                        account.showingRemainder = 0
+                    }
+                }
+                tmp.totalExpense += account.showingRemainder * relation
                 tmp.totalBudget += account.showingBudgetAmount * relation
-                if account.showingBudgetAmount != 0 && account.showingBudgetAmount > account.remainder {
-                    tmp.periodRemainder += (account.showingBudgetAmount - account.remainder) * relation
+                if account.showingBudgetAmount != 0 && account.showingBudgetAmount > account.showingRemainder {
+                    tmp.periodRemainder += (account.showingBudgetAmount - account.showingRemainder) * relation
                 }
             case .earnings:
                 continue
-            default:
-                tmp.totalRemainder += account.remainder * relation
+            case .debt, .regular:
+                tmp.totalRemainder += account.showingRemainder * relation
             }
         }
         return tmp

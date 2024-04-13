@@ -16,7 +16,7 @@ class HidedAccountViewModel {
     
     func load() {
         do {
-            accounts = try service.getAccounts(visible: false, types: [type])
+            accounts = Account.groupAccounts(try service.getAccounts(visible: false, types: [type]))
         } catch {
             showErrorAlert("\(error)")
         }

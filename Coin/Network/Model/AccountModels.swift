@@ -48,6 +48,7 @@ struct CreateAccountReq: Encodable {
     var remainder: Decimal?
     var type: String
     var isParent: Bool
+    var parentAccountID: UInt32?
 }
 
 struct CreateAccountBudgetReq: Encodable {
@@ -59,6 +60,13 @@ struct CreateAccountBudgetReq: Encodable {
 struct CreateAccountRes: Decodable {
     var id: UInt32
     var serialNumber: UInt32
+    var balancingTransactionID: UInt32?
+}
+
+struct UpdateAccountRes: Decodable {
+    var balancingTransactionID: UInt32?
+    var balancingAccountID: UInt32?
+    var balancingAccountSerialNumber: UInt32?
 }
 
 struct UpdateAccountReq: Encodable {
@@ -84,4 +92,8 @@ struct GetAccountGroupsRes: Decodable {
     var name: String
     var currency: String
     var serialNumber: UInt32
+}
+
+struct DeleteAccountReq: Encodable {
+    var id: UInt32
 }

@@ -17,11 +17,11 @@ struct BudgetDetails: View {
     let today = Calendar.current.component(.day, from: Date())
     
     var dailyBudget: Decimal {
-        account.budgetAmount / Decimal(daysInMonth)
+        account.showingBudgetAmount / Decimal(daysInMonth)
     }
     
     var availableExpense: Decimal {
-        dailyBudget * Decimal(today) - account.remainder
+        dailyBudget * Decimal(today) - account.showingRemainder
     }
     
     var currencyFormatter: CurrencyFormatter
@@ -41,9 +41,9 @@ struct BudgetDetails: View {
                 Text("Дневной бюджет: ")
             }
             VStack(alignment: .trailing) {
-                Text(currencyFormatter.string(number: account.budgetAmount))
-                Text(currencyFormatter.string(number: account.remainder))
-                Text(currencyFormatter.string(number: account.budgetAmount - account.remainder))
+                Text(currencyFormatter.string(number: account.showingBudgetAmount))
+                Text(currencyFormatter.string(number: account.showingRemainder))
+                Text(currencyFormatter.string(number: account.showingBudgetAmount - account.showingRemainder))
                 Text(currencyFormatter.string(number: availableExpense))
                 Text(currencyFormatter.string(number: dailyBudget))
             }

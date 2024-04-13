@@ -23,15 +23,18 @@ class EditAccountViewModel {
     var oldAccount = Account()
     
     var mode: mode
+    var isHiddenView: Bool
     
     init(
         currentAccount: Account,
         oldAccount: Account = Account(),
-        mode: mode
+        mode: mode,
+        isHiddenView: Bool = false
     ) {
         self.currentAccount = currentAccount
         self.oldAccount = oldAccount
         self.mode = mode
+        self.isHiddenView = isHiddenView
     }
     
     var permissions: AccountPermissions {
@@ -42,7 +45,11 @@ class EditAccountViewModel {
         do {
             currencies = try service.getCurrencies()
             accountGroups = try service.getAccountGroups()
-            accounts = try service.getAccounts(visible: true, types:[currentAccount.type], isParent: true)
+            var visible: Bool? = nil
+            if !isHiddenView {
+                visible = true
+            }
+            accounts = try service.getAccounts(visible: visible, types: [currentAccount.type], isParent: true)
             if mode == .create {
                 currentAccount.currency = currencies.first ?? Currency()
             }
@@ -57,5 +64,9 @@ class EditAccountViewModel {
     
     func updateAccount() async throws {
         try await service.updateAccount(newAccount: currentAccount, oldAccount: oldAccount)
+    }
+    
+    func deleteAccount() async throws {
+        try await service.deleteAccount(currentAccount)
     }
 }

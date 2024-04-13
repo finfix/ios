@@ -28,6 +28,9 @@ struct AccountCircleItem: View {
     ) {
         self.formatter = CurrencyFormatter(currency: account.currency)
         self.account = account
+        if account.type == .balancing && account.showingRemainder < 0 && account.isParent {
+            self.account.showingRemainder *= -1
+        }
         self.isAlreadyOpened = isAlreadyOpened
         self._path = path
         self._selectedAccountGroup = selectedAccountGroup
@@ -39,33 +42,17 @@ struct AccountCircleItem: View {
             Text(account.name)
                 .lineLimit(1)
             ZStack {
-                if account.isParent {
+                if account.isParent && account.type != .balancing {
                     Circle()
                         .fill(.clear)
-                        .strokeBorder(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.remainder ? .green : .red, lineWidth: 1)
+                        .strokeBorder(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.showingRemainder ? .green : .red, lineWidth: 1)
                         .frame(width: 35)
                 }
                 Circle()
-                    .fill(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.remainder ? .green : .red)
+                    .fill(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.showingRemainder ? .green : .red)
                     .frame(width: 30)
             }
-//            .onTapGesture(count: 1) {
-//                isTransactionOpen.toggle()
-//            }
-            .onTapGesture(count: 2) {
-                if !account.childrenAccounts.isEmpty {
-                    isChildrenOpen = true
-                }
-            }
-            .onLongPressGesture {
-                if isAlreadyOpened {
-                    dismiss()
-                }
-                if account.type != .balancing {
-                    path.append(account)
-                }
-            }
-            Text(formatter.string(number: account.remainder))
+            Text(formatter.string(number: account.showingRemainder))
                 .lineLimit(1)
             
             if account.showingBudgetAmount != 0 {
@@ -74,6 +61,21 @@ struct AccountCircleItem: View {
                     .foregroundColor(.secondary)
             }
         }
+        .onTapGesture(count: 2) {
+            if !account.childrenAccounts.isEmpty {
+                isChildrenOpen = true
+            }
+        }
+//        .onTapGesture(count: 1) {
+//            isTransactionOpen = true
+//        }
+        .onLongPressGesture {
+            if isAlreadyOpened {
+                dismiss()
+            }
+            path.append(account)
+        }
+
         .font(.caption)
         .frame(width: 80, height: 100)
         .opacity(account.accounting ? 1 : 0.5)
@@ -90,7 +92,7 @@ struct AccountCircleItem: View {
             }
         }
         .navigationDestination(isPresented: $isTransactionOpen) {
-            TransactionsView(selectedAccountGroup: $selectedAccountGroup, accountID: account.id)
+            TransactionsView(selectedAccountGroup: $selectedAccountGroup, account: account)
         }
     }
 }

@@ -12,7 +12,15 @@ private let logger = Logger(subsystem: "Coin", category: "TransactionList")
 
 struct TransactionsView: View {
     
-    @State private var vm = TransactionsListViewModel()
+    init(
+        selectedAccountGroup: Binding<AccountGroup>,
+        account: Account? = nil
+    ) {
+        self._selectedAccountGroup = selectedAccountGroup
+        vm = TransactionsListViewModel(account: account)
+    }
+    
+    @State private var vm: TransactionsListViewModel
     @Binding var selectedAccountGroup: AccountGroup
     
     var groupedTransactionByDate: [Date: [Transaction]] {
@@ -24,7 +32,6 @@ struct TransactionsView: View {
     @State var dateFrom: Date? = Calendar(identifier: .gregorian).date(byAdding: .month, value: -1, to: Date.now)!
     
     @State var dateTo: Date?
-    @State var accountID: UInt32?
     @State var isFilterOpen = false
     
     var body: some View {
@@ -65,8 +72,10 @@ struct TransactionsView: View {
                     // Фильтры
                     Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
                 }
-                ToolbarItem(placement: .topBarLeading) {
-                    AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
+                if vm.accountIDs.isEmpty {
+                    ToolbarItem(placement: .topBarLeading) {
+                        AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
+                    }
                 }
             }
             .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }
