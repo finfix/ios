@@ -61,7 +61,7 @@ struct EditAccount: View {
                 TextField("Название счета", text: $vm.currentAccount.name)
                 
                 if vm.permissions.changeRemainder {
-                    TextField(vm.mode == .create ? "Начальный баланс" : "Баланс", value: $vm.currentAccount.showingRemainder, format: .number)
+                    TextField(vm.mode == .create ? "Начальный баланс" : "Баланс", value: $vm.currentAccount.remainder, format: .number)
                         .keyboardType(.decimalPad)
                 }
                 
@@ -145,7 +145,23 @@ struct EditAccount: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            Section {
+            if vm.currentAccount.id != 0 {
+                Section(footer:
+                    Text("ID: \(vm.currentAccount.id)")
+                ) {}
+            }
+        }
+        .onChange(of: vm.currentAccount.visible) { _, newValue in
+            if !newValue {
+                vm.currentAccount.accounting = false
+            }
+        }
+        .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
+        .task {
+            vm.load()
+        }
+        .toolbar(content: {
+            ToolbarItem {
                 Button(role: .destructive) {
                     Task {
                         shouldDisableUI = true
@@ -168,26 +184,13 @@ struct EditAccount: View {
                     if shouldShowProgress {
                         ProgressView()
                     } else {
-                        Text("Удалить")
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
                     }
                 }
                 .frame(maxWidth: .infinity)
             }
-            if vm.currentAccount.id != 0 {
-                Section(footer:
-                    Text("ID: \(vm.currentAccount.id)")
-                ) {}
-            }
-        }
-        .onChange(of: vm.currentAccount.visible) { _, newValue in
-            if !newValue {
-                vm.currentAccount.accounting = false
-            }
-        }
-        .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
-        .task {
-            vm.load()
-        }
+        })
         .disabled(shouldDisableUI)
     }
 }

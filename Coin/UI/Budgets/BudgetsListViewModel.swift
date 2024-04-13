@@ -26,7 +26,7 @@ class BudgetsListViewModel {
                 visible: true,
                 types: [.expense]
             )
-            accounts = Account.groupAccounts(tmpAccounts).filter { $0.budgetAmount != 0 }
+            accounts = Account.groupAccounts(tmpAccounts).filter { $0.showingBudgetAmount != 0 }
         } catch {
             showErrorAlert("\(error)")
         }
