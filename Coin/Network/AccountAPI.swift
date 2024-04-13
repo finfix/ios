@@ -59,4 +59,13 @@ class AccountAPI: API {
             resModel: UpdateAccountRes.self
         )
     }
+    
+    func DeleteAccount(req: DeleteAccountReq) async throws {
+        return try await request(
+            url: apiBasePath + accountBasePath,
+            method: .delete,
+            headers: getBaseHeaders(),
+            query: ["id": String(req.id)]
+        )
+    }
 }

@@ -42,6 +42,8 @@ struct Settings: View {
                 if isDevMode {
                     HStack {
                         TextField("", text: $apiBasePath)
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
                         Button { apiBasePath = defaultApiBasePath } label: { Text("По умолчанию") }
                     }
                 }

@@ -38,21 +38,21 @@ class QuickStatisticViewModel {
             switch account.type {
             case .expense, .balancing:
                 if account.type == .balancing {
-                    if account.remainder < 0 {
-                        account.remainder *= -1
+                    if account.showingRemainder < 0 {
+                        account.showingRemainder *= -1
                     } else {
-                        account.remainder = 0
+                        account.showingRemainder = 0
                     }
                 }
-                tmp.totalExpense += account.remainder * relation
+                tmp.totalExpense += account.showingRemainder * relation
                 tmp.totalBudget += account.showingBudgetAmount * relation
-                if account.showingBudgetAmount != 0 && account.showingBudgetAmount > account.remainder {
-                    tmp.periodRemainder += (account.showingBudgetAmount - account.remainder) * relation
+                if account.showingBudgetAmount != 0 && account.showingBudgetAmount > account.showingRemainder {
+                    tmp.periodRemainder += (account.showingBudgetAmount - account.showingRemainder) * relation
                 }
             case .earnings:
                 continue
             case .debt, .regular:
-                tmp.totalRemainder += account.remainder * relation
+                tmp.totalRemainder += account.showingRemainder * relation
             }
         }
         return tmp

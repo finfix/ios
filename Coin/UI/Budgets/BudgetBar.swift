@@ -17,15 +17,15 @@ struct BudgetBar: View {
     let today = Calendar.current.component(.day, from: Date())
     
     var fillingCoef: CGFloat {
-        account.remainder.doubleValue / account.budgetAmount.doubleValue
+        account.showingRemainder.doubleValue / account.showingBudgetAmount.doubleValue
     }
     
     var partWidthFixed: CGFloat {
-        return CGFloat(account.budgetFixedSum.doubleValue / account.budgetAmount.doubleValue) * width / CGFloat(account.budgetDaysOffset)
+        return CGFloat(account.budgetFixedSum.doubleValue / account.showingBudgetAmount.doubleValue) * width / CGFloat(account.budgetDaysOffset)
     }
     
     var partWidthLeft: CGFloat {
-        return CGFloat(1 - account.budgetFixedSum.doubleValue / account.budgetAmount.doubleValue) * width / CGFloat(daysInMonth - Int(account.budgetDaysOffset))
+        return CGFloat(1 - account.budgetFixedSum.doubleValue / account.showingBudgetAmount.doubleValue) * width / CGFloat(daysInMonth - Int(account.budgetDaysOffset))
     }
     
     var availableCoef: CGFloat {

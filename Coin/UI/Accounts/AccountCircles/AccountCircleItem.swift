@@ -28,8 +28,8 @@ struct AccountCircleItem: View {
     ) {
         self.formatter = CurrencyFormatter(currency: account.currency)
         self.account = account
-        if account.type == .balancing && account.remainder < 0 && account.isParent {
-            self.account.remainder *= -1
+        if account.type == .balancing && account.showingRemainder < 0 && account.isParent {
+            self.account.showingRemainder *= -1
         }
         self.isAlreadyOpened = isAlreadyOpened
         self._path = path
@@ -45,14 +45,14 @@ struct AccountCircleItem: View {
                 if account.isParent && account.type != .balancing {
                     Circle()
                         .fill(.clear)
-                        .strokeBorder(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.remainder ? .green : .red, lineWidth: 1)
+                        .strokeBorder(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.showingRemainder ? .green : .red, lineWidth: 1)
                         .frame(width: 35)
                 }
                 Circle()
-                    .fill(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.remainder ? .green : .red)
+                    .fill(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.showingRemainder ? .green : .red)
                     .frame(width: 30)
             }
-            Text(formatter.string(number: account.remainder))
+            Text(formatter.string(number: account.showingRemainder))
                 .lineLimit(1)
             
             if account.showingBudgetAmount != 0 {
