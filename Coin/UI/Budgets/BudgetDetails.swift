@@ -21,7 +21,7 @@ struct BudgetDetails: View {
     }
     
     var availableExpense: Decimal {
-        dailyBudget * Decimal(today) - account.remainder
+        dailyBudget * Decimal(today) - account.showingRemainder
     }
     
     var currencyFormatter: CurrencyFormatter
@@ -42,8 +42,8 @@ struct BudgetDetails: View {
             }
             VStack(alignment: .trailing) {
                 Text(currencyFormatter.string(number: account.budgetAmount))
-                Text(currencyFormatter.string(number: account.remainder))
-                Text(currencyFormatter.string(number: account.budgetAmount - account.remainder))
+                Text(currencyFormatter.string(number: account.showingRemainder))
+                Text(currencyFormatter.string(number: account.budgetAmount - account.showingRemainder))
                 Text(currencyFormatter.string(number: availableExpense))
                 Text(currencyFormatter.string(number: dailyBudget))
             }
