@@ -92,8 +92,8 @@ extension AppDatabase {
     func updateBalance(id: UInt32, newBalance: Decimal) throws {
         try dbWriter.write { db in
             _ = try AccountDB
-                .filter(Column("id") == id)
-                .updateAll(db, Column("remainder").set(to: newBalance))
+                .filter(AccountDB.Columns.id == id)
+                .updateAll(db, AccountDB.Columns.remainder.set(to: newBalance))
         }
     }
     
@@ -191,30 +191,30 @@ extension AppDatabase {
     ) throws -> [AccountDB] {
         try reader.read { db in
             var request = AccountDB
-                .order(Column("serialNumber"))
+                .order(AccountDB.Columns.serialNumber)
             
             if let ids = ids {
                 request = request.filter(keys: ids)
             }
             
             if let accountGroupID = accountGroupID {
-                request = request.filter(Column("accountGroupId") == accountGroupID)
+                request = request.filter(AccountDB.Columns.accountGroupId == accountGroupID)
             }
             
             if let visible = visible {
-                request = request.filter(Column("visible") == visible)
+                request = request.filter(AccountDB.Columns.visible == visible)
             }
             
             if let accounting = accounting {
-                request = request.filter(Column("accounting") == accounting)
+                request = request.filter(AccountDB.Columns.accounting == accounting)
             }
             
             if let currencyCode = currencyCode {
-                request = request.filter(Column("currencyCode") == currencyCode)
+                request = request.filter(AccountDB.Columns.currencyCode == currencyCode)
             }
             
             if let isParent = isParent {
-                request = request.filter(Column("isParent") == isParent)
+                request = request.filter(AccountDB.Columns.isParent == isParent)
             }
             
             if let types = types {
@@ -222,7 +222,7 @@ extension AppDatabase {
                 for type in types {
                     typesString.append(type.rawValue)
                 }
-                request = request.filter(typesString.contains(Column("type")))
+                request = request.filter(typesString.contains(AccountDB.Columns.type))
             }
             
             return try request.fetchAll(db)
@@ -237,10 +237,10 @@ extension AppDatabase {
         try reader.read { db in
             
             var request = TransactionDB
-                .order(Column("dateTransaction").desc, Column("id").desc)
+                .order(TransactionDB.Columns.dateTransaction.desc, TransactionDB.Columns.id.desc)
                 
             if !accountIDs.isEmpty {
-                request = request.filter(accountIDs.contains(Column("accountFromId")) || accountIDs.contains(Column("accountToId")))
+                request = request.filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))
             }
                     
             return try request

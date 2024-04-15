@@ -149,7 +149,10 @@ struct EditAccount: View {
             }
             if vm.currentAccount.id != 0 {
                 Section(footer:
-                    Text("ID: \(vm.currentAccount.id)")
+                    VStack(alignment: .leading) {
+                        Text("ID: \(vm.currentAccount.id)")
+                        Text("Дата и время создания: \(vm.currentAccount.datetimeCreate, format: .dateTime)")
+                    }
                 ) {}
             }
         }

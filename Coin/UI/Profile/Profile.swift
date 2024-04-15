@@ -67,15 +67,18 @@ struct Profile: View {
                         Task {
                             shouldDisableUI = true
                             shouldShowProgress = true
+                            defer {
+                                shouldShowProgress = false
+                                shouldDisableUI = false
+                            }
                             
                             do {
                                 try await vm.sync()
                             } catch {
                                 alert(error)
+                                return
                             }
                             
-                            shouldShowProgress = false
-                            shouldDisableUI = false
                             withAnimation(.spring().delay(0.25)) {
                                 self.shouldShowSuccess.toggle()
                             }

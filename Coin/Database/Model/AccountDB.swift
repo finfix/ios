@@ -26,6 +26,7 @@ struct AccountDB {
     var budgetFixedSum: Decimal
     var budgetDaysOffset: UInt8
     var budgetGradualFilling: Bool
+    var datetimeCreate: Date
     
     init(
         id: UInt32,
@@ -43,7 +44,8 @@ struct AccountDB {
         budgetAmount: Decimal,
         budgetFixedSum: Decimal,
         budgetDaysOffset: UInt8,
-        budgetGradualFilling: Bool
+        budgetGradualFilling: Bool,
+        datetimeCreate: Date
     ) {
         self.id = id
         self.accounting = accounting
@@ -61,6 +63,7 @@ struct AccountDB {
         self.budgetFixedSum = budgetFixedSum
         self.budgetDaysOffset = budgetDaysOffset
         self.budgetGradualFilling = budgetGradualFilling
+        self.datetimeCreate = datetimeCreate
     }
     
     // Инициализатор из сетевой модели
@@ -81,6 +84,7 @@ struct AccountDB {
         self.budgetGradualFilling = res.budget.gradualFilling
         self.accountGroupId = res.accountGroupID
         self.currencyCode = res.currency
+        self.datetimeCreate = res.datetimeCreate
     }
     
     // Инициализатор из бизнес модели
@@ -102,6 +106,7 @@ struct AccountDB {
         self.accountGroupId = model.accountGroup.id
         self.currencyCode = model.currency.code
         self.parentAccountId = model.parentAccountID
+        self.datetimeCreate = model.datetimeCreate
     }
     
     
@@ -116,7 +121,7 @@ struct AccountDB {
 
 // MARK: - Persistence
 extension AccountDB: Codable, FetchableRecord, PersistableRecord {
-    fileprivate enum Columns {
+    enum Columns {
         static let id = Column(CodingKeys.id)
         static let accounting = Column(CodingKeys.accounting)
         static let iconID = Column(CodingKeys.iconID)
@@ -124,7 +129,7 @@ extension AccountDB: Codable, FetchableRecord, PersistableRecord {
         static let remainder = Column(CodingKeys.remainder)
         static let type = Column(CodingKeys.type)
         static let visible = Column(CodingKeys.visible)
-//        static let parentAccountId = Column(CodingKeys.parentAccountId)
+        static let parentAccountId = Column(CodingKeys.parentAccountId)
         static let serialNumber = Column(CodingKeys.serialNumber)
         static let isParent = Column(CodingKeys.isParent)
         static let currencyCode = Column(CodingKeys.currencyCode)
@@ -133,5 +138,6 @@ extension AccountDB: Codable, FetchableRecord, PersistableRecord {
         static let budgetFixedSum = Column(CodingKeys.budgetFixedSum)
         static let budgetDaysOffset = Column(CodingKeys.budgetDaysOffset)
         static let budgetGradualFilling = Column(CodingKeys.budgetGradualFilling)
+        static let datetimeCreate = Column(CodingKeys.datetimeCreate)
     }
 }

@@ -29,6 +29,7 @@ struct GetAccountsRes: Decodable {
     var accountGroupID: UInt32
     var serialNumber: UInt32
     var isParent: Bool
+    var datetimeCreate: Date
 }
 
 struct GetAccountBudgetRes: Decodable {

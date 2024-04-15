@@ -218,7 +218,7 @@ extension Service {
                 isExecuted: true,
                 note: "",
                 type: .balancing,
-                timeCreate: Date.now,
+                datetimeCreate: Date.now,
                 accountFrom: balancingAccount!,
                 accountTo: newAccount)
             )
@@ -291,6 +291,7 @@ extension Service {
         }
         
         transaction.dateTransaction = transaction.dateTransaction.stripTime()
+        transaction.datetimeCreate = Date.now
         
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
             accountFromID: transaction.accountFrom.id,

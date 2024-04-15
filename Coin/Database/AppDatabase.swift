@@ -119,6 +119,8 @@ extension AppDatabase {
                     .notNull()
                 table.column("budgetGradualFilling", .boolean)
                     .notNull()
+                table.column("datetimeCreate", .date)
+                    .notNull()
                 
                 table.belongsTo("parentAccount", inTable: "accountDB")
                 table.belongsTo("accountGroup", inTable: "accountGroupDB")
@@ -143,9 +145,9 @@ extension AppDatabase {
                     .notNull()
                 table.column("note", .text)
                     .notNull()
-                table.column("type", .text)
+                table.column("datetimeCreate", .date)
                     .notNull()
-                table.column("timeCreate", .datetime)
+                table.column("type", .text)
                     .notNull()
                 
                 table.belongsTo("accountFrom", inTable: "accountDB")

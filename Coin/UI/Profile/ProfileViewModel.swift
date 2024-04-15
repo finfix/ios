@@ -12,8 +12,12 @@ class ProfileViewModel {
     private let service = Service.shared
     
     func sync() async throws {
-        try await service.sync()
-        try service.deleteAllData()
+        do {
+            try await service.sync()
+        } catch {
+            try service.deleteAllData()
+            throw error
+        }
     }
     
     func deleteAll() throws {

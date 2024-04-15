@@ -16,7 +16,7 @@ struct Transaction: Identifiable {
     var isExecuted: Bool
     var note: String
     var type: TransactionType
-    var timeCreate: Date
+    var datetimeCreate: Date
     var accountFrom: Account
     var accountTo: Account
     
@@ -29,7 +29,7 @@ struct Transaction: Identifiable {
         isExecuted: Bool = true,
         note: String = "",
         type: TransactionType = .consumption,
-        timeCreate: Date = Date(),
+        datetimeCreate: Date = Date(),
         accountFrom: Account = Account(),
         accountTo: Account = Account()
     ) {
@@ -41,7 +41,7 @@ struct Transaction: Identifiable {
         self.isExecuted = isExecuted
         self.note = note
         self.type = type
-        self.timeCreate = timeCreate
+        self.datetimeCreate = datetimeCreate
         self.accountFrom = accountFrom
         self.accountTo = accountTo
     }
@@ -58,7 +58,7 @@ extension Transaction {
         self.isExecuted = dbModel.isExecuted
         self.note = dbModel.note
         self.type = dbModel.type
-        self.timeCreate = Date()
+        self.datetimeCreate = dbModel.datetimeCreate
         self.accountFrom = accountsMap?[dbModel.accountFromId] ?? Account()
         self.accountTo = accountsMap?[dbModel.accountToId] ?? Account()
     }

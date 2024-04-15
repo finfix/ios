@@ -52,7 +52,7 @@ class AlertManager {
     let handle: (AlertModel) -> Void
     
     func callAsFunction(_ error: Error) {
-        logger.error("\(error.localizedDescription)")
+        logger.error("\(error)")
         handle(AlertModel(title: "Произошла ошибка", message: error.localizedDescription))
     }
     
