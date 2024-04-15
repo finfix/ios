@@ -68,7 +68,7 @@ struct TransactionsList: View {
                 Text("Загрузка...")
                     .task {
                         do {
-                            try vm.load(refresh: false)
+                            try await vm.load(refresh: false)
                         } catch {
                             alert(error)
                         }
@@ -78,7 +78,7 @@ struct TransactionsList: View {
         .task {
             if vm.transactions.count != 0 {
                 do {
-                    try vm.load(refresh: true)
+                    try await vm.load(refresh: true)
                 } catch {
                     alert(error)
                 }

@@ -70,7 +70,7 @@ struct AccountCirclesView: View {
             Spacer()
             .task {
                 do {
-                    try vm.load()
+                    try await vm.load()
                 } catch {
                     alert(error)
                 }

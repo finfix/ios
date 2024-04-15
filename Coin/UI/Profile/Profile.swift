@@ -96,7 +96,7 @@ struct Profile: View {
                     Button("Выйти", role: .destructive) {
                         Task {
                             do {
-                                try vm.deleteAll()
+                                try await vm.deleteAll()
                             } catch {
                                 alert(error)
                             }

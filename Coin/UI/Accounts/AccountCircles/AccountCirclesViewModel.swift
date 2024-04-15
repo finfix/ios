@@ -13,8 +13,8 @@ class AccountCirclesViewModel {
     
     var accounts: [Account] = []
         
-    func load() throws {
-        accounts = try service.getAccounts(visible: true)
+    func load() async throws {
+        accounts = try await service.getAccounts(visible: true)
     }
     
 }

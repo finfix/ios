@@ -164,7 +164,7 @@ struct EditAccount: View {
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
         .task {
             do {
-                try vm.load()
+                try await vm.load()
             } catch {
                 alert(error)
             }

@@ -61,7 +61,7 @@ struct QuickStatisticView: View {
         }
         .task {
             do {
-                try vm.load()
+                try await vm.load()
             } catch {
                 alert(error)
             }

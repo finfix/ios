@@ -11,46 +11,46 @@ import GRDB
 // MARK: Writes
 extension AppDatabase {
     
-    func importCurrencies(_ currencies: [CurrencyDB]) throws {
-        try dbWriter.write { db in
+    func importCurrencies(_ currencies: [CurrencyDB]) async throws {
+        try await dbWriter.write { db in
             for currency in currencies {
                 try currency.insert(db)
             }
         }
     }
     
-    func importUser(_ user: UserDB) throws {
-        try dbWriter.write { db in
+    func importUser(_ user: UserDB) async throws {
+        try await dbWriter.write { db in
             try user.insert(db)
         }
     }
     
-    func importAccountGroups(_ accountGroups: [AccountGroupDB]) throws {
-        try dbWriter.write { db in
+    func importAccountGroups(_ accountGroups: [AccountGroupDB]) async throws {
+        try await dbWriter.write { db in
             for accountGroup in accountGroups {
                 try accountGroup.insert(db)
             }
         }
     }
     
-    func importAccounts(_ accounts: [AccountDB]) throws {
-        try dbWriter.write { db in
+    func importAccounts(_ accounts: [AccountDB]) async throws {
+        try await dbWriter.write { db in
             for account in accounts {
                 try account.insert(db)
             }
         }
     }
     
-    func importTransactions(_ transactions: [TransactionDB]) throws {
-        try dbWriter.write { db in
+    func importTransactions(_ transactions: [TransactionDB]) async throws {
+        try await dbWriter.write { db in
             for transaction in transactions {
                 try transaction.insert(db)
             }
         }
     }
     
-    func deleteAllData() throws {
-        try dbWriter.write { db in
+    func deleteAllData() async throws {
+        try await dbWriter.write { db in
             _ = try TransactionDB.deleteAll(db)
             _ = try AccountDB.deleteAll(db)
             _ = try AccountGroupDB.deleteAll(db)
@@ -59,52 +59,52 @@ extension AppDatabase {
         }
     }
     
-    func deleteTransaction(_ transaction: Transaction) throws {
-        try dbWriter.write { db in
+    func deleteTransaction(_ transaction: Transaction) async throws {
+        try await dbWriter.write { db in
             _ = try TransactionDB(transaction).delete(db)
         }
     }
     
-    func createAccount(_ account: Account) throws {
-        try dbWriter.write { db in
+    func createAccount(_ account: Account) async throws {
+        try await dbWriter.write { db in
             _ = try AccountDB(account).insert(db)
         }
     }
     
-    func createAccountAndReturn(_ account: Account) throws -> AccountDB {
-        try dbWriter.write { db in
+    func createAccountAndReturn(_ account: Account) async throws -> AccountDB {
+        try await dbWriter.write { db in
             return try AccountDB(account).insertAndFetch(db)!
         }
     }
     
-    func updateAccount(_ account: Account) throws {
-        try dbWriter.write { db in
+    func updateAccount(_ account: Account) async throws {
+        try await dbWriter.write { db in
             _ = try AccountDB(account).update(db)
         }
     }
     
-    func deleteAccount(_ account: Account) throws {
-        try dbWriter.write { db in
+    func deleteAccount(_ account: Account) async throws {
+        try await dbWriter.write { db in
             _ = try AccountDB(account).delete(db)
         }
     }
     
-    func updateBalance(id: UInt32, newBalance: Decimal) throws {
-        try dbWriter.write { db in
+    func updateBalance(id: UInt32, newBalance: Decimal) async throws {
+        try await dbWriter.write { db in
             _ = try AccountDB
                 .filter(AccountDB.Columns.id == id)
                 .updateAll(db, AccountDB.Columns.remainder.set(to: newBalance))
         }
     }
     
-    func createTransaction(_ transaction: Transaction) throws {
-        try dbWriter.write { db in
+    func createTransaction(_ transaction: Transaction) async throws {
+        try await dbWriter.write { db in
             _ = try TransactionDB(transaction).insert(db)
         }
     }
     
-    func updateTransaction(_ transaction: Transaction) throws {
-        try dbWriter.write { db in
+    func updateTransaction(_ transaction: Transaction) async throws {
+        try await dbWriter.write { db in
             _ = try TransactionDB(transaction).update(db)
         }
     }
@@ -116,22 +116,22 @@ extension AppDatabase {
         dbWriter
     }
     
-    func getAvailableIDForAccount() throws -> UInt32 {
-        try reader.read { db in
+    func getAvailableIDForAccount() async throws -> UInt32 {
+        try await reader.read { db in
             return try Row.fetchOne(db, sql: "SELECT MAX(id) + 1 as max FROM AccountDB")!["max"]
         }
     }
     
-    func getCurrencies() throws -> [CurrencyDB] {
-        try reader.read { db in
+    func getCurrencies() async throws -> [CurrencyDB] {
+        try await reader.read { db in
             return try CurrencyDB.fetchAll(db).sorted { i, j in
                 i.code < j.code
             }
         }
     }
     
-    func getAccountGroups() throws -> [AccountGroupDB] {
-        try reader.read { db in
+    func getAccountGroups() async throws -> [AccountGroupDB] {
+        try await reader.read { db in
             return try AccountGroupDB.fetchAll(db).sorted { i, j in
                 i.serialNumber < j.serialNumber
             }
@@ -142,8 +142,8 @@ extension AppDatabase {
         _ account: Account,
         dateFrom: Date? = nil,
         dateTo: Date? = nil
-    ) throws -> Decimal? {
-        try reader.read { db in
+    ) async throws -> Decimal? {
+        try await reader.read { db in
             
             var dateFilter = ""
             var args: StatementArguments = ["id": account.id]
@@ -188,8 +188,8 @@ extension AppDatabase {
         types: [AccountType]? = nil,
         currencyCode: String? = nil,
         isParent: Bool? = nil
-    ) throws -> [AccountDB] {
-        try reader.read { db in
+    ) async throws -> [AccountDB] {
+        try await reader.read { db in
             var request = AccountDB
                 .order(AccountDB.Columns.serialNumber)
             
@@ -233,8 +233,8 @@ extension AppDatabase {
         offset: Int,
         limit: Int,
         accountIDs: [UInt32] = []
-    ) throws -> [TransactionDB] {
-        try reader.read { db in
+    ) async throws -> [TransactionDB] {
+        try await reader.read { db in
             
             var request = TransactionDB
                 .order(TransactionDB.Columns.dateTransaction.desc, TransactionDB.Columns.id.desc)
