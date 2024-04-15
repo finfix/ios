@@ -7,12 +7,19 @@
 
 import SwiftUI
 
+enum PlusNewAccountRoute: Hashable {
+    case createAccount(AccountType)
+}
+
 struct PlusNewAccount: View {
     
+    @Binding var path: NavigationPath
     var accountType: AccountType
     
     var body: some View {
-        NavigationLink(value: accountType) {
+        Button {
+            path.append(PlusNewAccountRoute.createAccount(accountType))
+        } label: {
             VStack {
                 ZStack {
                     Circle()
@@ -30,5 +37,5 @@ struct PlusNewAccount: View {
 }
 
 #Preview {
-    PlusNewAccount(accountType: .regular)
+    PlusNewAccount(path: .constant(NavigationPath()), accountType: .regular)
 }
