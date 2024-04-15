@@ -41,14 +41,14 @@ class EditAccountViewModel {
         GetPermissions(account: currentAccount)
     }
         
-    func load() throws {
-        currencies = try service.getCurrencies()
-        accountGroups = try service.getAccountGroups()
+    func load() async throws {
+        currencies = try await service.getCurrencies()
+        accountGroups = try await service.getAccountGroups()
         var visible: Bool? = nil
         if !isHiddenView {
             visible = true
         }
-        accounts = try service.getAccounts(visible: visible, types: [currentAccount.type], isParent: true)
+        accounts = try await service.getAccounts(visible: visible, types: [currentAccount.type], isParent: true)
         if mode == .create {
             currentAccount.currency = currencies.first ?? Currency()
         }

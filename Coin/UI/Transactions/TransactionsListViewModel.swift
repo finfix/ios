@@ -27,7 +27,7 @@ class TransactionsListViewModel {
         }
     }
     
-    func load(refresh: Bool) throws {
+    func load(refresh: Bool) async throws {
         var offset = 0
         var limit = 0
         
@@ -40,7 +40,7 @@ class TransactionsListViewModel {
             page += 1
         }
         
-        let transactions = try service.getTransactions(
+        let transactions = try await service.getTransactions(
             limit: limit,
             offset: offset,
             accountIDs: accountIDs

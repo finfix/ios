@@ -14,7 +14,7 @@ class HidedAccountViewModel {
     var accounts: [Account] = []
     var type: AccountType = .regular
     
-    func load() throws {
-        accounts = Account.groupAccounts(try service.getAccounts(visible: false, types: [type]))
+    func load() async throws {
+        accounts = Account.groupAccounts(try await service.getAccounts(visible: false, types: [type]))
     }
 }

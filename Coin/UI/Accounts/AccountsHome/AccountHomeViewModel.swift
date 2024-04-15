@@ -13,7 +13,7 @@ class AccountHomeViewModel {
     
     var accounts: [Account] = []
     
-    func load() throws {
-        accounts = try service.getAccounts()
+    func load() async throws {
+        accounts = try await service.getAccounts()
     }
 }

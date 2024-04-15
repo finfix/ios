@@ -22,17 +22,17 @@ class Service {
 }
 
 extension Service {
-    private func recalculateAccountBalance(_ accounts: [Account]) throws {
+    private func recalculateAccountBalance(_ accounts: [Account]) async throws {
         for account in accounts {
             var balance: Decimal?
             switch account.type {
             case .regular, .debt:
-                balance = try db.getBalanceForAccount(account)
+                balance = try await db.getBalanceForAccount(account)
             case .expense, .earnings, .balancing:
                 let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
                 let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
                 let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
-                balance = try db.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
+                balance = try await db.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
             }
             guard var balance = balance else {
                 throw ErrorModel(humanTextError: "Не смогли посчитать баланс счета \(account.id)")
@@ -40,16 +40,16 @@ extension Service {
             if account.type == .earnings || account.type == .balancing {
                 balance *= -1
             }
-            try db.updateBalance(id: account.id, newBalance: balance)
+            try await db.updateBalance(id: account.id, newBalance: balance)
         }
     }
     
-    func getCurrencies() throws -> [Currency] {
-        return Currency.convertFromDBModel(try db.getCurrencies())
+    func getCurrencies() async throws -> [Currency] {
+        return Currency.convertFromDBModel(try await db.getCurrencies())
     }
     
-    func deleteAllData() throws {
-        try db.deleteAllData()
+    func deleteAllData() async throws {
+        try await db.deleteAllData()
     }
     
     func getAccounts(
@@ -60,10 +60,10 @@ extension Service {
         types: [AccountType]? = nil,
         currencyCode: String? = nil,
         isParent: Bool? = nil
-    ) throws -> [Account] {
-        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
-        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
-        return Account.convertFromDBModel(try db.getAccounts(
+    ) async throws -> [Account] {
+        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
+        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
+        return Account.convertFromDBModel(try await db.getAccounts(
             ids: ids,
             accountGroupID: accountGroup?.id,
             visible: visible,
@@ -74,21 +74,21 @@ extension Service {
         ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
     }
     
-    func getAccountGroups() throws -> [AccountGroup] {
-        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
-        return AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap)
+    func getAccountGroups() async throws -> [AccountGroup] {
+        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
+        return AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap)
     }
     
     func getTransactions(
         limit: Int,
         offset: Int,
         accountIDs: [UInt32] = []
-    ) throws -> [Transaction] {
+    ) async throws -> [Transaction] {
         
-        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try db.getCurrencies()))
-        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try db.getAccountGroups(), currenciesMap: currenciesMap))
-        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
-        return Transaction.convertFromDBModel(try db.getTransactionsWithPagination(
+        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
+        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
+        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
+        return Transaction.convertFromDBModel(try await db.getTransactionsWithPagination(
             offset: offset,
             limit: limit,
             accountIDs: accountIDs
@@ -98,8 +98,16 @@ extension Service {
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
     func deleteTransaction(_ transaction: Transaction) async throws {
         try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
-        try db.deleteTransaction(transaction)
-        try recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            group.addTask {
+                try await self.db.deleteTransaction(transaction)
+            }
+            group.addTask {
+                try await self.recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
+            }
+            
+            try await group.waitForAll()
+        }
     }
     
     func createAccount(_ a: Account) async throws {
@@ -122,7 +130,7 @@ extension Service {
         account.id = accountRes.id
         account.serialNumber = accountRes.serialNumber
         
-        try db.createAccount(account)
+        try await db.createAccount(account)
     }
     
     func updateAccount(newAccount: Account, oldAccount: Account) async throws {
@@ -157,7 +165,7 @@ extension Service {
         // Если изменился баланс счета
         if oldAccount.remainder != newAccount.remainder {
             // Получаем балансировочный счет группы счетов
-            var balancingAccount = try getAccounts(
+            var balancingAccount = try await getAccounts(
                 accountGroup: newAccount.accountGroup,
                 types: [.balancing],
                 currencyCode: newAccount.currency.code,
@@ -168,7 +176,7 @@ extension Service {
             if balancingAccount == nil {
                 
                 // Получаем родительский балансировочный счет группы счетов
-                let parentBalancingAccount = try getAccounts(
+                let parentBalancingAccount = try await getAccounts(
                     accountGroup: newAccount.accountGroup,
                     types: [.balancing],
                     isParent: true
@@ -187,7 +195,7 @@ extension Service {
                 }
                                 
                 // Создаем и получаем балансировочный счет группы счетов
-                balancingAccount = Account.convertFromDBModel(try [db.createAccountAndReturn(Account(
+                balancingAccount = Account.convertFromDBModel(try await [db.createAccountAndReturn(Account(
                     id: updateAccountRes.balancingAccountID!,
                     accounting: true,
                     iconID: 0,
@@ -209,7 +217,7 @@ extension Service {
                 ))], currenciesMap: nil, accountGroupsMap: nil).first
             }
             
-            try db.createTransaction(Transaction(
+            try await db.createTransaction(Transaction(
                 id: updateAccountRes.balancingTransactionID!,
                 accounting: true,
                 amountFrom: newAccount.remainder-oldAccount.remainder,
@@ -223,13 +231,13 @@ extension Service {
                 accountTo: newAccount)
             )
             
-            try recalculateAccountBalance([balancingAccount!])
+            try await recalculateAccountBalance([balancingAccount!])
         }
         
         // Получаем родительский счет
         var parentAccount: Account?
         if let parentAccountID = newAccount.parentAccountID {
-            parentAccount = try getAccounts(ids: [parentAccountID]).first
+            parentAccount = try await getAccounts(ids: [parentAccountID]).first
         }
         
         // Если значение родительского счета отрицательное, а у дочернего счета положительное
@@ -258,14 +266,14 @@ extension Service {
         }
         
         if let parentAccount = parentAccount {
-            try db.updateAccount(parentAccount)
+            try await db.updateAccount(parentAccount)
         }
 
         for childAccount in newAccount.childrenAccounts {
-            try db.updateAccount(childAccount)
+            try await db.updateAccount(childAccount)
         }
         
-        try db.updateAccount(newAccount)
+        try await db.updateAccount(newAccount)
     }
     
     func deleteAccount(_ account: Account) async throws {
@@ -276,11 +284,11 @@ extension Service {
         for childAccount in account.childrenAccounts {
             var childAccount = childAccount
             childAccount.parentAccountID = nil
-            try db.updateAccount(childAccount)
+            try await db.updateAccount(childAccount)
         }
         
         // Удаляем счет
-        try db.deleteAccount(account)
+        try await db.deleteAccount(account)
     }
     
     func createTransaction(_ t: Transaction) async throws {
@@ -304,8 +312,8 @@ extension Service {
             isExecuted: true
         ))
         
-        try db.createTransaction(transaction)
-        try recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
+        try await db.createTransaction(transaction)
+        try await recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
     }
     
     func updateTransaction(newTransaction t: Transaction, oldTransaction: Transaction) async throws {
@@ -325,8 +333,8 @@ extension Service {
             note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
             id: newTransaction.id))
         
-        try db.updateTransaction(newTransaction)
-        try recalculateAccountBalance([oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
+        try await db.updateTransaction(newTransaction)
+        try await recalculateAccountBalance([oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
     }
 }
 
@@ -346,22 +354,22 @@ extension Service {
         async let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
         
         // Удаляем все данные в базе данных
-        try db.deleteAllData()
+        try await db.deleteAllData()
         
         // Сохраняем данные в базу данных
         logger.info("Сохраняем валюты")
-        try db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
+        try await db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
         logger.info("Сохраняем пользователя")
-        try db.importUser(UserDB(try await user))
+        try await db.importUser(UserDB(try await user))
         logger.info("Сохраняем группы счетов")
-        try db.importAccountGroups(AccountGroupDB.convertFromApiModel(try await accountGroups))
+        try await db.importAccountGroups(AccountGroupDB.convertFromApiModel(try await accountGroups))
         logger.info("Сохраняем счета")
         // Cортируем счета, чтобы сначала были родительские
         let sortedAccountsDB = AccountDB.convertFromApiModel(try await accounts).sorted { l, _ in
             l.isParent
         }
-        try db.importAccounts(sortedAccountsDB)
+        try await db.importAccounts(sortedAccountsDB)
         logger.info("Сохраняем транзакции")
-        try db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
+        try await db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
     }
 }

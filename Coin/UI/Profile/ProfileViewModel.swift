@@ -15,12 +15,12 @@ class ProfileViewModel {
         do {
             try await service.sync()
         } catch {
-            try service.deleteAllData()
+            try await service.deleteAllData()
             throw error
         }
     }
     
-    func deleteAll() throws {
-        try service.deleteAllData()
+    func deleteAll() async throws {
+        try await service.deleteAllData()
     }
 }

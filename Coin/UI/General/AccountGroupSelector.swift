@@ -26,7 +26,7 @@ struct AccountGroupSelector: View {
         .pickerStyle(.menu)
         .task {
             do {
-                let firstAccountGroup = try vm.load()
+                let firstAccountGroup = try await vm.load()
                 if selectedAccountGroup.id == 0 {
                     selectedAccountGroup = firstAccountGroup
                 }

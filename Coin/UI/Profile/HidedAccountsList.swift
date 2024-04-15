@@ -41,16 +41,18 @@ struct HidedAccountsList: View {
                 }
             }
             .onChange(of: vm.type) {
-                do {
-                    try vm.load()
-                } catch {
-                    alert(error)
+                Task {
+                    do {
+                        try await vm.load()
+                    } catch {
+                        alert(error)
+                    }
                 }
             }
         }
         .task {
             do {
-                try vm.load()
+                try await vm.load()
             } catch {
                 alert(error)
             }

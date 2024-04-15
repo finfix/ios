@@ -36,8 +36,8 @@ class EditTransactionViewModel {
         self.mode = mode
     }
             
-    func load() throws {
-        accounts = try service.getAccounts(accountGroup: accountGroup)
+    func load() async throws {
+        accounts = try await service.getAccounts(accountGroup: accountGroup)
         if mode == .create {
             let accountFrom = getAccountsForShowingInCreate(accounts: accounts, position: .up, transactionType: currentTransaction.type, excludedAccount: nil).first ?? Account()
             currentTransaction.accountFrom = accountFrom
