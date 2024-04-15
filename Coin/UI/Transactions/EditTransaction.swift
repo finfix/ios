@@ -115,7 +115,10 @@ struct EditTransaction: View {
             }
             if vm.currentTransaction.id != 0 {
                 Section(footer: 
-                    Text("ID: \(vm.currentTransaction.id)")
+                    VStack(alignment: .leading) {
+                        Text("ID: \(vm.currentTransaction.id)")
+                        Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
+                    }
                 ) {}
 			}
         }
