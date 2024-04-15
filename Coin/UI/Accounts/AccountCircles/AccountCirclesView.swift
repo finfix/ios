@@ -38,7 +38,7 @@ struct AccountCirclesView: View {
                             ForEach(groupedAccounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.showingRemainder > 0) }) { account in
                                 AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
-                            PlusNewAccount(accountType: .earnings)
+                            PlusNewAccount(path: $path, accountType: .earnings)
                         }
                     }
                     
@@ -49,7 +49,7 @@ struct AccountCirclesView: View {
                             ForEach(groupedAccounts.filter { $0.type == .regular }) { account in
                                 AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
-                            PlusNewAccount(accountType: .regular)
+                            PlusNewAccount(path: $path, accountType: .regular)
                         }
                     }
                     
@@ -60,14 +60,12 @@ struct AccountCirclesView: View {
                             ForEach(groupedAccounts.filter { $0.type == .expense || ($0.type == .balancing && $0.showingRemainder < 0)}) { account in
                                 AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
                             }
-                            PlusNewAccount(accountType: .expense)
+                            PlusNewAccount(path: $path, accountType: .expense)
                         }
                     }
                 }
                 .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
                 .scrollIndicators(.hidden)
-                .navigationDestination(for: Account.self) { EditAccount($0, selectedAccountGroup: selectedAccountGroup) }
-                .navigationDestination(for: AccountType.self) { EditAccount(accountType: $0, accountGroup: selectedAccountGroup) }
             }
             Spacer()
             .task {
@@ -77,8 +75,26 @@ struct AccountCirclesView: View {
                     alert(error)
                 }
             }
+            .navigationDestination(for: AccountCircleItemRoute.self) { screen in
+                switch screen {
+                case .accountTransactions(let account): TransactionsList(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
+                case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup, isHiddenView: false)
+                }
+            }
+            .navigationDestination(for: PlusNewAccountRoute.self) { screen in
+                switch screen {
+                case .createAccount(let accountType): EditAccount(accountType: accountType, accountGroup: selectedAccountGroup)
+                }
+            }
+            .navigationDestination(for: TransactionsListRoute.self) { screen in
+                switch screen {
+                case .editTransaction(let transaction): EditTransaction(transaction)
+                }
+            }
+//            .onChange(of: selectedAccountGroup) { _, newValue in
+//                vm.load() // Передавать ид группы
+//            }
         }
-        
     }
 }
 
