@@ -12,6 +12,7 @@ private let logger = Logger(subsystem: "Coin", category: "account group selector
 
 struct AccountGroupSelector: View {
     
+    @Environment (AlertManager.self) private var alert
     @State private var vm = AccountGroupSelectorViewModel()
     @Binding var selectedAccountGroup: AccountGroup
     
@@ -24,9 +25,13 @@ struct AccountGroupSelector: View {
         }
         .pickerStyle(.menu)
         .task {
-            let firstAccountGroup = vm.load()
-            if selectedAccountGroup.id == 0 {
-                selectedAccountGroup = firstAccountGroup
+            do {
+                let firstAccountGroup = try vm.load()
+                if selectedAccountGroup.id == 0 {
+                    selectedAccountGroup = firstAccountGroup
+                }
+            } catch {
+                alert(error)
             }
         }
     }

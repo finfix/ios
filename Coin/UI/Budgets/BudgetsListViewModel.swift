@@ -19,16 +19,12 @@ class BudgetsListViewModel {
         self.accountGroup = accountGroup
     }
         
-    func load() {
-        do {
-            let tmpAccounts = try service.getAccounts(
-                accountGroup: accountGroup,
-                visible: true,
-                types: [.expense]
-            )
-            accounts = Account.groupAccounts(tmpAccounts).filter { $0.showingBudgetAmount != 0 }
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func load() throws {
+        let tmpAccounts = try service.getAccounts(
+            accountGroup: accountGroup,
+            visible: true,
+            types: [.expense]
+        )
+        accounts = Account.groupAccounts(tmpAccounts).filter { $0.showingBudgetAmount != 0 }
     }
 }

@@ -12,6 +12,8 @@ private let logger = Logger(subsystem: "Coin", category: "TransactionList")
 
 struct TransactionsView: View {
     
+    @Environment (AlertManager.self) private var alert
+    
     init(
         selectedAccountGroup: Binding<AccountGroup>,
         account: Account? = nil
@@ -47,7 +49,11 @@ struct TransactionsView: View {
                         .onDelete {
                             for i in $0.makeIterator() {
                                 Task {
-                                    await vm.deleteTransaction(groupedTransactionByDate[date]![i])
+                                    do {
+                                        try await vm.deleteTransaction(groupedTransactionByDate[date]![i])
+                                    } catch {
+                                        alert(error)
+                                    }
                                 }
                             }
                         }
@@ -56,13 +62,21 @@ struct TransactionsView: View {
                 if !vm.transactionsCancelled {
                     Text("Загрузка...")
                         .task {
-                            vm.load(refresh: false)
+                            do {
+                                try vm.load(refresh: false)
+                            } catch {
+                                alert(error)
+                            }
                         }
                 }
             }
             .task {
                 if vm.transactions.count != 0 {
-                    vm.load(refresh: true)
+                    do {
+                        try vm.load(refresh: true)
+                    } catch {
+                        alert(error)
+                    }
                 }
             }
             .navigationDestination(for: Transaction.self) { EditTransaction($0) }

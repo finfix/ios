@@ -11,24 +11,12 @@ import Foundation
 class ProfileViewModel {
     private let service = Service.shared
     
-    func sync() async {
-        do {
-            try await service.sync()
-        } catch {
-            do {
-                try service.deleteAllData()
-            } catch {
-                showErrorAlert("\(error)")
-            }
-            showErrorAlert("\(error)")
-        }
+    func sync() async throws {
+        try await service.sync()
+        try service.deleteAllData()
     }
     
-    func deleteAll() {
-        do {
-            try service.deleteAllData()
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func deleteAll() throws {
+        try service.deleteAllData()
     }
 }

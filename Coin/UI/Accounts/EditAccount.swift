@@ -10,6 +10,8 @@ import SwiftUI
 struct EditAccount: View {
     
     @Environment(\.dismiss) var dismiss
+    @Environment (AlertManager.self) private var alert
+
     @State private var vm: EditAccountViewModel
     
     @State var shouldDisableUI = false
@@ -130,7 +132,7 @@ struct EditAccount: View {
                                 try await vm.updateAccount()
                             }
                         } catch {
-                            showErrorAlert("\(error)")
+                            alert(error)
                             return
                         }
                         
@@ -158,7 +160,11 @@ struct EditAccount: View {
         }
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
         .task {
-            vm.load()
+            do {
+                try vm.load()
+            } catch {
+                alert(error)
+            }
         }
         .toolbar(content: {
             ToolbarItem {
@@ -174,7 +180,7 @@ struct EditAccount: View {
                         do {
                             try await vm.deleteAccount()
                         } catch {
-                            showErrorAlert("\(error)")
+                            alert(error)
                             return
                         }
                         

@@ -12,6 +12,7 @@ private let logger = Logger(subsystem: "Coin", category: "AccountCirclesView")
 
 struct AccountCirclesView: View {
     
+    @Environment (AlertManager.self) private var alert
     @Binding var selectedAccountGroup: AccountGroup
     @State var path = NavigationPath()
     @State var vm = AccountCirclesViewModel()
@@ -70,7 +71,11 @@ struct AccountCirclesView: View {
             }
             Spacer()
             .task {
-                vm.load()
+                do {
+                    try vm.load()
+                } catch {
+                    alert(error)
+                }
             }
         }
         

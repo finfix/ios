@@ -14,6 +14,7 @@ struct EditTransaction: View {
     
     @Environment (\.dismiss) private var dismiss
     @State private var vm: EditTransactionViewModel
+    @Environment (AlertManager.self) private var alert
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
@@ -97,7 +98,7 @@ struct EditTransaction: View {
                             case .update: try await vm.updateTransaction()
                             }
                         } catch {
-                            showErrorAlert("\(error)")
+                            alert(error)
                             return
                         }
                         
@@ -119,7 +120,11 @@ struct EditTransaction: View {
 			}
         }
         .task {
-            vm.load()
+            do {
+                try vm.load()
+            } catch {
+                alert(error)
+            }
         }
 		.disabled(shouldDisableUI)
     }

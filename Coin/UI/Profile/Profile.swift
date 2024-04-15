@@ -13,6 +13,7 @@ enum ProfileViews {
 
 struct Profile: View {
     
+    @Environment (AlertManager.self) private var alert
     @State var vm = ProfileViewModel()
     
     @Binding var selectedAccountGroup: AccountGroup
@@ -56,7 +57,11 @@ struct Profile: View {
                             shouldDisableUI = true
                             shouldShowProgress = true
                             
-                            await vm.sync()
+                            do {
+                                try await vm.sync()
+                            } catch {
+                                alert(error)
+                            }
                             
                             shouldShowProgress = false
                             shouldDisableUI = false
@@ -76,7 +81,11 @@ struct Profile: View {
                 Section {
                     Button("Выйти", role: .destructive) {
                         Task {
-                            vm.deleteAll()
+                            do {
+                                try vm.deleteAll()
+                            } catch {
+                                alert(error)
+                            }
                         }
                         isLogin = false
                         accessToken = nil

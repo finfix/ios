@@ -13,12 +13,8 @@ class AccountCirclesViewModel {
     
     var accounts: [Account] = []
         
-    func load() {
-        do {
-            accounts = try service.getAccounts(visible: true)
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func load() throws {
+        accounts = try service.getAccounts(visible: true)
     }
     
 }

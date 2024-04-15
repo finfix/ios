@@ -13,11 +13,7 @@ class CurrencyRatesViewModel {
     
     var currencies: [Currency] = []
     
-    func load() {
-        do {
-            currencies = try service.getCurrencies()
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func load() throws {
+        currencies = try service.getCurrencies()
     }
 }

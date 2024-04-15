@@ -13,6 +13,7 @@ private let logger = Logger(subsystem: "Coin", category: "quick statistic")
 struct QuickStatisticView: View {
     
     @State private var vm = QuickStatisticViewModel()
+    @Environment(AlertManager.self) private var alert
     var selectedAccountGroup: AccountGroup
     var statistic: QuickStatistic {
         let filteredAccounts = vm.accounts.filter { $0.accountGroup == selectedAccountGroup }
@@ -59,7 +60,11 @@ struct QuickStatisticView: View {
             Spacer()
         }
         .task {
-            vm.load()
+            do {
+                try vm.load()
+            } catch {
+                alert(error)
+            }
         }
         .font(.caption2)
         .frame(maxWidth: .infinity)

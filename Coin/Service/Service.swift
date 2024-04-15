@@ -35,8 +35,7 @@ extension Service {
                 balance = try db.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
             }
             guard var balance = balance else {
-                showErrorAlert("Не смогли посчитать баланс счета \(account.id)")
-                return
+                throw ErrorModel(humanTextError: "Не смогли посчитать баланс счета \(account.id)")
             }
             if account.type == .earnings || account.type == .balancing {
                 balance *= -1
@@ -176,18 +175,15 @@ extension Service {
                 ).first
                 
                 guard parentBalancingAccount != nil else {
-                    showErrorAlert("Не смогли найти родительский балансировочный счет для группы счетов \(newAccount.accountGroup.id)")
-                    return
+                    throw ErrorModel(humanTextError: "Не смогли найти родительский балансировочный счет для группы счетов \(newAccount.accountGroup.id)")
                 }
                 
                 guard updateAccountRes.balancingAccountID != nil && updateAccountRes.balancingAccountSerialNumber != nil else {
-                    showErrorAlert("На сервере не создавался балансировочный счет")
-                    return
+                    throw ErrorModel(humanTextError: "На сервере не создавался балансировочный счет")
                 }
                 
                 guard updateAccountRes.balancingTransactionID != nil else {
-                    showErrorAlert("На сервере не создавалась балансировочная транзакция")
-                    return
+                    throw ErrorModel(humanTextError: "На сервере не создавалась балансировочная транзакция")
                 }
                                 
                 // Создаем и получаем балансировочный счет группы счетов
