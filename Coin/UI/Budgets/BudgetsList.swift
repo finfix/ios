@@ -12,6 +12,7 @@ private let logger = Logger(subsystem: "Coin", category: "BudgetList")
 
 struct BudgetsList: View {
         
+    @Environment (AlertManager.self) private var alert
     @State private var vm: BudgetsListViewModel
     
     init(accountGroup: AccountGroup) {
@@ -28,7 +29,11 @@ struct BudgetsList: View {
         }
         .navigationTitle("Бюджеты")
         .task {
-            vm.load()
+            do {
+                try vm.load()
+            } catch {
+                alert(error)
+            }
         }
     }
 }

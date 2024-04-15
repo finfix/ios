@@ -11,7 +11,8 @@ struct AccountsHomeView: View {
     
     @State var vm = AccountHomeViewModel()
     @Binding var selectedAccountGroup: AccountGroup
-    
+    @Environment (AlertManager.self) private var alert
+
     var filteredAccounts: [Account] {
         vm.accounts.filter { $0.accountGroup == selectedAccountGroup }
     }
@@ -76,7 +77,11 @@ struct AccountsHomeView: View {
             .navigationDestination(for: TransactionType.self ) { EditTransaction(transactionType: $0, accountGroup: selectedAccountGroup) }
         }
         .task {
-            vm.load()
+            do {
+                try vm.load()
+            } catch {
+                alert(error)
+            }
         }
     }
 }
