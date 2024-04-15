@@ -20,13 +20,21 @@ class API {
         return ["Authorization": accessToken]
     }
     
-    enum RequestError: Error {
+    enum RequestError: LocalizedError {
         case invalidURL
-        case serverError(Error)
+        case serverError(ErrorModel)
         case decodingError(Error)
         case encodingError(Error)
         case requestError(Error)
         case unauthorized
+        var errorDescription: String? {
+            switch self {
+            case let .serverError(model):
+                return model.humanTextError
+            default:
+                return nil
+            }
+        }
     }
         
     private let dateFormatter: DateFormatter = {
