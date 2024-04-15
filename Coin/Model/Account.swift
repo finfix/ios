@@ -8,6 +8,23 @@
 import Foundation
 
 struct Account: Identifiable {
+    
+    indirect enum Parent: ExpressibleByNilLiteral {
+        init(nilLiteral: ()) {
+            self = .none
+        }
+        
+        case none
+        case account(Account)
+        
+        var account: Account? {
+            if case .account(let account) = self {
+                return account
+            }
+            return nil
+        }
+    }
+    
     var id: UInt32
     var accounting: Bool
     var iconID: UInt32
@@ -25,7 +42,7 @@ struct Account: Identifiable {
     var budgetGradualFilling: Bool
     
     var parentAccountID: UInt32?
-//    var parentAccount: Account?
+    var parentAccount: Parent
     
     var accountGroup: AccountGroup
     var currency: Currency
@@ -49,7 +66,7 @@ struct Account: Identifiable {
             budgetDaysOffset: UInt8 = 0,
             budgetGradualFilling: Bool = false,
             parentAccountID: UInt32? = nil,
-//            parentAccount: Account? = nil,
+            parentAccount: Account.Parent = nil,
             accountGroup: AccountGroup = AccountGroup(),
             currency: Currency = Currency(),
             childrenAccounts: [Account] = []
@@ -63,7 +80,7 @@ struct Account: Identifiable {
             self.type = type
             self.visible = visible
             self.parentAccountID = parentAccountID
-//            self.parentAccount = parentAccount
+            self.parentAccount = parentAccount
             self.serialNumber = serialNumber
             self.isParent = isParent
             self.budgetAmount = budgetAmount
@@ -95,7 +112,7 @@ struct Account: Identifiable {
         self.budgetGradualFilling = dbModel.budgetGradualFilling
         
         self.parentAccountID = dbModel.parentAccountId
-//        self.parentAccount = nil
+        self.parentAccount = nil
         
         self.accountGroup = accountGroupsMap?[dbModel.accountGroupId] ?? AccountGroup()
         self.currency = currenciesMap?[dbModel.currencyCode] ?? Currency()
@@ -170,6 +187,9 @@ extension Account {
                             accountsContainer[parentAccountIndex].showingRemainder += account.remainder * relation
                             accountsContainer[parentAccountIndex].showingBudgetAmount += account.budgetAmount * relation
                         }
+                        
+                        // Добавляем родителя в счет
+                        account.parentAccount = .account(accountsContainer[parentAccountIndex])
                         
                         // Добавляем счет в дочерние счета родителя
                         accountsContainer[parentAccountIndex].childrenAccounts.append(account)
