@@ -7,12 +7,15 @@
 
 import SwiftUI
 
-enum ProfileViews {
-    case hidedAccounts, currencyRates, settings
+enum ProfileViews: Hashable {
+    case hidedAccounts
+    case currencyRates
+    case settings
 }
 
 struct Profile: View {
     
+    @Environment (AlertManager.self) private var alert
     @State var vm = ProfileViewModel()
     
     @Binding var selectedAccountGroup: AccountGroup
@@ -37,29 +40,45 @@ struct Profile: View {
                 Section {
                     Text(isProdAPI ? "Продакшн окружение" : "Тестовое окружение")
                         .foregroundColor(isProdAPI ? .red : .yellow)
+                    if !isProdAPI {
+                        Text(apiBasePath)
+                    }
                 }
                 #else
                 if !isProdAPI {
                     Section {
                         Text("Тестовое окружение")
                             .foregroundColor(.yellow)
+                        Text(apiBasePath)
                     }
                 }
                 #endif
                 Section {
-                    NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
-                    NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
+                    Button("Cкрытые счета") {
+                        path.append(ProfileViews.hidedAccounts)
+                    }
+                    Button("Курсы валют") {
+                        path.append(ProfileViews.currencyRates)
+                    }
                 }
+                .buttonStyle(.plain)
                 Section {
                     Button {
                         Task {
                             shouldDisableUI = true
                             shouldShowProgress = true
+                            defer {
+                                shouldShowProgress = false
+                                shouldDisableUI = false
+                            }
                             
-                            await vm.sync()
+                            do {
+                                try await vm.sync()
+                            } catch {
+                                alert(error)
+                                return
+                            }
                             
-                            shouldShowProgress = false
-                            shouldDisableUI = false
                             withAnimation(.spring().delay(0.25)) {
                                 self.shouldShowSuccess.toggle()
                             }
@@ -76,7 +95,11 @@ struct Profile: View {
                 Section {
                     Button("Выйти", role: .destructive) {
                         Task {
-                            vm.deleteAll()
+                            do {
+                                try await vm.deleteAll()
+                            } catch {
+                                alert(error)
+                            }
                         }
                         isLogin = false
                         accessToken = nil
@@ -99,16 +122,29 @@ struct Profile: View {
                         }
                 }
             }
-            .navigationDestination(for: ProfileViews.self) { view in
-                switch view {
+            .navigationDestination(for: ProfileViews.self) { screen in
+                switch screen {
                 case .hidedAccounts: HidedAccountsList(selectedAccountGroup: $selectedAccountGroup, path: $path)
                 case .currencyRates: CurrencyRates()
                 case .settings: Settings()
                 }
             }
+            .navigationDestination(for: AccountCircleItemRoute.self) { screen in
+                switch screen {
+                case .accountTransactions(let account): TransactionsList(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
+                case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup, isHiddenView: false)
+                }
+            }
+            .navigationDestination(for: TransactionsListRoute.self) { screen in
+                switch screen {
+                case .editTransaction(let transaction): EditTransaction(transaction)
+                }
+            }
             .toolbar {
                 ToolbarItem {
-                    NavigationLink(value: ProfileViews.settings) {
+                    Button {
+                        path.append(ProfileViews.settings)
+                    } label: {
                         Image(systemName: "gearshape")
                     }
                 }

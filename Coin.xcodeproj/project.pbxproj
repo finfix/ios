@@ -10,6 +10,7 @@
 		B5024EB22AE1A20F00F60449 /* EditAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5024EB12AE1A20F00F60449 /* EditAccount.swift */; };
 		B504B7E52AE46EEB0078643A /* UserAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B504B7E42AE46EEB0078643A /* UserAPI.swift */; };
 		B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = B504B7E62AE526DA0078643A /* PlusNewAccount.swift */; };
+		B50DBAD42BCD2D2600A58B53 /* TransactionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50DBAD32BCD2D2600A58B53 /* TransactionsList.swift */; };
 		B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */; };
 		B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */; };
 		B512688F2BBAA1FF00B54572 /* QuickStatisticViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B512688E2BBAA1FF00B54572 /* QuickStatisticViewModel.swift */; };
@@ -78,7 +79,7 @@
 		B5F9CC6728F01CA90037A21A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6628F01CA90037A21A /* Assets.xcassets */; };
 		B5F9CC6A28F01CA90037A21A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6928F01CA90037A21A /* Preview Assets.xcassets */; };
 		B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC7028F01E1A0037A21A /* ContentView.swift */; };
-		B5FB6AA428F3D62D00C2A2AC /* TransactionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */; };
+		B5FB6AA428F3D62D00C2A2AC /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA328F3D62D00C2A2AC /* TransactionsView.swift */; };
 		B5FB6AAE28F3D86000C2A2AC /* AccountsHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AAD28F3D86000C2A2AC /* AccountsHomeView.swift */; };
 		B5FF351E2AEC091F007694F9 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF351D2AEC091F007694F9 /* Defaults.swift */; };
 /* End PBXBuildFile section */
@@ -87,6 +88,7 @@
 		B5024EB12AE1A20F00F60449 /* EditAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccount.swift; sourceTree = "<group>"; };
 		B504B7E42AE46EEB0078643A /* UserAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAPI.swift; sourceTree = "<group>"; };
 		B504B7E62AE526DA0078643A /* PlusNewAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlusNewAccount.swift; sourceTree = "<group>"; };
+		B50DBAD32BCD2D2600A58B53 /* TransactionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsList.swift; sourceTree = "<group>"; };
 		B510BE8C2AE01A70002CDB54 /* BudgetBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetBar.swift; sourceTree = "<group>"; };
 		B510BE8E2AE03109002CDB54 /* BudgetDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetDetails.swift; sourceTree = "<group>"; };
 		B512688E2BBAA1FF00B54572 /* QuickStatisticViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickStatisticViewModel.swift; sourceTree = "<group>"; };
@@ -157,7 +159,7 @@
 		B5F9CC6628F01CA90037A21A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B5F9CC6928F01CA90037A21A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B5F9CC7028F01E1A0037A21A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsList.swift; sourceTree = "<group>"; };
+		B5FB6AA328F3D62D00C2A2AC /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
 		B5FB6AAD28F3D86000C2A2AC /* AccountsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsHomeView.swift; sourceTree = "<group>"; };
 		B5FF351D2AEC091F007694F9 /* Defaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Defaults.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -395,7 +397,8 @@
 		B5FB6AA128F3D5EF00C2A2AC /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
-				B5FB6AA328F3D62D00C2A2AC /* TransactionsList.swift */,
+				B5FB6AA328F3D62D00C2A2AC /* TransactionsView.swift */,
+				B50DBAD32BCD2D2600A58B53 /* TransactionsList.swift */,
 				B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */,
 				B5B950542ADF258700798F8C /* TransactionRow.swift */,
 				B593F9542AE1CCB000378E17 /* EditTransaction.swift */,
@@ -519,6 +522,7 @@
 				B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* AccountGroupSelector.swift in Sources */,
 				B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */,
+				B50DBAD42BCD2D2600A58B53 /* TransactionsList.swift in Sources */,
 				B5D143B62906B4EC00875037 /* AuthAPI.swift in Sources */,
 				B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */,
 				B5B950452ADF16FF00798F8C /* Line.swift in Sources */,
@@ -560,7 +564,7 @@
 				B5B950532ADF24A900798F8C /* AccountCircleItem.swift in Sources */,
 				B517100A2BB2E6BF00950EE0 /* EditTransactionViewModel.swift in Sources */,
 				B5B068E62BAC6DEA00AEEC98 /* QuickStatistic.swift in Sources */,
-				B5FB6AA428F3D62D00C2A2AC /* TransactionsList.swift in Sources */,
+				B5FB6AA428F3D62D00C2A2AC /* TransactionsView.swift in Sources */,
 				B512688F2BBAA1FF00B54572 /* QuickStatisticViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -712,7 +716,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.6;
+				MARKETING_VERSION = 1.0.7;
 				PRODUCT_BUNDLE_IDENTIFIER = ilyaivanov.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -750,7 +754,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.6;
+				MARKETING_VERSION = 1.0.7;
 				PRODUCT_BUNDLE_IDENTIFIER = ilyaivanov.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

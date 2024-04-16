@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HidedAccountsList: View {
     
+    @Environment (AlertManager.self) private var alert
     @State private var vm = HidedAccountViewModel()
     @Binding var selectedAccountGroup: AccountGroup
     @Binding var path: NavigationPath
@@ -38,13 +39,23 @@ struct HidedAccountsList: View {
                     Text(value.rawValue)
                         .tag(value)
                 }
-            }        
+            }
             .onChange(of: vm.type) {
-                vm.load()
+                Task {
+                    do {
+                        try await vm.load()
+                    } catch {
+                        alert(error)
+                    }
+                }
             }
         }
         .task {
-            vm.load()
+            do {
+                try await vm.load()
+            } catch {
+                alert(error)
+            }
         }
     }
 }

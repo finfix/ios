@@ -21,8 +21,6 @@ class TransactionAPI: API {
     }
     
     func CreateTransaction(req: CreateTransactionReq) async throws -> UInt32 {
-        let format = DateFormatter()
-        format.dateFormat = "YYYY-MM-dd"
         return try await request(
             url: apiBasePath + transactionBasePath,
             method: .post,

@@ -19,38 +19,44 @@ struct MyApp: App {
     @AppStorage("errorTitle") var errorText: String = ""
     @AppStorage("errorDescription") var errorDescription: String = ""
     
+    @State var alert: AlertModel?
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .preferredColorScheme(isDarkMode ? .dark : .light)
-                .alert(isPresented: $isErrorShowing) {
-                    Alert(title: 
-                            Text(errorText),
+                .alert(item: $alert) { alert in
+                    Alert(title:
+                            Text(alert.title),
                           message:
-                            Text(errorDescription),
+                            Text(alert.message),
                           dismissButton:
-                            .cancel(Text("OK")) {
-                                errorText = ""
-                                errorDescription = ""
-                            }
+                            .cancel(Text("OK"))
                     )
                 }
+                .environment(AlertManager(handle: {
+                    alertModel in self.alert = alertModel
+                }))
         }
     }
 }
 
-func showErrorAlert(_ title: String, description: String? = nil) {
+struct AlertModel: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+}
+
+@Observable
+class AlertManager {
+    let handle: (AlertModel) -> Void
     
-    @AppStorage("isErrorShowing") var isErrorShowing = false
-    @AppStorage("errorTitle") var errorText: String?
-    @AppStorage("errorDescription") var errorDescription: String?
-    
-    logger.error("\(title)")
-    if let description = description {
-        logger.error("\(description)")
+    func callAsFunction(_ error: Error) {
+        logger.error("\(error)")
+        handle(AlertModel(title: "Произошла ошибка", message: error.localizedDescription))
     }
     
-    errorText = title
-    errorDescription = description
-    isErrorShowing = true
+    init(handle: @escaping (AlertModel) -> Void) {
+        self.handle = handle
+    }
 }

@@ -20,20 +20,25 @@ class API {
         return ["Authorization": accessToken]
     }
     
-    enum RequestError: Error {
+    enum RequestError: LocalizedError {
         case invalidURL
-        case serverError(Error)
+        case serverError(ErrorModel)
         case decodingError(Error)
         case encodingError(Error)
         case requestError(Error)
         case unauthorized
+        var errorDescription: String? {
+            switch self {
+            case let .serverError(model):
+                return model.humanTextError
+            default:
+                return nil
+            }
+        }
     }
         
-    private let dateFormatter: DateFormatter = {
-        let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd"
-        df.locale = Locale(identifier: "en_US_POSIX")
-        return df
+    private let defaultDateFormatter: DateFormatter = {
+        return DateFormatters.fullTime
     }()
     
     enum Method: String {
@@ -78,7 +83,7 @@ class API {
         // Тело
         do {
             let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .formatted(self.dateFormatter)
+            encoder.dateEncodingStrategy = .formatted(self.defaultDateFormatter)
             request.httpBody = try encoder.encode(reqModel)
         } catch {
             throw RequestError.encodingError(error)
@@ -98,7 +103,7 @@ class API {
         case 200:
             // Декодируем ответ, если передан тип
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .formatted(self.dateFormatter)
+            decoder.dateDecodingStrategy = .formatted(self.defaultDateFormatter)
             do {
                 return try decoder.decode(resModel.self, from: data)
             } catch {
@@ -143,7 +148,7 @@ class API {
         // Тело
         do {
             let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .formatted(self.dateFormatter)
+            encoder.dateEncodingStrategy = .formatted(self.defaultDateFormatter)
             request.httpBody = try encoder.encode(reqModel)
         } catch {
             throw RequestError.encodingError(error)
@@ -212,7 +217,7 @@ class API {
         case 200:
             // Декодируем ответ, если передан тип
             let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .formatted(self.dateFormatter)
+            decoder.dateDecodingStrategy = .formatted(self.defaultDateFormatter)
             do {
                 return try decoder.decode(resModel.self, from: data)
             } catch {

@@ -6,8 +6,27 @@
 //
 
 import Foundation
+import OSLog
+private let logger = Logger(subsystem: "Coin", category: "AccountModel")
 
 struct Account: Identifiable {
+    
+    indirect enum Parent: ExpressibleByNilLiteral {
+        init(nilLiteral: ()) {
+            self = .none
+        }
+        
+        case none
+        case account(Account)
+        
+        var account: Account? {
+            if case .account(let account) = self {
+                return account
+            }
+            return nil
+        }
+    }
+    
     var id: UInt32
     var accounting: Bool
     var iconID: UInt32
@@ -23,9 +42,10 @@ struct Account: Identifiable {
     var budgetFixedSum: Decimal
     var budgetDaysOffset: UInt8
     var budgetGradualFilling: Bool
+    var datetimeCreate: Date
     
     var parentAccountID: UInt32?
-//    var parentAccount: Account?
+    var parentAccount: Parent
     
     var accountGroup: AccountGroup
     var currency: Currency
@@ -48,8 +68,9 @@ struct Account: Identifiable {
             budgetFixedSum: Decimal = 0,
             budgetDaysOffset: UInt8 = 0,
             budgetGradualFilling: Bool = false,
+            datetimeCreate: Date = Date.now,
             parentAccountID: UInt32? = nil,
-//            parentAccount: Account? = nil,
+            parentAccount: Account.Parent = nil,
             accountGroup: AccountGroup = AccountGroup(),
             currency: Currency = Currency(),
             childrenAccounts: [Account] = []
@@ -63,7 +84,7 @@ struct Account: Identifiable {
             self.type = type
             self.visible = visible
             self.parentAccountID = parentAccountID
-//            self.parentAccount = parentAccount
+            self.parentAccount = parentAccount
             self.serialNumber = serialNumber
             self.isParent = isParent
             self.budgetAmount = budgetAmount
@@ -71,6 +92,7 @@ struct Account: Identifiable {
             self.budgetFixedSum = budgetFixedSum
             self.budgetDaysOffset = budgetDaysOffset
             self.budgetGradualFilling = budgetGradualFilling
+            self.datetimeCreate = datetimeCreate
             self.accountGroup = accountGroup
             self.currency = currency
             self.childrenAccounts = childrenAccounts
@@ -93,9 +115,10 @@ struct Account: Identifiable {
         self.budgetFixedSum = dbModel.budgetFixedSum
         self.budgetDaysOffset = dbModel.budgetDaysOffset
         self.budgetGradualFilling = dbModel.budgetGradualFilling
+        self.datetimeCreate = dbModel.datetimeCreate
         
         self.parentAccountID = dbModel.parentAccountId
-//        self.parentAccount = nil
+        self.parentAccount = nil
         
         self.accountGroup = accountGroupsMap?[dbModel.accountGroupId] ?? AccountGroup()
         self.currency = currenciesMap?[dbModel.currencyCode] ?? Currency()
@@ -145,9 +168,7 @@ extension Account {
         // Проходимся по каждому счету
         for account in accounts {
             var account = account
-            
-            print("\(account.name), \(account.id) \(account.isParent), \(account.parentAccountID ?? 0)")
-            
+                        
             // Присваиваем показываевому бюджету его собственный
             account.showingBudgetAmount = account.budgetAmount
             account.showingRemainder = account.remainder
@@ -171,6 +192,9 @@ extension Account {
                             accountsContainer[parentAccountIndex].showingBudgetAmount += account.budgetAmount * relation
                         }
                         
+                        // Добавляем родителя в счет
+                        account.parentAccount = .account(accountsContainer[parentAccountIndex])
+                        
                         // Добавляем счет в дочерние счета родителя
                         accountsContainer[parentAccountIndex].childrenAccounts.append(account)
                         
@@ -178,7 +202,7 @@ extension Account {
                     } else { // Если не находим
                         
                         // Значит у нас где-то ошибка, раз мы такое допустили и просто логгируем это
-                        print("Родительский счет (id: \(parentAccountID)) для (name: \(account.name), id: \(account.id)) отсутствует")
+                        logger.error("Родительский счет (id: \(parentAccountID)) для (name: \(account.name), id: \(account.id)) отсутствует")
                     }
                 }
                     

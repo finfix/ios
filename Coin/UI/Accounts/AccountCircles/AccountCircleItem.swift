@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+enum AccountCircleItemRoute: Hashable {
+    case editAccount(Account)
+    case accountTransactions(Account)
+}
+
 struct AccountCircleItem: View {
     
     var account: Account
@@ -66,14 +71,14 @@ struct AccountCircleItem: View {
                 isChildrenOpen = true
             }
         }
-//        .onTapGesture(count: 1) {
-//            isTransactionOpen = true
-//        }
+        .onTapGesture(count: 1) {
+            path.append(AccountCircleItemRoute.accountTransactions(account))
+        }
         .onLongPressGesture {
             if isAlreadyOpened {
                 dismiss()
             }
-            path.append(account)
+            path.append(AccountCircleItemRoute.editAccount(account))
         }
 
         .font(.caption)
@@ -90,9 +95,6 @@ struct AccountCircleItem: View {
                 .presentationCompactAdaptation(.popover)
                 .padding()
             }
-        }
-        .navigationDestination(isPresented: $isTransactionOpen) {
-            TransactionsView(selectedAccountGroup: $selectedAccountGroup, account: account)
         }
     }
 }

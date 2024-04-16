@@ -9,7 +9,7 @@ import Foundation
 
 struct ErrorModel: Error, Decodable {
     var developerTextError: String = ""
-    var humanTextError: String = ""
+    var humanTextError: String
     var statusCode: Int?
     var context: String?
 }
