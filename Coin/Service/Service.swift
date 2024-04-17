@@ -116,8 +116,13 @@ extension Service {
         }
     }
     
-    func createAccount(_ a: Account) async throws {
-        var account = a
+    func createAccount(_ account: Account) async throws {
+        
+        guard account.name != "" else {
+            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
+        }
+        
+        var account = account
         let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
             accountingInHeader: account.accountingInHeader,
@@ -142,6 +147,10 @@ extension Service {
     
     func updateAccount(newAccount: Account, oldAccount: Account) async throws {
         var newAccount = newAccount
+        
+        guard newAccount.name != "" else {
+            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
+        }
         
         // Получаем корректное значение parentAccountID для сервера
         var parentAccountIDToReq: UInt32? = nil
@@ -300,8 +309,12 @@ extension Service {
         try await db.deleteAccount(account)
     }
     
-    func createTransaction(_ t: Transaction) async throws {
-        var transaction = t
+    func createTransaction(_ transaction: Transaction) async throws {
+        var transaction = transaction
+        
+        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+        }
         
         if transaction.accountFrom.currency == transaction.accountTo.currency {
             transaction.amountTo = transaction.amountFrom
@@ -325,8 +338,13 @@ extension Service {
         try await recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
     }
     
-    func updateTransaction(newTransaction t: Transaction, oldTransaction: Transaction) async throws {
-        var newTransaction = t
+    func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
+        var newTransaction = transaction
+        
+        guard newTransaction.amountFrom != 0 && newTransaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+        }
+
         
         if newTransaction.accountFrom.currency == newTransaction.accountTo.currency{
             newTransaction.amountTo = newTransaction.amountFrom
