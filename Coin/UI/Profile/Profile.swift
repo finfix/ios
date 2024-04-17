@@ -42,6 +42,7 @@ struct Profile: View {
                         .foregroundColor(isProdAPI ? .red : .yellow)
                     if !isProdAPI {
                         Text(apiBasePath)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 #else
@@ -50,6 +51,7 @@ struct Profile: View {
                         Text("Тестовое окружение")
                             .foregroundColor(.yellow)
                         Text(apiBasePath)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 #endif
@@ -131,7 +133,7 @@ struct Profile: View {
             }
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                 switch screen {
-                case .accountTransactions(let account): TransactionsList(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
+                case .accountTransactions(let account): TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
                 case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup, isHiddenView: false)
                 }
             }

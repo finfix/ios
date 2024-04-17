@@ -232,12 +232,27 @@ extension AppDatabase {
     func getTransactionsWithPagination(
         offset: Int,
         limit: Int,
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
         accountIDs: [UInt32] = []
     ) async throws -> [TransactionDB] {
         try await reader.read { db in
             
             var request = TransactionDB
                 .order(TransactionDB.Columns.dateTransaction.desc, TransactionDB.Columns.id.desc)
+            
+            if let dateFrom {
+                request = request.filter(TransactionDB.Columns.dateTransaction >= dateFrom)
+            }
+            
+            if let dateTo {
+                request = request.filter(TransactionDB.Columns.dateTransaction <= dateTo)
+            }
+            
+            if searchText != "" {
+                request = request.filter(TransactionDB.Columns.note.like("%"+searchText+"%"))
+            }
                 
             if !accountIDs.isEmpty {
                 request = request.filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))

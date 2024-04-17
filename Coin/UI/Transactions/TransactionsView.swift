@@ -1,32 +1,42 @@
 //
-//  Transaction.swift
+//  TransactionsView.swift
 //  Coin
 //
-//  Created by Илья on 10.10.2022.
+//  Created by Илья on 17.04.2024.
 //
 
 import SwiftUI
 
 struct TransactionsView: View {
     
-    @State var path = NavigationPath()
-    
+    @Binding var path: NavigationPath
+    @State var isFilterOpen = false
+    @State private var searchText = ""
+    @State var dateFrom: Date?
+    @State var dateTo: Date?
     @Binding var selectedAccountGroup: AccountGroup
+    var account: Account? = nil
+    
     
     var body: some View {
-        NavigationStack(path: $path) {
-            TransactionsList(path: $path, selectedAccountGroup: $selectedAccountGroup)
-                .navigationDestination(for: TransactionsListRoute.self) { screen in
-                    switch screen {
-                    case .editTransaction(let transaction):
-                        EditTransaction(transaction)
+        TransactionsList(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account, searchText: searchText, dateFrom: dateFrom, dateTo: dateTo)
+            .searchable(text: $searchText)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    // Фильтры
+                    Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
+                }
+                if account == nil {
+                    ToolbarItem(placement: .topBarLeading) {
+                        AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
                     }
                 }
-        }
+            }
+            .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }
+
     }
 }
 
 #Preview {
-    TransactionsView(selectedAccountGroup: .constant(AccountGroup()))
-        .environment(AlertManager(handle: {_ in }))
+    TransactionsView(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup()))
 }

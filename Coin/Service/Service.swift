@@ -82,6 +82,9 @@ extension Service {
     func getTransactions(
         limit: Int,
         offset: Int,
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
         accountIDs: [UInt32] = []
     ) async throws -> [Transaction] {
         
@@ -91,6 +94,9 @@ extension Service {
         return Transaction.convertFromDBModel(try await db.getTransactionsWithPagination(
             offset: offset,
             limit: limit,
+            dateFrom: dateFrom,
+            dateTo: dateTo,
+            searchText: searchText,
             accountIDs: accountIDs
         ), accountsMap: accountsMap)
     }
