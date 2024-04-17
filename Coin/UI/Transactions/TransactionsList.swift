@@ -104,4 +104,5 @@ struct TransactionsList: View {
 
 #Preview {
     TransactionsList(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup()))
+        .environment(AlertManager(handle: {_ in }))
 }

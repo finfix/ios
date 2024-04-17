@@ -31,4 +31,5 @@ struct BudgetRow: View {
 
 #Preview {
     BudgetRow(account: Account())
+        .environment(AlertManager(handle: {_ in }))
 }

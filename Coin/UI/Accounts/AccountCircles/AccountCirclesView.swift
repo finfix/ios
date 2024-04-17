@@ -100,4 +100,5 @@ struct AccountCirclesView: View {
 
 #Preview {
     AccountCirclesView(selectedAccountGroup: .constant(AccountGroup()))
+        .environment(AlertManager(handle: {_ in }))
 }

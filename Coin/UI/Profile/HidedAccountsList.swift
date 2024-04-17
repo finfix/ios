@@ -62,4 +62,5 @@ struct HidedAccountsList: View {
 
 #Preview {
     HidedAccountsList(selectedAccountGroup: .constant(AccountGroup()), path: .constant(NavigationPath()))
+        .environment(AlertManager(handle: {_ in }))
 }

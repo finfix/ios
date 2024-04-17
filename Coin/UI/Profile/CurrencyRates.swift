@@ -33,5 +33,6 @@ struct CurrencyRates: View {
 }
 
 #Preview {
-    CurrencyRates()
+    CurrencyRates()        
+        .environment(AlertManager(handle: {_ in }))
 }

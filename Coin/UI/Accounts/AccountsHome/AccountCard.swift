@@ -30,4 +30,5 @@ struct AccountCard: View {
 
 #Preview {
     AccountCard(size: CGSize(width: 30, height: 30), account: Account())
+        .environment(AlertManager(handle: {_ in }))
 }

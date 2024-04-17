@@ -22,4 +22,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(AlertManager(handle: {_ in }))
 }

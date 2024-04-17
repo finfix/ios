@@ -54,5 +54,6 @@ struct TransactionRow: View {
 #Preview {
     List {
         TransactionRow(transaction: Transaction())
+            .environment(AlertManager(handle: {_ in }))
     }
 }

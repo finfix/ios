@@ -48,9 +48,9 @@ extension AppDatabase {
     private var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
         
-        #if DEBUG
+//        #if DEBUG
         migrator.eraseDatabaseOnSchemaChange = true
-        #endif
+//        #endif
         
         migrator.registerMigration("createCurrency") { db in
             try db.create(table: "currencyDB") { table in
@@ -95,7 +95,9 @@ extension AppDatabase {
                 
                 table.primaryKey("id", .integer)
                 
-                table.column("accounting", .boolean)
+                table.column("accountingInHeader", .boolean)
+                    .notNull()
+                table.column("accountingInCharts", .boolean)
                     .notNull()
                 table.column("iconID", .integer)
                     .notNull()

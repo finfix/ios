@@ -107,13 +107,12 @@ class CurrencyFormatter: NumberFormatter {
                 selectedUnit = countOfNumbers / 3 - 1
             }
             
-            suffix += units[selectedUnit] + " "
         }
         
         if let userSuffix {
             suffix += userSuffix
         } else {
-            suffix += self.currencySymbol
+            suffix += " " + self.currencySymbol
         }
                                          
         self.positiveSuffix = suffix
