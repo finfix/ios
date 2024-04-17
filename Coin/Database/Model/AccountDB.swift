@@ -11,7 +11,8 @@ import GRDB
 struct AccountDB {
     
     var id: UInt32
-    var accounting: Bool
+    var accountingInHeader: Bool
+    var accountingInCharts: Bool
     var iconID: UInt32
     var name: String
     var remainder: Decimal
@@ -30,7 +31,8 @@ struct AccountDB {
     
     init(
         id: UInt32,
-        accounting: Bool,
+        accountingInHeader: Bool,
+        accountingInCharts: Bool,
         iconID: UInt32,
         name: String,
         remainder: Decimal,
@@ -48,7 +50,8 @@ struct AccountDB {
         datetimeCreate: Date
     ) {
         self.id = id
-        self.accounting = accounting
+        self.accountingInHeader = accountingInHeader
+        self.accountingInCharts = accountingInCharts
         self.iconID = iconID
         self.name = name
         self.remainder = remainder
@@ -69,7 +72,8 @@ struct AccountDB {
     // Инициализатор из сетевой модели
     init(_ res: GetAccountsRes) {
         self.id = res.id
-        self.accounting = res.accounting
+        self.accountingInHeader = res.accountingInHeader
+        self.accountingInCharts = res.accountingInCharts
         self.iconID = res.iconID
         self.name = res.name
         self.remainder = res.remainder
@@ -90,7 +94,8 @@ struct AccountDB {
     // Инициализатор из бизнес модели
     init(_ model: Account) {
         self.id = model.id
-        self.accounting = model.accounting
+        self.accountingInHeader = model.accountingInHeader
+        self.accountingInCharts = model.accountingInCharts
         self.iconID = model.iconID
         self.name = model.name
         self.remainder = model.remainder
@@ -123,7 +128,8 @@ struct AccountDB {
 extension AccountDB: Codable, FetchableRecord, PersistableRecord {
     enum Columns {
         static let id = Column(CodingKeys.id)
-        static let accounting = Column(CodingKeys.accounting)
+        static let accountingInHeader = Column(CodingKeys.accountingInHeader)
+        static let accountingInCharts = Column(CodingKeys.accountingInCharts)
         static let iconID = Column(CodingKeys.iconID)
         static let name = Column(CodingKeys.name)
         static let remainder = Column(CodingKeys.remainder)
