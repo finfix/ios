@@ -74,4 +74,5 @@ struct BudgetBar: View {
 
 #Preview {
     BudgetBar(account: Account())
+        .environment(AlertManager(handle: {_ in }))
 }

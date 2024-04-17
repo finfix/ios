@@ -206,4 +206,5 @@ struct EditAccount: View {
 
 #Preview {
     EditAccount(accountType: .regular, accountGroup: AccountGroup())
+        .environment(AlertManager(handle: {_ in }))
 }

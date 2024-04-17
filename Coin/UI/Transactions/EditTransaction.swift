@@ -135,6 +135,7 @@ struct EditTransaction: View {
 
 #Preview {
     EditTransaction(Transaction())
+        .environment(AlertManager(handle: {_ in }))
 }
 
 private struct Rate: View {

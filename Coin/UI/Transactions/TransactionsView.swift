@@ -28,4 +28,5 @@ struct TransactionsView: View {
 
 #Preview {
     TransactionsView(selectedAccountGroup: .constant(AccountGroup()))
+        .environment(AlertManager(handle: {_ in }))
 }

@@ -130,4 +130,5 @@ struct CircleTypeTransaction: View {
     
 #Preview {
     AccountsHomeView(selectedAccountGroup: .constant(AccountGroup()))
+        .environment(AlertManager(handle: {_ in }))
 }

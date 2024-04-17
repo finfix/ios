@@ -101,4 +101,5 @@ struct AccountCircleItem: View {
 
 #Preview {
     AccountCircleItem(Account(), path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup()))
+        .environment(AlertManager(handle: {_ in }))
 }

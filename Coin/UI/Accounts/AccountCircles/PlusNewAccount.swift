@@ -38,4 +38,5 @@ struct PlusNewAccount: View {
 
 #Preview {
     PlusNewAccount(path: .constant(NavigationPath()), accountType: .regular)
+        .environment(AlertManager(handle: {_ in }))
 }

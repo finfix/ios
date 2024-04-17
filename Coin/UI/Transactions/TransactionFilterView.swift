@@ -80,5 +80,6 @@ private struct Сalendar: View {
 }
 
 #Preview {
-    TransactionFilterView(dateFrom: .constant(Date()), dateTo: .constant(Date()))
+    TransactionFilterView(dateFrom: .constant(Date()), dateTo: .constant(Date()))        .environment(AlertManager(handle: {_ in }))
+
 }

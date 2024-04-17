@@ -182,4 +182,5 @@ struct LoginView: View {
 
 #Preview {
     LoginView()
+        .environment(AlertManager(handle: {_ in }))
 }

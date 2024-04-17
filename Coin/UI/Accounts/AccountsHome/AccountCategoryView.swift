@@ -66,4 +66,5 @@ struct AccountCategoryView: View {
 
 #Preview {
     AccountCategoryView(header: "Заголовок", accounts: [])
+        .environment(AlertManager(handle: {_ in }))
 }

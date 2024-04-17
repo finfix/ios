@@ -77,6 +77,7 @@ struct QuickStatisticView: View {
 #Preview {
     Group {
         QuickStatisticView(selectedAccountGroup: AccountGroup())
+            .environment(AlertManager(handle: {_ in }))
         Spacer()
     }
 }
