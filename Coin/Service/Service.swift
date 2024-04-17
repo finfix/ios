@@ -336,6 +336,15 @@ extension Service {
         try await db.updateTransaction(newTransaction)
         try await recalculateAccountBalance([oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
     }
+    
+    func getStatisticByMonth(accountGroupID: UInt32) async throws -> [Series] {
+        var data: [Series] = []
+        let expenses = try await db.getStatisticByMonth(transactionType: .consumption, accountGroupID: accountGroupID)
+        data.append(Series(name: "Расходы", data: expenses))
+        let incomes = try await db.getStatisticByMonth(transactionType: .income, accountGroupID: accountGroupID)
+        data.append(Series(name: "Доходы", data: incomes))
+        return data
+    }
 }
 
 // MARK: - Sync

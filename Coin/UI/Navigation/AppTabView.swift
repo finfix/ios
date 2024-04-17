@@ -11,8 +11,10 @@ struct AppTabView: View {
     
     @State var selectedAccountGroup = AccountGroup()
     
+    @State var selectionTab = 1
+    
     var body: some View {
-        TabView {
+        TabView(selection: $selectionTab) {
             AccountsHomeView(selectedAccountGroup: $selectedAccountGroup)
                 .tag(1)
                 .tabItem {
@@ -32,10 +34,16 @@ struct AppTabView: View {
                     Text("Транзакции")
                 }
             Profile(selectedAccountGroup: $selectedAccountGroup)
-                .tag(5)
+                .tag(4)
                 .tabItem {
                     Image(systemName: "person.fill")
                     Text("Профиль")
+                }
+            ChartTab(selectedAccountGroup: selectedAccountGroup)
+                .tag(5)
+                .tabItem {
+                    Image(systemName: "5.circle")
+                    Text("График")
                 }
         }
     }
