@@ -184,7 +184,7 @@ extension AppDatabase {
         ids: [UInt32]? = nil,
         accountGroupID: UInt32? = nil,
         visible: Bool? = nil,
-        accounting: Bool? = nil,
+        accountingInHeader: Bool? = nil,
         types: [AccountType]? = nil,
         currencyCode: String? = nil,
         isParent: Bool? = nil
@@ -205,8 +205,8 @@ extension AppDatabase {
                 request = request.filter(AccountDB.Columns.visible == visible)
             }
             
-            if let accounting = accounting {
-                request = request.filter(AccountDB.Columns.accounting == accounting)
+            if let accountingInHeader = accountingInHeader {
+                request = request.filter(AccountDB.Columns.accountingInHeader == accountingInHeader)
             }
             
             if let currencyCode = currencyCode {
@@ -279,7 +279,7 @@ extension AppDatabase {
                 JOIN accountGroupDB ag  ON a.accountGroupId = ag.id
                 WHERE a.type = '\(accountType)'
                 AND ag.id = ?
-                AND a.accounting = true
+                AND a.accountingInCharts = true
                 GROUP BY "month";
             """
             

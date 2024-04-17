@@ -83,7 +83,7 @@ struct AccountCircleItem: View {
 
         .font(.caption)
         .frame(width: 80, height: 100)
-        .opacity(account.accounting ? 1 : 0.5)
+        .opacity(account.accountingInHeader ? 1 : 0.5)
         .popover(isPresented: $isChildrenOpen) {
             ScrollView {
                 ForEach(account.childrenAccounts) { account in

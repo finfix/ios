@@ -56,7 +56,7 @@ extension Service {
         ids: [UInt32]? = nil,
         accountGroup: AccountGroup? = nil,
         visible: Bool? = nil,
-        accounting: Bool? = nil,
+        accountingInHeader: Bool? = nil,
         types: [AccountType]? = nil,
         currencyCode: String? = nil,
         isParent: Bool? = nil
@@ -67,7 +67,7 @@ extension Service {
             ids: ids,
             accountGroupID: accountGroup?.id,
             visible: visible,
-            accounting: accounting,
+            accountingInHeader: accountingInHeader,
             types: types,
             currencyCode: currencyCode,
             isParent: isParent
@@ -114,7 +114,8 @@ extension Service {
         var account = a
         let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
-            accounting: account.accounting,
+            accountingInHeader: account.accountingInHeader,
+            accountingInCharts: account.accountingInCharts,
             budget: CreateAccountBudgetReq (
                 amount: account.budgetAmount,
                 gradualFilling: account.budgetGradualFilling
@@ -149,7 +150,8 @@ extension Service {
         // Обновляем счет на сервере
         let updateAccountRes = try await AccountAPI().UpdateAccount(req: UpdateAccountReq(
             id: newAccount.id,
-            accounting: oldAccount.accounting != newAccount.accounting ? newAccount.accounting : nil,
+            accountingInHeader: oldAccount.accountingInHeader != newAccount.accountingInHeader ? newAccount.accountingInHeader : nil,
+            accountingInCharts: oldAccount.accountingInCharts != newAccount.accountingInCharts ? newAccount.accountingInCharts : nil,
             name: oldAccount.name != newAccount.name ? newAccount.name : nil,
             remainder: oldAccount.remainder != newAccount.remainder ? newAccount.remainder : nil,
             visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
@@ -197,7 +199,8 @@ extension Service {
                 // Создаем и получаем балансировочный счет группы счетов
                 balancingAccount = Account.convertFromDBModel(try await [db.createAccountAndReturn(Account(
                     id: updateAccountRes.balancingAccountID!,
-                    accounting: true,
+                    accountingInHeader: true,
+                    accountingInCharts: true,
                     iconID: 0,
                     name: "Балансировочный",
                     remainder: 0,
@@ -241,14 +244,14 @@ extension Service {
         }
         
         // Если значение родительского счета отрицательное, а у дочернего счета положительное
-        if parentAccount != nil && !parentAccount!.accounting && newAccount.accounting {
-            parentAccount!.accounting = true
+        if parentAccount != nil && !parentAccount!.accountingInHeader && newAccount.accountingInHeader {
+            parentAccount!.accountingInHeader = true
         }
         
         // Если значения дочерних счетов положительные, а значение родительского отрицательное
         for (i, childAccount) in newAccount.childrenAccounts.enumerated() {
-            if childAccount.accounting && !newAccount.accounting {
-                newAccount.childrenAccounts[i].accounting = false
+            if childAccount.accountingInHeader && !newAccount.accountingInHeader {
+                newAccount.childrenAccounts[i].accountingInHeader = false
             }
         }
         
@@ -260,8 +263,8 @@ extension Service {
         // Если значения родительского счета меняется, то значения дочерних счетов меняются на такое же
         for (i, childAccount) in newAccount.childrenAccounts.enumerated() {
             newAccount.childrenAccounts[i].visible = newAccount.visible
-            if !childAccount.visible && childAccount.accounting {
-                newAccount.childrenAccounts[i].accounting = false
+            if !childAccount.visible && childAccount.accountingInHeader {
+                newAccount.childrenAccounts[i].accountingInHeader = false
             }
         }
         

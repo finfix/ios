@@ -14,7 +14,7 @@ struct ChartView: View {
     @Environment(\.calendar) var calendar
     @Binding var rawSelectedDate: Date?
     let oneMonthRange = 60 * 60 * 24 * 30
-    @State var visibleRange: Float = 60 * 60 * 24 * 30 * 6
+    @State var visibleRange = 60 * 60 * 24 * 30 * 6
     @State var xPosition = Date.now.addingTimeInterval(TimeInterval(-1 * 60 * 60 * 24 * 30 * 6))
     var colorPerName: [String: Color]
     

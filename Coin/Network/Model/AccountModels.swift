@@ -9,7 +9,7 @@ import Foundation
 
 struct GetAccountsReq: Encodable {
     var accountGroupID: UInt32?
-    var accounting: Bool?
+    var accountingInHeader: Bool?
     var dateFrom: Date?
     var dateTo: Date?
     var type: String?
@@ -17,7 +17,8 @@ struct GetAccountsReq: Encodable {
 
 struct GetAccountsRes: Decodable {
     var id: UInt32
-    var accounting: Bool
+    var accountingInHeader: Bool
+    var accountingInCharts: Bool
     var budget: GetAccountBudgetRes
     var iconID: UInt32
     var name: String
@@ -41,7 +42,8 @@ struct GetAccountBudgetRes: Decodable {
 
 struct CreateAccountReq: Encodable {
     var accountGroupID: UInt32
-    var accounting: Bool
+    var accountingInHeader: Bool
+    var accountingInCharts: Bool
     var budget: CreateAccountBudgetReq
     var currency: String
     var iconID: UInt32
@@ -72,7 +74,8 @@ struct UpdateAccountRes: Decodable {
 
 struct UpdateAccountReq: Encodable {
     var id: UInt32
-    var accounting: Bool?
+    var accountingInHeader: Bool?
+    var accountingInCharts: Bool?
     var name: String?
     var remainder: Decimal?
     var visible: Bool?

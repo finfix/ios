@@ -95,7 +95,9 @@ extension AppDatabase {
                 
                 table.primaryKey("id", .integer)
                 
-                table.column("accounting", .boolean)
+                table.column("accountingInHeader", .boolean)
+                    .notNull()
+                table.column("accountingInCharts", .boolean)
                     .notNull()
                 table.column("iconID", .integer)
                     .notNull()
