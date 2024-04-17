@@ -27,7 +27,7 @@ struct AppTabView: View {
                     Image(systemName: "2.circle")
                     Text("Счета 2")
                 }
-            TransactionsView(selectedAccountGroup: $selectedAccountGroup)
+            TransactionsTab(selectedAccountGroup: $selectedAccountGroup)
                 .tag(3)
                 .tabItem {
                     Image(systemName: "3.circle")
