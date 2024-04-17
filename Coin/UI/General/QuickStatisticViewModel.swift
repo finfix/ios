@@ -13,12 +13,8 @@ class QuickStatisticViewModel {
         
     var accounts: [Account] = []
     
-    func load() {
-        do {
-            accounts = try service.getAccounts(accounting: true)
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func load() async throws {
+        accounts = try await service.getAccounts(accountingInHeader: true)
     }
     
     func calculateStatistic(accounts a: [Account], targetCurrency: Currency) -> QuickStatistic {

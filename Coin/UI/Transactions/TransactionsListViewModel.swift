@@ -27,51 +27,41 @@ class TransactionsListViewModel {
         }
     }
     
-    func load(refresh: Bool) {
-        do {
-            var offset = 0
-            var limit = 0
-            
-            if refresh {
-                offset = 0
-                limit = page * pageSize
-            } else {
-                offset = page * pageSize
-                limit = pageSize
-                page += 1
-            }
-            
-            let transactions = try service.getTransactions(
-                limit: limit,
-                offset: offset,
-                accountIDs: accountIDs
-            )
-            
-            if transactions.isEmpty {
-                transactionsCancelled = true
-            }
-            
-            if refresh {
-                self.transactions = transactions
-            } else {
-                self.transactions.append(contentsOf: transactions)
-            }
-
-        } catch {
-            showErrorAlert("\(error)")
+    func load(refresh: Bool) async throws {
+        var offset = 0
+        var limit = 0
+        
+        if refresh {
+            offset = 0
+            limit = page * pageSize
+        } else {
+            offset = page * pageSize
+            limit = pageSize
+            page += 1
+        }
+        
+        let transactions = try await service.getTransactions(
+            limit: limit,
+            offset: offset,
+            accountIDs: accountIDs
+        )
+        
+        if transactions.isEmpty {
+            transactionsCancelled = true
+        }
+        
+        if refresh {
+            self.transactions = transactions
+        } else {
+            self.transactions.append(contentsOf: transactions)
         }
     }
     
-    func deleteTransaction(_ transaction: Transaction) async {
-        do {
-            guard let index = transactions.firstIndex(of: transaction) else {
-                showErrorAlert("Не смогли найти позицию транзакции №\(transaction.id) в массиве")
-                return
-            }
-            _ = transactions.remove(at: index)
-            try await service.deleteTransaction(transaction)
-        } catch {
-            showErrorAlert("\(error)")
+    func deleteTransaction(_ transaction: Transaction) async throws {
+        guard let index = transactions.firstIndex(of: transaction) else {
+            throw ErrorModel(humanTextError: "Не смогли найти позицию транзакции №\(transaction.id) в массиве")
         }
+        _ = transactions.remove(at: index)
+        try await service.deleteTransaction(transaction)
     }
 }

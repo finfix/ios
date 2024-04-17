@@ -48,9 +48,9 @@ extension AppDatabase {
     private var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
         
-        #if DEBUG
+//        #if DEBUG
         migrator.eraseDatabaseOnSchemaChange = true
-        #endif
+//        #endif
         
         migrator.registerMigration("createCurrency") { db in
             try db.create(table: "currencyDB") { table in
@@ -95,7 +95,9 @@ extension AppDatabase {
                 
                 table.primaryKey("id", .integer)
                 
-                table.column("accounting", .boolean)
+                table.column("accountingInHeader", .boolean)
+                    .notNull()
+                table.column("accountingInCharts", .boolean)
                     .notNull()
                 table.column("iconID", .integer)
                     .notNull()
@@ -118,6 +120,8 @@ extension AppDatabase {
                 table.column("budgetDaysOffset", .integer)
                     .notNull()
                 table.column("budgetGradualFilling", .boolean)
+                    .notNull()
+                table.column("datetimeCreate", .date)
                     .notNull()
                 
                 table.belongsTo("parentAccount", inTable: "accountDB")
@@ -143,9 +147,9 @@ extension AppDatabase {
                     .notNull()
                 table.column("note", .text)
                     .notNull()
-                table.column("type", .text)
+                table.column("datetimeCreate", .date)
                     .notNull()
-                table.column("timeCreate", .datetime)
+                table.column("type", .text)
                     .notNull()
                 
                 table.belongsTo("accountFrom", inTable: "accountDB")

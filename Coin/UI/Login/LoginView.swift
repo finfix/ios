@@ -21,6 +21,7 @@ struct LoginView: View {
     }
     
     @State private var service = Service.shared
+    @Environment (AlertManager.self) private var alert
     
     @AppStorage("isLogin") var isLogin: Bool = false
     @AppStorage("accessToken") var accessToken: String?
@@ -162,7 +163,7 @@ struct LoginView: View {
             try await service.sync()
             isLogin = true
         } catch {
-            showErrorAlert("\(error)")
+            alert(error)
         }
     }
     
@@ -174,11 +175,12 @@ struct LoginView: View {
             try await service.sync()
             isLogin = true
         } catch {
-            showErrorAlert("\(error)")
+            alert(error)
         }
     }
 }
 
 #Preview {
     LoginView()
+        .environment(AlertManager(handle: {_ in }))
 }

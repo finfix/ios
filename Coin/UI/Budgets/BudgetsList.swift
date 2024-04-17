@@ -12,11 +12,9 @@ private let logger = Logger(subsystem: "Coin", category: "BudgetList")
 
 struct BudgetsList: View {
         
-    @State private var vm: BudgetsListViewModel
-    
-    init(accountGroup: AccountGroup) {
-        vm = BudgetsListViewModel(accountGroup: accountGroup)
-    }
+    @Environment (AlertManager.self) private var alert
+    var accountGroup: AccountGroup
+    @State private var vm = BudgetsListViewModel()
         
     var body: some View {
         ScrollView {
@@ -28,11 +26,25 @@ struct BudgetsList: View {
         }
         .navigationTitle("Бюджеты")
         .task {
-            vm.load()
+            do {
+                try await vm.load(accountGroup: accountGroup)
+            } catch {
+                alert(error)
+            }
+        }
+        .onChange(of: accountGroup) { _, newValue in
+            Task {
+                do {
+                    try await vm.load(accountGroup: newValue)
+                } catch {
+                    alert(error)
+                }
+            }
         }
     }
 }
 
 #Preview {
     BudgetsList(accountGroup: AccountGroup(id: 1))
+        .environment(AlertManager(handle: {_ in }))
 }

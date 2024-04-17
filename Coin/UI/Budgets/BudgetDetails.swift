@@ -53,4 +53,5 @@ struct BudgetDetails: View {
 
 #Preview {
     BudgetDetails(account: Account())
+        .environment(AlertManager(handle: {_ in }))
 }

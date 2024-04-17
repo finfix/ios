@@ -14,13 +14,7 @@ class AccountGroupSelectorViewModel {
     
     var accountGroups: [AccountGroup] = []
     
-    func load() -> AccountGroup {
-        do {
-            accountGroups = try service.getAccountGroups()
-            return accountGroups.first ?? AccountGroup()
-        } catch {
-            showErrorAlert("\(error)")
-        }
-        return AccountGroup()
+    func load() async throws {
+        accountGroups = try await service.getAccountGroups()
     }
 }

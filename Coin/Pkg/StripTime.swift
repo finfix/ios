@@ -9,7 +9,8 @@ import Foundation
 
 extension Date {
     func stripTime() -> Date {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: self)
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: self)
+        components.timeZone = TimeZone(identifier: "UTC")
         let date = Calendar.current.date(from: components)
         return date!
     }

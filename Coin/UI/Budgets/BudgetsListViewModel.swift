@@ -13,22 +13,14 @@ class BudgetsListViewModel {
     
     var accounts: [Account] = []
     
-    private var accountGroup = AccountGroup()
+    var accountGroup = AccountGroup()
     
-    init(accountGroup: AccountGroup) {
-        self.accountGroup = accountGroup
-    }
-        
-    func load() {
-        do {
-            let tmpAccounts = try service.getAccounts(
-                accountGroup: accountGroup,
-                visible: true,
-                types: [.expense]
-            )
-            accounts = Account.groupAccounts(tmpAccounts).filter { $0.showingBudgetAmount != 0 }
-        } catch {
-            showErrorAlert("\(error)")
-        }
+    func load(accountGroup: AccountGroup) async throws {
+        let tmpAccounts = try await service.getAccounts(
+            accountGroup: accountGroup,
+            visible: true,
+            types: [.expense]
+        )
+        accounts = Account.groupAccounts(tmpAccounts).filter { $0.showingBudgetAmount != 0 }
     }
 }

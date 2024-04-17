@@ -11,7 +11,8 @@ import GRDB
 struct AccountDB {
     
     var id: UInt32
-    var accounting: Bool
+    var accountingInHeader: Bool
+    var accountingInCharts: Bool
     var iconID: UInt32
     var name: String
     var remainder: Decimal
@@ -26,10 +27,12 @@ struct AccountDB {
     var budgetFixedSum: Decimal
     var budgetDaysOffset: UInt8
     var budgetGradualFilling: Bool
+    var datetimeCreate: Date
     
     init(
         id: UInt32,
-        accounting: Bool,
+        accountingInHeader: Bool,
+        accountingInCharts: Bool,
         iconID: UInt32,
         name: String,
         remainder: Decimal,
@@ -43,10 +46,12 @@ struct AccountDB {
         budgetAmount: Decimal,
         budgetFixedSum: Decimal,
         budgetDaysOffset: UInt8,
-        budgetGradualFilling: Bool
+        budgetGradualFilling: Bool,
+        datetimeCreate: Date
     ) {
         self.id = id
-        self.accounting = accounting
+        self.accountingInHeader = accountingInHeader
+        self.accountingInCharts = accountingInCharts
         self.iconID = iconID
         self.name = name
         self.remainder = remainder
@@ -61,12 +66,14 @@ struct AccountDB {
         self.budgetFixedSum = budgetFixedSum
         self.budgetDaysOffset = budgetDaysOffset
         self.budgetGradualFilling = budgetGradualFilling
+        self.datetimeCreate = datetimeCreate
     }
     
     // Инициализатор из сетевой модели
     init(_ res: GetAccountsRes) {
         self.id = res.id
-        self.accounting = res.accounting
+        self.accountingInHeader = res.accountingInHeader
+        self.accountingInCharts = res.accountingInCharts
         self.iconID = res.iconID
         self.name = res.name
         self.remainder = res.remainder
@@ -81,12 +88,14 @@ struct AccountDB {
         self.budgetGradualFilling = res.budget.gradualFilling
         self.accountGroupId = res.accountGroupID
         self.currencyCode = res.currency
+        self.datetimeCreate = res.datetimeCreate
     }
     
     // Инициализатор из бизнес модели
     init(_ model: Account) {
         self.id = model.id
-        self.accounting = model.accounting
+        self.accountingInHeader = model.accountingInHeader
+        self.accountingInCharts = model.accountingInCharts
         self.iconID = model.iconID
         self.name = model.name
         self.remainder = model.remainder
@@ -102,6 +111,7 @@ struct AccountDB {
         self.accountGroupId = model.accountGroup.id
         self.currencyCode = model.currency.code
         self.parentAccountId = model.parentAccountID
+        self.datetimeCreate = model.datetimeCreate
     }
     
     
@@ -116,15 +126,16 @@ struct AccountDB {
 
 // MARK: - Persistence
 extension AccountDB: Codable, FetchableRecord, PersistableRecord {
-    fileprivate enum Columns {
+    enum Columns {
         static let id = Column(CodingKeys.id)
-        static let accounting = Column(CodingKeys.accounting)
+        static let accountingInHeader = Column(CodingKeys.accountingInHeader)
+        static let accountingInCharts = Column(CodingKeys.accountingInCharts)
         static let iconID = Column(CodingKeys.iconID)
         static let name = Column(CodingKeys.name)
         static let remainder = Column(CodingKeys.remainder)
         static let type = Column(CodingKeys.type)
         static let visible = Column(CodingKeys.visible)
-//        static let parentAccountId = Column(CodingKeys.parentAccountId)
+        static let parentAccountId = Column(CodingKeys.parentAccountId)
         static let serialNumber = Column(CodingKeys.serialNumber)
         static let isParent = Column(CodingKeys.isParent)
         static let currencyCode = Column(CodingKeys.currencyCode)
@@ -133,5 +144,6 @@ extension AccountDB: Codable, FetchableRecord, PersistableRecord {
         static let budgetFixedSum = Column(CodingKeys.budgetFixedSum)
         static let budgetDaysOffset = Column(CodingKeys.budgetDaysOffset)
         static let budgetGradualFilling = Column(CodingKeys.budgetGradualFilling)
+        static let datetimeCreate = Column(CodingKeys.datetimeCreate)
     }
 }

@@ -59,4 +59,5 @@ struct Settings: View {
 
 #Preview {
     Settings()
+        .environment(AlertManager(handle: {_ in }))
 }

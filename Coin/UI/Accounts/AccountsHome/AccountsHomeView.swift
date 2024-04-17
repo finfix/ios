@@ -10,19 +10,21 @@ import SwiftUI
 struct AccountsHomeView: View {
     
     @State var vm = AccountHomeViewModel()
+    @State var path = NavigationPath()
     @Binding var selectedAccountGroup: AccountGroup
-    
+    @Environment (AlertManager.self) private var alert
+
+    @State var chooseBlurIsOpened = false
+
     var filteredAccounts: [Account] {
         vm.accounts.filter { $0.accountGroup == selectedAccountGroup }
     }
     
     @State var showDebts = false
     @State var currentIndex = 0
-    
-    @State var chooseBlurIsOpened = false
-        
+            
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
@@ -43,41 +45,69 @@ struct AccountsHomeView: View {
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)
         
-                Group {
-                    
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            chooseBlurIsOpened.toggle()
-                        }
-                    } label: {
-                        CircleTypeTransaction(imageName: chooseBlurIsOpened ? "arrow.uturn.backward" : "plus")
-                    }
+                CirclesCreateTransaction(path: $path, chooseBlurIsOpened: $chooseBlurIsOpened)
 
-                    if chooseBlurIsOpened {
-                        NavigationLink(value: TransactionType.consumption) {
-                            CircleTypeTransaction(imageName: "minus")
-                        }
-                        .padding(.bottom, 90)
-                        
-                        NavigationLink(value: TransactionType.income) {
-                            CircleTypeTransaction(imageName: "plus")
-                        }
-                        .padding(.trailing, 90)
-                        
-                        NavigationLink(value: TransactionType.transfer) {
-                            CircleTypeTransaction(imageName: "arrow.left.arrow.right")
-                        }
-                        .padding(.trailing, 75)
-                        .padding(.bottom, 75)
-                    }
-                }
-                .onDisappear { chooseBlurIsOpened = false }
             }
-            .navigationDestination(for: TransactionType.self ) { EditTransaction(transactionType: $0, accountGroup: selectedAccountGroup) }
+            .navigationDestination(for: CirclesCreateTransactionRoute.self ) { screen in
+                switch screen {
+                case .createTrasnaction(let transactionType):
+                    EditTransaction(transactionType: transactionType, accountGroup: selectedAccountGroup)
+                }
+            }
         }
         .task {
-            vm.load()
+            do {
+                try await vm.load()
+            } catch {
+                alert(error)
+            }
         }
+    }
+}
+
+enum CirclesCreateTransactionRoute: Hashable {
+    case createTrasnaction(TransactionType)
+}
+
+struct CirclesCreateTransaction: View {
+    
+    @Binding var path: NavigationPath
+    @Binding var chooseBlurIsOpened: Bool
+    
+    var body: some View {
+        Group {
+            Button {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    chooseBlurIsOpened.toggle()
+                }
+            } label: {
+                CircleTypeTransaction(imageName: chooseBlurIsOpened ? "arrow.uturn.backward" : "plus")
+            }
+            if chooseBlurIsOpened {
+                Button {
+                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.consumption))
+                } label: {
+                    CircleTypeTransaction(imageName: "minus")
+                }
+                .padding(.bottom, 90)
+                
+                Button {
+                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.income))
+                } label: {
+                    CircleTypeTransaction(imageName: "plus")
+                }
+                .padding(.trailing, 90)
+                
+                Button {
+                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.transfer))
+                } label: {
+                    CircleTypeTransaction(imageName: "arrow.left.arrow.right")
+                }
+                .padding(.trailing, 75)
+                .padding(.bottom, 75)
+            }
+        }
+        .onDisappear { chooseBlurIsOpened = false }
     }
 }
     
@@ -100,4 +130,5 @@ struct CircleTypeTransaction: View {
     
 #Preview {
     AccountsHomeView(selectedAccountGroup: .constant(AccountGroup()))
+        .environment(AlertManager(handle: {_ in }))
 }

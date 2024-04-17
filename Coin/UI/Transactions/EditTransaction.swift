@@ -14,6 +14,7 @@ struct EditTransaction: View {
     
     @Environment (\.dismiss) private var dismiss
     @State private var vm: EditTransactionViewModel
+    @Environment (AlertManager.self) private var alert
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
@@ -97,7 +98,7 @@ struct EditTransaction: View {
                             case .update: try await vm.updateTransaction()
                             }
                         } catch {
-                            showErrorAlert("\(error)")
+                            alert(error)
                             return
                         }
                         
@@ -114,12 +115,19 @@ struct EditTransaction: View {
             }
             if vm.currentTransaction.id != 0 {
                 Section(footer: 
-                    Text("ID: \(vm.currentTransaction.id)")
+                    VStack(alignment: .leading) {
+                        Text("ID: \(vm.currentTransaction.id)")
+                        Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
+                    }
                 ) {}
 			}
         }
         .task {
-            vm.load()
+            do {
+                try await vm.load()
+            } catch {
+                alert(error)
+            }
         }
 		.disabled(shouldDisableUI)
     }
@@ -127,6 +135,7 @@ struct EditTransaction: View {
 
 #Preview {
     EditTransaction(Transaction())
+        .environment(AlertManager(handle: {_ in }))
 }
 
 private struct Rate: View {

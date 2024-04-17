@@ -10,6 +10,8 @@ import SwiftUI
 struct CurrencyRates: View {
     
     @State var vm = CurrencyRatesViewModel()
+    @Environment (AlertManager.self) private var alert
+
     var currencyFormatter = CurrencyFormatter()
         
     var body: some View {
@@ -21,11 +23,16 @@ struct CurrencyRates: View {
             }
         }
         .task {
-            vm.load()
+            do {
+                try await vm.load()
+            } catch {
+                alert(error)
+            }
         }
     }
 }
 
 #Preview {
-    CurrencyRates()
+    CurrencyRates()        
+        .environment(AlertManager(handle: {_ in }))
 }

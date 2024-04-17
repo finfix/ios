@@ -10,6 +10,8 @@ import SwiftUI
 struct EditAccount: View {
     
     @Environment(\.dismiss) var dismiss
+    @Environment (AlertManager.self) private var alert
+
     @State private var vm: EditAccountViewModel
     
     @State var shouldDisableUI = false
@@ -85,8 +87,9 @@ struct EditAccount: View {
             
             Section {
                 
-                Toggle("Учитывать ли счет в шапке", isOn: $vm.currentAccount.accounting)
+                Toggle("Учитывать ли счет в шапке", isOn: $vm.currentAccount.accountingInHeader)
                     .disabled(!vm.currentAccount.visible)
+                Toggle("Учитывать ли счет на графиках", isOn: $vm.currentAccount.accountingInCharts)
                 if vm.mode == .update {
                     Toggle("Видимость счета", isOn: $vm.currentAccount.visible)
                 }
@@ -130,7 +133,7 @@ struct EditAccount: View {
                                 try await vm.updateAccount()
                             }
                         } catch {
-                            showErrorAlert("\(error)")
+                            alert(error)
                             return
                         }
                         
@@ -147,18 +150,25 @@ struct EditAccount: View {
             }
             if vm.currentAccount.id != 0 {
                 Section(footer:
-                    Text("ID: \(vm.currentAccount.id)")
+                    VStack(alignment: .leading) {
+                        Text("ID: \(vm.currentAccount.id)")
+                        Text("Дата и время создания: \(vm.currentAccount.datetimeCreate, format: .dateTime)")
+                    }
                 ) {}
             }
         }
         .onChange(of: vm.currentAccount.visible) { _, newValue in
             if !newValue {
-                vm.currentAccount.accounting = false
+                vm.currentAccount.accountingInHeader = false
             }
         }
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
         .task {
-            vm.load()
+            do {
+                try await vm.load()
+            } catch {
+                alert(error)
+            }
         }
         .toolbar(content: {
             ToolbarItem {
@@ -174,7 +184,7 @@ struct EditAccount: View {
                         do {
                             try await vm.deleteAccount()
                         } catch {
-                            showErrorAlert("\(error)")
+                            alert(error)
                             return
                         }
                         
@@ -197,4 +207,5 @@ struct EditAccount: View {
 
 #Preview {
     EditAccount(accountType: .regular, accountGroup: AccountGroup())
+        .environment(AlertManager(handle: {_ in }))
 }

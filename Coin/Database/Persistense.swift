@@ -46,7 +46,6 @@ extension AppDatabase {
             return appDatabase
 
         } catch {
-            showErrorAlert("\(error)")
             fatalError("ERROR: \(error)")
         }
     }
