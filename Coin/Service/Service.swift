@@ -372,6 +372,11 @@ extension Service {
         data.append(Series(name: "Доходы", data: incomes))
         return data
     }
+    
+    func getServerVersion() async throws -> (String, String) {
+        let versionModel = try await SettingsAPI().GetVersion()
+        return (versionModel.version, versionModel.build)
+    }
 }
 
 // MARK: - Sync
@@ -383,7 +388,7 @@ extension Service {
         let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
         
         // Получаем все данные с сервера
-        async let currencies = try await UserAPI().GetCurrencies()
+        async let currencies = try await SettingsAPI().GetCurrencies()
         async let user = try await UserAPI().GetUser()
         async let accountGroups = try await AccountAPI().GetAccountGroups()
         async let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))

@@ -39,6 +39,9 @@
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
 		B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
 		B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56361A32B04FC000044CDD8 /* AppTabView.swift */; };
+		B5744E982BD29180004C9AC7 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */; };
+		B5744E9B2BD29267004C9AC7 /* SettingsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */; };
+		B5744E9D2BD29276004C9AC7 /* SettingsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */; };
 		B57A6B872BBAC37200BDDEFE /* HidedAccountListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */; };
 		B58705762900956D004C77DD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
 		B58CAB2A2BCFE6A200B472FA /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58CAB292BCFE6A200B472FA /* ChartView.swift */; };
@@ -121,6 +124,9 @@
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
 		B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsList.swift; sourceTree = "<group>"; };
 		B56361A32B04FC000044CDD8 /* AppTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTabView.swift; sourceTree = "<group>"; };
+		B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAPI.swift; sourceTree = "<group>"; };
+		B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModels.swift; sourceTree = "<group>"; };
 		B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HidedAccountListViewModel.swift; sourceTree = "<group>"; };
 		B58705752900956D004C77DD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B58CAB292BCFE6A200B472FA /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
@@ -258,6 +264,7 @@
 				B5D143B72906B4F800875037 /* AccountAPI.swift */,
 				B557AA0D290D959F00631421 /* API.swift */,
 				B504B7E42AE46EEB0078643A /* UserAPI.swift */,
+				B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */,
 				B5FF351D2AEC091F007694F9 /* Defaults.swift */,
 			);
 			path = Network;
@@ -279,6 +286,7 @@
 				B5D143B32906A66400875037 /* AuthModels.swift */,
 				B596E6092A278CC1007D7E6D /* AccountModels.swift */,
 				B529280C2B0614D100C192CA /* UserModels.swift */,
+				B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -340,6 +348,7 @@
 				B5C0C31B2AEAD9E70016990E /* HidedAccountsList.swift */,
 				B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */,
 				B5F595912B56D35F004D57A4 /* Settings.swift */,
+				B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -524,6 +533,7 @@
 				B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */,
 				B5B707242BA59A3700A07DB6 /* AppDatabase.swift in Sources */,
 				B557AA0E290D959F00631421 /* API.swift in Sources */,
+				B5744E9D2BD29276004C9AC7 /* SettingsModels.swift in Sources */,
 				B5B068EC2BAC6E2600AEEC98 /* User.swift in Sources */,
 				B5B068E42BAC6DD800AEEC98 /* Account.swift in Sources */,
 				B5024EB22AE1A20F00F60449 /* EditAccount.swift in Sources */,
@@ -551,6 +561,7 @@
 				B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
 				B5D6DE242BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift in Sources */,
+				B5744E982BD29180004C9AC7 /* SettingsViewModel.swift in Sources */,
 				B5B068E82BAC6E0400AEEC98 /* AccountGroup.swift in Sources */,
 				B5B068E22BAC6DC200AEEC98 /* Transaction.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
@@ -590,6 +601,7 @@
 				B50DBAD92BCD8CF500A58B53 /* ChartViewModel.swift in Sources */,
 				B5FB6AA428F3D62D00C2A2AC /* TransactionsTab.swift in Sources */,
 				B512688F2BBAA1FF00B54572 /* QuickStatisticViewModel.swift in Sources */,
+				B5744E9B2BD29267004C9AC7 /* SettingsAPI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

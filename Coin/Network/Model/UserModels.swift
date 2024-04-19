@@ -7,13 +7,6 @@
 
 import Foundation
 
-struct GetCurrenciesRes: Decodable {
-    var isoCode: String
-    var rate: Decimal
-    var name: String
-    var symbol: String
-}
-
 struct GetUserRes: Decodable {
     var id: UInt32
     var name: String

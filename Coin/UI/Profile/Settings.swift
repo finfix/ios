@@ -8,23 +8,13 @@
 import SwiftUI
 
 struct Settings: View {
+    
+    @Environment(AlertManager.self) var alert
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
     @AppStorage("isDevMode") private var isDevMode = defaultIsDevMode
     @AppStorage("apiBasePath") private var apiBasePath = defaultApiBasePath
     
-    func getAppVersion() -> String {
-        if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-            return appVersion
-        }
-        return "Unknown"
-    }
-    
-    func getBuildNumber() -> String {
-        if let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-            return buildNumber
-        }
-        return "Unknown"
-    }
+    @State private var vm = SettingsViewModel()
     
     var body: some View {
         Form {
@@ -49,10 +39,19 @@ struct Settings: View {
                 }
             }
             Section(footer:
-                Text("Version \(getAppVersion()) (Build \(getBuildNumber()))")
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity)
+                VStack {
+                    Text("Version \(vm.appVersion) (Build \(vm.appBuildNumber))")
+                    Text("Server version \(vm.serverVersion) (Build \(vm.serverBuildNumber))")
+                }
+                .frame(maxWidth: .infinity)
             ) {}
+        }
+        .task {
+            do {
+                try await vm.load()
+            } catch {
+                alert(error)
+            }
         }
     }
 }
