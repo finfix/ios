@@ -107,6 +107,7 @@ class CurrencyFormatter: NumberFormatter {
                 selectedUnit = countOfNumbers / 3 - 1
             }
             
+            suffix += units[selectedUnit]
         }
         
         if let userSuffix {
