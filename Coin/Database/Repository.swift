@@ -11,6 +11,14 @@ import GRDB
 // MARK: Writes
 extension AppDatabase {
     
+    func importIcons(_ icons: [IconDB]) async throws {
+        try await dbWriter.write { db in
+            for icon in icons {
+                try icon.insert(db)
+            }
+        }
+    }
+    
     func importCurrencies(_ currencies: [CurrencyDB]) async throws {
         try await dbWriter.write { db in
             for currency in currencies {
@@ -56,6 +64,7 @@ extension AppDatabase {
             _ = try AccountGroupDB.deleteAll(db)
             _ = try UserDB.deleteAll(db)
             _ = try CurrencyDB.deleteAll(db)
+            _ = try IconDB.deleteAll(db)
         }
     }
     
@@ -127,6 +136,12 @@ extension AppDatabase {
             return try CurrencyDB.fetchAll(db).sorted { i, j in
                 i.code < j.code
             }
+        }
+    }
+    
+    func getIcons() async throws -> [IconDB] {
+        try await reader.read { db in
+            return try IconDB.fetchAll(db)
         }
     }
     
@@ -232,12 +247,27 @@ extension AppDatabase {
     func getTransactionsWithPagination(
         offset: Int,
         limit: Int,
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
         accountIDs: [UInt32] = []
     ) async throws -> [TransactionDB] {
         try await reader.read { db in
             
             var request = TransactionDB
                 .order(TransactionDB.Columns.dateTransaction.desc, TransactionDB.Columns.id.desc)
+            
+            if let dateFrom {
+                request = request.filter(TransactionDB.Columns.dateTransaction >= dateFrom)
+            }
+            
+            if let dateTo {
+                request = request.filter(TransactionDB.Columns.dateTransaction <= dateTo)
+            }
+            
+            if searchText != "" {
+                request = request.filter(TransactionDB.Columns.note.like("%"+searchText+"%"))
+            }
                 
             if !accountIDs.isEmpty {
                 request = request.filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))

@@ -17,20 +17,25 @@ struct TransactionsList: View {
     @State private var vm: TransactionsListViewModel
     @Binding var selectedAccountGroup: AccountGroup
     
-    @State private var searchText = ""
-    @State var dateFrom: Date? = Calendar(identifier: .gregorian).date(byAdding: .month, value: -1, to: Date.now)!
+    var searchText: String
+    var dateFrom: Date?
+    var dateTo: Date?
     
     @Binding var path: NavigationPath
-    @State var dateTo: Date?
-    @State var isFilterOpen = false
     
     init(
         path: Binding<NavigationPath>,
         selectedAccountGroup: Binding<AccountGroup>,
-        account: Account? = nil
+        account: Account? = nil,
+        searchText: String = "",
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil
     ) {
         self._selectedAccountGroup = selectedAccountGroup
         self._path = path
+        self.dateTo = dateTo
+        self.dateFrom = dateFrom
+        self.searchText = searchText
         vm = TransactionsListViewModel(account: account)
     }
     
@@ -68,7 +73,7 @@ struct TransactionsList: View {
                 Text("Загрузка...")
                     .task {
                         do {
-                            try await vm.load(refresh: false)
+                            try await vm.load(refresh: false, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
                         } catch {
                             alert(error)
                         }
@@ -78,7 +83,34 @@ struct TransactionsList: View {
         .task {
             if vm.transactions.count != 0 {
                 do {
-                    try await vm.load(refresh: true)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                } catch {
+                    alert(error)
+                }
+            }
+        }
+        .onChange(of: dateFrom) { _, _ in
+            Task {
+                do {
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                } catch {
+                    alert(error)
+                }
+            }
+        }
+        .onChange(of: dateTo) { _, _ in
+            Task {
+                do {
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                } catch {
+                    alert(error)
+                }
+            }
+        }
+        .onChange(of: searchText) { _, _ in
+            Task {
+                do {
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
                 } catch {
                     alert(error)
                 }
@@ -86,18 +118,6 @@ struct TransactionsList: View {
         }
         .navigationDestination(for: Transaction.self) { EditTransaction($0) }
         .listStyle(.grouped)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                // Фильтры
-                Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
-            }
-            if vm.accountIDs.isEmpty {
-                ToolbarItem(placement: .topBarLeading) {
-                    AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
-                }
-            }
-        }
-        .sheet(isPresented: $isFilterOpen) { TransactionFilterView(dateFrom: $dateFrom, dateTo: $dateTo) }
         .navigationTitle("Транзакции")
     }
 }

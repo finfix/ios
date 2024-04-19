@@ -27,7 +27,7 @@ class TransactionsListViewModel {
         }
     }
     
-    func load(refresh: Bool) async throws {
+    func load(refresh: Bool, dateFrom: Date? = nil, dateTo: Date? = nil, searchText: String = "") async throws {
         var offset = 0
         var limit = 0
         
@@ -43,6 +43,9 @@ class TransactionsListViewModel {
         let transactions = try await service.getTransactions(
             limit: limit,
             offset: offset,
+            dateFrom: dateFrom,
+            dateTo: dateTo,
+            searchText: searchText,
             accountIDs: accountIDs
         )
         

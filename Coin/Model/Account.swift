@@ -30,7 +30,7 @@ struct Account: Identifiable {
     var id: UInt32
     var accountingInHeader: Bool
     var accountingInCharts: Bool
-    var iconID: UInt32
+    var icon: Icon
     var name: String
     var remainder: Decimal
     var showingRemainder: Decimal
@@ -57,7 +57,7 @@ struct Account: Identifiable {
         id: UInt32 = 0,
         accountingInHeader: Bool = true,
         accountingInCharts: Bool = true,
-        iconID: UInt32 = 1,
+        icon: Icon = Icon(),
         name: String = "",
         remainder: Decimal = 0,
         showingRemainder: Decimal = 0,
@@ -80,7 +80,7 @@ struct Account: Identifiable {
         self.id = id
         self.accountingInHeader = accountingInHeader
         self.accountingInCharts = accountingInCharts
-        self.iconID = iconID
+        self.icon = icon
         self.name = name
         self.remainder = remainder
         self.showingRemainder = showingRemainder
@@ -102,11 +102,15 @@ struct Account: Identifiable {
     }
     
     // Инициализатор из модели базы данных
-    init(_ dbModel: AccountDB, currenciesMap: [String: Currency]?, accountGroupsMap: [UInt32: AccountGroup]?) {
+    init(
+         _ dbModel: AccountDB,
+         currenciesMap: [String: Currency]?,
+         accountGroupsMap: [UInt32: AccountGroup]?,
+         iconsMap: [UInt32: Icon]?
+    ) {
         self.id = dbModel.id
         self.accountingInHeader = dbModel.accountingInHeader
         self.accountingInCharts = dbModel.accountingInCharts
-        self.iconID = dbModel.iconID
         self.name = dbModel.name
         self.remainder = dbModel.remainder
         self.showingRemainder = 0
@@ -124,16 +128,22 @@ struct Account: Identifiable {
         self.parentAccountID = dbModel.parentAccountId
         self.parentAccount = nil
         
+        self.icon = iconsMap?[dbModel.iconID] ?? Icon()
         self.accountGroup = accountGroupsMap?[dbModel.accountGroupId] ?? AccountGroup()
         self.currency = currenciesMap?[dbModel.currencyCode] ?? Currency()
         
         self.childrenAccounts = []
     }
     
-    static func convertFromDBModel(_ accountsDB: [AccountDB], currenciesMap: [String: Currency]?, accountGroupsMap: [UInt32: AccountGroup]?) -> [Account] {
+    static func convertFromDBModel(
+        _ accountsDB: [AccountDB],
+        currenciesMap: [String: Currency]?,
+        accountGroupsMap: [UInt32: AccountGroup]?,
+        iconsMap: [UInt32: Icon]?
+    ) -> [Account] {
         var accounts: [Account] = []
         for accountDB in accountsDB {
-            accounts.append(Account(accountDB, currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
+            accounts.append(Account(accountDB, currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap))
         }
         return accounts
     }

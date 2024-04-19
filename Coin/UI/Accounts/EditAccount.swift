@@ -96,12 +96,30 @@ struct EditAccount: View {
                 
                 if vm.mode == .create || vm.permissions.changeCurrency {
                     Picker("Валюта", selection: $vm.currentAccount.currency) {
-                        ForEach(vm.currencies, id: \.code) { currency in
+                        ForEach(vm.currencies) { currency in
                             Text(currency.code)
                                 .tag(currency)
                         }
                     }
                 }
+                Picker(selection: $vm.currentAccount.icon) {
+                    ForEach(vm.icons) { icon in
+                        HStack {
+                            Text(icon.name)
+                            AsyncImage(url: icon.url) { image in
+                                image.image?        
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 20)
+                            }
+                        }
+                        .tag(icon)
+                    }
+                } label: {
+                    Text("Иконка")
+                }
+                .pickerStyle(.wheel)
+
             }
             if vm.permissions.changeParentAccountID {
                 Section {

@@ -16,6 +16,7 @@ class EditAccountViewModel {
     private let service = Service.shared
     
     var currencies: [Currency] = []
+    var icons: [Icon] = []
     var accountGroups: [AccountGroup] = []
     var accounts: [Account] = []
     
@@ -44,6 +45,7 @@ class EditAccountViewModel {
     func load() async throws {
         currencies = try await service.getCurrencies()
         accountGroups = try await service.getAccountGroups()
+        icons = try await service.getIcons()
         var visible: Bool? = nil
         if !isHiddenView {
             visible = true

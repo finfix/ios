@@ -61,6 +61,7 @@ extension Service {
         currencyCode: String? = nil,
         isParent: Bool? = nil
     ) async throws -> [Account] {
+        let iconsMap = Icon.convertToMap(Icon.convertFromDBModel(try await db.getIcons()))
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
         return Account.convertFromDBModel(try await db.getAccounts(
@@ -71,7 +72,7 @@ extension Service {
             types: types,
             currencyCode: currencyCode,
             isParent: isParent
-        ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
+        ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap)
     }
     
     func getAccountGroups() async throws -> [AccountGroup] {
@@ -79,18 +80,28 @@ extension Service {
         return AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap)
     }
     
+    func getIcons() async throws -> [Icon] {
+        return Icon.convertFromDBModel(try await db.getIcons())
+    }
+    
     func getTransactions(
         limit: Int,
         offset: Int,
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
         accountIDs: [UInt32] = []
     ) async throws -> [Transaction] {
         
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
-        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
+        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: nil))
         return Transaction.convertFromDBModel(try await db.getTransactionsWithPagination(
             offset: offset,
             limit: limit,
+            dateFrom: dateFrom,
+            dateTo: dateTo,
+            searchText: searchText,
             accountIDs: accountIDs
         ), accountsMap: accountsMap)
     }
@@ -110,8 +121,13 @@ extension Service {
         }
     }
     
-    func createAccount(_ a: Account) async throws {
-        var account = a
+    func createAccount(_ account: Account) async throws {
+        
+        guard account.name != "" else {
+            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
+        }
+        
+        var account = account
         let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
             accountingInHeader: account.accountingInHeader,
@@ -121,7 +137,7 @@ extension Service {
                 gradualFilling: account.budgetGradualFilling
             ),
             currency: account.currency.code,
-            iconID: 1,
+            iconID: account.icon.id,
             name: account.name,
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
@@ -136,6 +152,10 @@ extension Service {
     
     func updateAccount(newAccount: Account, oldAccount: Account) async throws {
         var newAccount = newAccount
+        
+        guard newAccount.name != "" else {
+            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
+        }
         
         // Получаем корректное значение parentAccountID для сервера
         var parentAccountIDToReq: UInt32? = nil
@@ -157,6 +177,7 @@ extension Service {
             visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
             currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
             parentAccountID: parentAccountIDToReq,
+            iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
             budget: UpdateBudgetReq(
                 amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
                 fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
@@ -201,7 +222,7 @@ extension Service {
                     id: updateAccountRes.balancingAccountID!,
                     accountingInHeader: true,
                     accountingInCharts: true,
-                    iconID: 0,
+                    icon: Icon(),
                     name: "Балансировочный",
                     remainder: 0,
                     type: .balancing,
@@ -217,7 +238,7 @@ extension Service {
                     accountGroup: newAccount.accountGroup,
                     currency: newAccount.currency,
                     childrenAccounts: []
-                ))], currenciesMap: nil, accountGroupsMap: nil).first
+                ))], currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil).first
             }
             
             try await db.createTransaction(Transaction(
@@ -294,8 +315,12 @@ extension Service {
         try await db.deleteAccount(account)
     }
     
-    func createTransaction(_ t: Transaction) async throws {
-        var transaction = t
+    func createTransaction(_ transaction: Transaction) async throws {
+        var transaction = transaction
+        
+        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+        }
         
         if transaction.accountFrom.currency == transaction.accountTo.currency {
             transaction.amountTo = transaction.amountFrom
@@ -319,8 +344,13 @@ extension Service {
         try await recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
     }
     
-    func updateTransaction(newTransaction t: Transaction, oldTransaction: Transaction) async throws {
-        var newTransaction = t
+    func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
+        var newTransaction = transaction
+        
+        guard newTransaction.amountFrom != 0 && newTransaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+        }
+
         
         if newTransaction.accountFrom.currency == newTransaction.accountTo.currency{
             newTransaction.amountTo = newTransaction.amountFrom
@@ -348,6 +378,11 @@ extension Service {
         data.append(Series(name: "Доходы", data: incomes))
         return data
     }
+    
+    func getServerVersion() async throws -> (String, String) {
+        let versionModel = try await SettingsAPI().GetVersion()
+        return (versionModel.version, versionModel.build)
+    }
 }
 
 // MARK: - Sync
@@ -359,7 +394,8 @@ extension Service {
         let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
         
         // Получаем все данные с сервера
-        async let currencies = try await UserAPI().GetCurrencies()
+        async let icons = try await SettingsAPI().GetIcons()
+        async let currencies = try await SettingsAPI().GetCurrencies()
         async let user = try await UserAPI().GetUser()
         async let accountGroups = try await AccountAPI().GetAccountGroups()
         async let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
@@ -369,6 +405,15 @@ extension Service {
         try await db.deleteAllData()
         
         // Сохраняем данные в базу данных
+        logger.info("Сохраняем иконки")
+        var iconss = try await icons
+        for (index, icon) in iconss.enumerated() {
+            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
+            let url = URL.documentsDirectory.appending(path: String(icon.url))
+            iconss[index].url = url.absoluteString
+            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
+        }
+        try await db.importIcons(IconDB.convertFromApiModel(iconss))
         logger.info("Сохраняем валюты")
         try await db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
         logger.info("Сохраняем пользователя")
