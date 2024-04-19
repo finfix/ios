@@ -11,6 +11,14 @@ import GRDB
 // MARK: Writes
 extension AppDatabase {
     
+    func importIcons(_ icons: [IconDB]) async throws {
+        try await dbWriter.write { db in
+            for icon in icons {
+                try icon.insert(db)
+            }
+        }
+    }
+    
     func importCurrencies(_ currencies: [CurrencyDB]) async throws {
         try await dbWriter.write { db in
             for currency in currencies {
@@ -56,6 +64,7 @@ extension AppDatabase {
             _ = try AccountGroupDB.deleteAll(db)
             _ = try UserDB.deleteAll(db)
             _ = try CurrencyDB.deleteAll(db)
+            _ = try IconDB.deleteAll(db)
         }
     }
     
@@ -127,6 +136,12 @@ extension AppDatabase {
             return try CurrencyDB.fetchAll(db).sorted { i, j in
                 i.code < j.code
             }
+        }
+    }
+    
+    func getIcons() async throws -> [IconDB] {
+        try await reader.read { db in
+            return try IconDB.fetchAll(db)
         }
     }
     

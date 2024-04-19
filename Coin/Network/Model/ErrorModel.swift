@@ -11,7 +11,7 @@ struct ErrorModel: LocalizedError, Decodable {
     var developerTextError: String = ""
     var humanTextError: String
     var statusCode: Int?
-    var context: String?
+    var parameters: [String: String]?
     
     var errorDescription: String? {
         return self.humanTextError

@@ -61,6 +61,7 @@ extension Service {
         currencyCode: String? = nil,
         isParent: Bool? = nil
     ) async throws -> [Account] {
+        let iconsMap = Icon.convertToMap(Icon.convertFromDBModel(try await db.getIcons()))
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
         return Account.convertFromDBModel(try await db.getAccounts(
@@ -71,12 +72,16 @@ extension Service {
             types: types,
             currencyCode: currencyCode,
             isParent: isParent
-        ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
+        ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap)
     }
     
     func getAccountGroups() async throws -> [AccountGroup] {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         return AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap)
+    }
+    
+    func getIcons() async throws -> [Icon] {
+        return Icon.convertFromDBModel(try await db.getIcons())
     }
     
     func getTransactions(
@@ -90,7 +95,7 @@ extension Service {
         
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
-        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
+        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: nil))
         return Transaction.convertFromDBModel(try await db.getTransactionsWithPagination(
             offset: offset,
             limit: limit,
@@ -132,7 +137,7 @@ extension Service {
                 gradualFilling: account.budgetGradualFilling
             ),
             currency: account.currency.code,
-            iconID: 1,
+            iconID: account.icon.id,
             name: account.name,
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
@@ -172,6 +177,7 @@ extension Service {
             visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
             currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
             parentAccountID: parentAccountIDToReq,
+            iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
             budget: UpdateBudgetReq(
                 amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
                 fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
@@ -216,7 +222,7 @@ extension Service {
                     id: updateAccountRes.balancingAccountID!,
                     accountingInHeader: true,
                     accountingInCharts: true,
-                    iconID: 0,
+                    icon: Icon(),
                     name: "Балансировочный",
                     remainder: 0,
                     type: .balancing,
@@ -232,7 +238,7 @@ extension Service {
                     accountGroup: newAccount.accountGroup,
                     currency: newAccount.currency,
                     childrenAccounts: []
-                ))], currenciesMap: nil, accountGroupsMap: nil).first
+                ))], currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil).first
             }
             
             try await db.createTransaction(Transaction(
@@ -388,6 +394,7 @@ extension Service {
         let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
         
         // Получаем все данные с сервера
+        async let icons = try await SettingsAPI().GetIcons()
         async let currencies = try await SettingsAPI().GetCurrencies()
         async let user = try await UserAPI().GetUser()
         async let accountGroups = try await AccountAPI().GetAccountGroups()
@@ -398,6 +405,15 @@ extension Service {
         try await db.deleteAllData()
         
         // Сохраняем данные в базу данных
+        logger.info("Сохраняем иконки")
+        var iconss = try await icons
+        for (index, icon) in iconss.enumerated() {
+            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
+            let url = URL.documentsDirectory.appending(path: String(icon.url))
+            iconss[index].url = url.absoluteString
+            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
+        }
+        try await db.importIcons(IconDB.convertFromApiModel(iconss))
         logger.info("Сохраняем валюты")
         try await db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
         logger.info("Сохраняем пользователя")

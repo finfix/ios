@@ -42,6 +42,9 @@
 		B5744E982BD29180004C9AC7 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */; };
 		B5744E9B2BD29267004C9AC7 /* SettingsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */; };
 		B5744E9D2BD29276004C9AC7 /* SettingsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */; };
+		B5744E9F2BD29C8B004C9AC7 /* FileStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9E2BD29C8B004C9AC7 /* FileStorageManager.swift */; };
+		B5744EA12BD2A4BA004C9AC7 /* Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA02BD2A4BA004C9AC7 /* Icon.swift */; };
+		B5744EA32BD2A579004C9AC7 /* IconDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA22BD2A579004C9AC7 /* IconDB.swift */; };
 		B57A6B872BBAC37200BDDEFE /* HidedAccountListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */; };
 		B58705762900956D004C77DD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
 		B58CAB2A2BCFE6A200B472FA /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58CAB292BCFE6A200B472FA /* ChartView.swift */; };
@@ -127,6 +130,9 @@
 		B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAPI.swift; sourceTree = "<group>"; };
 		B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModels.swift; sourceTree = "<group>"; };
+		B5744E9E2BD29C8B004C9AC7 /* FileStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStorageManager.swift; sourceTree = "<group>"; };
+		B5744EA02BD2A4BA004C9AC7 /* Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Icon.swift; sourceTree = "<group>"; };
+		B5744EA22BD2A579004C9AC7 /* IconDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconDB.swift; sourceTree = "<group>"; };
 		B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HidedAccountListViewModel.swift; sourceTree = "<group>"; };
 		B58705752900956D004C77DD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B58CAB292BCFE6A200B472FA /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
@@ -219,6 +225,7 @@
 				B51CE1F12BAC403800682D48 /* AccountGroupDB.swift */,
 				B51CE1F52BAC40F600682D48 /* UserDB.swift */,
 				B51CE1F32BAC40BB00682D48 /* CurrencyDB.swift */,
+				B5744EA22BD2A579004C9AC7 /* IconDB.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -334,6 +341,7 @@
 				B5B068E72BAC6E0400AEEC98 /* AccountGroup.swift */,
 				B5B068E92BAC6E1B00AEEC98 /* Currency.swift */,
 				B5B068EB2BAC6E2600AEEC98 /* User.swift */,
+				B5744EA02BD2A4BA004C9AC7 /* Icon.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -410,6 +418,7 @@
 				B5F595932B56DBBE004D57A4 /* Coin.entitlements */,
 				B5F595942B56F374004D57A4 /* Info.plist */,
 				B51CE1F72BAC431700682D48 /* AccountPermissions.swift */,
+				B5744E9E2BD29C8B004C9AC7 /* FileStorageManager.swift */,
 			);
 			path = Coin;
 			sourceTree = "<group>";
@@ -540,6 +549,7 @@
 				B517100C2BB3218200950EE0 /* BudgetsListViewModel.swift in Sources */,
 				B51CE1FE2BAC478D00682D48 /* CurrencyRatesViewModel.swift in Sources */,
 				B51CE1FA2BAC442F00682D48 /* Repository.swift in Sources */,
+				B5744E9F2BD29C8B004C9AC7 /* FileStorageManager.swift in Sources */,
 				B5FB6AAE28F3D86000C2A2AC /* AccountsHomeView.swift in Sources */,
 				B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */,
 				B51CE1F02BAC3FB100682D48 /* AccountDB.swift in Sources */,
@@ -562,6 +572,7 @@
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
 				B5D6DE242BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift in Sources */,
 				B5744E982BD29180004C9AC7 /* SettingsViewModel.swift in Sources */,
+				B5744EA32BD2A579004C9AC7 /* IconDB.swift in Sources */,
 				B5B068E82BAC6E0400AEEC98 /* AccountGroup.swift in Sources */,
 				B5B068E22BAC6DC200AEEC98 /* Transaction.swift in Sources */,
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
@@ -576,6 +587,7 @@
 				B5E6C1942AF2AF9500097067 /* CurrencyRates.swift in Sources */,
 				B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
+				B5744EA12BD2A4BA004C9AC7 /* Icon.swift in Sources */,
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
 				B51CE1F82BAC431700682D48 /* AccountPermissions.swift in Sources */,
 				B51CE1F42BAC40BB00682D48 /* CurrencyDB.swift in Sources */,
