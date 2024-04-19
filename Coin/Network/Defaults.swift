@@ -9,4 +9,4 @@ import Foundation
 
 let defaultIsDarkMode = true
 let defaultIsDevMode = false
-let defaultApiBasePath = "https://bonavii.com/api"
+let defaultApiBasePath = "https://api.bonavii.com"
