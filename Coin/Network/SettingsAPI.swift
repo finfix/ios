@@ -25,4 +25,16 @@ class SettingsAPI: API {
             method: .get,
             resModel: GetVersionRes.self)
     }
+    
+    func GetIcons() async throws -> [GetIconsRes] {
+        return try await request(
+            url: apiBasePath + settingsBasePath + "/icons",
+            method: .get,
+            headers: getBaseHeaders(),
+            resModel: [GetIconsRes].self)
+    }
+    
+    func GetIcon(url: String) async throws -> Data {
+        return try await download(url: url)
+    }
 }

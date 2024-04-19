@@ -157,6 +157,16 @@ extension AppDatabase {
                 table.belongsTo("accountTo", inTable: "accountDB")
                     .notNull()
             }
+            
+            try db.create(table: "iconDB") { table in
+                
+                table.primaryKey("id", .integer)
+                
+                table.column("url", .text)
+                    .notNull()
+                table.column("name", .text)
+                    .notNull()
+            }
         }
         
         return migrator

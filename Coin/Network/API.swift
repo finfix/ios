@@ -173,6 +173,20 @@ class API {
         }
     }
     
+    func download(url: String) async throws -> Data {
+        // Адрес
+        var urlComponents = URLComponents(string: url)
+        guard let url = urlComponents?.url else { throw RequestError.invalidURL }
+        var request = URLRequest(url: url)
+        var data = Data()
+        do {
+            (data, _) = try await URLSession.shared.data(for: request)
+        } catch {
+            throw RequestError.requestError(error)
+        }
+        return data
+    }
+    
     func request<TT: Decodable>(
         url urlString: String,
         method: Method = .get,

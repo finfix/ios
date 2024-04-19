@@ -7,11 +7,12 @@
 
 import Foundation
 
-struct Currency {
+struct Currency: Identifiable {
     var code: String
     var name: String
     var rate: Decimal
     var symbol: String
+    var id: String { code }
     
     init(
         code: String = "",
