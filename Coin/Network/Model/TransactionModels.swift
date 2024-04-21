@@ -16,6 +16,7 @@ struct CreateTransactionReq: Encodable {
     var note: String
     var type: String
     var isExecuted: Bool
+    var tagIDs: [UInt32]
     
     enum CodingKeys: String, CodingKey {
         case accountFromID
@@ -26,6 +27,7 @@ struct CreateTransactionReq: Encodable {
         case note
         case type
         case isExecuted
+        case tagIDs
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -39,6 +41,7 @@ struct CreateTransactionReq: Encodable {
         try container.encode(note, forKey: .note)
         try container.encode(type, forKey: .type)
         try container.encode(isExecuted, forKey: .isExecuted)
+        try container.encode(tagIDs, forKey: .tagIDs)
     }
 }
 
@@ -53,6 +56,7 @@ struct UpdateTransactionReq: Encodable {
     var amountTo: Decimal?
     var dateTransaction: Date?
     var note: String?
+    var tagIDs: [UInt32]?
     var id: UInt32
     
     enum CodingKeys: String, CodingKey {
@@ -62,6 +66,7 @@ struct UpdateTransactionReq: Encodable {
         case amountTo
         case dateTransaction
         case note
+        case tagIDs
         case id
     }
     
@@ -75,6 +80,7 @@ struct UpdateTransactionReq: Encodable {
         if let dateTransaction = dateTransaction {
             try container.encode(DateFormatters.onlyDate.string(from: dateTransaction), forKey: .dateTransaction)
         }
+        try container.encode(tagIDs, forKey: .tagIDs)
         try container.encode(note, forKey: .note)
         try container.encode(id, forKey: .id)
     }

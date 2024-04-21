@@ -52,6 +52,11 @@ extension Service {
         try await db.deleteAllData()
     }
     
+    func getTags() async throws -> [Tag] {
+        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: nil))
+        return Tag.convertFromDBModel(try await db.getTags(), accountGroupsMap: accountGroupsMap)
+    }
+    
     func getAccounts(
         ids: [UInt32]? = nil,
         accountGroup: AccountGroup? = nil,
@@ -96,14 +101,21 @@ extension Service {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
         let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: nil))
-        return Transaction.convertFromDBModel(try await db.getTransactionsWithPagination(
-            offset: offset,
-            limit: limit,
-            dateFrom: dateFrom,
-            dateTo: dateTo,
-            searchText: searchText,
-            accountIDs: accountIDs
-        ), accountsMap: accountsMap)
+        let tagsToTransactions = try await db.getTagsToTransactions()
+        let tagsMap = Tag.convertToMap(Tag.convertFromDBModel(try await db.getTags(), accountGroupsMap: nil))
+        return Transaction.convertFromDBModel(
+            try await db.getTransactionsWithPagination(
+                offset: offset,
+                limit: limit,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                searchText: searchText,
+                accountIDs: accountIDs
+            ),
+            accountsMap: accountsMap,
+            tagsToTransactions: tagsToTransactions,
+            tagsMap: tagsMap
+        )
     }
     
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
@@ -399,6 +411,8 @@ extension Service {
         async let user = try await UserAPI().GetUser()
         async let accountGroups = try await AccountAPI().GetAccountGroups()
         async let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
+        async let tags = try await TagAPI().GetTags()
+        async let tagsToTransactions = try await TagAPI().GetTagsToTransaction()
         async let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
         
         // Удаляем все данные в базе данных
@@ -426,7 +440,11 @@ extension Service {
             l.isParent
         }
         try await db.importAccounts(sortedAccountsDB)
+        logger.info("Сохраняем подкатегории")
+        try await db.importTags(TagDB.convertFromApiModel(try await tags))
         logger.info("Сохраняем транзакции")
         try await db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
+        logger.info("Сохраняем связки между подкатегориями и транзакциями")
+        try await db.importTagsToTransactions(TagToTransactionDB.convertFromApiModel(try await tagsToTransactions))
     }
 }

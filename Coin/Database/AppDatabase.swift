@@ -91,6 +91,16 @@ extension AppDatabase {
                     .notNull()
             }
             
+            try db.create(table: "iconDB") { table in
+                
+                table.primaryKey("id", .integer)
+                
+                table.column("url", .text)
+                    .notNull()
+                table.column("name", .text)
+                    .notNull()
+            }
+            
             try db.create(table: "accountDB") { table in
                 
                 table.primaryKey("id", .integer)
@@ -98,8 +108,6 @@ extension AppDatabase {
                 table.column("accountingInHeader", .boolean)
                     .notNull()
                 table.column("accountingInCharts", .boolean)
-                    .notNull()
-                table.column("iconID", .integer)
                     .notNull()
                 table.column("name", .text)
                     .notNull()
@@ -124,6 +132,8 @@ extension AppDatabase {
                 table.column("datetimeCreate", .date)
                     .notNull()
                 
+                table.belongsTo("icon", inTable: "iconDB")
+                    .notNull()
                 table.belongsTo("parentAccount", inTable: "accountDB")
                 table.belongsTo("accountGroup", inTable: "accountGroupDB")
                     .notNull()
@@ -158,14 +168,25 @@ extension AppDatabase {
                     .notNull()
             }
             
-            try db.create(table: "iconDB") { table in
+            try db.create(table: "tagDB") { table in
                 
                 table.primaryKey("id", .integer)
                 
-                table.column("url", .text)
-                    .notNull()
                 table.column("name", .text)
                     .notNull()
+                table.column("datetimeCreate", .date)
+                    .notNull()
+                
+                table.belongsTo("accountGroup", inTable: "accountGroupDB")
+                    .notNull()
+            }
+            
+            try db.create(table: "tagToTransactionDB") { table in
+                
+                table.belongsTo("tag", inTable: "tagDB")
+                table.belongsTo("transaction", inTable: "transactionDB")
+                
+                table.primaryKey(["tagId", "transactionId"])
             }
         }
         
