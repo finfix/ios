@@ -18,33 +18,35 @@ struct TransactionRow: View {
         default: return ""
         }
     }
-        
+    
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            HStack {
-                VStack(alignment: .leading) {
-                    if transaction.type != .balancing {
-                        HStack {
-                            Text(transaction.accountFrom.name)
-                        }
-                        .font(.footnote)
-                    }
+        HStack {
+            VStack(alignment: .leading) {
+                if transaction.type != .balancing {
                     HStack {
-                        Text(transaction.accountTo.name)
+                        Text(transaction.accountFrom.name)
                     }
+                    .font(.footnote)
                 }
-                Spacer()
-                VStack(alignment: .trailing) {
-                    if transaction.amountFrom != transaction.amountTo && transaction.type != .balancing {
-                        Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom.currency))
-                            .font(.footnote)
-                    }
-                    Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo.currency))
-                    if transaction.note != "" {
-                        Text(transaction.note)
-                            .font(.footnote)
-                            .lineLimit(2)
-                    }
+                HStack {
+                    Text(transaction.accountTo.name)
+                }
+            }
+            Spacer()
+            VStack(alignment: .trailing) {
+                if transaction.amountFrom != transaction.amountTo && transaction.type != .balancing {
+                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom.currency))
+                        .font(.footnote)
+                }
+                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo.currency))
+                if transaction.note != "" {
+                    Text(transaction.note)
+                        .font(.footnote)
+                        .lineLimit(2)
+                }
+                ForEach(transaction.tags) { tag in
+                    Text("#\(tag.name)")
+                        .font(.caption2)
                 }
             }
         }

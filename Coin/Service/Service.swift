@@ -133,6 +133,11 @@ extension Service {
         }
     }
     
+    func deleteTag(_ tag: Tag) async throws {
+        try await TagAPI().DeleteTag(req: DeleteTagReq(id: tag.id))
+        try await self.db.deleteTag(tag)
+    }
+    
     func createAccount(_ account: Account) async throws {
         
         guard account.name != "" else {
@@ -327,6 +332,19 @@ extension Service {
         try await db.deleteAccount(account)
     }
     
+    func createTag(_ tag: Tag) async throws {
+        var tag = tag
+        
+        tag.datetimeCreate = Date.now
+        
+        tag.id = try await TagAPI().CreateTag(req: CreateTagReq(
+            name: tag.name,
+            accountGroupID: tag.accountGroup.id
+        ))
+        
+        try await db.createTag(tag)
+    }
+    
     func createTransaction(_ transaction: Transaction) async throws {
         var transaction = transaction
         
@@ -340,6 +358,10 @@ extension Service {
         
         transaction.dateTransaction = transaction.dateTransaction.stripTime()
         transaction.datetimeCreate = Date.now
+        var tagIDs: [UInt32] = []
+        for tag in transaction.tags {
+            tagIDs.append(tag.id)
+        }
         
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
             accountFromID: transaction.accountFrom.id,
@@ -349,13 +371,15 @@ extension Service {
             dateTransaction: transaction.dateTransaction,
             note: transaction.note,
             type: transaction.type.rawValue,
-            isExecuted: true
+            isExecuted: true,
+            tagIDs: tagIDs
         ))
         
         try await db.createTransaction(transaction)
         try await recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
+        try await db.linkTagsToTransaction(transaction.tags, transaction: transaction)
     }
-    
+        
     func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = transaction
         
@@ -368,6 +392,16 @@ extension Service {
             newTransaction.amountTo = newTransaction.amountFrom
         }
         
+        var oldTransactionTagIDs: [UInt32] = []
+        for tag in oldTransaction.tags {
+            oldTransactionTagIDs.append(tag.id)
+        }
+        
+        var newTransactionTagIDs: [UInt32] = []
+        for tag in newTransaction.tags {
+            newTransactionTagIDs.append(tag.id)
+        }
+        
         newTransaction.dateTransaction = newTransaction.dateTransaction.stripTime()
         try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
             accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
@@ -376,10 +410,56 @@ extension Service {
             amountTo: newTransaction.amountTo != oldTransaction.amountTo ? newTransaction.amountTo : nil,
             dateTransaction: newTransaction.dateTransaction != oldTransaction.dateTransaction ? newTransaction.dateTransaction : nil,
             note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
+            tagIDs: oldTransactionTagIDs != newTransactionTagIDs ? newTransactionTagIDs : nil,
             id: newTransaction.id))
         
         try await db.updateTransaction(newTransaction)
         try await recalculateAccountBalance([oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
+        
+        let (tagsToDelete, tagsToInsert) = joinExclusive(oldTransaction.tags, newTransaction.tags)
+        if !tagsToDelete.isEmpty {
+            try await db.unlinkTagsFromTransaction(tagsToDelete, transaction: transaction)
+        }
+        if !tagsToInsert.isEmpty {
+            try await db.linkTagsToTransaction(tagsToInsert, transaction: transaction)
+        }
+    }
+    
+    func updateTag(newTag tag: Tag, oldTag: Tag) async throws {
+        var newTag = tag
+        
+        guard tag.name != "" else {
+            throw ErrorModel(humanTextError: "Нельзя создать подкатегорию без названия")
+        }
+        
+        try await TagAPI().UpdateTag(req: UpdateTagReq(
+            id: newTag.id,
+            name: newTag.name != oldTag.name ? newTag.name : nil
+        ))
+        
+        try await db.updateTag(newTag)
+    }
+        
+    func joinExclusive(_ leftObjects: [Tag], _ rightObjects: [Tag]) -> ([Tag], [Tag]) {
+        let leftObjectsMap = Dictionary(uniqueKeysWithValues: leftObjects.map { ($0.id, $0) })
+        let rightObjectsMap = Dictionary(uniqueKeysWithValues: rightObjects.map { ($0.id, $0) })
+        
+        var leftObjectsExclusive: [Tag] = []
+        var rightObjectsExclusive: [Tag] = []
+        
+        for leftObject in leftObjects {
+            if rightObjectsMap[leftObject.id] == nil {
+                leftObjectsExclusive.append(leftObject)
+            }
+        }
+        
+        for rightObject in rightObjects {
+            if leftObjectsMap[rightObject.id] == nil {
+                rightObjectsExclusive.append(rightObject)
+            }
+        }
+        
+        return (leftObjectsExclusive, rightObjectsExclusive)
     }
     
     func getStatisticByMonth(accountGroupID: UInt32) async throws -> [Series] {

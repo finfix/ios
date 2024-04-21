@@ -10,6 +10,10 @@ import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "EditTransaction")
 
+enum EditTransactionRoute: Hashable {
+    case tagsList
+}
+
 struct EditTransaction: View {
     
     @Environment (\.dismiss) private var dismiss
@@ -18,17 +22,19 @@ struct EditTransaction: View {
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
+    @Binding var path: NavigationPath
     
-    init(_ transaction: Transaction) {
+    init(_ transaction: Transaction, path: Binding<NavigationPath>) {
         vm = EditTransactionViewModel(
             currentTransaction: transaction,
             oldTransaction: transaction,
             accountGroup: transaction.accountFrom.accountGroup,
             mode: .update
         )
+        self._path = path
     }
     
-    init(transactionType: TransactionType, accountGroup: AccountGroup) {
+    init(transactionType: TransactionType, accountGroup: AccountGroup, path: Binding<NavigationPath>) {
         vm = EditTransactionViewModel(
             currentTransaction: Transaction(
                 type: transactionType
@@ -36,10 +42,44 @@ struct EditTransaction: View {
             accountGroup: accountGroup,
             mode: .create
         )
+        self._path = path
     }
     
     var body: some View {
         Form {
+            HStack {
+                ScrollView(.horizontal) {
+                    HStack {
+                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
+                            Button {
+                                if vm.currentTransaction.tags.contains(tag) {
+                                    vm.currentTransaction.tags.removeAll { $0.id == tag.id }
+                                } else {
+                                    vm.currentTransaction.tags.append(tag)
+                                }
+                            } label: {
+                                ZStack {
+                                    Text("#\(tag.name)")
+                                        .padding(5)
+                                        .overlay {
+                                            if vm.currentTransaction.tags.contains(tag) {
+                                                RoundedRectangle(cornerRadius: 5)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+                                    
+                                }
+                            }
+                        }
+                    }
+                }
+                Button {
+                    path.append(EditTransactionRoute.tagsList)
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+            }
+            .buttonStyle(.plain)
             if vm.currentTransaction.type != .balancing {
                 Section {
                     Pickers(
@@ -134,7 +174,7 @@ struct EditTransaction: View {
 }
 
 #Preview {
-    EditTransaction(Transaction())
+    EditTransaction(Transaction(), path: .constant(NavigationPath()))
         .environment(AlertManager(handle: {_ in }))
 }
 

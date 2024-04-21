@@ -116,7 +116,6 @@ struct TransactionsList: View {
                 }
             }
         }
-        .navigationDestination(for: Transaction.self) { EditTransaction($0) }
         .listStyle(.grouped)
         .navigationTitle("Транзакции")
     }

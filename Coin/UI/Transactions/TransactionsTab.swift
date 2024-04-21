@@ -19,7 +19,21 @@ struct TransactionsTab: View {
                 .navigationDestination(for: TransactionsListRoute.self) { screen in
                     switch screen {
                     case .editTransaction(let transaction):
-                        EditTransaction(transaction)
+                        EditTransaction(transaction, path: $path)
+                    }
+                }
+                .navigationDestination(for: EditTransactionRoute.self) { screen in
+                    switch screen {
+                    case .tagsList:
+                        TagsList(path: $path)
+                    }
+                }
+                .navigationDestination(for: TagsListRoute.self) { screen in
+                    switch screen {
+                    case .createTag:
+                        EditTag(selectedAccountGroup: selectedAccountGroup, path: $path)
+                    case .editTag(let tag):
+                        EditTag(tag, path: $path)
                     }
                 }
         }

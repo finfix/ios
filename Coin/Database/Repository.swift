@@ -92,6 +92,12 @@ extension AppDatabase {
         }
     }
     
+    func deleteTag(_ tag: Tag) async throws {
+        try await dbWriter.write { db in
+            _ = try TagDB(tag).delete(db)
+        }
+    }
+    
     func createAccount(_ account: Account) async throws {
         try await dbWriter.write { db in
             _ = try AccountDB(account).insert(db)
@@ -107,6 +113,12 @@ extension AppDatabase {
     func updateAccount(_ account: Account) async throws {
         try await dbWriter.write { db in
             _ = try AccountDB(account).update(db)
+        }
+    }
+    
+    func updateTag(_ tag: Tag) async throws {
+        try await dbWriter.write { db in
+            _ = try TagDB(tag).update(db)
         }
     }
     
@@ -127,6 +139,28 @@ extension AppDatabase {
     func createTransaction(_ transaction: Transaction) async throws {
         try await dbWriter.write { db in
             _ = try TransactionDB(transaction).insert(db)
+        }
+    }
+    
+    func createTag(_ tag: Tag) async throws {
+        try await dbWriter.write { db in
+            _ = try TagDB(tag).insert(db)
+        }
+    }
+    
+    func linkTagsToTransaction(_ tags: [Tag], transaction: Transaction) async throws {
+        try await dbWriter.write { db in
+            for tag in tags {
+                _ = try TagToTransactionDB(transactionID: transaction.id, tagID: tag.id).insert(db)
+            }
+        }
+    }
+    
+    func unlinkTagsFromTransaction(_ tags: [Tag], transaction: Transaction) async throws {
+        try await dbWriter.write { db in
+            for tag in tags {
+                _ = try TagToTransactionDB(transactionID: transaction.id, tagID: tag.id).delete(db)
+            }
         }
     }
     
