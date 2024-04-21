@@ -11,8 +11,9 @@ import SwiftUI
 @Observable
 class EditTransactionViewModel {
     private let service = Service.shared
-    
+        
     var accounts: [Account] = []
+    var tags: [Tag] = []
     
     var currentTransaction = Transaction()
     var oldTransaction = Transaction()
@@ -38,6 +39,7 @@ class EditTransactionViewModel {
             
     func load() async throws {
         accounts = try await service.getAccounts(accountGroup: accountGroup)
+        tags = try await service.getTags()
         if mode == .create {
             let accountFrom = getAccountsForShowingInCreate(accounts: accounts, position: .up, transactionType: currentTransaction.type, excludedAccount: nil).first ?? Account()
             currentTransaction.accountFrom = accountFrom

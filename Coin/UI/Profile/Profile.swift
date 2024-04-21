@@ -139,7 +139,7 @@ struct Profile: View {
             }
             .navigationDestination(for: TransactionsListRoute.self) { screen in
                 switch screen {
-                case .editTransaction(let transaction): EditTransaction(transaction)
+                case .editTransaction(let transaction): EditTransaction(transaction, path: $path)
                 }
             }
             .toolbar {

@@ -51,7 +51,7 @@ struct AccountsHomeView: View {
             .navigationDestination(for: CirclesCreateTransactionRoute.self ) { screen in
                 switch screen {
                 case .createTrasnaction(let transactionType):
-                    EditTransaction(transactionType: transactionType, accountGroup: selectedAccountGroup)
+                    EditTransaction(transactionType: transactionType, accountGroup: selectedAccountGroup, path: $path)
                 }
             }
         }
