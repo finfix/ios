@@ -34,6 +34,10 @@
 		B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54254842AF5218C008ECC33 /* TransactionFilterView.swift */; };
 		B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */; };
 		B54DA3AA2BBD81D9008A9FD1 /* StripTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */; };
+		B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DAF2BD579FA00780460 /* TagsList.swift */; };
+		B54F3DB22BD57A0700780460 /* TagsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB12BD57A0700780460 /* TagsListViewModel.swift */; };
+		B54F3DB42BD57D8900780460 /* EditTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB32BD57D8900780460 /* EditTag.swift */; };
+		B54F3DB62BD57DBB00780460 /* EditTagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */; };
 		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
@@ -45,6 +49,11 @@
 		B5744E9F2BD29C8B004C9AC7 /* FileStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9E2BD29C8B004C9AC7 /* FileStorageManager.swift */; };
 		B5744EA12BD2A4BA004C9AC7 /* Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA02BD2A4BA004C9AC7 /* Icon.swift */; };
 		B5744EA32BD2A579004C9AC7 /* IconDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA22BD2A579004C9AC7 /* IconDB.swift */; };
+		B5744EA62BD2DA9B004C9AC7 /* TagAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA52BD2DA9B004C9AC7 /* TagAPI.swift */; };
+		B5744EA82BD2DAC5004C9AC7 /* TagModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA72BD2DAC5004C9AC7 /* TagModels.swift */; };
+		B5744EAA2BD2DD7A004C9AC7 /* TagDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA92BD2DD7A004C9AC7 /* TagDB.swift */; };
+		B5744EAC2BD2DDC0004C9AC7 /* TagToTransactionDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EAB2BD2DDC0004C9AC7 /* TagToTransactionDB.swift */; };
+		B5744EAE2BD2DE41004C9AC7 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EAD2BD2DE41004C9AC7 /* Tag.swift */; };
 		B57A6B872BBAC37200BDDEFE /* HidedAccountListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */; };
 		B58705762900956D004C77DD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
 		B58CAB2A2BCFE6A200B472FA /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58CAB292BCFE6A200B472FA /* ChartView.swift */; };
@@ -122,6 +131,10 @@
 		B54254842AF5218C008ECC33 /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
 		B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMonthPeriodFromDate.swift; sourceTree = "<group>"; };
 		B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripTime.swift; sourceTree = "<group>"; };
+		B54F3DAF2BD579FA00780460 /* TagsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsList.swift; sourceTree = "<group>"; };
+		B54F3DB12BD57A0700780460 /* TagsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsListViewModel.swift; sourceTree = "<group>"; };
+		B54F3DB32BD57D8900780460 /* EditTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTag.swift; sourceTree = "<group>"; };
+		B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTagViewModel.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
@@ -133,6 +146,11 @@
 		B5744E9E2BD29C8B004C9AC7 /* FileStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileStorageManager.swift; sourceTree = "<group>"; };
 		B5744EA02BD2A4BA004C9AC7 /* Icon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Icon.swift; sourceTree = "<group>"; };
 		B5744EA22BD2A579004C9AC7 /* IconDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconDB.swift; sourceTree = "<group>"; };
+		B5744EA52BD2DA9B004C9AC7 /* TagAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagAPI.swift; sourceTree = "<group>"; };
+		B5744EA72BD2DAC5004C9AC7 /* TagModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagModels.swift; sourceTree = "<group>"; };
+		B5744EA92BD2DD7A004C9AC7 /* TagDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagDB.swift; sourceTree = "<group>"; };
+		B5744EAB2BD2DDC0004C9AC7 /* TagToTransactionDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagToTransactionDB.swift; sourceTree = "<group>"; };
+		B5744EAD2BD2DE41004C9AC7 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HidedAccountListViewModel.swift; sourceTree = "<group>"; };
 		B58705752900956D004C77DD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B58CAB292BCFE6A200B472FA /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
@@ -226,6 +244,8 @@
 				B51CE1F52BAC40F600682D48 /* UserDB.swift */,
 				B51CE1F32BAC40BB00682D48 /* CurrencyDB.swift */,
 				B5744EA22BD2A579004C9AC7 /* IconDB.swift */,
+				B5744EA92BD2DD7A004C9AC7 /* TagDB.swift */,
+				B5744EAB2BD2DDC0004C9AC7 /* TagToTransactionDB.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -273,6 +293,7 @@
 				B504B7E42AE46EEB0078643A /* UserAPI.swift */,
 				B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */,
 				B5FF351D2AEC091F007694F9 /* Defaults.swift */,
+				B5744EA52BD2DA9B004C9AC7 /* TagAPI.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -294,6 +315,7 @@
 				B596E6092A278CC1007D7E6D /* AccountModels.swift */,
 				B529280C2B0614D100C192CA /* UserModels.swift */,
 				B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */,
+				B5744EA72BD2DAC5004C9AC7 /* TagModels.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -342,6 +364,7 @@
 				B5B068E92BAC6E1B00AEEC98 /* Currency.swift */,
 				B5B068EB2BAC6E2600AEEC98 /* User.swift */,
 				B5744EA02BD2A4BA004C9AC7 /* Icon.swift */,
+				B5744EAD2BD2DE41004C9AC7 /* Tag.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -442,6 +465,10 @@
 				B593F9542AE1CCB000378E17 /* EditTransaction.swift */,
 				B51710092BB2E6BF00950EE0 /* EditTransactionViewModel.swift */,
 				B54254842AF5218C008ECC33 /* TransactionFilterView.swift */,
+				B54F3DAF2BD579FA00780460 /* TagsList.swift */,
+				B54F3DB12BD57A0700780460 /* TagsListViewModel.swift */,
+				B54F3DB32BD57D8900780460 /* EditTag.swift */,
+				B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -536,12 +563,15 @@
 			files = (
 				B59F0F2128FDC7C000AA33A9 /* AccountCategoryView.swift in Sources */,
 				B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */,
+				B54F3DB42BD57D8900780460 /* EditTag.swift in Sources */,
 				B51CE1F22BAC403800682D48 /* AccountGroupDB.swift in Sources */,
 				B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */,
 				B50DBAD72BCD8CD900A58B53 /* ChartTab.swift in Sources */,
 				B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */,
 				B5B707242BA59A3700A07DB6 /* AppDatabase.swift in Sources */,
 				B557AA0E290D959F00631421 /* API.swift in Sources */,
+				B54F3DB22BD57A0700780460 /* TagsListViewModel.swift in Sources */,
+				B54F3DB62BD57DBB00780460 /* EditTagViewModel.swift in Sources */,
 				B5744E9D2BD29276004C9AC7 /* SettingsModels.swift in Sources */,
 				B5B068EC2BAC6E2600AEEC98 /* User.swift in Sources */,
 				B5B068E42BAC6DD800AEEC98 /* Account.swift in Sources */,
@@ -551,14 +581,19 @@
 				B51CE1FA2BAC442F00682D48 /* Repository.swift in Sources */,
 				B5744E9F2BD29C8B004C9AC7 /* FileStorageManager.swift in Sources */,
 				B5FB6AAE28F3D86000C2A2AC /* AccountsHomeView.swift in Sources */,
+				B5744EAE2BD2DE41004C9AC7 /* Tag.swift in Sources */,
+				B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */,
 				B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */,
+				B5744EAC2BD2DDC0004C9AC7 /* TagToTransactionDB.swift in Sources */,
 				B51CE1F02BAC3FB100682D48 /* AccountDB.swift in Sources */,
 				B51CE1EB2BAC37A000682D48 /* Service.swift in Sources */,
+				B5744EAA2BD2DD7A004C9AC7 /* TagDB.swift in Sources */,
 				B54DA3AA2BBD81D9008A9FD1 /* StripTime.swift in Sources */,
 				B529280D2B0614D100C192CA /* UserModels.swift in Sources */,
 				B510BE8D2AE01A70002CDB54 /* BudgetBar.swift in Sources */,
 				B51CE1EE2BAC3F2700682D48 /* TransactionDB.swift in Sources */,
 				B5CF7D342AE57A9B0086C0B6 /* CurrencyFormatter.swift in Sources */,
+				B5744EA62BD2DA9B004C9AC7 /* TagAPI.swift in Sources */,
 				B504B7E52AE46EEB0078643A /* UserAPI.swift in Sources */,
 				B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* AccountGroupSelector.swift in Sources */,
@@ -591,6 +626,7 @@
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
 				B51CE1F82BAC431700682D48 /* AccountPermissions.swift in Sources */,
 				B51CE1F42BAC40BB00682D48 /* CurrencyDB.swift in Sources */,
+				B5744EA82BD2DAC5004C9AC7 /* TagModels.swift in Sources */,
 				B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */,
 				B5FF351E2AEC091F007694F9 /* Defaults.swift in Sources */,
 				B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */,
