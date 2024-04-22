@@ -11,6 +11,14 @@ import GRDB
 // MARK: Writes
 extension AppDatabase {
     
+    func importIcons(_ icons: [IconDB]) async throws {
+        try await dbWriter.write { db in
+            for icon in icons {
+                try icon.insert(db)
+            }
+        }
+    }
+    
     func importCurrencies(_ currencies: [CurrencyDB]) async throws {
         try await dbWriter.write { db in
             for currency in currencies {
@@ -41,6 +49,22 @@ extension AppDatabase {
         }
     }
     
+    func importTags(_ tags: [TagDB]) async throws {
+        try await dbWriter.write { db in
+            for tag in tags {
+                try tag.insert(db)
+            }
+        }
+    }
+    
+    func importTagsToTransactions(_ tagsToTransactions: [TagToTransactionDB]) async throws {
+        try await dbWriter.write { db in
+            for tagToTransaction in tagsToTransactions {
+                try tagToTransaction.insert(db)
+            }
+        }
+    }
+    
     func importTransactions(_ transactions: [TransactionDB]) async throws {
         try await dbWriter.write { db in
             for transaction in transactions {
@@ -51,17 +75,26 @@ extension AppDatabase {
     
     func deleteAllData() async throws {
         try await dbWriter.write { db in
+            _ = try TagToTransactionDB.deleteAll(db)
             _ = try TransactionDB.deleteAll(db)
             _ = try AccountDB.deleteAll(db)
+            _ = try TagDB.deleteAll(db)
             _ = try AccountGroupDB.deleteAll(db)
             _ = try UserDB.deleteAll(db)
             _ = try CurrencyDB.deleteAll(db)
+            _ = try IconDB.deleteAll(db)
         }
     }
     
     func deleteTransaction(_ transaction: Transaction) async throws {
         try await dbWriter.write { db in
             _ = try TransactionDB(transaction).delete(db)
+        }
+    }
+    
+    func deleteTag(_ tag: Tag) async throws {
+        try await dbWriter.write { db in
+            _ = try TagDB(tag).delete(db)
         }
     }
     
@@ -83,6 +116,12 @@ extension AppDatabase {
         }
     }
     
+    func updateTag(_ tag: Tag) async throws {
+        try await dbWriter.write { db in
+            _ = try TagDB(tag).update(db)
+        }
+    }
+    
     func deleteAccount(_ account: Account) async throws {
         try await dbWriter.write { db in
             _ = try AccountDB(account).delete(db)
@@ -100,6 +139,28 @@ extension AppDatabase {
     func createTransaction(_ transaction: Transaction) async throws {
         try await dbWriter.write { db in
             _ = try TransactionDB(transaction).insert(db)
+        }
+    }
+    
+    func createTag(_ tag: Tag) async throws {
+        try await dbWriter.write { db in
+            _ = try TagDB(tag).insert(db)
+        }
+    }
+    
+    func linkTagsToTransaction(_ tags: [Tag], transaction: Transaction) async throws {
+        try await dbWriter.write { db in
+            for tag in tags {
+                _ = try TagToTransactionDB(transactionID: transaction.id, tagID: tag.id).insert(db)
+            }
+        }
+    }
+    
+    func unlinkTagsFromTransaction(_ tags: [Tag], transaction: Transaction) async throws {
+        try await dbWriter.write { db in
+            for tag in tags {
+                _ = try TagToTransactionDB(transactionID: transaction.id, tagID: tag.id).delete(db)
+            }
         }
     }
     
@@ -127,6 +188,12 @@ extension AppDatabase {
             return try CurrencyDB.fetchAll(db).sorted { i, j in
                 i.code < j.code
             }
+        }
+    }
+    
+    func getIcons() async throws -> [IconDB] {
+        try await reader.read { db in
+            return try IconDB.fetchAll(db)
         }
     }
     
@@ -177,6 +244,18 @@ extension AppDatabase {
                 return row["remainder"]
             }
             return nil
+        }
+    }
+    
+    func getTags() async throws -> [TagDB] {
+        try await reader.read { db in
+            return try TagDB.fetchAll(db)
+        }
+    }
+    
+    func getTagsToTransactions() async throws -> [TagToTransactionDB] {
+        try await reader.read { db in
+            return try TagToTransactionDB.fetchAll(db)
         }
     }
     
@@ -232,12 +311,27 @@ extension AppDatabase {
     func getTransactionsWithPagination(
         offset: Int,
         limit: Int,
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
         accountIDs: [UInt32] = []
     ) async throws -> [TransactionDB] {
         try await reader.read { db in
             
             var request = TransactionDB
                 .order(TransactionDB.Columns.dateTransaction.desc, TransactionDB.Columns.id.desc)
+            
+            if let dateFrom {
+                request = request.filter(TransactionDB.Columns.dateTransaction >= dateFrom)
+            }
+            
+            if let dateTo {
+                request = request.filter(TransactionDB.Columns.dateTransaction <= dateTo)
+            }
+            
+            if searchText != "" {
+                request = request.filter(TransactionDB.Columns.note.like("%"+searchText+"%"))
+            }
                 
             if !accountIDs.isEmpty {
                 request = request.filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))

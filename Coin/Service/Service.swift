@@ -52,6 +52,11 @@ extension Service {
         try await db.deleteAllData()
     }
     
+    func getTags() async throws -> [Tag] {
+        let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: nil))
+        return Tag.convertFromDBModel(try await db.getTags(), accountGroupsMap: accountGroupsMap)
+    }
+    
     func getAccounts(
         ids: [UInt32]? = nil,
         accountGroup: AccountGroup? = nil,
@@ -61,6 +66,7 @@ extension Service {
         currencyCode: String? = nil,
         isParent: Bool? = nil
     ) async throws -> [Account] {
+        let iconsMap = Icon.convertToMap(Icon.convertFromDBModel(try await db.getIcons()))
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
         return Account.convertFromDBModel(try await db.getAccounts(
@@ -71,7 +77,7 @@ extension Service {
             types: types,
             currencyCode: currencyCode,
             isParent: isParent
-        ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap)
+        ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap)
     }
     
     func getAccountGroups() async throws -> [AccountGroup] {
@@ -79,20 +85,37 @@ extension Service {
         return AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap)
     }
     
+    func getIcons() async throws -> [Icon] {
+        return Icon.convertFromDBModel(try await db.getIcons())
+    }
+    
     func getTransactions(
         limit: Int,
         offset: Int,
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
         accountIDs: [UInt32] = []
     ) async throws -> [Transaction] {
         
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
-        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap))
-        return Transaction.convertFromDBModel(try await db.getTransactionsWithPagination(
-            offset: offset,
-            limit: limit,
-            accountIDs: accountIDs
-        ), accountsMap: accountsMap)
+        let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: nil))
+        let tagsToTransactions = try await db.getTagsToTransactions()
+        let tagsMap = Tag.convertToMap(Tag.convertFromDBModel(try await db.getTags(), accountGroupsMap: nil))
+        return Transaction.convertFromDBModel(
+            try await db.getTransactionsWithPagination(
+                offset: offset,
+                limit: limit,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                searchText: searchText,
+                accountIDs: accountIDs
+            ),
+            accountsMap: accountsMap,
+            tagsToTransactions: tagsToTransactions,
+            tagsMap: tagsMap
+        )
     }
     
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
@@ -110,8 +133,18 @@ extension Service {
         }
     }
     
-    func createAccount(_ a: Account) async throws {
-        var account = a
+    func deleteTag(_ tag: Tag) async throws {
+        try await TagAPI().DeleteTag(req: DeleteTagReq(id: tag.id))
+        try await self.db.deleteTag(tag)
+    }
+    
+    func createAccount(_ account: Account) async throws {
+        
+        guard account.name != "" else {
+            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
+        }
+        
+        var account = account
         let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
             accountingInHeader: account.accountingInHeader,
@@ -121,7 +154,7 @@ extension Service {
                 gradualFilling: account.budgetGradualFilling
             ),
             currency: account.currency.code,
-            iconID: 1,
+            iconID: account.icon.id,
             name: account.name,
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
@@ -136,6 +169,10 @@ extension Service {
     
     func updateAccount(newAccount: Account, oldAccount: Account) async throws {
         var newAccount = newAccount
+        
+        guard newAccount.name != "" else {
+            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
+        }
         
         // Получаем корректное значение parentAccountID для сервера
         var parentAccountIDToReq: UInt32? = nil
@@ -157,6 +194,7 @@ extension Service {
             visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
             currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
             parentAccountID: parentAccountIDToReq,
+            iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
             budget: UpdateBudgetReq(
                 amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
                 fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
@@ -201,7 +239,7 @@ extension Service {
                     id: updateAccountRes.balancingAccountID!,
                     accountingInHeader: true,
                     accountingInCharts: true,
-                    iconID: 0,
+                    icon: Icon(),
                     name: "Балансировочный",
                     remainder: 0,
                     type: .balancing,
@@ -217,7 +255,7 @@ extension Service {
                     accountGroup: newAccount.accountGroup,
                     currency: newAccount.currency,
                     childrenAccounts: []
-                ))], currenciesMap: nil, accountGroupsMap: nil).first
+                ))], currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil).first
             }
             
             try await db.createTransaction(Transaction(
@@ -294,8 +332,25 @@ extension Service {
         try await db.deleteAccount(account)
     }
     
-    func createTransaction(_ t: Transaction) async throws {
-        var transaction = t
+    func createTag(_ tag: Tag) async throws {
+        var tag = tag
+        
+        tag.datetimeCreate = Date.now
+        
+        tag.id = try await TagAPI().CreateTag(req: CreateTagReq(
+            name: tag.name,
+            accountGroupID: tag.accountGroup.id
+        ))
+        
+        try await db.createTag(tag)
+    }
+    
+    func createTransaction(_ transaction: Transaction) async throws {
+        var transaction = transaction
+        
+        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+        }
         
         if transaction.accountFrom.currency == transaction.accountTo.currency {
             transaction.amountTo = transaction.amountFrom
@@ -303,6 +358,10 @@ extension Service {
         
         transaction.dateTransaction = transaction.dateTransaction.stripTime()
         transaction.datetimeCreate = Date.now
+        var tagIDs: [UInt32] = []
+        for tag in transaction.tags {
+            tagIDs.append(tag.id)
+        }
         
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
             accountFromID: transaction.accountFrom.id,
@@ -312,18 +371,35 @@ extension Service {
             dateTransaction: transaction.dateTransaction,
             note: transaction.note,
             type: transaction.type.rawValue,
-            isExecuted: true
+            isExecuted: true,
+            tagIDs: tagIDs
         ))
         
         try await db.createTransaction(transaction)
         try await recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
+        try await db.linkTagsToTransaction(transaction.tags, transaction: transaction)
     }
-    
-    func updateTransaction(newTransaction t: Transaction, oldTransaction: Transaction) async throws {
-        var newTransaction = t
+        
+    func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
+        var newTransaction = transaction
+        
+        guard newTransaction.amountFrom != 0 && newTransaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+        }
+
         
         if newTransaction.accountFrom.currency == newTransaction.accountTo.currency{
             newTransaction.amountTo = newTransaction.amountFrom
+        }
+        
+        var oldTransactionTagIDs: [UInt32] = []
+        for tag in oldTransaction.tags {
+            oldTransactionTagIDs.append(tag.id)
+        }
+        
+        var newTransactionTagIDs: [UInt32] = []
+        for tag in newTransaction.tags {
+            newTransactionTagIDs.append(tag.id)
         }
         
         newTransaction.dateTransaction = newTransaction.dateTransaction.stripTime()
@@ -334,10 +410,56 @@ extension Service {
             amountTo: newTransaction.amountTo != oldTransaction.amountTo ? newTransaction.amountTo : nil,
             dateTransaction: newTransaction.dateTransaction != oldTransaction.dateTransaction ? newTransaction.dateTransaction : nil,
             note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
+            tagIDs: oldTransactionTagIDs != newTransactionTagIDs ? newTransactionTagIDs : nil,
             id: newTransaction.id))
         
         try await db.updateTransaction(newTransaction)
         try await recalculateAccountBalance([oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
+        
+        let (tagsToDelete, tagsToInsert) = joinExclusive(oldTransaction.tags, newTransaction.tags)
+        if !tagsToDelete.isEmpty {
+            try await db.unlinkTagsFromTransaction(tagsToDelete, transaction: transaction)
+        }
+        if !tagsToInsert.isEmpty {
+            try await db.linkTagsToTransaction(tagsToInsert, transaction: transaction)
+        }
+    }
+    
+    func updateTag(newTag tag: Tag, oldTag: Tag) async throws {
+        var newTag = tag
+        
+        guard tag.name != "" else {
+            throw ErrorModel(humanTextError: "Нельзя создать подкатегорию без названия")
+        }
+        
+        try await TagAPI().UpdateTag(req: UpdateTagReq(
+            id: newTag.id,
+            name: newTag.name != oldTag.name ? newTag.name : nil
+        ))
+        
+        try await db.updateTag(newTag)
+    }
+        
+    func joinExclusive(_ leftObjects: [Tag], _ rightObjects: [Tag]) -> ([Tag], [Tag]) {
+        let leftObjectsMap = Dictionary(uniqueKeysWithValues: leftObjects.map { ($0.id, $0) })
+        let rightObjectsMap = Dictionary(uniqueKeysWithValues: rightObjects.map { ($0.id, $0) })
+        
+        var leftObjectsExclusive: [Tag] = []
+        var rightObjectsExclusive: [Tag] = []
+        
+        for leftObject in leftObjects {
+            if rightObjectsMap[leftObject.id] == nil {
+                leftObjectsExclusive.append(leftObject)
+            }
+        }
+        
+        for rightObject in rightObjects {
+            if leftObjectsMap[rightObject.id] == nil {
+                rightObjectsExclusive.append(rightObject)
+            }
+        }
+        
+        return (leftObjectsExclusive, rightObjectsExclusive)
     }
     
     func getStatisticByMonth(accountGroupID: UInt32) async throws -> [Series] {
@@ -347,6 +469,11 @@ extension Service {
         let incomes = try await db.getStatisticByMonth(transactionType: .income, accountGroupID: accountGroupID)
         data.append(Series(name: "Доходы", data: incomes))
         return data
+    }
+    
+    func getServerVersion() async throws -> (String, String) {
+        let versionModel = try await SettingsAPI().GetVersion()
+        return (versionModel.version, versionModel.build)
     }
 }
 
@@ -359,16 +486,28 @@ extension Service {
         let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
         
         // Получаем все данные с сервера
-        async let currencies = try await UserAPI().GetCurrencies()
+        async let icons = try await SettingsAPI().GetIcons()
+        async let currencies = try await SettingsAPI().GetCurrencies()
         async let user = try await UserAPI().GetUser()
         async let accountGroups = try await AccountAPI().GetAccountGroups()
         async let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
+        async let tags = try await TagAPI().GetTags()
+        async let tagsToTransactions = try await TagAPI().GetTagsToTransaction()
         async let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
         
         // Удаляем все данные в базе данных
         try await db.deleteAllData()
         
         // Сохраняем данные в базу данных
+        logger.info("Сохраняем иконки")
+        var iconss = try await icons
+        for (index, icon) in iconss.enumerated() {
+            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
+            let url = URL.documentsDirectory.appending(path: String(icon.url))
+            iconss[index].url = url.absoluteString
+            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
+        }
+        try await db.importIcons(IconDB.convertFromApiModel(iconss))
         logger.info("Сохраняем валюты")
         try await db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
         logger.info("Сохраняем пользователя")
@@ -381,7 +520,11 @@ extension Service {
             l.isParent
         }
         try await db.importAccounts(sortedAccountsDB)
+        logger.info("Сохраняем подкатегории")
+        try await db.importTags(TagDB.convertFromApiModel(try await tags))
         logger.info("Сохраняем транзакции")
         try await db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
+        logger.info("Сохраняем связки между подкатегориями и транзакциями")
+        try await db.importTagsToTransactions(TagToTransactionDB.convertFromApiModel(try await tagsToTransactions))
     }
 }

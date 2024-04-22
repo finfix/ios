@@ -77,7 +77,7 @@ struct AccountCirclesView: View {
             }
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                 switch screen {
-                case .accountTransactions(let account): TransactionsList(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
+                case .accountTransactions(let account): TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
                 case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup, isHiddenView: false)
                 }
             }
@@ -88,12 +88,23 @@ struct AccountCirclesView: View {
             }
             .navigationDestination(for: TransactionsListRoute.self) { screen in
                 switch screen {
-                case .editTransaction(let transaction): EditTransaction(transaction)
+                case .editTransaction(let transaction): EditTransaction(transaction, path: $path)
                 }
             }
-//            .onChange(of: selectedAccountGroup) { _, newValue in
-//                vm.load() // Передавать ид группы
-//            }
+            .navigationDestination(for: EditTransactionRoute.self) { screen in
+                switch screen {
+                case .tagsList:
+                    TagsList(path: $path)
+                }
+            }
+            .navigationDestination(for: TagsListRoute.self) { screen in
+                switch screen {
+                case .createTag:
+                    EditTag(selectedAccountGroup: selectedAccountGroup, path: $path)
+                case .editTag(let tag):
+                    EditTag(tag, path: $path)
+                }
+            }
         }
     }
 }

@@ -96,7 +96,7 @@ struct AccountDB {
         self.id = model.id
         self.accountingInHeader = model.accountingInHeader
         self.accountingInCharts = model.accountingInCharts
-        self.iconID = model.iconID
+        self.iconID = model.icon.id
         self.name = model.name
         self.remainder = model.remainder
         self.type = model.type

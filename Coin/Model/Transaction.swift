@@ -19,6 +19,7 @@ struct Transaction: Identifiable {
     var datetimeCreate: Date
     var accountFrom: Account
     var accountTo: Account
+    var tags: [Tag]
     
     init(
         id: UInt32 = 0,
@@ -31,7 +32,8 @@ struct Transaction: Identifiable {
         type: TransactionType = .consumption,
         datetimeCreate: Date = Date(),
         accountFrom: Account = Account(),
-        accountTo: Account = Account()
+        accountTo: Account = Account(),
+        tags: [Tag] = []
     ) {
         self.accounting = accounting
         self.amountFrom = amountFrom
@@ -44,12 +46,18 @@ struct Transaction: Identifiable {
         self.datetimeCreate = datetimeCreate
         self.accountFrom = accountFrom
         self.accountTo = accountTo
+        self.tags = tags
     }
 }
 
 // Инициализатор из модели базы данных
 extension Transaction {
-    init(_ dbModel: TransactionDB, accountsMap: [UInt32: Account]?) {
+    init(
+        _ dbModel: TransactionDB,
+        accountsMap: [UInt32: Account]?,
+        tagsToTransactions: [TagToTransactionDB],
+        tagsMap: [UInt32: Tag]?
+    ) {
         self.accounting = dbModel.accounting
         self.amountFrom = dbModel.amountFrom
         self.amountTo = dbModel.amountTo
@@ -61,12 +69,29 @@ extension Transaction {
         self.datetimeCreate = dbModel.datetimeCreate
         self.accountFrom = accountsMap?[dbModel.accountFromId] ?? Account()
         self.accountTo = accountsMap?[dbModel.accountToId] ?? Account()
+        var tags: [Tag] = []
+        if let tagsMap = tagsMap {
+            for tagToTransaction in tagsToTransactions.filter({ $0.transactionId == dbModel.id }) {
+                tags.append(tagsMap[tagToTransaction.tagId] ?? Tag())
+            }
+        }
+        self.tags = tags
     }
     
-    static func convertFromDBModel(_ transactionsDB: [TransactionDB], accountsMap: [UInt32: Account]?) -> [Transaction] {
+    static func convertFromDBModel(
+        _ transactionsDB: [TransactionDB],
+        accountsMap: [UInt32: Account]?,
+        tagsToTransactions: [TagToTransactionDB],
+        tagsMap: [UInt32: Tag]?
+    ) -> [Transaction] {
         var transactions: [Transaction] = []
         for transactionDB in transactionsDB {
-            transactions.append(Transaction(transactionDB, accountsMap: accountsMap))
+            transactions.append(Transaction(
+                transactionDB,
+                accountsMap: accountsMap,
+                tagsToTransactions: tagsToTransactions,
+                tagsMap: tagsMap)
+            )
         }
         return transactions
     }

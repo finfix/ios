@@ -23,7 +23,7 @@ struct ChartView: View {
     }
     
     var maxSum: Int {
-        let dateRange = xPosition...xPosition + TimeInterval(visibleRange)
+        let dateRange = xPosition-TimeInterval(oneMonthRange)...xPosition + TimeInterval(visibleRange + oneMonthRange)
         var maxValue: Int = 0
         for series in data {
             if let value = series.data.filter({ dateRange.contains($0.key) }).values.max() {
