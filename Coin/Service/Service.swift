@@ -348,10 +348,6 @@ extension Service {
     func createTransaction(_ transaction: Transaction) async throws {
         var transaction = transaction
         
-        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
-            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
-        }
-        
         if transaction.accountFrom.currency == transaction.accountTo.currency {
             transaction.amountTo = transaction.amountFrom
         }
@@ -361,6 +357,10 @@ extension Service {
         var tagIDs: [UInt32] = []
         for tag in transaction.tags {
             tagIDs.append(tag.id)
+        }
+        
+        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
         }
         
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
@@ -383,11 +383,6 @@ extension Service {
     func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = transaction
         
-        guard newTransaction.amountFrom != 0 && newTransaction.amountTo != 0 else {
-            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
-        }
-
-        
         if newTransaction.accountFrom.currency == newTransaction.accountTo.currency{
             newTransaction.amountTo = newTransaction.amountFrom
         }
@@ -403,6 +398,11 @@ extension Service {
         }
         
         newTransaction.dateTransaction = newTransaction.dateTransaction.stripTime()
+        
+        guard newTransaction.amountFrom != 0 && newTransaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+        }
+        
         try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
             accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
             accountToID: newTransaction.accountTo.id != oldTransaction.accountTo.id ? newTransaction.accountTo.id : nil,
