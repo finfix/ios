@@ -35,10 +35,10 @@ struct TransactionRow: View {
             Spacer()
             VStack(alignment: .trailing) {
                 if transaction.amountFrom != transaction.amountTo && transaction.type != .balancing {
-                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom.currency))
+                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom.currency, withUnits: false))
                         .font(.footnote)
                 }
-                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo.currency))
+                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo.currency, withUnits: false))
                 if transaction.note != "" {
                     Text(transaction.note)
                         .font(.footnote)
