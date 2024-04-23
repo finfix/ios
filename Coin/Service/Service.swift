@@ -164,7 +164,9 @@ extension Service {
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
             isParent: account.isParent,
-            parentAccountID: account.parentAccountID)
+            parentAccountID: account.parentAccountID,
+            datetimeCreate: account.datetimeCreate
+        )
         )
         account.id = accountRes.id
         account.serialNumber = accountRes.serialNumber
@@ -368,7 +370,8 @@ extension Service {
         
         tag.id = try await TagAPI().CreateTag(req: CreateTagReq(
             name: tag.name,
-            accountGroupID: tag.accountGroup.id
+            accountGroupID: tag.accountGroup.id,
+            datetimeCreate: tag.datetimeCreate
         ))
         
         try await db.createTag(tag)
@@ -405,7 +408,8 @@ extension Service {
             note: transaction.note,
             type: transaction.type.rawValue,
             isExecuted: true,
-            tagIDs: tagIDs
+            tagIDs: tagIDs,
+            datetimeCreate: transaction.datetimeCreate
         ))
         
         try await db.createTransaction(transaction)
