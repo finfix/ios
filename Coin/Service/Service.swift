@@ -90,8 +90,8 @@ extension Service {
     }
     
     func getTransactions(
-        limit: Int,
-        offset: Int,
+        limit: Int? = nil,
+        offset: Int = 0,
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
@@ -104,7 +104,7 @@ extension Service {
         let tagsToTransactions = try await db.getTagsToTransactions()
         let tagsMap = Tag.convertToMap(Tag.convertFromDBModel(try await db.getTags(), accountGroupsMap: nil))
         return Transaction.convertFromDBModel(
-            try await db.getTransactionsWithPagination(
+            try await db.getTransactions(
                 offset: offset,
                 limit: limit,
                 dateFrom: dateFrom,
@@ -474,6 +474,80 @@ extension Service {
     func getServerVersion() async throws -> (String, String) {
         let versionModel = try await SettingsAPI().GetVersion()
         return (versionModel.version, versionModel.build)
+    }
+    
+    func compareLocalAndServerData() async throws -> String? {
+        logger.log("Начали сравнение серверных данных с локальными")
+        
+        var differences: String = ""
+        
+        // Получаем данные текущего месяца для запроса
+        let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
+        
+        // Получаем все данные с сервера
+        async let serverIcons = IconDB.convertFromApiModel(try await SettingsAPI().GetIcons())
+        async let serverCurrencies = CurrencyDB.convertFromApiModel(try await SettingsAPI().GetCurrencies())
+        async let serverUser = UserDB(try await UserAPI().GetUser())
+        async let serverAccountGroups = AccountGroupDB.convertFromApiModel(try await AccountAPI().GetAccountGroups())
+        async let serverAccounts = AccountDB.convertFromApiModel(try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo)))
+        async let serverTags = TagDB.convertFromApiModel(try await TagAPI().GetTags())
+        async let serverTagsToTransactions = TagToTransactionDB.convertFromApiModel(try await TagAPI().GetTagsToTransaction())
+        async let serverTransactions = TransactionDB.convertFromApiModel(try await TransactionAPI().GetTransactions(req: GetTransactionReq()))
+        
+        let localIcons = try await db.getIcons()
+        let localCurrencies = try await db.getCurrencies()
+        let localUsers = try await db.getUsers()
+        let localAccountGroups = try await db.getAccountGroups()
+        let localAccounts = try await db.getAccounts()
+        let localTags = try await db.getTags()
+        let localTagsToTransactions = try await db.getTagsToTransactions()
+        let localTransactions = try await db.getTransactions()
+        
+        let iconsDifferences = IconDB.compareTwoArrays(try await serverIcons, localIcons)
+        if !iconsDifferences.isEmpty {
+            differences += "Icons: \(iconsDifferences)"
+            logger.warning("Icons: \(iconsDifferences)")
+        }
+        let currenciesDifferences = CurrencyDB.compareTwoArrays(try await serverCurrencies, localCurrencies)
+        if !currenciesDifferences.isEmpty {
+            differences += "\n\nCurrencies: \(currenciesDifferences)"
+            logger.warning("Currencies: \(currenciesDifferences)")
+        }
+        let userDifferences = UserDB.compareTwoArrays(try await [serverUser], localUsers)
+        if !userDifferences.isEmpty {
+            differences += "\n\nUsers: \(userDifferences)"
+            logger.warning("Users: \(userDifferences)")
+        }
+        let accountGroupsDifferences = AccountGroupDB.compareTwoArrays(try await serverAccountGroups, localAccountGroups)
+        if !accountGroupsDifferences.isEmpty {
+            differences += "\n\nAccountGroups: \(accountGroupsDifferences)"
+            logger.warning("AccountGroups: \(accountGroupsDifferences)")
+        }
+        let accountsDifferences = AccountDB.compareTwoArrays(try await serverAccounts, localAccounts)
+        if !accountsDifferences.isEmpty {
+            differences += "\n\nAccounts: \(accountsDifferences)"
+            logger.warning("Accounts: \(accountsDifferences)")
+        }
+        let tagsDifferences = TagDB.compareTwoArrays(try await serverTags, localTags)
+        if !tagsDifferences.isEmpty {
+            differences += "\n\nTags: \(tagsDifferences)"
+            logger.warning("Tags: \(tagsDifferences)")
+        }
+        let tagsToTransactionsDifferences = TagToTransactionDB.compareTwoArrays(try await serverTagsToTransactions, localTagsToTransactions)
+        if !tagsToTransactionsDifferences.isEmpty {
+            differences += "\n\nTagsToTransactions: \(tagsToTransactionsDifferences)"
+            logger.warning("TagsToTransactions: \(tagsToTransactionsDifferences)")
+        }
+        let transactionsDifferences = TransactionDB.compareTwoArrays(try await serverTransactions, localTransactions)
+        if !transactionsDifferences.isEmpty {
+            differences += "\n\nTagsToTransactions: \(tagsToTransactionsDifferences)"
+            logger.warning("Transactions: \(transactionsDifferences)")
+        }
+        if differences == "" {
+            return nil
+        } else {
+            return differences
+        }
     }
 }
 
