@@ -143,12 +143,10 @@ extension Service {
     }
     
     func createAccount(_ account: Account) async throws {
-        
-        guard account.name != "" else {
-            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
-        }
-        
         var account = account
+        
+        try validateAccount(account)
+        
         let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
             accountingInHeader: account.accountingInHeader,
@@ -171,12 +169,34 @@ extension Service {
         try await db.createAccount(account)
     }
     
-    func updateAccount(newAccount: Account, oldAccount: Account) async throws {
-        var newAccount = newAccount
-        
-        guard newAccount.name != "" else {
+    private func validateAccount(_ account: Account) throws {
+        guard account.name != "" else {
             throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
         }
+        
+        guard account.budgetAmount >= 0 else {
+            throw ErrorModel(humanTextError: "Бюджет не может быть отрицательным")
+        }
+        
+        guard account.budgetFixedSum >= 0 else {
+            throw ErrorModel(humanTextError: "Фиксированная сумма бюджета не может быть отрицательной")
+        }
+        
+        guard account.budgetDaysOffset >= 0 else {
+            throw ErrorModel(humanTextError: "Количество дней отступа не может быть отрицательным")
+        }
+        
+        guard account.budgetFixedSum <= account.budgetAmount else {
+            throw ErrorModel(humanTextError: "Фиксированная сумма бюджета не может быть больше бюджета")
+        }
+        
+        guard account.budgetDaysOffset < Calendar.current.range(of: .day, in: .month, for: Date())!.count else {
+            throw ErrorModel(humanTextError: "Количество дней отступа не может быть больше или равно количеству дней в месяце")
+        }
+    }
+    
+    func updateAccount(newAccount: Account, oldAccount: Account) async throws {
+        var newAccount = newAccount
         
         // Получаем корректное значение parentAccountID для сервера
         var parentAccountIDToReq: UInt32? = nil
@@ -188,6 +208,8 @@ extension Service {
             }
         }
         
+        try validateAccount(newAccount)
+
         // Обновляем счет на сервере
         let updateAccountRes = try await AccountAPI().UpdateAccount(req: UpdateAccountReq(
             id: newAccount.id,
@@ -349,6 +371,12 @@ extension Service {
         try await db.createTag(tag)
     }
     
+    private func validateTransaction(_ transaction: Transaction) throws {
+        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
+            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+        }
+    }
+    
     func createTransaction(_ transaction: Transaction) async throws {
         var transaction = transaction
         
@@ -363,9 +391,7 @@ extension Service {
             tagIDs.append(tag.id)
         }
         
-        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
-            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
-        }
+        try validateTransaction(transaction)
         
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
             accountFromID: transaction.accountFrom.id,
@@ -403,9 +429,7 @@ extension Service {
         
         newTransaction.dateTransaction = newTransaction.dateTransaction.stripTime()
         
-        guard newTransaction.amountFrom != 0 && newTransaction.amountTo != 0 else {
-            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
-        }
+        try validateTransaction(transaction)
         
         try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
             accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
@@ -579,12 +603,11 @@ extension Service {
         // Сохраняем данные в базу данных
         logger.info("Сохраняем иконки")
         var iconss = try await icons
-        for (index, icon) in iconss.enumerated() {
-            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
-            let url = URL.documentsDirectory.appending(path: String(icon.url))
-            iconss[index].url = url.absoluteString
-            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
-        }
+//        for (index, icon) in iconss.enumerated() {
+//            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
+//            let url = URL.documentsDirectory.appending(path: String(icon.url))
+//            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
+//        }
         try await db.importIcons(IconDB.convertFromApiModel(iconss))
         logger.info("Сохраняем валюты")
         try await db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))

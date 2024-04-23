@@ -25,7 +25,7 @@ struct AccountDB {
     var accountGroupId: UInt32
     var budgetAmount: Decimal
     var budgetFixedSum: Decimal
-    var budgetDaysOffset: UInt8
+    var budgetDaysOffset: Int8
     var budgetGradualFilling: Bool
     var datetimeCreate: Date
     
@@ -45,7 +45,7 @@ struct AccountDB {
         accountGroupId: UInt32,
         budgetAmount: Decimal,
         budgetFixedSum: Decimal,
-        budgetDaysOffset: UInt8,
+        budgetDaysOffset: Int8,
         budgetGradualFilling: Bool,
         datetimeCreate: Date
     ) {

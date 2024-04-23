@@ -77,10 +77,14 @@ struct EditAccount: View {
                     }
                     TextField("Бюджет", value: $vm.currentAccount.budgetAmount, format: .number)
                         .keyboardType(.decimalPad)
-                    TextField("Фиксированная сумма", value: $vm.currentAccount.budgetFixedSum, format: .number)
-                        .keyboardType(.decimalPad)
-                    TextField("Отступ в днях", value: $vm.currentAccount.budgetDaysOffset, format: .number)
-                        .keyboardType(.numberPad)
+                    if vm.currentAccount.budgetAmount != 0 {
+                        TextField("Фиксированная сумма", value: $vm.currentAccount.budgetFixedSum, format: .number)
+                            .keyboardType(.decimalPad)
+                        if vm.currentAccount.budgetFixedSum != 0 {
+                            TextField("Отступ в днях", value: $vm.currentAccount.budgetDaysOffset, format: .number)
+                                .keyboardType(.numberPad)
+                        }
+                    }
                     Toggle("Плавное заполнение бюджета", isOn: $vm.currentAccount.budgetGradualFilling)
                 }
             }
