@@ -40,7 +40,7 @@ extension Service {
             if account.type == .earnings || account.type == .balancing {
                 balance *= -1
             }
-            try await db.updateBalance(id: account.id, newBalance: balance)
+            try await db.updateBalance(id: account.id, newBalance: balance.round(factor: 7))
         }
     }
     
@@ -148,6 +148,8 @@ extension Service {
     func createAccount(_ account: Account) async throws {
         var account = account
         
+        account.remainder = account.remainder.round(factor: 6)
+        
         try validateAccount(account)
         
         let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
@@ -202,6 +204,8 @@ extension Service {
     
     func updateAccount(newAccount: Account, oldAccount: Account) async throws {
         var newAccount = newAccount
+        
+        newAccount.remainder = newAccount.remainder.round(factor: 6)
         
         // Получаем корректное значение parentAccountID для сервера
         var parentAccountIDToReq: UInt32? = nil
@@ -386,6 +390,9 @@ extension Service {
     func createTransaction(_ transaction: Transaction) async throws {
         var transaction = transaction
         
+        transaction.amountFrom = transaction.amountFrom.round(factor: 7)
+        transaction.amountTo = transaction.amountTo.round(factor: 7)
+                
         if transaction.accountFrom.currency == transaction.accountTo.currency {
             transaction.amountTo = transaction.amountFrom
         }
@@ -419,6 +426,9 @@ extension Service {
         
     func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = transaction
+        
+        newTransaction.amountFrom = newTransaction.amountFrom.round(factor: 7)
+        newTransaction.amountTo = newTransaction.amountTo.round(factor: 7)
         
         if newTransaction.accountFrom.currency == newTransaction.accountTo.currency{
             newTransaction.amountTo = newTransaction.amountFrom
@@ -634,5 +644,20 @@ extension Service {
         try await db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
         logger.info("Сохраняем связки между подкатегориями и транзакциями")
         try await db.importTagsToTransactions(TagToTransactionDB.convertFromApiModel(try await tagsToTransactions))
+    }
+}
+
+extension Decimal {
+    public func round(factor: Int16) -> Decimal {
+      let roundingBehavior = NSDecimalNumberHandler(
+        roundingMode: .bankers,
+        scale: factor,
+        raiseOnExactness: true,
+        raiseOnOverflow: true,
+        raiseOnUnderflow: true,
+        raiseOnDivideByZero: true
+      )
+    
+      return (self as NSDecimalNumber).rounding(accordingToBehavior: roundingBehavior) as Decimal
     }
 }

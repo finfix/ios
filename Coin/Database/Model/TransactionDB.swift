@@ -80,10 +80,10 @@ struct TransactionDB {
             if serverModel.accounting != localModels[i].accounting {
                 difference["accounting"] = (server: serverModel.accounting, local: localModels[i].accounting)
             }
-            if !serverModel.amountFrom.isEqual(to: localModels[i].amountFrom) {
+            if serverModel.amountFrom != localModels[i].amountFrom {
                 difference["amountFrom"] = (server: serverModel.amountFrom, local: localModels[i].amountFrom)
             }
-            if !serverModel.amountTo.isEqual(to: localModels[i].amountTo) {
+            if serverModel.amountTo != localModels[i].amountTo {
                 difference["amountTo"] = (server: serverModel.amountTo, local: localModels[i].amountTo)
             }
             if serverModel.dateTransaction != localModels[i].dateTransaction {
