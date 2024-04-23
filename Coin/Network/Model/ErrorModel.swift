@@ -14,6 +14,10 @@ struct ErrorModel: LocalizedError, Decodable {
 //    var parameters: [String: String]?
     
     var errorDescription: String? {
-        return self.humanTextError
+        var description = self.humanTextError
+        #if DEBUG
+        description += "\n\n" + self.developerTextError
+        #endif
+        return description
     }
 }
