@@ -106,8 +106,8 @@ struct EditAccount: View {
                     ForEach(vm.icons) { icon in
                         HStack {
                             Text(icon.name)
-                            AsyncImage(url: icon.url) { image in
-                                image.image?        
+                            AsyncImage(url: URL.documentsDirectory.appending(path: String(icon.url))) { image in
+                                image.image?
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
                                     .frame(width: 20)

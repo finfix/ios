@@ -56,13 +56,11 @@ struct AccountCircleItem: View {
                 Circle()
                     .fill(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.showingRemainder ? .green : .red)
                     .frame(width: 30)
-                if let url = account.icon.url {
-                    AsyncImage(url: account.icon.url) { image in
-                        image.image?
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 20)
-                    }
+                AsyncImage(url: URL.documentsDirectory.appending(path: account.icon.url)) { image in
+                    image.image?
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 20)
                 }
             }
             Text(formatter.string(number: account.showingRemainder))
