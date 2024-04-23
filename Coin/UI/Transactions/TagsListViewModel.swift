@@ -11,10 +11,17 @@ import Foundation
 class TagsListViewModel {
     private let service = Service.shared
 
+    var accountGroup = AccountGroup()
     var tags: [Tag] = []
+    
+    init(
+        accountGroup: AccountGroup
+    ) {
+        self.accountGroup = accountGroup
+    }
 
     func load() async throws {
-        tags = try await service.getTags()
+        tags = try await service.getTags(accountGroup: accountGroup)
     }
     
     func deleteTag(_ tag: Tag) async throws {

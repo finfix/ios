@@ -253,9 +253,15 @@ extension AppDatabase {
         }
     }
     
-    func getTags() async throws -> [TagDB] {
+    func getTags(
+        accountGroupID: UInt32? = nil
+    ) async throws -> [TagDB] {
         try await reader.read { db in
-            return try TagDB.fetchAll(db)
+            var request = TagDB.order(TagDB.Columns.id)
+            if let accountGroupID {
+                request = request.filter(TagDB.Columns.accountGroupID == accountGroupID)
+            }
+            return try request.fetchAll(db)
         }
     }
     
