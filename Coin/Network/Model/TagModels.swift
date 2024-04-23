@@ -41,6 +41,7 @@ struct DeleteTagReq {
 struct CreateTagReq: Encodable {
     let name: String
     let accountGroupID: UInt32
+    let datetimeCreate: Date
 }
 
 struct CreateTagRes: Decodable {

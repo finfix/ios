@@ -41,7 +41,7 @@ struct Account: Identifiable {
     var budgetAmount: Decimal
     var showingBudgetAmount: Decimal
     var budgetFixedSum: Decimal
-    var budgetDaysOffset: UInt8
+    var budgetDaysOffset: Int8
     var budgetGradualFilling: Bool
     var datetimeCreate: Date
     
@@ -68,7 +68,7 @@ struct Account: Identifiable {
         budgetAmount: Decimal = 0,
         showingBudgetAmount: Decimal = 0,
         budgetFixedSum: Decimal = 0,
-        budgetDaysOffset: UInt8 = 0,
+        budgetDaysOffset: Int8 = 0,
         budgetGradualFilling: Bool = false,
         datetimeCreate: Date = Date.now,
         parentAccountID: UInt32? = nil,

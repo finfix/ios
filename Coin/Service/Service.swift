@@ -40,7 +40,7 @@ extension Service {
             if account.type == .earnings || account.type == .balancing {
                 balance *= -1
             }
-            try await db.updateBalance(id: account.id, newBalance: balance)
+            try await db.updateBalance(id: account.id, newBalance: balance.round(factor: 7))
         }
     }
     
@@ -52,9 +52,13 @@ extension Service {
         try await db.deleteAllData()
     }
     
-    func getTags() async throws -> [Tag] {
+    func getTags(
+        accountGroup: AccountGroup? = nil
+    ) async throws -> [Tag] {
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: nil))
-        return Tag.convertFromDBModel(try await db.getTags(), accountGroupsMap: accountGroupsMap)
+        return Tag.convertFromDBModel(try await db.getTags(
+            accountGroupID: accountGroup?.id
+        ), accountGroupsMap: accountGroupsMap)
     }
     
     func getAccounts(
@@ -90,13 +94,16 @@ extension Service {
     }
     
     func getTransactions(
-        limit: Int,
-        offset: Int,
+        limit: Int? = nil,
+        offset: Int = 0,
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
         accountIDs: [UInt32] = []
     ) async throws -> [Transaction] {
+        
+        let dateFrom: Date? = dateFrom?.stripTime()
+        let dateTo: Date? = dateTo?.stripTime()
         
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
@@ -104,7 +111,7 @@ extension Service {
         let tagsToTransactions = try await db.getTagsToTransactions()
         let tagsMap = Tag.convertToMap(Tag.convertFromDBModel(try await db.getTags(), accountGroupsMap: nil))
         return Transaction.convertFromDBModel(
-            try await db.getTransactionsWithPagination(
+            try await db.getTransactions(
                 offset: offset,
                 limit: limit,
                 dateFrom: dateFrom,
@@ -139,12 +146,12 @@ extension Service {
     }
     
     func createAccount(_ account: Account) async throws {
-        
-        guard account.name != "" else {
-            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
-        }
-        
         var account = account
+        
+        account.remainder = account.remainder.round(factor: 6)
+        
+        try validateAccount(account)
+        
         let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
             accountGroupID: account.accountGroup.id,
             accountingInHeader: account.accountingInHeader,
@@ -159,7 +166,9 @@ extension Service {
             remainder: account.remainder != 0 ? account.remainder : nil,
             type: account.type.rawValue,
             isParent: account.isParent,
-            parentAccountID: account.parentAccountID)
+            parentAccountID: account.parentAccountID,
+            datetimeCreate: account.datetimeCreate
+        )
         )
         account.id = accountRes.id
         account.serialNumber = accountRes.serialNumber
@@ -167,12 +176,36 @@ extension Service {
         try await db.createAccount(account)
     }
     
+    private func validateAccount(_ account: Account) throws {
+        guard account.name != "" else {
+            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
+        }
+        
+        guard account.budgetAmount >= 0 else {
+            throw ErrorModel(humanTextError: "Бюджет не может быть отрицательным")
+        }
+        
+        guard account.budgetFixedSum >= 0 else {
+            throw ErrorModel(humanTextError: "Фиксированная сумма бюджета не может быть отрицательной")
+        }
+        
+        guard account.budgetDaysOffset >= 0 else {
+            throw ErrorModel(humanTextError: "Количество дней отступа не может быть отрицательным")
+        }
+        
+        guard account.budgetFixedSum <= account.budgetAmount else {
+            throw ErrorModel(humanTextError: "Фиксированная сумма бюджета не может быть больше бюджета")
+        }
+        
+        guard account.budgetDaysOffset < Calendar.current.range(of: .day, in: .month, for: Date())!.count else {
+            throw ErrorModel(humanTextError: "Количество дней отступа не может быть больше или равно количеству дней в месяце")
+        }
+    }
+    
     func updateAccount(newAccount: Account, oldAccount: Account) async throws {
         var newAccount = newAccount
         
-        guard newAccount.name != "" else {
-            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
-        }
+        newAccount.remainder = newAccount.remainder.round(factor: 6)
         
         // Получаем корректное значение parentAccountID для сервера
         var parentAccountIDToReq: UInt32? = nil
@@ -184,6 +217,8 @@ extension Service {
             }
         }
         
+        try validateAccount(newAccount)
+
         // Обновляем счет на сервере
         let updateAccountRes = try await AccountAPI().UpdateAccount(req: UpdateAccountReq(
             id: newAccount.id,
@@ -339,19 +374,25 @@ extension Service {
         
         tag.id = try await TagAPI().CreateTag(req: CreateTagReq(
             name: tag.name,
-            accountGroupID: tag.accountGroup.id
+            accountGroupID: tag.accountGroup.id,
+            datetimeCreate: tag.datetimeCreate
         ))
         
         try await db.createTag(tag)
     }
     
-    func createTransaction(_ transaction: Transaction) async throws {
-        var transaction = transaction
-        
+    private func validateTransaction(_ transaction: Transaction) throws {
         guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
             throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
         }
+    }
+    
+    func createTransaction(_ transaction: Transaction) async throws {
+        var transaction = transaction
         
+        transaction.amountFrom = transaction.amountFrom.round(factor: 7)
+        transaction.amountTo = transaction.amountTo.round(factor: 7)
+                
         if transaction.accountFrom.currency == transaction.accountTo.currency {
             transaction.amountTo = transaction.amountFrom
         }
@@ -363,6 +404,8 @@ extension Service {
             tagIDs.append(tag.id)
         }
         
+        try validateTransaction(transaction)
+        
         transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
             accountFromID: transaction.accountFrom.id,
             accountToID: transaction.accountTo.id,
@@ -372,7 +415,8 @@ extension Service {
             note: transaction.note,
             type: transaction.type.rawValue,
             isExecuted: true,
-            tagIDs: tagIDs
+            tagIDs: tagIDs,
+            datetimeCreate: transaction.datetimeCreate
         ))
         
         try await db.createTransaction(transaction)
@@ -383,10 +427,8 @@ extension Service {
     func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = transaction
         
-        guard newTransaction.amountFrom != 0 && newTransaction.amountTo != 0 else {
-            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
-        }
-
+        newTransaction.amountFrom = newTransaction.amountFrom.round(factor: 7)
+        newTransaction.amountTo = newTransaction.amountTo.round(factor: 7)
         
         if newTransaction.accountFrom.currency == newTransaction.accountTo.currency{
             newTransaction.amountTo = newTransaction.amountFrom
@@ -403,6 +445,9 @@ extension Service {
         }
         
         newTransaction.dateTransaction = newTransaction.dateTransaction.stripTime()
+        
+        try validateTransaction(transaction)
+        
         try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
             accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
             accountToID: newTransaction.accountTo.id != oldTransaction.accountTo.id ? newTransaction.accountTo.id : nil,
@@ -475,6 +520,80 @@ extension Service {
         let versionModel = try await SettingsAPI().GetVersion()
         return (versionModel.version, versionModel.build)
     }
+    
+    func compareLocalAndServerData() async throws -> String? {
+        logger.log("Начали сравнение серверных данных с локальными")
+        
+        var differences: String = ""
+        
+        // Получаем данные текущего месяца для запроса
+        let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
+        
+        // Получаем все данные с сервера
+        async let serverIcons = IconDB.convertFromApiModel(try await SettingsAPI().GetIcons())
+        async let serverCurrencies = CurrencyDB.convertFromApiModel(try await SettingsAPI().GetCurrencies())
+        async let serverUser = UserDB(try await UserAPI().GetUser())
+        async let serverAccountGroups = AccountGroupDB.convertFromApiModel(try await AccountAPI().GetAccountGroups())
+        async let serverAccounts = AccountDB.convertFromApiModel(try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo)))
+        async let serverTags = TagDB.convertFromApiModel(try await TagAPI().GetTags())
+        async let serverTagsToTransactions = TagToTransactionDB.convertFromApiModel(try await TagAPI().GetTagsToTransaction())
+        async let serverTransactions = TransactionDB.convertFromApiModel(try await TransactionAPI().GetTransactions(req: GetTransactionReq()))
+        
+        let localIcons = try await db.getIcons()
+        let localCurrencies = try await db.getCurrencies()
+        let localUsers = try await db.getUsers()
+        let localAccountGroups = try await db.getAccountGroups()
+        let localAccounts = try await db.getAccounts()
+        let localTags = try await db.getTags()
+        let localTagsToTransactions = try await db.getTagsToTransactions()
+        let localTransactions = try await db.getTransactions()
+        
+        let iconsDifferences = IconDB.compareTwoArrays(try await serverIcons, localIcons)
+        if !iconsDifferences.isEmpty {
+            differences += "Icons: \(iconsDifferences)"
+            logger.warning("Icons: \(iconsDifferences)")
+        }
+        let currenciesDifferences = CurrencyDB.compareTwoArrays(try await serverCurrencies, localCurrencies)
+        if !currenciesDifferences.isEmpty {
+            differences += "\n\nCurrencies: \(currenciesDifferences)"
+            logger.warning("Currencies: \(currenciesDifferences)")
+        }
+        let userDifferences = UserDB.compareTwoArrays(try await [serverUser], localUsers)
+        if !userDifferences.isEmpty {
+            differences += "\n\nUsers: \(userDifferences)"
+            logger.warning("Users: \(userDifferences)")
+        }
+        let accountGroupsDifferences = AccountGroupDB.compareTwoArrays(try await serverAccountGroups, localAccountGroups)
+        if !accountGroupsDifferences.isEmpty {
+            differences += "\n\nAccountGroups: \(accountGroupsDifferences)"
+            logger.warning("AccountGroups: \(accountGroupsDifferences)")
+        }
+        let accountsDifferences = AccountDB.compareTwoArrays(try await serverAccounts, localAccounts)
+        if !accountsDifferences.isEmpty {
+            differences += "\n\nAccounts: \(accountsDifferences)"
+            logger.warning("Accounts: \(accountsDifferences)")
+        }
+        let tagsDifferences = TagDB.compareTwoArrays(try await serverTags, localTags)
+        if !tagsDifferences.isEmpty {
+            differences += "\n\nTags: \(tagsDifferences)"
+            logger.warning("Tags: \(tagsDifferences)")
+        }
+        let tagsToTransactionsDifferences = TagToTransactionDB.compareTwoArrays(try await serverTagsToTransactions, localTagsToTransactions)
+        if !tagsToTransactionsDifferences.isEmpty {
+            differences += "\n\nTagsToTransactions: \(tagsToTransactionsDifferences)"
+            logger.warning("TagsToTransactions: \(tagsToTransactionsDifferences)")
+        }
+        let transactionsDifferences = TransactionDB.compareTwoArrays(try await serverTransactions, localTransactions)
+        if !transactionsDifferences.isEmpty {
+            differences += "\n\nTransactions: \(tagsToTransactionsDifferences)"
+            logger.warning("Transactions: \(transactionsDifferences)")
+        }
+        if differences == "" {
+            return nil
+        } else {
+            return differences
+        }
+    }
 }
 
 // MARK: - Sync
@@ -501,12 +620,11 @@ extension Service {
         // Сохраняем данные в базу данных
         logger.info("Сохраняем иконки")
         var iconss = try await icons
-        for (index, icon) in iconss.enumerated() {
-            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
-            let url = URL.documentsDirectory.appending(path: String(icon.url))
-            iconss[index].url = url.absoluteString
-            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
-        }
+//        for (index, icon) in iconss.enumerated() {
+//            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
+//            let url = URL.documentsDirectory.appending(path: String(icon.url))
+//            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
+//        }
         try await db.importIcons(IconDB.convertFromApiModel(iconss))
         logger.info("Сохраняем валюты")
         try await db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
@@ -526,5 +644,20 @@ extension Service {
         try await db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
         logger.info("Сохраняем связки между подкатегориями и транзакциями")
         try await db.importTagsToTransactions(TagToTransactionDB.convertFromApiModel(try await tagsToTransactions))
+    }
+}
+
+extension Decimal {
+    public func round(factor: Int16) -> Decimal {
+      let roundingBehavior = NSDecimalNumberHandler(
+        roundingMode: .bankers,
+        scale: factor,
+        raiseOnExactness: true,
+        raiseOnOverflow: true,
+        raiseOnUnderflow: true,
+        raiseOnDivideByZero: true
+      )
+    
+      return (self as NSDecimalNumber).rounding(accordingToBehavior: roundingBehavior) as Decimal
     }
 }
