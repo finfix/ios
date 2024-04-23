@@ -52,9 +52,13 @@ extension Service {
         try await db.deleteAllData()
     }
     
-    func getTags() async throws -> [Tag] {
+    func getTags(
+        accountGroup: AccountGroup? = nil
+    ) async throws -> [Tag] {
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: nil))
-        return Tag.convertFromDBModel(try await db.getTags(), accountGroupsMap: accountGroupsMap)
+        return Tag.convertFromDBModel(try await db.getTags(
+            accountGroupID: accountGroup?.id
+        ), accountGroupsMap: accountGroupsMap)
     }
     
     func getAccounts(

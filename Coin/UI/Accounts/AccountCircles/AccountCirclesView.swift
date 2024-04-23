@@ -94,7 +94,7 @@ struct AccountCirclesView: View {
             .navigationDestination(for: EditTransactionRoute.self) { screen in
                 switch screen {
                 case .tagsList:
-                    TagsList(path: $path)
+                    TagsList(accountGroup: selectedAccountGroup, path: $path)
                 }
             }
             .navigationDestination(for: TagsListRoute.self) { screen in
