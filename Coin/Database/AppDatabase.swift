@@ -59,7 +59,7 @@ extension AppDatabase {
                 
                 table.column("name", .text)
                     .notNull()
-                table.column("rate", .double)
+                table.column("rate", .text)
                     .notNull()
                 table.column("symbol", .text)
                     .notNull()
@@ -71,7 +71,7 @@ extension AppDatabase {
                 
                 table.column("name", .text)
                     .notNull()
-                table.column("email", .double)
+                table.column("email", .text)
                     .notNull()
                 
                 table.belongsTo("defaultCurrency", inTable: "currencyDB")
@@ -111,7 +111,7 @@ extension AppDatabase {
                     .notNull()
                 table.column("name", .text)
                     .notNull()
-                table.column("remainder", .double)
+                table.column("remainder", .text)
                     .notNull()
                 table.column("type", .text)
                     .notNull()
@@ -147,9 +147,9 @@ extension AppDatabase {
                 
                 table.column("accounting", .boolean)
                     .notNull()
-                table.column("amountFrom", .double)
+                table.column("amountFrom", .text)
                     .notNull()
-                table.column("amountTo", .double)
+                table.column("amountTo", .text)
                     .notNull()
                 table.column("dateTransaction", .date)
                     .notNull()

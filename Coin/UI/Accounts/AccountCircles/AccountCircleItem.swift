@@ -80,6 +80,9 @@ struct AccountCircleItem: View {
             }
         }
         .onTapGesture(count: 1) {
+            if isAlreadyOpened {
+                dismiss()
+            }
             path.append(AccountCircleItemRoute.accountTransactions(account))
         }
         .onLongPressGesture {

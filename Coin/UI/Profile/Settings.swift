@@ -14,6 +14,11 @@ struct Settings: View {
     @AppStorage("isDevMode") private var isDevMode = defaultIsDevMode
     @AppStorage("apiBasePath") private var apiBasePath = defaultApiBasePath
     
+    @State var shouldDisableUI = false
+    @State var shouldShowProgress = false
+    @State var shouldShowAlert = false
+    @State var differences: String? = nil
+
     @State private var vm = SettingsViewModel()
     
     var body: some View {
@@ -29,7 +34,14 @@ struct Settings: View {
                     Label("Режим разработчика", systemImage: "hammer.fill")
                         .foregroundColor(.primary)
                 }
-                if isDevMode {
+                .onChange(of: isDevMode) { _, newValue in
+                    if newValue == true {
+                        apiBasePath = defaultApiBasePath
+                    }
+                }
+            }
+            if isDevMode {
+                Section {
                     HStack {
                         TextField("", text: $apiBasePath)
                             .autocapitalization(.none)
@@ -37,6 +49,34 @@ struct Settings: View {
                         Button { apiBasePath = defaultApiBasePath } label: { Text("По умолчанию") }
                     }
                 }
+                Section {
+                    Button {
+                        Task {
+                            shouldDisableUI = true
+                            shouldShowProgress = true
+                            defer {
+                                shouldShowProgress = false
+                                shouldDisableUI = false
+                            }
+                            do {
+                                differences = try await vm.compareLocalAndServerData()
+                            } catch {
+                                alert(error)
+                            }
+                            shouldShowAlert = true
+                        }
+                    } label: {
+                        if !shouldShowProgress {
+                            Text("Сравнить данные с сервером")
+                        } else {
+                            ProgressView()
+                        }
+                    }
+                    if let differences {
+                        ShareLink("Скачать несовпадения", item: differences)
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
             Section(footer:
                 VStack {
@@ -45,6 +85,16 @@ struct Settings: View {
                 }
                 .frame(maxWidth: .infinity)
             ) {}
+        }
+        .disabled(shouldDisableUI)
+        .alert(isPresented: $shouldShowAlert) {
+            Alert(title:
+                    Text(differences == nil ? "Все данные совпадают" : "Данные не совпадают"),
+                  message:
+                    Text(differences != nil ? "Вы можете скачать несовпадающие данные" : ""),
+                  dismissButton:
+                    .cancel(Text("OK"))
+            )
         }
         .task {
             do {
