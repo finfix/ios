@@ -575,7 +575,7 @@ extension Service {
         }
         let transactionsDifferences = TransactionDB.compareTwoArrays(try await serverTransactions, localTransactions)
         if !transactionsDifferences.isEmpty {
-            differences += "\n\nTagsToTransactions: \(tagsToTransactionsDifferences)"
+            differences += "\n\nTransactions: \(tagsToTransactionsDifferences)"
             logger.warning("Transactions: \(transactionsDifferences)")
         }
         if differences == "" {

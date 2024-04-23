@@ -98,9 +98,9 @@ struct TransactionDB {
             if serverModel.type != localModels[i].type {
                 difference["type"] = (server: serverModel.type, local: localModels[i].type)
             }
-            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
-                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
-            }
+//            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
+//                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
+//            }
             if serverModel.accountFromId != localModels[i].accountFromId {
                 difference["accountFromId"] = (server: serverModel.accountFromId, local: localModels[i].accountFromId)
             }

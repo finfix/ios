@@ -74,9 +74,9 @@ struct TagDB {
             if serverModel.accountGroupID != localModels[i].accountGroupID {
                 difference["accountGroupID"] = (server: serverModel.accountGroupID, local: localModels[i].accountGroupID)
             }
-            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
-                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
-            }
+//            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
+//                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
+//            }
             if !difference.isEmpty {
                 differences[serverModel.id] = difference
             }

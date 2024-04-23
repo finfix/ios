@@ -137,60 +137,61 @@ struct AccountDB {
         
         for (i, serverModel) in serverModels.enumerated() {
             var difference: [String: (server: Any, local: Any)] = [:]
-            if serverModel.id != localModels[i].id {
-                difference["id"] = (server: serverModel.id, local: localModels[i].id)
+            let localModel = localModels[i]
+            if serverModel.id != localModel.id {
+                difference["id"] = (server: serverModel.id, local: localModel.id)
             }
-            if serverModel.accountingInHeader != localModels[i].accountingInHeader {
-                difference["accountingInHeader"] = (server: serverModel.accountingInHeader, local: localModels[i].accountingInHeader)
+            if serverModel.accountingInHeader != localModel.accountingInHeader {
+                difference["accountingInHeader"] = (server: serverModel.accountingInHeader, local: localModel.accountingInHeader)
             }
-            if serverModel.accountingInCharts != localModels[i].accountingInCharts {
-                difference["accountingInCharts"] = (server: serverModel.accountingInCharts, local: localModels[i].accountingInCharts)
+            if serverModel.accountingInCharts != localModel.accountingInCharts {
+                difference["accountingInCharts"] = (server: serverModel.accountingInCharts, local: localModel.accountingInCharts)
             }
-            if serverModel.iconID != localModels[i].iconID {
-                difference["iconID"] = (server: serverModel.iconID, local: localModels[i].iconID)
+            if serverModel.iconID != localModel.iconID {
+                difference["iconID"] = (server: serverModel.iconID, local: localModel.iconID)
             }
-            if serverModel.name != localModels[i].name {
-                difference["name"] = (server: serverModel.name, local: localModels[i].name)
+            if serverModel.name != localModel.name {
+                difference["name"] = (server: serverModel.name, local: localModel.name)
             }
-            if serverModel.remainder != localModels[i].remainder {
-                difference["remainder"] = (server: serverModel.remainder, local: localModels[i].remainder)
+            if serverModel.remainder != localModel.remainder {
+                difference["remainder"] = (server: serverModel.remainder, local: localModel.remainder)
             }
-            if serverModel.type != localModels[i].type {
-                difference["type"] = (server: serverModel.type, local: localModels[i].type)
+            if serverModel.type != localModel.type {
+                difference["type"] = (server: serverModel.type, local: localModel.type)
             }
-            if serverModel.visible != localModels[i].visible {
-                difference["visible"] = (server: serverModel.visible, local: localModels[i].visible)
+            if serverModel.visible != localModel.visible {
+                difference["visible"] = (server: serverModel.visible, local: localModel.visible)
             }
-            if serverModel.parentAccountId != localModels[i].parentAccountId {
-                difference["parentAccountId"] = (server: serverModel.parentAccountId ?? 0, local: localModels[i].parentAccountId ?? 0)
+            if serverModel.parentAccountId != localModel.parentAccountId {
+                difference["parentAccountId"] = (server: serverModel.parentAccountId ?? 0, local: localModel.parentAccountId ?? 0)
             }
-            if serverModel.serialNumber != localModels[i].serialNumber {
-                difference["serialNumber"] = (server: serverModel.serialNumber, local: localModels[i].serialNumber)
+            if serverModel.serialNumber != localModel.serialNumber {
+                difference["serialNumber"] = (server: serverModel.serialNumber, local: localModel.serialNumber)
             }
-            if serverModel.isParent != localModels[i].isParent {
-                difference["isParent"] = (server: serverModel.isParent, local: localModels[i].isParent)
+            if serverModel.isParent != localModel.isParent {
+                difference["isParent"] = (server: serverModel.isParent, local: localModel.isParent)
             }
-            if serverModel.currencyCode != localModels[i].currencyCode {
-                difference["currencyCode"] = (server: serverModel.currencyCode, local: localModels[i].currencyCode)
+            if serverModel.currencyCode != localModel.currencyCode {
+                difference["currencyCode"] = (server: serverModel.currencyCode, local: localModel.currencyCode)
             }
-            if serverModel.accountGroupId != localModels[i].accountGroupId {
-                difference["accountGroupId"] = (server: serverModel.accountGroupId, local: localModels[i].accountGroupId)
+            if serverModel.accountGroupId != localModel.accountGroupId {
+                difference["accountGroupId"] = (server: serverModel.accountGroupId, local: localModel.accountGroupId)
             }
-            if serverModel.budgetAmount != localModels[i].budgetAmount {
-                difference["budgetAmount"] = (server: serverModel.budgetAmount, local: localModels[i].budgetAmount)
+            if serverModel.budgetAmount != localModel.budgetAmount {
+                difference["budgetAmount"] = (server: serverModel.budgetAmount, local: localModel.budgetAmount)
             }
-            if serverModel.budgetFixedSum != localModels[i].budgetFixedSum {
-                difference["budgetFixedSum"] = (server: serverModel.budgetFixedSum, local: localModels[i].budgetFixedSum)
+            if serverModel.budgetFixedSum != localModel.budgetFixedSum {
+                difference["budgetFixedSum"] = (server: serverModel.budgetFixedSum, local: localModel.budgetFixedSum)
             }
-            if serverModel.budgetDaysOffset != localModels[i].budgetDaysOffset {
-                difference["budgetDaysOffset"] = (server: serverModel.budgetDaysOffset, local: localModels[i].budgetDaysOffset)
+            if serverModel.budgetDaysOffset != localModel.budgetDaysOffset {
+                difference["budgetDaysOffset"] = (server: serverModel.budgetDaysOffset, local: localModel.budgetDaysOffset)
             }
-            if serverModel.budgetGradualFilling != localModels[i].budgetGradualFilling {
-                difference["budgetGradualFilling"] = (server: serverModel.budgetGradualFilling, local: localModels[i].budgetGradualFilling)
+            if serverModel.budgetGradualFilling != localModel.budgetGradualFilling {
+                difference["budgetGradualFilling"] = (server: serverModel.budgetGradualFilling, local: localModel.budgetGradualFilling)
             }
-            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
-                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
-            }
+//            if serverModel.datetimeCreate != localModel.datetimeCreate {
+//                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModel.datetimeCreate)
+//            }
             
             if !difference.isEmpty {
                 differences[serverModel.id] = difference
