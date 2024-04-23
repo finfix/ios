@@ -102,6 +102,9 @@ extension Service {
         accountIDs: [UInt32] = []
     ) async throws -> [Transaction] {
         
+        let dateFrom: Date? = dateFrom?.stripTime()
+        let dateTo: Date? = dateTo?.stripTime()
+        
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await db.getAccountGroups(), currenciesMap: currenciesMap))
         let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: nil))
