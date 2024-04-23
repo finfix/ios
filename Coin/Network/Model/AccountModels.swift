@@ -37,7 +37,7 @@ struct GetAccountBudgetRes: Decodable {
     var amount: Decimal
     var fixedSum: Decimal
     var gradualFilling: Bool
-    var daysOffset: UInt8
+    var daysOffset: Int8
 }
 
 struct CreateAccountReq: Encodable {
@@ -88,7 +88,7 @@ struct UpdateAccountReq: Encodable {
 struct UpdateBudgetReq: Encodable {
     var amount: Decimal?
     var fixedSum: Decimal?
-    var daysOffset: UInt8?
+    var daysOffset: Int8?
     var gradualFilling: Bool?
 }
 
