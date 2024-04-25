@@ -40,13 +40,14 @@ class CurrencyFormatter: NumberFormatter {
         self.userSuffix = suffix
     }
     
-    func string(number: Decimal, currency: Currency? = nil, suffix: String? = nil) -> String {
+    func string(number: Decimal, currency: Currency? = nil, suffix: String? = nil, withUnits: Bool = true) -> String {
         
         if let currency = currency {
             self.currencyCode = currency.code
             self.currencySymbol = currency.symbol
         }
         self.userSuffix = suffix
+        self.withUnits = withUnits
         
         var num = number
         let doubleNum = num.doubleValue

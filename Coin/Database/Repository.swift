@@ -191,6 +191,12 @@ extension AppDatabase {
         }
     }
     
+    func getUsers() async throws -> [UserDB] {
+        try await reader.read { db in
+            return try UserDB.fetchAll(db)
+        }
+    }
+    
     func getIcons() async throws -> [IconDB] {
         try await reader.read { db in
             return try IconDB.fetchAll(db)
@@ -247,9 +253,15 @@ extension AppDatabase {
         }
     }
     
-    func getTags() async throws -> [TagDB] {
+    func getTags(
+        accountGroupID: UInt32? = nil
+    ) async throws -> [TagDB] {
         try await reader.read { db in
-            return try TagDB.fetchAll(db)
+            var request = TagDB.order(TagDB.Columns.id)
+            if let accountGroupID {
+                request = request.filter(TagDB.Columns.accountGroupID == accountGroupID)
+            }
+            return try request.fetchAll(db)
         }
     }
     
@@ -308,9 +320,9 @@ extension AppDatabase {
         }
     }
     
-    func getTransactionsWithPagination(
-        offset: Int,
-        limit: Int,
+    func getTransactions(
+        offset: Int = 0,
+        limit: Int? = nil,
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
@@ -336,11 +348,12 @@ extension AppDatabase {
             if !accountIDs.isEmpty {
                 request = request.filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))
             }
+            
+            if let limit {
+                request = request.limit(limit, offset: offset)
+            }
                     
-            return try request
-                .limit(limit, offset: offset)
-                .fetchAll(db)
-                
+            return try request.fetchAll(db)
         }
     }
     

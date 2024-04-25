@@ -14,9 +14,17 @@ enum TagsListRoute: Hashable {
 
 struct TagsList: View {
     
-    @State private var vm = TagsListViewModel()
+    @State private var vm: TagsListViewModel
     @Environment (AlertManager.self) private var alert
     @Binding var path: NavigationPath
+    
+    init(
+        accountGroup: AccountGroup,
+        path: Binding<NavigationPath>
+    ) {
+        self.vm = TagsListViewModel(accountGroup: accountGroup)
+        self._path = path
+    }
     
     var body: some View {
         List {
@@ -60,5 +68,5 @@ struct TagsList: View {
 }
 
 #Preview {
-    TagsList(path: .constant(NavigationPath()))
+    TagsList(accountGroup: AccountGroup(), path: .constant(NavigationPath()))
 }

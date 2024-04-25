@@ -34,6 +34,33 @@ struct TagToTransactionDB {
         }
         return iconsDB
     }
+    
+    static func compareTwoArrays(_ serverModels: [TagToTransactionDB], _ localModels: [TagToTransactionDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
+        let serverModels = serverModels.sorted { ($0.transactionId, $0.tagId) < ($1.transactionId, $1.tagId) }
+        let localModels = localModels.sorted { ($0.transactionId, $0.tagId) < ($1.transactionId, $1.tagId) }
+        
+        var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
+        
+        guard serverModels.count == localModels.count else {
+            var difference: [String: (server: Any, local: Any)] = ["count": (server: serverModels.count, local: localModels.count)]
+            differences[0] = difference
+            return differences
+        }
+        
+        for (i, serverModel) in serverModels.enumerated() {
+            var difference: [String: (server: Any, local: Any)] = [:]
+            if serverModel.transactionId != localModels[i].transactionId {
+                difference["transactionId"] = (server: serverModel.transactionId, local: localModels[i].transactionId)
+            }
+            if serverModel.tagId != localModels[i].tagId {
+                difference["tagId"] = (server: serverModel.tagId, local: localModels[i].tagId)
+            }
+            if !difference.isEmpty {
+                differences[UInt32(i)] = difference
+            }
+        }
+        return differences
+    }
 }
 
 // MARK: - Persistence

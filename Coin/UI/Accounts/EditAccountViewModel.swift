@@ -52,7 +52,12 @@ class EditAccountViewModel {
         }
         accounts = try await service.getAccounts(visible: visible, types: [currentAccount.type], isParent: true)
         if mode == .create {
-            currentAccount.currency = currencies.first ?? Currency()
+            if let currency = currencies.first {
+                currentAccount.currency = currency
+            }
+            if let icon = icons.first {
+                currentAccount.icon = icon
+            }
         }
     }
     

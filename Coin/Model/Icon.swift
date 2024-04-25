@@ -10,7 +10,7 @@ import Foundation
 struct Icon: Identifiable {
     var id: UInt32
     var name: String
-    var url: URL?
+    var url: String
     
     private let basePath = "https://bonavii.com/"
     
@@ -21,16 +21,14 @@ struct Icon: Identifiable {
     ) {
         self.id = id
         self.name = name
-        if url != "" {
-            self.url = URL(string: basePath + url)!
-        }
+        self.url = url
     }
     
     // Инициализатор из модели базы данных
     init(_ dbModel: IconDB) {
         self.id = dbModel.id
         self.name = dbModel.name
-        self.url = URL(string: dbModel.url)!
+        self.url = dbModel.url
     }
     
     static func convertFromDBModel(_ iconsDB: [IconDB]) -> [Icon] {

@@ -17,6 +17,7 @@ struct CreateTransactionReq: Encodable {
     var type: String
     var isExecuted: Bool
     var tagIDs: [UInt32]
+    var datetimeCreate: Date
     
     enum CodingKeys: String, CodingKey {
         case accountFromID
@@ -28,6 +29,7 @@ struct CreateTransactionReq: Encodable {
         case type
         case isExecuted
         case tagIDs
+        case datetimeCreate
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -42,6 +44,7 @@ struct CreateTransactionReq: Encodable {
         try container.encode(type, forKey: .type)
         try container.encode(isExecuted, forKey: .isExecuted)
         try container.encode(tagIDs, forKey: .tagIDs)
+        try container.encode(DateFormatters.fullTime.string(from: datetimeCreate), forKey: .datetimeCreate)
     }
 }
 
