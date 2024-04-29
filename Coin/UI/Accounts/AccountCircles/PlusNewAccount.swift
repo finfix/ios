@@ -17,9 +17,7 @@ struct PlusNewAccount: View {
     var accountType: AccountType
     
     var body: some View {
-        Button {
-            path.append(PlusNewAccountRoute.createAccount(accountType))
-        } label: {
+        NavigationLink(value: PlusNewAccountRoute.createAccount(accountType)) {
             VStack {
                 ZStack {
                     Circle()

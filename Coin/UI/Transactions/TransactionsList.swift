@@ -49,9 +49,7 @@ struct TransactionsList: View {
             ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                 Section(header: Text(date, style: .date).font(.headline)) {
                     ForEach(groupedTransactionByDate[date] ?? []) { transaction in
-                        Button {
-                            path.append(TransactionsListRoute.editTransaction(transaction))
-                        } label: {
+                        NavigationLink(value: TransactionsListRoute.editTransaction(transaction)) {
                             TransactionRow(transaction: transaction)
                         }
                         .buttonStyle(.plain)

@@ -56,12 +56,8 @@ struct Profile: View {
                 }
                 #endif
                 Section {
-                    Button("Cкрытые счета") {
-                        path.append(ProfileViews.hidedAccounts)
-                    }
-                    Button("Курсы валют") {
-                        path.append(ProfileViews.currencyRates)
-                    }
+                    NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
+                    NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
                 }
                 .buttonStyle(.plain)
                 Section {
@@ -144,9 +140,7 @@ struct Profile: View {
             }
             .toolbar {
                 ToolbarItem {
-                    Button {
-                        path.append(ProfileViews.settings)
-                    } label: {
+                    NavigationLink(value: ProfileViews.settings) {
                         Image(systemName: "gearshape")
                     }
                 }

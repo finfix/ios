@@ -84,23 +84,17 @@ struct CirclesCreateTransaction: View {
                 CircleTypeTransaction(imageName: chooseBlurIsOpened ? "arrow.uturn.backward" : "plus")
             }
             if chooseBlurIsOpened {
-                Button {
-                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.consumption))
-                } label: {
+                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.consumption)) {
                     CircleTypeTransaction(imageName: "minus")
                 }
                 .padding(.bottom, 90)
                 
-                Button {
-                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.income))
-                } label: {
+                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.income)) {
                     CircleTypeTransaction(imageName: "plus")
                 }
                 .padding(.trailing, 90)
                 
-                Button {
-                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.transfer))
-                } label: {
+                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.transfer)) {
                     CircleTypeTransaction(imageName: "arrow.left.arrow.right")
                 }
                 .padding(.trailing, 75)
