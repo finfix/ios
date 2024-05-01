@@ -25,6 +25,8 @@ struct TransactionsList: View {
     
     @Binding var path: NavigationPath
     
+    let width: CGFloat = UIScreen.main.bounds.width
+    
     init(
         path: Binding<NavigationPath>,
         selectedAccountGroup: Binding<AccountGroup>,
@@ -52,6 +54,10 @@ struct TransactionsList: View {
     
     var body: some View {
         List {
+            Section(footer:
+            ChartTab(selectedAccountGroup: selectedAccountGroup)
+                .frame(width: width, height: 400)
+            ){}
             ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                 Section(header: Text(date, style: .date).font(.headline)) {
                     ForEach(groupedTransactionByDate[date] ?? []) { transaction in
