@@ -39,6 +39,7 @@
 		B54F3DB42BD57D8900780460 /* EditTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB32BD57D8900780460 /* EditTag.swift */; };
 		B54F3DB62BD57DBB00780460 /* EditTagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */; };
 		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
+		B55EF9DB2BE274D3003C8882 /* TransactionFilterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
 		B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
@@ -136,6 +137,7 @@
 		B54F3DB32BD57D8900780460 /* EditTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTag.swift; sourceTree = "<group>"; };
 		B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTagViewModel.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+		B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterViewModel.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
 		B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsList.swift; sourceTree = "<group>"; };
@@ -465,6 +467,7 @@
 				B593F9542AE1CCB000378E17 /* EditTransaction.swift */,
 				B51710092BB2E6BF00950EE0 /* EditTransactionViewModel.swift */,
 				B54254842AF5218C008ECC33 /* TransactionFilterView.swift */,
+				B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */,
 				B54F3DAF2BD579FA00780460 /* TagsList.swift */,
 				B54F3DB12BD57A0700780460 /* TagsListViewModel.swift */,
 				B54F3DB32BD57D8900780460 /* EditTag.swift */,
@@ -585,6 +588,7 @@
 				B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */,
 				B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */,
 				B5744EAC2BD2DDC0004C9AC7 /* TagToTransactionDB.swift in Sources */,
+				B55EF9DB2BE274D3003C8882 /* TransactionFilterViewModel.swift in Sources */,
 				B51CE1F02BAC3FB100682D48 /* AccountDB.swift in Sources */,
 				B51CE1EB2BAC37A000682D48 /* Service.swift in Sources */,
 				B5744EAA2BD2DD7A004C9AC7 /* TagDB.swift in Sources */,

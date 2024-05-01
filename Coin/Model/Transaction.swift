@@ -107,6 +107,6 @@ extension Transaction: Hashable {
     }
 }
 
-enum TransactionType: String, Codable {
+enum TransactionType: String, Codable, CaseIterable {
     case consumption, income, transfer, balancing
 }

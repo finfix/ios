@@ -157,7 +157,7 @@ struct LoginView: View {
             }
             .navigationDestination(for: LoginRoute.self) { screen in
                 switch screen {
-                case .settings: Settings(path: $path)
+                case .settings: Settings()
                 }
             }
         }
