@@ -326,7 +326,10 @@ extension AppDatabase {
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
-        accountIDs: [UInt32] = []
+        accountIDs: [UInt32] = [],
+        accountGroupID: UInt32? = nil,
+        transactionType: TransactionType? = nil,
+        currency: Currency? = nil
     ) async throws -> [TransactionDB] {
         try await reader.read { db in
             
@@ -347,6 +350,14 @@ extension AppDatabase {
                 
             if !accountIDs.isEmpty {
                 request = request.filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))
+            }
+            
+            if let transactionType {
+                request = request.filter(TransactionDB.Columns.type == transactionType.rawValue)
+            }
+            
+            if let currency {
+                request = request
             }
             
             if let limit {

@@ -27,7 +27,14 @@ class TransactionsListViewModel {
         }
     }
     
-    func load(refresh: Bool, dateFrom: Date? = nil, dateTo: Date? = nil, searchText: String = "") async throws {
+    func load(
+        refresh: Bool,
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
+        transactionType: TransactionType? = nil,
+        currency: Currency? = nil
+    ) async throws {
         var offset = 0
         var limit = 0
         
@@ -46,7 +53,9 @@ class TransactionsListViewModel {
             dateFrom: dateFrom,
             dateTo: dateTo,
             searchText: searchText,
-            accountIDs: accountIDs
+            accountIDs: accountIDs,
+            transactionType: transactionType,
+            currency: currency
         )
         
         if transactions.isEmpty {

@@ -20,6 +20,8 @@ struct TransactionsList: View {
     var searchText: String
     var dateFrom: Date?
     var dateTo: Date?
+    var transactionType: TransactionType?
+    var currency: Currency?
     
     @Binding var path: NavigationPath
     
@@ -29,13 +31,17 @@ struct TransactionsList: View {
         account: Account? = nil,
         searchText: String = "",
         dateFrom: Date? = nil,
-        dateTo: Date? = nil
+        dateTo: Date? = nil,
+        transactionType: TransactionType? = nil,
+        currency: Currency? = nil
     ) {
         self._selectedAccountGroup = selectedAccountGroup
         self._path = path
         self.dateTo = dateTo
         self.dateFrom = dateFrom
         self.searchText = searchText
+        self.transactionType = transactionType
+        self.currency = currency
         vm = TransactionsListViewModel(account: account)
     }
     
@@ -71,7 +77,7 @@ struct TransactionsList: View {
                 Text("Загрузка...")
                     .task {
                         do {
-                            try await vm.load(refresh: false, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                            try await vm.load(refresh: false, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                         } catch {
                             alert(error)
                         }
@@ -81,7 +87,7 @@ struct TransactionsList: View {
         .task {
             if vm.transactions.count != 0 {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                 } catch {
                     alert(error)
                 }
@@ -90,7 +96,7 @@ struct TransactionsList: View {
         .onChange(of: dateFrom) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                 } catch {
                     alert(error)
                 }
@@ -99,7 +105,7 @@ struct TransactionsList: View {
         .onChange(of: dateTo) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                 } catch {
                     alert(error)
                 }
@@ -108,7 +114,25 @@ struct TransactionsList: View {
         .onChange(of: searchText) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
+                } catch {
+                    alert(error)
+                }
+            }
+        }
+        .onChange(of: transactionType) { _, _ in
+            Task {
+                do {
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
+                } catch {
+                    alert(error)
+                }
+            }
+        }
+        .onChange(of: currency) { _, _ in
+            Task {
+                do {
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                 } catch {
                     alert(error)
                 }

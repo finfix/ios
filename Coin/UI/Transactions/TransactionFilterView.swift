@@ -10,8 +10,13 @@ import SwiftUI
 struct TransactionFilterView: View {
     
     @Environment(\.dismiss) var dissmiss
+    @Environment(AlertManager.self) var alert
+    @State private var vm = TransactionFilterViewModel()
     @Binding var dateFrom: Date?
     @Binding var dateTo: Date?
+    @Binding var transactionType: TransactionType?
+    @Binding var accountGroup: AccountGroup
+    @Binding var currency: Currency?
     
     var body: some View {
         NavigationStack {
@@ -20,6 +25,37 @@ struct TransactionFilterView: View {
                     Label("Дата", systemImage: "calendar")
                     Сalendar(buttonName: "C", date: $dateFrom)
                     Сalendar(buttonName: "По", date: $dateTo)
+                }
+                Section {
+                    Picker("Тип транзакции", selection: $transactionType) {
+                        Text("Тип не выбран")
+                            .tag(nil as TransactionType?)
+                        ForEach(TransactionType.allCases, id: \.rawValue) { type in
+                            Text(type.rawValue)
+                                .tag(type as TransactionType?)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+                Section {
+                    AccountGroupSelector(selectedAccountGroup: $accountGroup, pickerName: "Группа счетов")
+                }
+                Section {
+                    Picker("Валюта транзакции", selection: $currency) {
+                        Text("Валюта не выбрана")
+                            .tag(nil as Currency?)
+                        ForEach(vm.currencies) { currency in
+                            Text(currency.name)
+                                .tag(currency as Currency?)
+                        }
+                    }
+                }
+            }
+            .task {
+                do {
+                    try await vm.load()
+                } catch {
+                    alert(error)
                 }
             }
             .datePickerStyle(.graphical)
@@ -80,6 +116,12 @@ private struct Сalendar: View {
 }
 
 #Preview {
-    TransactionFilterView(dateFrom: .constant(Date()), dateTo: .constant(Date()))        .environment(AlertManager(handle: {_ in }))
-
+    TransactionFilterView(
+        dateFrom: .constant(Date()),
+        dateTo: .constant(Date()),
+        transactionType: .constant(TransactionType.balancing),
+        accountGroup: .constant(AccountGroup()),
+        currency: .constant(Currency())
+    )
+    .environment(AlertManager(handle: {_ in }))
 }
