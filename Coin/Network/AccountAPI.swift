@@ -22,46 +22,50 @@ class AccountAPI: API {
         let dateFrom = dateFormatter.string(from: req.dateFrom!)
         let dateTo = dateFormatter.string(from: req.dateTo!)
                 
-        return try await request(
+        let data = try await request(
             url: apiBasePath + accountBasePath,
             method: .get,
             headers: getBaseHeaders(),
-            query: ["dateFrom": dateFrom, "dateTo": dateTo],
-            resModel: [GetAccountsRes].self
+            query: ["dateFrom": dateFrom, "dateTo": dateTo]
         )
+        
+        return try decode(data, model: [GetAccountsRes].self)
     }
     
     func GetAccountGroups() async throws -> [GetAccountGroupsRes] {
-        return try await request(
+        let data = try await request(
             url: apiBasePath + accountBasePath + "/accountGroups",
             method: .get,
-            headers: getBaseHeaders(),
-            resModel: [GetAccountGroupsRes].self
+            headers: getBaseHeaders()
         )
+        
+        return try decode(data, model: [GetAccountGroupsRes].self)
     }
     
     func CreateAccount(req: CreateAccountReq) async throws -> CreateAccountRes {
-        return try await request(
+        let data = try await request(
             url: apiBasePath + accountBasePath,
             method: .post,
             headers: getBaseHeaders(),
-            reqModel: req,
-            resModel: CreateAccountRes.self
+            body: req
         )
+        
+        return try decode(data, model: CreateAccountRes.self)
     }
     
     func UpdateAccount(req: UpdateAccountReq) async throws -> UpdateAccountRes {
-        return try await request(
+        let data = try await request(
             url: apiBasePath + accountBasePath,
             method: .patch,
             headers: getBaseHeaders(),
-            reqModel: req,
-            resModel: UpdateAccountRes.self
+            body: req
         )
+        
+        return try decode(data, model: UpdateAccountRes.self)
     }
     
     func DeleteAccount(req: DeleteAccountReq) async throws {
-        return try await request(
+        _ = try await request(
             url: apiBasePath + accountBasePath,
             method: .delete,
             headers: getBaseHeaders(),
