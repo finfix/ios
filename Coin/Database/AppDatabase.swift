@@ -189,6 +189,34 @@ extension AppDatabase {
                 table.primaryKey(["tagId", "transactionId"])
             }
             
+            try db.create(table: "syncTaskDB") { table in
+                
+                table.autoIncrementedPrimaryKey("id")
+                
+                table.column("localID", .integer)
+                    .notNull()
+                table.column("actionName", .text)
+                    .notNull()
+                table.column("tryCount", .integer)
+                    .notNull()
+                table.column("enabled", .boolean)
+                    .notNull()
+                table.column("error", .text)
+            }
+            
+            try db.create(table: "syncTaskValueDB") { table in
+                
+                table.autoIncrementedPrimaryKey("id")
+                                
+                table.column("objectType", .text)
+                table.column("name", .text)
+                    .notNull()
+                table.column("value", .text)
+                
+                table.belongsTo("syncTask", inTable: "syncTaskDB")
+
+            }
+            
             try db.create(table: "idMappingDB") { table in
                 table.column("localID", .integer)
                     .notNull()

@@ -14,6 +14,7 @@ extension AppDatabase {
     func importIcons(_ icons: [IconDB]) async throws {
         try await dbWriter.write { db in
             for icon in icons {
+                try IDMappingDB(localID: icon.id!, serverID: icon.id, modelType: .icon).insert(db)
                 try icon.insert(db)
             }
         }
@@ -29,6 +30,7 @@ extension AppDatabase {
     
     func importUser(_ user: UserDB) async throws {
         try await dbWriter.write { db in
+            try IDMappingDB(localID: user.id!, serverID: user.id, modelType: .user).insert(db)
             try user.insert(db)
         }
     }
@@ -36,6 +38,7 @@ extension AppDatabase {
     func importAccountGroups(_ accountGroups: [AccountGroupDB]) async throws {
         try await dbWriter.write { db in
             for accountGroup in accountGroups {
+                try IDMappingDB(localID: accountGroup.id!, serverID: accountGroup.id, modelType: .accountGroup).insert(db)
                 try accountGroup.insert(db)
             }
         }
@@ -44,6 +47,7 @@ extension AppDatabase {
     func importAccounts(_ accounts: [AccountDB]) async throws {
         try await dbWriter.write { db in
             for account in accounts {
+                try IDMappingDB(localID: account.id!, serverID: account.id, modelType: .account).insert(db)
                 try account.insert(db)
             }
         }
@@ -52,6 +56,7 @@ extension AppDatabase {
     func importTags(_ tags: [TagDB]) async throws {
         try await dbWriter.write { db in
             for tag in tags {
+                try IDMappingDB(localID: tag.id!, serverID: tag.id, modelType: .tag).insert(db)
                 try tag.insert(db)
             }
         }
@@ -68,6 +73,7 @@ extension AppDatabase {
     func importTransactions(_ transactions: [TransactionDB]) async throws {
         try await dbWriter.write { db in
             for transaction in transactions {
+                try IDMappingDB(localID: transaction.id!, serverID: transaction.id, modelType: .transaction).insert(db)
                 try transaction.insert(db)
             }
         }
@@ -83,6 +89,9 @@ extension AppDatabase {
             _ = try UserDB.deleteAll(db)
             _ = try CurrencyDB.deleteAll(db)
             _ = try IconDB.deleteAll(db)
+            _ = try IDMappingDB.deleteAll(db)
+            _ = try SyncTaskValueDB.deleteAll(db)
+            _ = try SyncTaskDB.deleteAll(db)
         }
     }
     
@@ -98,15 +107,13 @@ extension AppDatabase {
         }
     }
     
-    func createAccount(_ account: Account) async throws {
+    func createAccount(_ account: Account) async throws -> UInt32 {
         try await dbWriter.write { db in
             _ = try AccountDB(account).insert(db)
-        }
-    }
-    
-    func createAccountAndReturn(_ account: Account) async throws -> AccountDB {
-        try await dbWriter.write { db in
-            return try AccountDB(account).insertAndFetch(db)!
+            let id = UInt32(db.lastInsertedRowID)
+            try IDMappingDB(localID: id, serverID: nil, modelType: .account)
+                .insert(db)
+            return id
         }
     }
     
@@ -136,15 +143,23 @@ extension AppDatabase {
         }
     }
     
-    func createTransaction(_ transaction: Transaction) async throws {
+    func createTransaction(_ transaction: Transaction) async throws -> UInt32 {
         try await dbWriter.write { db in
             _ = try TransactionDB(transaction).insert(db)
+            let id = UInt32(db.lastInsertedRowID)
+            try IDMappingDB(localID: id, serverID: nil, modelType: .transaction)
+                .insert(db)
+            return id
         }
     }
     
-    func createTag(_ tag: Tag) async throws {
+    func createTag(_ tag: Tag) async throws -> UInt32 {
         try await dbWriter.write { db in
             _ = try TagDB(tag).insert(db)
+            let id = UInt32(db.lastInsertedRowID)
+            try IDMappingDB(localID: id, serverID: nil, modelType: .tag)
+                .insert(db)
+            return id
         }
     }
     
@@ -171,6 +186,10 @@ extension AppDatabase {
     }
 }
 
+enum ModelType: String, Codable {
+    case account, transaction, tag, icon, user, accountGroup
+}
+
 // MARK: - Reads
 extension AppDatabase {
     var reader: DatabaseReader {
@@ -194,6 +213,60 @@ extension AppDatabase {
     func getUsers() async throws -> [UserDB] {
         try await reader.read { db in
             return try UserDB.fetchAll(db)
+        }
+    }
+    
+    func getCountTasks() async throws -> UInt32 {
+        try await reader.read { db in
+            return UInt32(try SyncTaskDB.fetchCount(db))
+        }
+    }
+    
+    func getSyncTasks(limit: UInt32? = nil) async throws -> [SyncTask] {
+        try await reader.read { db in
+            
+            var request = SyncTaskDB
+                .order(SyncTaskDB.Columns.id)
+                .filter(SyncTaskDB.Columns.enabled)
+            
+            if let limit {
+                request = request.limit(Int(limit))
+            }
+            
+            let syncTaskDBs = try request.fetchAll(db)
+            
+            var syncTasksIDs: [UInt32] = []
+            for syncTaskDB in syncTaskDBs {
+                syncTasksIDs.append(syncTaskDB.id!)
+            }
+            
+            var questionsArr: [String] = []
+            for _ in 0..<syncTaskDBs.count {
+                questionsArr.append("?")
+            }
+                        
+            let syncTasksValuesDB = try SyncTaskValueDB
+                .fetchAll(db, sql: """
+                SELECT
+                  tv.id,
+                  tv.syncTaskId,
+                  tv.objectType,
+                  tv.name,
+                  CASE WHEN tv.objectType IS NULL
+                    THEN tv.value
+                    ELSE m.serverID
+                  END AS value
+                FROM syncTaskValueDB tv
+                LEFT JOIN idMappingDB m ON m.localID = tv.value
+                  AND m.modelType = tv.objectType
+                JOIN syncTaskDB t ON t.id = tv.syncTaskId
+                WHERE t.id in (\(questionsArr.joined(separator: ", ")))
+            """, arguments: StatementArguments(syncTasksIDs))
+                                    
+            return SyncTask.convertFromDBModel(
+                syncTaskDBs,
+                syncTaskValuesMap: SyncTaskValue.groupByTaskID(SyncTaskValue.convertFromDBModel(syncTasksValuesDB))
+            )
         }
     }
     
@@ -415,6 +488,24 @@ extension AppDatabase {
             return result
         }
     }
+    
+    func createTask(_ task: SyncTask) async throws {
+        try await dbWriter.write { db in
+            _ = try SyncTaskDB(task).insert(db)
+            let taskID = db.lastInsertedRowID
+            for var field in task.fields {
+                field.syncTaskID = UInt32(taskID)
+                _ = try SyncTaskValueDB(field).insert(db)
+            }
+        }
+    }
+    
+    func updateTask(_ task: SyncTask) async throws {
+        try await dbWriter.write { db in
+            _ = try SyncTaskDB(task).update(db)
+        }
+    }
+    
     func updateServerID(
         localID: UInt32,
         modelType: ModelType,
@@ -427,4 +518,12 @@ extension AppDatabase {
         }
     }
     
+    func deleteTask(_ task: SyncTask) async throws {
+        try await dbWriter.write { db in
+            _ = try SyncTaskValueDB
+                .filter(SyncTaskValueDB.Columns.syncTaskID == task.id)
+                .deleteAll(db)
+            _ = try SyncTaskDB(task).delete(db)
+        }
+    }
 }
