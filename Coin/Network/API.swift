@@ -93,7 +93,7 @@ class API {
         do {
             (data, response) = try await URLSession.shared.data(for: request)
         } catch {
-            throw ErrorModel(humanTextError: "Ошибка при запросе к серверу", developerTextError: "\(error)")
+            throw ErrorModel(humanTextError: error.localizedDescription, developerTextError: "\(error)")
         }
         let res = response as! HTTPURLResponse
         
