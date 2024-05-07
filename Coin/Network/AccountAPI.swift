@@ -29,6 +29,10 @@ class AccountAPI: API {
             query: ["dateFrom": dateFrom, "dateTo": dateTo]
         )
         
+        if data.count == 5 {
+            return []
+        }
+        
         return try decode(data, model: [GetAccountsRes].self)
     }
     

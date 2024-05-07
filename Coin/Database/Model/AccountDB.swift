@@ -10,7 +10,7 @@ import GRDB
 
 struct AccountDB {
     
-    var id: UInt32
+    var id: UInt32?
     var accountingInHeader: Bool
     var accountingInCharts: Bool
     var iconID: UInt32
@@ -79,7 +79,7 @@ struct AccountDB {
         self.remainder = res.remainder
         self.type = res.type
         self.visible = res.visible
-        self.parentAccountId = res.parentAccountID
+//        self.parentAccountId = res.parentAccountID
         self.serialNumber = res.serialNumber
         self.isParent = res.isParent
         self.budgetAmount = res.budget.amount
@@ -94,6 +94,9 @@ struct AccountDB {
     // Инициализатор из бизнес модели
     init(_ model: Account) {
         self.id = model.id
+        if self.id == 0 {
+            self.id = nil
+        }
         self.accountingInHeader = model.accountingInHeader
         self.accountingInCharts = model.accountingInCharts
         self.iconID = model.icon.id
@@ -124,8 +127,8 @@ struct AccountDB {
     }
     
     static func compareTwoArrays(_ serverModels: [AccountDB], _ localModels: [AccountDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
-        let serverModels = serverModels.sorted { $0.id < $1.id }
-        let localModels = localModels.sorted { $0.id < $1.id }
+        let serverModels = serverModels.sorted { $0.id! < $1.id! }
+        let localModels = localModels.sorted { $0.id! < $1.id! }
         
         var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
         
@@ -138,8 +141,8 @@ struct AccountDB {
         for (i, serverModel) in serverModels.enumerated() {
             var difference: [String: (server: Any, local: Any)] = [:]
             let localModel = localModels[i]
-            if serverModel.id != localModel.id {
-                difference["id"] = (server: serverModel.id, local: localModel.id)
+            if serverModel.id! != localModel.id {
+                difference["id"] = (server: serverModel.id!, local: localModel.id)
             }
             if serverModel.accountingInHeader != localModel.accountingInHeader {
                 difference["accountingInHeader"] = (server: serverModel.accountingInHeader, local: localModel.accountingInHeader)
@@ -194,7 +197,7 @@ struct AccountDB {
 //            }
             
             if !difference.isEmpty {
-                differences[serverModel.id] = difference
+                differences[serverModel.id!] = difference
             }
         }
         return differences

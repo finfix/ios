@@ -10,7 +10,7 @@ import GRDB
 
 struct AccountGroupDB {
     
-    var id: UInt32
+    var id: UInt32!
     var name: String
     var serialNumber: UInt32
     var currencyCode: String
@@ -32,8 +32,8 @@ struct AccountGroupDB {
     }
     
     static func compareTwoArrays(_ serverModels: [AccountGroupDB], _ localModels: [AccountGroupDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
-        let serverModels = serverModels.sorted { $0.id < $1.id }
-        let localModels = localModels.sorted { $0.id < $1.id }
+        let serverModels = serverModels.sorted { $0.id! < $1.id! }
+        let localModels = localModels.sorted { $0.id! < $1.id! }
         
         var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
         
@@ -45,8 +45,8 @@ struct AccountGroupDB {
         
         for (i, serverModel) in serverModels.enumerated() {
             var difference: [String: (server: Any, local: Any)] = [:]
-            if serverModel.id != localModels[i].id {
-                difference["id"] = (server: serverModel.id, local: localModels[i].id)
+            if serverModel.id! != localModels[i].id {
+                difference["id"] = (server: serverModel.id!, local: localModels[i].id!)
             }
             if serverModel.name != localModels[i].name {
                 difference["name"] = (server: serverModel.name, local: localModels[i].name)
@@ -58,7 +58,7 @@ struct AccountGroupDB {
                 difference["currencyCode"] = (server: serverModel.currencyCode, local: localModels[i].currencyCode)
             }
             if !difference.isEmpty {
-                differences[serverModel.id] = difference
+                differences[serverModel.id!] = difference
             }
         }
         return differences
@@ -67,7 +67,7 @@ struct AccountGroupDB {
 
 // MARK: - Persistence
 extension AccountGroupDB: Codable, FetchableRecord, PersistableRecord {
-    fileprivate enum Columns {
+    enum Columns {
         static let id = Column(CodingKeys.id)
         static let name = Column(CodingKeys.name)
         static let currencyCode = Column(CodingKeys.currencyCode)

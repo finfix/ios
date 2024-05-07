@@ -62,7 +62,7 @@ extension Transaction {
         self.amountFrom = dbModel.amountFrom
         self.amountTo = dbModel.amountTo
         self.dateTransaction = dbModel.dateTransaction
-        self.id = dbModel.id
+        self.id = dbModel.id!
         self.isExecuted = dbModel.isExecuted
         self.note = dbModel.note
         self.type = dbModel.type

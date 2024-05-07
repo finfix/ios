@@ -10,7 +10,7 @@ import GRDB
 
 struct UserDB {
     
-    var id: UInt32
+    var id: UInt32?
     var name: String
     var email: String
     var defaultCurrencyCode: String
@@ -24,8 +24,8 @@ struct UserDB {
     }
     
     static func compareTwoArrays(_ serverModels: [UserDB], _ localModels: [UserDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
-        let serverModels = serverModels.sorted { $0.id < $1.id }
-        let localModels = localModels.sorted { $0.id < $1.id }
+        let serverModels = serverModels.sorted { $0.id! < $1.id! }
+        let localModels = localModels.sorted { $0.id! < $1.id! }
         
         var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
         
@@ -37,8 +37,8 @@ struct UserDB {
         
         for (i, serverModel) in serverModels.enumerated() {
             var difference: [String: (server: Any, local: Any)] = [:]
-            if serverModel.id != localModels[i].id {
-                difference["id"] = (server: serverModel.id, local: localModels[i].id)
+            if serverModel.id! != localModels[i].id {
+                difference["id"] = (server: serverModel.id!, local: localModels[i].id!)
             }
             if serverModel.name != localModels[i].name {
                 difference["name"] = (server: serverModel.name, local: localModels[i].name)
@@ -50,7 +50,7 @@ struct UserDB {
                 difference["defaultCurrencyCode"] = (server: serverModel.defaultCurrencyCode, local: localModels[i].defaultCurrencyCode)
             }
             if !difference.isEmpty {
-                differences[serverModel.id] = difference
+                differences[serverModel.id!] = difference
             }
         }
         return differences
@@ -59,7 +59,7 @@ struct UserDB {
 
 // MARK: - Persistence
 extension UserDB: Codable, FetchableRecord, PersistableRecord {
-    fileprivate enum Columns {
+    enum Columns {
         static let id = Column(CodingKeys.id)
         static let name = Column(CodingKeys.name)
         static let email = Column(CodingKeys.email)

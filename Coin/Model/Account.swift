@@ -108,7 +108,7 @@ struct Account: Identifiable {
          accountGroupsMap: [UInt32: AccountGroup]?,
          iconsMap: [UInt32: Icon]?
     ) {
-        self.id = dbModel.id
+        self.id = dbModel.id!
         self.accountingInHeader = dbModel.accountingInHeader
         self.accountingInCharts = dbModel.accountingInCharts
         self.name = dbModel.name

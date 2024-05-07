@@ -155,9 +155,19 @@ struct LoginView: View {
                     }
                 }
             }
+            .navigationDestination(for: SettingsRoute.self) { screen in
+                switch screen {
+                case .tasksList: TasksList(path: $path)
+                }
+            }
+            .navigationDestination(for: TasksListRoute.self) { screen in
+                switch screen {
+                case .taskDetails(let task): TaskDetails(task: task)
+                }
+            }
             .navigationDestination(for: LoginRoute.self) { screen in
                 switch screen {
-                case .settings: Settings()
+                case .settings: Settings(path: $path)
                 }
             }
         }
@@ -165,7 +175,6 @@ struct LoginView: View {
     }
     
     func auth() async {
-        let password = encryptPassword(password: password, userSalt: login)
         do {
             let response = try await AuthAPI().Auth(req: AuthReq(email: login, password: password))
             accessToken = response.token.accessToken
@@ -178,7 +187,6 @@ struct LoginView: View {
     }
     
     func register() async {
-        let password = encryptPassword(password: password, userSalt: login)
         do {
             let response = try await AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name))
             accessToken = response.token.accessToken

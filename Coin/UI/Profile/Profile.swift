@@ -124,7 +124,7 @@ struct Profile: View {
                 switch screen {
                 case .hidedAccounts: HidedAccountsList(selectedAccountGroup: $selectedAccountGroup, path: $path)
                 case .currencyRates: CurrencyRates()
-                case .settings: Settings()
+                case .settings: Settings(path: $path)
                 }
             }
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
@@ -138,6 +138,16 @@ struct Profile: View {
                 case .editTransaction(let transaction): EditTransaction(transaction, path: $path)
                 }
             }
+            .navigationDestination(for: SettingsRoute.self, destination: { screen in
+                switch screen {
+                case .tasksList: TasksList(path: $path)
+                }
+            })
+            .navigationDestination(for: TasksListRoute.self, destination: { screen in
+                switch screen {
+                case .taskDetails(let task): TaskDetails(task: task)
+                }
+            })
             .toolbar {
                 ToolbarItem {
                     NavigationLink(value: ProfileViews.settings) {

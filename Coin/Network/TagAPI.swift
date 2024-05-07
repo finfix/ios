@@ -18,6 +18,10 @@ class TagAPI: API {
             headers: getBaseHeaders()
         )
         
+        if data.count == 5 {
+            return []
+        }
+        
         return try decode(data, model: [GetTagsRes].self)
     }
     
@@ -27,6 +31,10 @@ class TagAPI: API {
             method: .get,
             headers: getBaseHeaders()
         )
+                
+        if data.count == 5 {
+            return []
+        }
         
         return try decode(data, model: [GetTagsToTransactionsRes].self)
     }

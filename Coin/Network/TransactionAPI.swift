@@ -20,6 +20,10 @@ class TransactionAPI: API {
             headers: getBaseHeaders()
         )
         
+        if data.count == 5 {
+            return []
+        }
+        
         return try decode(data, model: [GetTransactionsRes].self)
         
     }

@@ -26,7 +26,7 @@ struct Icon: Identifiable {
     
     // Инициализатор из модели базы данных
     init(_ dbModel: IconDB) {
-        self.id = dbModel.id
+        self.id = dbModel.id!
         self.name = dbModel.name
         self.url = dbModel.url
     }

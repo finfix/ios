@@ -51,8 +51,8 @@ struct AlertModel: Identifiable {
 class AlertManager {
     let handle: (AlertModel) -> Void
     
-    func callAsFunction(_ error: Error) {
-        logger.error("\(error)")
+    func callAsFunction(_ error: Error, file: String = #file, line: Int = #line) {
+        logger.error("\(file):\(line) \(error)")
         handle(AlertModel(title: "Произошла ошибка", message: error.localizedDescription))
     }
     
