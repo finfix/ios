@@ -13,32 +13,40 @@ class AuthAPI: API {
     let authBasePath = "/auth"
     
     func Auth(req: AuthReq) async throws -> AuthRes {
-        return try await request(
+        let data = try await request(
             url: apiBasePath + authBasePath + "/signIn",
             method: .post,
             headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString], 
-            reqModel: req,
-            resModel: AuthRes.self
+            body: req,
+            handleUnauthorized: false
         )
+        
+        return try decode(data, model: AuthRes.self)
     }
     
     func Register(req: RegisterReq) async throws -> AuthRes {
-        return try await request(
+        let data = try await request(
             url: apiBasePath + authBasePath + "/signUp",
             method: .post,
             headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
-            reqModel: req,
-            resModel: AuthRes.self
+            body: req,
+            handleUnauthorized: false
         )
+        
+        return try decode(data, model: AuthRes.self)
     }
     
     func RefreshToken(req: RefreshTokensReq) async throws -> RefreshTokensRes {
-        return try await request(
+        var headers = try getBaseHeaders()
+        headers["DeviceID"] = await UIDevice.current.identifierForVendor!.uuidString
+        let data = try await request(
             url: apiBasePath + authBasePath + "/refreshTokens",
-            method: .get,
-            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
-            query: ["token": req.token],
-            resModel: RefreshTokensRes.self
+            method: .post,
+            headers: headers,
+            body: req,
+            handleUnauthorized: false
         )
+        
+        return try decode(data, model: RefreshTokensRes.self)
     }
 }

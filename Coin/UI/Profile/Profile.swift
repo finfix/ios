@@ -56,12 +56,8 @@ struct Profile: View {
                 }
                 #endif
                 Section {
-                    Button("Cкрытые счета") {
-                        path.append(ProfileViews.hidedAccounts)
-                    }
-                    Button("Курсы валют") {
-                        path.append(ProfileViews.currencyRates)
-                    }
+                    NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
+                    NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
                 }
                 .buttonStyle(.plain)
                 Section {
@@ -128,7 +124,7 @@ struct Profile: View {
                 switch screen {
                 case .hidedAccounts: HidedAccountsList(selectedAccountGroup: $selectedAccountGroup, path: $path)
                 case .currencyRates: CurrencyRates()
-                case .settings: Settings()
+                case .settings: Settings(path: $path)
                 }
             }
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
@@ -142,11 +138,19 @@ struct Profile: View {
                 case .editTransaction(let transaction): EditTransaction(transaction, path: $path)
                 }
             }
+            .navigationDestination(for: SettingsRoute.self, destination: { screen in
+                switch screen {
+                case .tasksList: TasksList(path: $path)
+                }
+            })
+            .navigationDestination(for: TasksListRoute.self, destination: { screen in
+                switch screen {
+                case .taskDetails(let task): TaskDetails(task: task)
+                }
+            })
             .toolbar {
                 ToolbarItem {
-                    Button {
-                        path.append(ProfileViews.settings)
-                    } label: {
+                    NavigationLink(value: ProfileViews.settings) {
                         Image(systemName: "gearshape")
                     }
                 }

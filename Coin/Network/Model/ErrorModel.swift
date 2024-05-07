@@ -6,17 +6,19 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct ErrorModel: LocalizedError, Decodable {
-    var developerTextError: String = ""
     var humanTextError: String
-    var statusCode: Int?
+    var developerTextError: String = ""
 //    var parameters: [String: String]?
     
     var errorDescription: String? {
         var description = self.humanTextError
         #if DEBUG
-        description += "\n\n" + self.developerTextError
+        if self.developerTextError != "" {
+            description += "\n\n" + self.developerTextError
+        }
         #endif
         return description
     }

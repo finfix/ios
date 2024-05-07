@@ -7,12 +7,17 @@
 
 import SwiftUI
 
+enum SettingsRoute {
+    case tasksList
+}
+
 struct Settings: View {
     
     @Environment(AlertManager.self) var alert
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
     @AppStorage("isDevMode") private var isDevMode = defaultIsDevMode
     @AppStorage("apiBasePath") private var apiBasePath = defaultApiBasePath
+    @Binding var path: NavigationPath
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
@@ -77,6 +82,10 @@ struct Settings: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
+                Section {
+                    NavigationLink("Показать все задачи", value: SettingsRoute.tasksList)
+                }
+                .frame(maxWidth: .infinity)
             }
             Section(footer:
                 VStack {
@@ -100,13 +109,13 @@ struct Settings: View {
             do {
                 try await vm.load()
             } catch {
-                alert(error)
+                
             }
         }
     }
 }
 
 #Preview {
-    Settings()
+    Settings(path: .constant(NavigationPath()))
         .environment(AlertManager(handle: {_ in }))
 }

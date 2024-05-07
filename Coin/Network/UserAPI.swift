@@ -12,10 +12,12 @@ class UserAPI: API {
     let userBasePath = "/user"
     
     func GetUser() async throws -> GetUserRes {
-        return try await request(
+        let data = try await request(
             url: apiBasePath + userBasePath + "/",
             method: .get,
-            headers: getBaseHeaders(),
-            resModel: GetUserRes.self)
+            headers: getBaseHeaders()
+        )
+        
+        return try decode(data, model: GetUserRes.self)
     }
 }

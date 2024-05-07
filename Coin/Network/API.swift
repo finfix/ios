@@ -13,33 +13,17 @@ private let logger = Logger(subsystem: "Coin", category: "API")
 
 class API {
     @AppStorage("apiBasePath") var apiBasePath = defaultApiBasePath
+    @AppStorage("refreshToken") var refreshToken: String?
+    @AppStorage("accessToken") var accessToken: String?
+    @AppStorage("isLogin") var isLogin: Bool = false
 
     func getBaseHeaders() throws -> [String: String] {
-        @AppStorage("accessToken") var accessToken: String?
-        guard let accessToken else { throw RequestError.unauthorized }
+        guard let accessToken else {
+            isLogin = false
+            throw ErrorModel(humanTextError: "AccessToken отсутствует")
+        }
         return ["Authorization": accessToken]
     }
-    
-    enum RequestError: LocalizedError {
-        case invalidURL
-        case serverError(ErrorModel)
-        case decodingError(Error)
-        case encodingError(Error)
-        case requestError(Error)
-        case unauthorized
-        var errorDescription: String? {
-            switch self {
-            case let .serverError(model):
-                return model.humanTextError
-            default:
-                return nil
-            }
-        }
-    }
-        
-    private let defaultDateFormatter: DateFormatter = {
-        return DateFormatters.fullTime
-    }()
     
     enum Method: String {
         case get = "GET"
@@ -49,206 +33,14 @@ class API {
         case put = "PUT"
     }
         
-    func request<T: Encodable, TT: Decodable>(
-        url urlString: String,
-        method: Method = .get,
-        headers: [String: String] = [:],
-        query: [String: String] = [:],
-        reqModel: T,
-        resModel: TT.Type
-    ) async throws -> TT {
-        
-        // Адрес
-        var urlComponents = URLComponents(string: urlString)
-        
-        // Параметры строки
-        if query != [:] {
-            var urlQueryItems: [URLQueryItem] = []
-            query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
-            urlComponents?.queryItems = urlQueryItems
-        }
-        
-        guard let url = urlComponents?.url else { throw RequestError.invalidURL }
-        
-        // Запрос
-        var request = URLRequest(url: url)
-        
-        // Метод
-        request.httpMethod = method.rawValue
-        
-        // Заголовки
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
-                
-        // Тело
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .formatted(self.defaultDateFormatter)
-            request.httpBody = try encoder.encode(reqModel)
-        } catch {
-            throw RequestError.encodingError(error)
-        }
-                
-        var data = Data()
-        var response = URLResponse()
-        
-        do {
-            (data, response) = try await URLSession.shared.data(for: request)
-        } catch {
-            throw RequestError.requestError(error)
-        }
-        let res = response as! HTTPURLResponse
-        
-        switch res.statusCode {
-        case 200:
-            // Декодируем ответ, если передан тип
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .formatted(self.defaultDateFormatter)
-            do {
-                return try decoder.decode(resModel.self, from: data)
-            } catch {
-                throw RequestError.decodingError(error)
-            }
-        default:
-            let errorModel = try JSONDecoder().decode(ErrorModel.self, from: data)
-            throw RequestError.serverError(errorModel)
-        }
-    }
-    
-    func request<T: Encodable>(
-        url urlString: String,
-        method: Method = .get,
-        headers: [String: String] = [:],
-        query: [String: String] = [:],
-        reqModel: T
-    ) async throws {
-        
-        // Адрес
-        var urlComponents = URLComponents(string: urlString)
-        
-        // Параметры строки
-        if !query.isEmpty {
-            var urlQueryItems: [URLQueryItem] = []
-            query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
-            urlComponents?.queryItems = urlQueryItems
-        }
-        
-        guard let url = urlComponents?.url else { throw RequestError.invalidURL }
-        
-        // Запрос
-        var request = URLRequest(url: url)
-        
-        // Метод
-        request.httpMethod = method.rawValue
-        
-        // Заголовки
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
-                
-        // Тело
-        do {
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .formatted(self.defaultDateFormatter)
-            request.httpBody = try encoder.encode(reqModel)
-        } catch {
-            throw RequestError.encodingError(error)
-        }
-                
-        var data = Data()
-        var response = URLResponse()
-        
-        do {
-            (data, response) = try await URLSession.shared.data(for: request)
-        } catch {
-            throw RequestError.requestError(error)
-        }
-        let res = response as! HTTPURLResponse
-        
-        switch res.statusCode {
-        case 200:
-            return
-        default:
-            let errorModel = try JSONDecoder().decode(ErrorModel.self, from: data)
-            throw RequestError.serverError(errorModel)
-        }
-    }
-    
-    func download(url: String) async throws -> Data {
-        // Адрес
-        var urlComponents = URLComponents(string: url)
-        guard let url = urlComponents?.url else { throw RequestError.invalidURL }
-        var request = URLRequest(url: url)
-        var data = Data()
-        do {
-            (data, _) = try await URLSession.shared.data(for: request)
-        } catch {
-            throw RequestError.requestError(error)
-        }
-        return data
-    }
-    
-    func request<TT: Decodable>(
-        url urlString: String,
-        method: Method = .get,
-        headers: [String: String] = [:],
-        query: [String: String] = [:],
-        resModel: TT.Type
-    ) async throws -> TT {
-        
-        // Адрес
-        var urlComponents = URLComponents(string: urlString)
-        
-        // Параметры строки
-        if query != [:] {
-            var urlQueryItems: [URLQueryItem] = []
-            query.forEach { urlQueryItems.append(URLQueryItem(name: $0, value: $1)) }
-            urlComponents?.queryItems = urlQueryItems
-        }
-        
-        guard let url = urlComponents?.url else { throw RequestError.invalidURL }
-        
-        // Запрос
-        var request = URLRequest(url: url)
-        
-        // Метод
-        request.httpMethod = method.rawValue
-        
-        // Заголовки
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
-                
-        var data = Data()
-        var response = URLResponse()
-        
-        do {
-            (data, response) = try await URLSession.shared.data(for: request)
-        } catch {
-            throw RequestError.requestError(error)
-        }
-        let res = response as! HTTPURLResponse
-        
-        switch res.statusCode {
-        case 200:
-            // Декодируем ответ, если передан тип
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .formatted(self.defaultDateFormatter)
-            do {
-                return try decoder.decode(resModel.self, from: data)
-            } catch {
-                throw RequestError.decodingError(error)
-            }
-        default:
-            let errorModel = try JSONDecoder().decode(ErrorModel.self, from: data)
-            throw RequestError.serverError(errorModel)
-        }
-    }
-    
     func request(
         url urlString: String,
-        method: Method = .get,
+        method: Method,
         headers: [String: String] = [:],
-        query: [String: String] = [:]
-    ) async throws {
+        query: [String: String] = [:],
+        body: Encodable? = nil,
+        handleUnauthorized: Bool = true
+    ) async throws -> Data {
         
         // Адрес
         var urlComponents = URLComponents(string: urlString)
@@ -260,7 +52,7 @@ class API {
             urlComponents?.queryItems = urlQueryItems
         }
         
-        guard let url = urlComponents?.url else { throw RequestError.invalidURL }
+        guard let url = urlComponents?.url else { throw ErrorModel(humanTextError: "Невалидный URL") }
         
         // Запрос
         var request = URLRequest(url: url)
@@ -272,22 +64,92 @@ class API {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
                 
+        // Тело
+        if let body {
+            do {
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .formatted(DateFormatters.fullTime)
+                request.httpBody = try encoder.encode(body)
+            } catch {
+                throw ErrorModel(humanTextError: "Ошибка при преобразовании структуры в JSON", developerTextError: "\(error)")
+            }
+        }
+                
+        return try await httpRequest(
+            request: request,
+            handleUnauthorized: handleUnauthorized
+        )
+    }
+    
+    private func httpRequest(
+        request: URLRequest,
+        handleUnauthorized: Bool
+    ) async throws -> Data {
+        var request = request
+        
         var data = Data()
         var response = URLResponse()
         
         do {
             (data, response) = try await URLSession.shared.data(for: request)
         } catch {
-            throw RequestError.requestError(error)
+            throw ErrorModel(humanTextError: error.localizedDescription, developerTextError: "\(error)")
         }
         let res = response as! HTTPURLResponse
         
         switch res.statusCode {
         case 200:
-            return
+            return data
+        case 401:
+            guard handleUnauthorized else {
+                isLogin = false
+                throw try decodeError(data)
+            }
+            
+            request.setValue(try await getNewTokens(), forHTTPHeaderField: "Authorization")
+            
+            return try await httpRequest(
+                request: request,
+                handleUnauthorized: false
+            )
+            
         default:
-            let errorModel = try JSONDecoder().decode(ErrorModel.self, from: data)
-            throw RequestError.serverError(errorModel)
+            throw try decodeError(data)
+        }
+    }
+    
+    private func getNewTokens() async throws -> String {
+        guard let refreshToken else {
+            throw ErrorModel(humanTextError: "Refresh token отсутствует")
+        }
+        let tokens = try await AuthAPI().RefreshToken(req: RefreshTokensReq(token: refreshToken))
+        self.refreshToken = tokens.refreshToken
+        self.accessToken = tokens.accessToken
+        return tokens.accessToken
+    }
+    
+    private func decodeError(
+        _ data: Data
+    ) throws -> ErrorModel {
+        do {
+            return try JSONDecoder().decode(ErrorModel.self, from: data)
+        } catch {
+            throw ErrorModel(humanTextError: "Ошибка декодирования", developerTextError: "\(error)")
+        }
+    }
+     
+    func decode<T: Decodable>(
+        _ data: Data,
+        model: T.Type
+    ) throws -> T {
+        
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(DateFormatters.fullTime)
+        
+        do {
+            return try decoder.decode(model.self, from: data)
+        } catch {
+            throw ErrorModel(humanTextError: "Ошибка декодирования", developerTextError: "\(error)")
         }
     }
 }

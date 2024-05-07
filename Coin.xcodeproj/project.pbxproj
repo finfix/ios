@@ -39,10 +39,14 @@
 		B54F3DB42BD57D8900780460 /* EditTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB32BD57D8900780460 /* EditTag.swift */; };
 		B54F3DB62BD57DBB00780460 /* EditTagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */; };
 		B557AA0E290D959F00631421 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
+		B55EF9DB2BE274D3003C8882 /* TransactionFilterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */; };
+		B55EF9DD2BE2CFF5003C8882 /* Hasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
 		B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
 		B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56361A32B04FC000044CDD8 /* AppTabView.swift */; };
+		B56FB60F2BEA268300CBFB1E /* IDMappingDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */; };
+		B56FB6112BEA343A00CBFB1E /* SyncTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56FB6102BEA343A00CBFB1E /* SyncTask.swift */; };
 		B5744E982BD29180004C9AC7 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */; };
 		B5744E9B2BD29267004C9AC7 /* SettingsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */; };
 		B5744E9D2BD29276004C9AC7 /* SettingsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */; };
@@ -92,6 +96,11 @@
 		B5E6C1942AF2AF9500097067 /* CurrencyRates.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */; };
 		B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8932F28FF090B002AC30C /* SnapCarousel.swift */; };
 		B5E89332290073C5002AC30C /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E89331290073C5002AC30C /* LoginView.swift */; };
+		B5F4C3EB2BDF6CAC007CCFC9 /* TaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4C3EA2BDF6CAC007CCFC9 /* TaskManager.swift */; };
+		B5F4C3ED2BDF6DCD007CCFC9 /* SyncTaskDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4C3EC2BDF6DCD007CCFC9 /* SyncTaskDB.swift */; };
+		B5F4C3EF2BDF9A36007CCFC9 /* TasksList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4C3EE2BDF9A36007CCFC9 /* TasksList.swift */; };
+		B5F4C3F12BDF9B82007CCFC9 /* TasksListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4C3F02BDF9B82007CCFC9 /* TasksListViewModel.swift */; };
+		B5F4C3F52BDFA233007CCFC9 /* TaskDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4C3F42BDFA233007CCFC9 /* TaskDetails.swift */; };
 		B5F595902B56C3A5004D57A4 /* CheckmarkPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F5958F2B56C3A5004D57A4 /* CheckmarkPopover.swift */; };
 		B5F595922B56D35F004D57A4 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F595912B56D35F004D57A4 /* Settings.swift */; };
 		B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F9CC6228F01CA80037A21A /* CoinApp.swift */; };
@@ -136,10 +145,14 @@
 		B54F3DB32BD57D8900780460 /* EditTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTag.swift; sourceTree = "<group>"; };
 		B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTagViewModel.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+		B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterViewModel.swift; sourceTree = "<group>"; };
+		B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hasher.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
 		B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsList.swift; sourceTree = "<group>"; };
 		B56361A32B04FC000044CDD8 /* AppTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTabView.swift; sourceTree = "<group>"; };
+		B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDMappingDB.swift; sourceTree = "<group>"; };
+		B56FB6102BEA343A00CBFB1E /* SyncTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTask.swift; sourceTree = "<group>"; };
 		B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAPI.swift; sourceTree = "<group>"; };
 		B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModels.swift; sourceTree = "<group>"; };
@@ -188,6 +201,11 @@
 		B5E6C1932AF2AF9500097067 /* CurrencyRates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyRates.swift; sourceTree = "<group>"; };
 		B5E8932F28FF090B002AC30C /* SnapCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapCarousel.swift; sourceTree = "<group>"; };
 		B5E89331290073C5002AC30C /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		B5F4C3EA2BDF6CAC007CCFC9 /* TaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskManager.swift; sourceTree = "<group>"; };
+		B5F4C3EC2BDF6DCD007CCFC9 /* SyncTaskDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTaskDB.swift; sourceTree = "<group>"; };
+		B5F4C3EE2BDF9A36007CCFC9 /* TasksList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksList.swift; sourceTree = "<group>"; };
+		B5F4C3F02BDF9B82007CCFC9 /* TasksListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksListViewModel.swift; sourceTree = "<group>"; };
+		B5F4C3F42BDFA233007CCFC9 /* TaskDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskDetails.swift; sourceTree = "<group>"; };
 		B5F5958F2B56C3A5004D57A4 /* CheckmarkPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckmarkPopover.swift; sourceTree = "<group>"; };
 		B5F595912B56D35F004D57A4 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		B5F595932B56DBBE004D57A4 /* Coin.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Coin.entitlements; sourceTree = "<group>"; };
@@ -246,6 +264,8 @@
 				B5744EA22BD2A579004C9AC7 /* IconDB.swift */,
 				B5744EA92BD2DD7A004C9AC7 /* TagDB.swift */,
 				B5744EAB2BD2DDC0004C9AC7 /* TagToTransactionDB.swift */,
+				B5F4C3EC2BDF6DCD007CCFC9 /* SyncTaskDB.swift */,
+				B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -254,6 +274,7 @@
 			isa = PBXGroup;
 			children = (
 				B51CE1EA2BAC37A000682D48 /* Service.swift */,
+				B5F4C3EA2BDF6CAC007CCFC9 /* TaskManager.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -327,6 +348,7 @@
 				B5CF7D332AE57A9B0086C0B6 /* CurrencyFormatter.swift */,
 				B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */,
 				B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */,
+				B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */,
 			);
 			path = Pkg;
 			sourceTree = "<group>";
@@ -365,6 +387,7 @@
 				B5B068EB2BAC6E2600AEEC98 /* User.swift */,
 				B5744EA02BD2A4BA004C9AC7 /* Icon.swift */,
 				B5744EAD2BD2DE41004C9AC7 /* Tag.swift */,
+				B56FB6102BEA343A00CBFB1E /* SyncTask.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -380,6 +403,9 @@
 				B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */,
 				B5F595912B56D35F004D57A4 /* Settings.swift */,
 				B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */,
+				B5F4C3EE2BDF9A36007CCFC9 /* TasksList.swift */,
+				B5F4C3F02BDF9B82007CCFC9 /* TasksListViewModel.swift */,
+				B5F4C3F42BDFA233007CCFC9 /* TaskDetails.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -465,6 +491,7 @@
 				B593F9542AE1CCB000378E17 /* EditTransaction.swift */,
 				B51710092BB2E6BF00950EE0 /* EditTransactionViewModel.swift */,
 				B54254842AF5218C008ECC33 /* TransactionFilterView.swift */,
+				B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */,
 				B54F3DAF2BD579FA00780460 /* TagsList.swift */,
 				B54F3DB12BD57A0700780460 /* TagsListViewModel.swift */,
 				B54F3DB32BD57D8900780460 /* EditTag.swift */,
@@ -565,15 +592,18 @@
 				B5D143B82906B4F800875037 /* AccountAPI.swift in Sources */,
 				B54F3DB42BD57D8900780460 /* EditTag.swift in Sources */,
 				B51CE1F22BAC403800682D48 /* AccountGroupDB.swift in Sources */,
+				B55EF9DD2BE2CFF5003C8882 /* Hasher.swift in Sources */,
 				B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */,
 				B50DBAD72BCD8CD900A58B53 /* ChartTab.swift in Sources */,
 				B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */,
 				B5B707242BA59A3700A07DB6 /* AppDatabase.swift in Sources */,
+				B5F4C3F52BDFA233007CCFC9 /* TaskDetails.swift in Sources */,
 				B557AA0E290D959F00631421 /* API.swift in Sources */,
 				B54F3DB22BD57A0700780460 /* TagsListViewModel.swift in Sources */,
 				B54F3DB62BD57DBB00780460 /* EditTagViewModel.swift in Sources */,
 				B5744E9D2BD29276004C9AC7 /* SettingsModels.swift in Sources */,
 				B5B068EC2BAC6E2600AEEC98 /* User.swift in Sources */,
+				B5F4C3ED2BDF6DCD007CCFC9 /* SyncTaskDB.swift in Sources */,
 				B5B068E42BAC6DD800AEEC98 /* Account.swift in Sources */,
 				B5024EB22AE1A20F00F60449 /* EditAccount.swift in Sources */,
 				B517100C2BB3218200950EE0 /* BudgetsListViewModel.swift in Sources */,
@@ -585,6 +615,7 @@
 				B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */,
 				B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */,
 				B5744EAC2BD2DDC0004C9AC7 /* TagToTransactionDB.swift in Sources */,
+				B55EF9DB2BE274D3003C8882 /* TransactionFilterViewModel.swift in Sources */,
 				B51CE1F02BAC3FB100682D48 /* AccountDB.swift in Sources */,
 				B51CE1EB2BAC37A000682D48 /* Service.swift in Sources */,
 				B5744EAA2BD2DD7A004C9AC7 /* TagDB.swift in Sources */,
@@ -595,6 +626,7 @@
 				B5CF7D342AE57A9B0086C0B6 /* CurrencyFormatter.swift in Sources */,
 				B5744EA62BD2DA9B004C9AC7 /* TagAPI.swift in Sources */,
 				B504B7E52AE46EEB0078643A /* UserAPI.swift in Sources */,
+				B5F4C3F12BDF9B82007CCFC9 /* TasksListViewModel.swift in Sources */,
 				B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* AccountGroupSelector.swift in Sources */,
 				B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */,
@@ -613,6 +645,7 @@
 				B5F9CC6328F01CA80037A21A /* CoinApp.swift in Sources */,
 				B5C0C31C2AEAD9E70016990E /* HidedAccountsList.swift in Sources */,
 				B58CAB2C2BD02E0700B472FA /* TransactionsView.swift in Sources */,
+				B56FB6112BEA343A00CBFB1E /* SyncTask.swift in Sources */,
 				B5D6DE262BB1DBA800A06D67 /* TransactionsListViewModel.swift in Sources */,
 				B57A6B872BBAC37200BDDEFE /* HidedAccountListViewModel.swift in Sources */,
 				B593F9552AE1CCB000378E17 /* EditTransaction.swift in Sources */,
@@ -622,17 +655,20 @@
 				B5E6C1942AF2AF9500097067 /* CurrencyRates.swift in Sources */,
 				B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
+				B56FB60F2BEA268300CBFB1E /* IDMappingDB.swift in Sources */,
 				B5744EA12BD2A4BA004C9AC7 /* Icon.swift in Sources */,
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
 				B51CE1F82BAC431700682D48 /* AccountPermissions.swift in Sources */,
 				B51CE1F42BAC40BB00682D48 /* CurrencyDB.swift in Sources */,
 				B5744EA82BD2DAC5004C9AC7 /* TagModels.swift in Sources */,
 				B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */,
+				B5F4C3EF2BDF9A36007CCFC9 /* TasksList.swift in Sources */,
 				B5FF351E2AEC091F007694F9 /* Defaults.swift in Sources */,
 				B504B7E72AE526DA0078643A /* PlusNewAccount.swift in Sources */,
 				B5B950592ADF274E00798F8C /* AccountCard.swift in Sources */,
 				B5F595902B56C3A5004D57A4 /* CheckmarkPopover.swift in Sources */,
 				B51CE1F62BAC40F600682D48 /* UserDB.swift in Sources */,
+				B5F4C3EB2BDF6CAC007CCFC9 /* TaskManager.swift in Sources */,
 				B5B9504F2ADF235A00798F8C /* Profile.swift in Sources */,
 				B514D4922BA477A30019AED6 /* Persistense.swift in Sources */,
 				B5D6DE222BB1D21E00A06D67 /* AccountHomeViewModel.swift in Sources */,
@@ -800,7 +836,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ilyaivanov.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -838,7 +874,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ilyaivanov.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

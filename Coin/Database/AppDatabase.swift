@@ -48,9 +48,9 @@ extension AppDatabase {
     private var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
         
-//        #if DEBUG
+        #if DEBUG
         migrator.eraseDatabaseOnSchemaChange = true
-//        #endif
+        #endif
         
         migrator.registerMigration("createCurrency") { db in
             try db.create(table: "currencyDB") { table in
@@ -67,8 +67,8 @@ extension AppDatabase {
             
             try db.create(table: "userDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("name", .text)
                     .notNull()
                 table.column("email", .text)
@@ -80,8 +80,8 @@ extension AppDatabase {
             
             try db.create(table: "accountGroupDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("name", .text)
                     .notNull()
                 table.column("serialNumber", .integer)
@@ -93,8 +93,8 @@ extension AppDatabase {
             
             try db.create(table: "iconDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("url", .text)
                     .notNull()
                 table.column("name", .text)
@@ -103,8 +103,8 @@ extension AppDatabase {
             
             try db.create(table: "accountDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("accountingInHeader", .boolean)
                     .notNull()
                 table.column("accountingInCharts", .boolean)
@@ -143,8 +143,8 @@ extension AppDatabase {
             
             try db.create(table: "transactionDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("accounting", .boolean)
                     .notNull()
                 table.column("amountFrom", .text)
@@ -170,8 +170,8 @@ extension AppDatabase {
             
             try db.create(table: "tagDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("name", .text)
                     .notNull()
                 table.column("datetimeCreate", .date)
@@ -187,6 +187,44 @@ extension AppDatabase {
                 table.belongsTo("transaction", inTable: "transactionDB")
                 
                 table.primaryKey(["tagId", "transactionId"])
+            }
+            
+            try db.create(table: "syncTaskDB") { table in
+                
+                table.autoIncrementedPrimaryKey("id")
+                
+                table.column("localID", .integer)
+                    .notNull()
+                table.column("actionName", .text)
+                    .notNull()
+                table.column("tryCount", .integer)
+                    .notNull()
+                table.column("enabled", .boolean)
+                    .notNull()
+                table.column("error", .text)
+            }
+            
+            try db.create(table: "syncTaskValueDB") { table in
+                
+                table.autoIncrementedPrimaryKey("id")
+                                
+                table.column("objectType", .text)
+                table.column("name", .text)
+                    .notNull()
+                table.column("value", .text)
+                
+                table.belongsTo("syncTask", inTable: "syncTaskDB")
+
+            }
+            
+            try db.create(table: "idMappingDB") { table in
+                table.column("localID", .integer)
+                    .notNull()
+                table.column("serverID", .integer)
+                table.column("modelType", .text)
+                    .notNull()
+                
+                table.primaryKey(["localID", "serverID", "modelType"])
             }
         }
         

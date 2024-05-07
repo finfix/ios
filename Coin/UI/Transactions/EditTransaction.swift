@@ -153,14 +153,14 @@ struct EditTransaction: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            if vm.currentTransaction.id != 0 {
-                Section(footer: 
-                    VStack(alignment: .leading) {
-                        Text("ID: \(vm.currentTransaction.id)")
-                        Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
-                    }
-                ) {}
-			}
+            
+            Section(footer:
+                VStack(alignment: .leading) {
+                    Text("ID: \(vm.currentTransaction.id)")
+                    Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
+                }
+            ) {}
+			
         }
         .task {
             do {

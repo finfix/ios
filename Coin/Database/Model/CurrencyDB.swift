@@ -67,7 +67,7 @@ struct CurrencyDB {
 
 // MARK: - Persistence
 extension CurrencyDB: Codable, FetchableRecord, PersistableRecord {
-    fileprivate enum Columns {
+    enum Columns {
         static let code = Column(CodingKeys.code)
         static let name = Column(CodingKeys.name)
         static let rate = Column(CodingKeys.rate)

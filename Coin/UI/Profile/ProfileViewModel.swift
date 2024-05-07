@@ -15,7 +15,6 @@ class ProfileViewModel {
         do {
             try await service.sync()
         } catch {
-            try await service.deleteAllData()
             throw error
         }
     }

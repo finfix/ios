@@ -14,6 +14,7 @@ private let logger = Logger(subsystem: "Coin", category: "Service")
 @Observable
 class Service {
     private let db = AppDatabase.shared
+    private let taskManager = TaskManager.shared
     
     static let shared = makeShared()
     static func makeShared() -> Service {
@@ -46,6 +47,14 @@ extension Service {
     
     func getCurrencies() async throws -> [Currency] {
         return Currency.convertFromDBModel(try await db.getCurrencies())
+    }
+    
+    func getSyncTasks() async throws -> [SyncTask] {
+        return try await db.getSyncTasks()
+    }
+    
+    func getCountTasks() async throws -> UInt32 {
+        return try await db.getCountTasks()
     }
     
     func deleteAllData() async throws {
@@ -99,7 +108,9 @@ extension Service {
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
-        accountIDs: [UInt32] = []
+        accountIDs: [UInt32] = [],
+        transactionType: TransactionType? = nil,
+        currency: Currency? = nil
     ) async throws -> [Transaction] {
         
         let dateFrom: Date? = dateFrom?.stripTime()
@@ -117,7 +128,9 @@ extension Service {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 searchText: searchText,
-                accountIDs: accountIDs
+                accountIDs: accountIDs,
+                transactionType: transactionType,
+                currency: currency
             ),
             accountsMap: accountsMap,
             tagsToTransactions: tagsToTransactions,
@@ -127,22 +140,22 @@ extension Service {
     
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
     func deleteTransaction(_ transaction: Transaction) async throws {
-        try await TransactionAPI().DeleteTransaction(req: DeleteTransactionReq(id: transaction.id))
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask {
-                try await self.db.deleteTransaction(transaction)
-            }
-            group.addTask {
-                try await self.recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
-            }
-            
-            try await group.waitForAll()
-        }
+        try await self.db.deleteTransaction(transaction)
+        try await self.recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
+        taskManager.createTask(
+            actionName: .deleteTransaction,
+            localObjectID: transaction.id,
+            reqModel: DeleteTransactionReq(id: transaction.id)
+        )
     }
     
     func deleteTag(_ tag: Tag) async throws {
-        try await TagAPI().DeleteTag(req: DeleteTagReq(id: tag.id))
         try await self.db.deleteTag(tag)
+        taskManager.createTask(
+            actionName: .deleteTag,
+            localObjectID: tag.id,
+            reqModel: DeleteTagReq(id: tag.id)
+        )
     }
     
     func createAccount(_ account: Account) async throws {
@@ -151,29 +164,30 @@ extension Service {
         account.remainder = account.remainder.round(factor: 6)
         
         try validateAccount(account)
+                
+        let id = try await db.createAccount(account)
         
-        let accountRes = try await AccountAPI().CreateAccount(req: CreateAccountReq(
-            accountGroupID: account.accountGroup.id,
-            accountingInHeader: account.accountingInHeader,
-            accountingInCharts: account.accountingInCharts,
-            budget: CreateAccountBudgetReq (
-                amount: account.budgetAmount,
-                gradualFilling: account.budgetGradualFilling
-            ),
-            currency: account.currency.code,
-            iconID: account.icon.id,
-            name: account.name,
-            remainder: account.remainder != 0 ? account.remainder : nil,
-            type: account.type.rawValue,
-            isParent: account.isParent,
-            parentAccountID: account.parentAccountID,
-            datetimeCreate: account.datetimeCreate
+        taskManager.createTask(
+            actionName: .createAccount,
+            localObjectID: id,
+            reqModel: CreateAccountReq(
+                accountGroupID: account.accountGroup.id,
+                accountingInHeader: account.accountingInHeader,
+                accountingInCharts: account.accountingInCharts,
+                budget: CreateAccountBudgetReq (
+                    amount: account.budgetAmount,
+                    gradualFilling: account.budgetGradualFilling
+                ),
+                currency: account.currency.code,
+                iconID: account.icon.id,
+                name: account.name,
+                remainder: account.remainder != 0 ? account.remainder : nil,
+                type: account.type.rawValue,
+                isParent: account.isParent,
+                parentAccountID: account.parentAccountID,
+                datetimeCreate: account.datetimeCreate
+            )
         )
-        )
-        account.id = accountRes.id
-        account.serialNumber = accountRes.serialNumber
-        
-        try await db.createAccount(account)
     }
     
     private func validateAccount(_ account: Account) throws {
@@ -218,24 +232,8 @@ extension Service {
         }
         
         try validateAccount(newAccount)
-
-        // Обновляем счет на сервере
-        let updateAccountRes = try await AccountAPI().UpdateAccount(req: UpdateAccountReq(
-            id: newAccount.id,
-            accountingInHeader: oldAccount.accountingInHeader != newAccount.accountingInHeader ? newAccount.accountingInHeader : nil,
-            accountingInCharts: oldAccount.accountingInCharts != newAccount.accountingInCharts ? newAccount.accountingInCharts : nil,
-            name: oldAccount.name != newAccount.name ? newAccount.name : nil,
-            remainder: oldAccount.remainder != newAccount.remainder ? newAccount.remainder : nil,
-            visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
-            currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
-            parentAccountID: parentAccountIDToReq,
-            iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
-            budget: UpdateBudgetReq(
-                amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
-                fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
-                daysOffset: oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ? newAccount.budgetDaysOffset : nil,
-                gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
-        ))
+        
+        var addictionalMapping: [String: UInt32] = [:]
         
         // Если изменился баланс счета
         if oldAccount.remainder != newAccount.remainder {
@@ -261,17 +259,8 @@ extension Service {
                     throw ErrorModel(humanTextError: "Не смогли найти родительский балансировочный счет для группы счетов \(newAccount.accountGroup.id)")
                 }
                 
-                guard updateAccountRes.balancingAccountID != nil && updateAccountRes.balancingAccountSerialNumber != nil else {
-                    throw ErrorModel(humanTextError: "На сервере не создавался балансировочный счет")
-                }
-                
-                guard updateAccountRes.balancingTransactionID != nil else {
-                    throw ErrorModel(humanTextError: "На сервере не создавалась балансировочная транзакция")
-                }
-                                
                 // Создаем и получаем балансировочный счет группы счетов
-                balancingAccount = Account.convertFromDBModel(try await [db.createAccountAndReturn(Account(
-                    id: updateAccountRes.balancingAccountID!,
+                addictionalMapping["balancingAccountID"] = try await db.createAccount(Account(
                     accountingInHeader: true,
                     accountingInCharts: true,
                     icon: Icon(),
@@ -279,7 +268,7 @@ extension Service {
                     remainder: 0,
                     type: .balancing,
                     visible: true,
-                    serialNumber: updateAccountRes.balancingAccountSerialNumber!,
+                    serialNumber: 0,
                     isParent: false,
                     budgetAmount: 0,
                     showingBudgetAmount: 0,
@@ -290,11 +279,10 @@ extension Service {
                     accountGroup: newAccount.accountGroup,
                     currency: newAccount.currency,
                     childrenAccounts: []
-                ))], currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil).first
+                ))
             }
             
-            try await db.createTransaction(Transaction(
-                id: updateAccountRes.balancingTransactionID!,
+            addictionalMapping["balancingTransactionID"] = try await db.createTransaction(Transaction(
                 accounting: true,
                 amountFrom: newAccount.remainder-oldAccount.remainder,
                 amountTo: newAccount.remainder-oldAccount.remainder,
@@ -350,11 +338,32 @@ extension Service {
         }
         
         try await db.updateAccount(newAccount)
+        
+        taskManager.createTask(
+            actionName: .updateAccount,
+            localObjectID: newAccount.id,
+            reqModel: UpdateAccountReq(
+                id: newAccount.id,
+                accountingInHeader: oldAccount.accountingInHeader != newAccount.accountingInHeader ? newAccount.accountingInHeader : nil,
+                accountingInCharts: oldAccount.accountingInCharts != newAccount.accountingInCharts ? newAccount.accountingInCharts : nil,
+                name: oldAccount.name != newAccount.name ? newAccount.name : nil,
+                remainder: oldAccount.remainder != newAccount.remainder ? newAccount.remainder : nil,
+                visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
+                currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
+                parentAccountID: parentAccountIDToReq,
+                iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
+                budget: UpdateBudgetReq(
+                    amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
+                    fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
+                    daysOffset: oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ? newAccount.budgetDaysOffset : nil,
+                    gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
+            ),
+            addictionalMapping: addictionalMapping
+        )
     }
     
     func deleteAccount(_ account: Account) async throws {
         
-        try await AccountAPI().DeleteAccount(req: DeleteAccountReq(id: account.id))
         
         // Если у счета есть дочерние счета
         for childAccount in account.childrenAccounts {
@@ -365,20 +374,30 @@ extension Service {
         
         // Удаляем счет
         try await db.deleteAccount(account)
+        
+        taskManager.createTask(
+            actionName: .deleteAccount,
+            localObjectID: account.id,
+            reqModel: DeleteAccountReq(id: account.id)
+        )
     }
     
     func createTag(_ tag: Tag) async throws {
         var tag = tag
         
         tag.datetimeCreate = Date.now
+                
+        let id = try await db.createTag(tag)
         
-        tag.id = try await TagAPI().CreateTag(req: CreateTagReq(
-            name: tag.name,
-            accountGroupID: tag.accountGroup.id,
-            datetimeCreate: tag.datetimeCreate
-        ))
-        
-        try await db.createTag(tag)
+        taskManager.createTask(
+            actionName: .createTag,
+            localObjectID: id,
+            reqModel: CreateTagReq(
+                name: tag.name,
+                accountGroupID: tag.accountGroup.id,
+                datetimeCreate: tag.datetimeCreate
+            )
+        )
     }
     
     private func validateTransaction(_ transaction: Transaction) throws {
@@ -406,23 +425,28 @@ extension Service {
         
         try validateTransaction(transaction)
         
-        transaction.id = try await TransactionAPI().CreateTransaction(req: CreateTransactionReq(
-            accountFromID: transaction.accountFrom.id,
-            accountToID: transaction.accountTo.id,
-            amountFrom: transaction.amountFrom,
-            amountTo: transaction.amountTo,
-            dateTransaction: transaction.dateTransaction,
-            note: transaction.note,
-            type: transaction.type.rawValue,
-            isExecuted: true,
-            tagIDs: tagIDs,
-            datetimeCreate: transaction.datetimeCreate
-        ))
-        
-        try await db.createTransaction(transaction)
+        let id = try await db.createTransaction(transaction)
+        transaction.id = id
         try await recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
         try await db.linkTagsToTransaction(transaction.tags, transaction: transaction)
-    }
+
+        taskManager.createTask(
+            actionName: .createTransaction,
+            localObjectID: id,
+            reqModel: CreateTransactionReq(
+                accountFromID: transaction.accountFrom.id,
+                accountToID: transaction.accountTo.id,
+                amountFrom: transaction.amountFrom,
+                amountTo: transaction.amountTo,
+                dateTransaction: transaction.dateTransaction,
+                note: transaction.note,
+                type: transaction.type.rawValue,
+                isExecuted: true,
+                tagIDs: tagIDs,
+                datetimeCreate: transaction.datetimeCreate
+            )
+        )
+}
         
     func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = transaction
@@ -448,16 +472,6 @@ extension Service {
         
         try validateTransaction(transaction)
         
-        try await TransactionAPI().UpdateTransaction(req: UpdateTransactionReq(
-            accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
-            accountToID: newTransaction.accountTo.id != oldTransaction.accountTo.id ? newTransaction.accountTo.id : nil,
-            amountFrom: newTransaction.amountFrom != oldTransaction.amountFrom ? newTransaction.amountFrom : nil,
-            amountTo: newTransaction.amountTo != oldTransaction.amountTo ? newTransaction.amountTo : nil,
-            dateTransaction: newTransaction.dateTransaction != oldTransaction.dateTransaction ? newTransaction.dateTransaction : nil,
-            note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
-            tagIDs: oldTransactionTagIDs != newTransactionTagIDs ? newTransactionTagIDs : nil,
-            id: newTransaction.id))
-        
         try await db.updateTransaction(newTransaction)
         try await recalculateAccountBalance([oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
         
@@ -468,6 +482,19 @@ extension Service {
         if !tagsToInsert.isEmpty {
             try await db.linkTagsToTransaction(tagsToInsert, transaction: transaction)
         }
+        
+        taskManager.createTask(
+            actionName: .updateTransaction,
+            localObjectID: newTransaction.id,
+            reqModel: UpdateTransactionReq(
+            accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
+            accountToID: newTransaction.accountTo.id != oldTransaction.accountTo.id ? newTransaction.accountTo.id : nil,
+            amountFrom: newTransaction.amountFrom != oldTransaction.amountFrom ? newTransaction.amountFrom : nil,
+            amountTo: newTransaction.amountTo != oldTransaction.amountTo ? newTransaction.amountTo : nil,
+            dateTransaction: newTransaction.dateTransaction != oldTransaction.dateTransaction ? newTransaction.dateTransaction : nil,
+            note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
+            tagIDs: oldTransactionTagIDs != newTransactionTagIDs ? newTransactionTagIDs : nil,
+            id: newTransaction.id))
     }
     
     func updateTag(newTag tag: Tag, oldTag: Tag) async throws {
@@ -476,13 +503,17 @@ extension Service {
         guard tag.name != "" else {
             throw ErrorModel(humanTextError: "Нельзя создать подкатегорию без названия")
         }
-        
-        try await TagAPI().UpdateTag(req: UpdateTagReq(
-            id: newTag.id,
-            name: newTag.name != oldTag.name ? newTag.name : nil
-        ))
-        
+                
         try await db.updateTag(newTag)
+        
+        taskManager.createTask(
+            actionName: .updateTag,
+            localObjectID: newTag.id,
+            reqModel: UpdateTagReq(
+                id: newTag.id,
+                name: newTag.name != oldTag.name ? newTag.name : nil
+            )
+        )
     }
         
     func joinExclusive(_ leftObjects: [Tag], _ rightObjects: [Tag]) -> ([Tag], [Tag]) {
@@ -539,14 +570,41 @@ extension Service {
         async let serverTagsToTransactions = TagToTransactionDB.convertFromApiModel(try await TagAPI().GetTagsToTransaction())
         async let serverTransactions = TransactionDB.convertFromApiModel(try await TransactionAPI().GetTransactions(req: GetTransactionReq()))
         
-        let localIcons = try await db.getIcons()
-        let localCurrencies = try await db.getCurrencies()
-        let localUsers = try await db.getUsers()
-        let localAccountGroups = try await db.getAccountGroups()
-        let localAccounts = try await db.getAccounts()
-        let localTags = try await db.getTags()
-        let localTagsToTransactions = try await db.getTagsToTransactions()
-        let localTransactions = try await db.getTransactions()
+        var localIcons = try await db.getIcons()
+        var localCurrencies = try await db.getCurrencies()
+        var localUsers = try await db.getUsers()
+        var localAccountGroups = try await db.getAccountGroups()
+        var localAccounts = try await db.getAccounts()
+        var localTags = try await db.getTags()
+        var localTagsToTransactions = try await db.getTagsToTransactions()
+        var localTransactions = try await db.getTransactions()
+        
+        let idsMapping = try await db.getIDsMapping()
+        
+        let iconIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .icon)
+        for (i, localIcon) in localIcons.enumerated() {
+            localIcons[i].id = iconIDsMapping[localIcon.id!]
+        }
+        let userIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .user)
+        for (i, localUser) in localUsers.enumerated() {
+            localUsers[i].id = userIDsMapping[localUser.id!]
+        }
+        let accountGroupIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .accountGroup)
+        for (i, localAccountGroup) in localAccountGroups.enumerated() {
+            localAccountGroups[i].id = accountGroupIDsMapping[localAccountGroup.id!]
+        }
+        let accountIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .account)
+        for (i, localAccount) in localAccounts.enumerated() {
+            localAccounts[i].id = accountIDsMapping[localAccount.id!]
+        }
+        let tagIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .tag)
+        for (i, localTag) in localTags.enumerated() {
+            localTags[i].id = tagIDsMapping[localTag.id!]
+        }
+        let transactionIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .transaction)
+        for (i, localTransaction) in localTransactions.enumerated() {
+            localTransactions[i].id = transactionIDsMapping[localTransaction.id!]
+        }
         
         let iconsDifferences = IconDB.compareTwoArrays(try await serverIcons, localIcons)
         if !iconsDifferences.isEmpty {
@@ -585,7 +643,7 @@ extension Service {
         }
         let transactionsDifferences = TransactionDB.compareTwoArrays(try await serverTransactions, localTransactions)
         if !transactionsDifferences.isEmpty {
-            differences += "\n\nTransactions: \(tagsToTransactionsDifferences)"
+            differences += "\n\nTransactions: \(transactionsDifferences)"
             logger.warning("Transactions: \(transactionsDifferences)")
         }
         if differences == "" {
@@ -605,45 +663,44 @@ extension Service {
         let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
         
         // Получаем все данные с сервера
-        async let icons = try await SettingsAPI().GetIcons()
-        async let currencies = try await SettingsAPI().GetCurrencies()
-        async let user = try await UserAPI().GetUser()
-        async let accountGroups = try await AccountAPI().GetAccountGroups()
-        async let accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
-        async let tags = try await TagAPI().GetTags()
-        async let tagsToTransactions = try await TagAPI().GetTagsToTransaction()
-        async let transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
+        async let _icons = try await SettingsAPI().GetIcons()
+        async let _currencies = try await SettingsAPI().GetCurrencies()
+        async let _user = try await UserAPI().GetUser()
+        async let _accountGroups = try await AccountAPI().GetAccountGroups()
+        async let _accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
+        async let _tags = try await TagAPI().GetTags()
+        async let _tagsToTransactions = try await TagAPI().GetTagsToTransaction()
+        async let _transactions = try await TransactionAPI().GetTransactions(req: GetTransactionReq())
+
+        var (icons, currencies, user, accountGroups, accounts, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _tags, _tagsToTransactions, _transactions)
+        
+        // Загружаем и сохраняем локально иконки
+        for icon in icons {
+            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
+            let url = URL.documentsDirectory.appending(path: String(icon.url))
+            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
+        }
         
         // Удаляем все данные в базе данных
         try await db.deleteAllData()
-        
+                
         // Сохраняем данные в базу данных
         logger.info("Сохраняем иконки")
-        var iconss = try await icons
-//        for (index, icon) in iconss.enumerated() {
-//            let iconData = try await SettingsAPI().GetIcon(url: "https://bonavii.com/"+icon.url)
-//            let url = URL.documentsDirectory.appending(path: String(icon.url))
-//            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
-//        }
-        try await db.importIcons(IconDB.convertFromApiModel(iconss))
+        try await db.importIcons(IconDB.convertFromApiModel(icons))
         logger.info("Сохраняем валюты")
-        try await db.importCurrencies(CurrencyDB.convertFromApiModel(try await currencies))
+        try await db.importCurrencies(CurrencyDB.convertFromApiModel(currencies))
         logger.info("Сохраняем пользователя")
-        try await db.importUser(UserDB(try await user))
+        try await db.importUser(UserDB(user))
         logger.info("Сохраняем группы счетов")
-        try await db.importAccountGroups(AccountGroupDB.convertFromApiModel(try await accountGroups))
+        try await db.importAccountGroups(AccountGroupDB.convertFromApiModel(accountGroups))
         logger.info("Сохраняем счета")
-        // Cортируем счета, чтобы сначала были родительские
-        let sortedAccountsDB = AccountDB.convertFromApiModel(try await accounts).sorted { l, _ in
-            l.isParent
-        }
-        try await db.importAccounts(sortedAccountsDB)
+        try await db.importAccounts(AccountDB.convertFromApiModel(accounts).sorted { l, _ in l.isParent })
         logger.info("Сохраняем подкатегории")
-        try await db.importTags(TagDB.convertFromApiModel(try await tags))
+        try await db.importTags(TagDB.convertFromApiModel(tags))
         logger.info("Сохраняем транзакции")
-        try await db.importTransactions(TransactionDB.convertFromApiModel(try await transactions))
+        try await db.importTransactions(TransactionDB.convertFromApiModel(transactions))
         logger.info("Сохраняем связки между подкатегориями и транзакциями")
-        try await db.importTagsToTransactions(TagToTransactionDB.convertFromApiModel(try await tagsToTransactions))
+        try await db.importTagsToTransactions(TagToTransactionDB.convertFromApiModel(tagsToTrasnactions))
     }
 }
 

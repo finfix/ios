@@ -10,6 +10,10 @@ import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "Login")
 
+enum LoginRoute {
+    case settings
+}
+
 struct LoginView: View {
     
     private enum Mode {
@@ -21,6 +25,7 @@ struct LoginView: View {
     }
     
     @State private var service = Service.shared
+    @State private var path = NavigationPath()
     @Environment (AlertManager.self) private var alert
     
     @AppStorage("isLogin") var isLogin: Bool = false
@@ -136,12 +141,9 @@ struct LoginView: View {
             .navigationTitle(mode == .login ? "Вход" : "Регистрация")
             .toolbar {
                 ToolbarItem {
-                    NavigationLink {
-                        Settings()
-                    } label: {
+                    NavigationLink(value: LoginRoute.settings) {
                         Image(systemName: "gearshape")
                     }
-
                 }
                 if mode == .register {
                     ToolbarItem(placement: .cancellationAction) {
@@ -151,6 +153,21 @@ struct LoginView: View {
                             }
                         }
                     }
+                }
+            }
+            .navigationDestination(for: SettingsRoute.self) { screen in
+                switch screen {
+                case .tasksList: TasksList(path: $path)
+                }
+            }
+            .navigationDestination(for: TasksListRoute.self) { screen in
+                switch screen {
+                case .taskDetails(let task): TaskDetails(task: task)
+                }
+            }
+            .navigationDestination(for: LoginRoute.self) { screen in
+                switch screen {
+                case .settings: Settings(path: $path)
                 }
             }
         }
