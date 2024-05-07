@@ -10,7 +10,7 @@ import GRDB
 
 struct TransactionDB {
     
-    var id: UInt32
+    var id: UInt32?
     var accounting: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
@@ -39,11 +39,14 @@ struct TransactionDB {
     
     // Инициализатор из бизнес модели
     init(_ model: Transaction) {
+        self.id = model.id
+        if self.id == 0 {
+            self.id = nil
+        }
         self.accounting = model.accounting
         self.amountFrom = model.amountFrom
         self.amountTo = model.amountTo
         self.dateTransaction = model.dateTransaction
-        self.id = model.id
         self.isExecuted = model.isExecuted
         self.note = model.note
         self.type = model.type
@@ -61,8 +64,8 @@ struct TransactionDB {
     }
     
     static func compareTwoArrays(_ serverModels: [TransactionDB], _ localModels: [TransactionDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
-        let serverModels = serverModels.sorted { $0.id < $1.id }
-        let localModels = localModels.sorted { $0.id < $1.id }
+        let serverModels = serverModels.sorted { $0.id! < $1.id! }
+        let localModels = localModels.sorted { $0.id! < $1.id! }
         
         var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
         
@@ -74,8 +77,8 @@ struct TransactionDB {
         
         for (i, serverModel) in serverModels.enumerated() {
             var difference: [String: (server: Any, local: Any)] = [:]
-            if serverModel.id != localModels[i].id {
-                difference["id"] = (server: serverModel.id, local: localModels[i].id)
+            if serverModel.id! != localModels[i].id {
+                difference["id"] = (server: serverModel.id!, local: localModels[i].id!)
             }
             if serverModel.accounting != localModels[i].accounting {
                 difference["accounting"] = (server: serverModel.accounting, local: localModels[i].accounting)
@@ -108,7 +111,7 @@ struct TransactionDB {
                 difference["accountToId"] = (server: serverModel.accountToId, local: localModels[i].accountToId)
             }
             if !difference.isEmpty {
-                differences[serverModel.id] = difference
+                differences[serverModel.id!] = difference
             }
         }
         return differences

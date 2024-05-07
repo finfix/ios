@@ -10,13 +10,13 @@ import GRDB
 
 struct TagDB {
     
-    var id: UInt32
+    var id: UInt32?
     var name: String
     var accountGroupID: UInt32
     var datetimeCreate: Date
     
     init(
-        id: UInt32,
+        id: UInt32?,
         name: String,
         accountGroupID: UInt32,
         datetimeCreate: Date
@@ -29,7 +29,10 @@ struct TagDB {
     
     // Инициализатор из бизнес модели
     init(_ model: Tag) {
-        self.id = model.id
+                self.id = model.id
+        if self.id == 0 {
+            self.id = nil
+        }
         self.name = model.name
         self.accountGroupID = model.accountGroup.id
         self.datetimeCreate = model.datetimeCreate
@@ -52,8 +55,8 @@ struct TagDB {
     }
     
     static func compareTwoArrays(_ serverModels: [TagDB], _ localModels: [TagDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
-        let serverModels = serverModels.sorted { $0.id < $1.id }
-        let localModels = localModels.sorted { $0.id < $1.id }
+        let serverModels = serverModels.sorted { $0.id! < $1.id! }
+        let localModels = localModels.sorted { $0.id! < $1.id! }
         
         var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
         
@@ -65,8 +68,8 @@ struct TagDB {
         
         for (i, serverModel) in serverModels.enumerated() {
             var difference: [String: (server: Any, local: Any)] = [:]
-            if serverModel.id != localModels[i].id {
-                difference["id"] = (server: serverModel.id, local: localModels[i].id)
+            if serverModel.id! != localModels[i].id {
+                difference["id"] = (server: serverModel.id!, local: localModels[i].id!)
             }
             if serverModel.name != localModels[i].name {
                 difference["name"] = (server: serverModel.name, local: localModels[i].name)
@@ -78,7 +81,7 @@ struct TagDB {
 //                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
 //            }
             if !difference.isEmpty {
-                differences[serverModel.id] = difference
+                differences[serverModel.id!] = difference
             }
         }
         return differences

@@ -27,7 +27,7 @@ struct AccountGroup: Identifiable {
     
     // Инициализатор из модели базы данных
     init(_ dbModel: AccountGroupDB, currenciesMap: [String: Currency]?) {
-        self.id = dbModel.id
+        self.id = dbModel.id!
         self.name = dbModel.name
         self.serialNumber = dbModel.serialNumber
         self.currency = currenciesMap?[dbModel.currencyCode]! ?? Currency()

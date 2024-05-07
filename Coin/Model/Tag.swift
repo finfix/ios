@@ -28,7 +28,7 @@ struct Tag: Identifiable {
     
     // Инициализатор из модели базы данных
     init(_ dbModel: TagDB, accountGroupsMap: [UInt32: AccountGroup]?) {
-        self.id = dbModel.id
+        self.id = dbModel.id!
         self.name = dbModel.name
         self.datetimeCreate = dbModel.datetimeCreate
         self.accountGroup = accountGroupsMap?[dbModel.accountGroupID] ?? AccountGroup()

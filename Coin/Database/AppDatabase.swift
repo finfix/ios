@@ -67,8 +67,8 @@ extension AppDatabase {
             
             try db.create(table: "userDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("name", .text)
                     .notNull()
                 table.column("email", .text)
@@ -80,8 +80,8 @@ extension AppDatabase {
             
             try db.create(table: "accountGroupDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("name", .text)
                     .notNull()
                 table.column("serialNumber", .integer)
@@ -93,8 +93,8 @@ extension AppDatabase {
             
             try db.create(table: "iconDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("url", .text)
                     .notNull()
                 table.column("name", .text)
@@ -103,8 +103,8 @@ extension AppDatabase {
             
             try db.create(table: "accountDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("accountingInHeader", .boolean)
                     .notNull()
                 table.column("accountingInCharts", .boolean)
@@ -143,8 +143,8 @@ extension AppDatabase {
             
             try db.create(table: "transactionDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("accounting", .boolean)
                     .notNull()
                 table.column("amountFrom", .text)
@@ -170,8 +170,8 @@ extension AppDatabase {
             
             try db.create(table: "tagDB") { table in
                 
-                table.primaryKey("id", .integer)
                 
+                table.autoIncrementedPrimaryKey("id")
                 table.column("name", .text)
                     .notNull()
                 table.column("datetimeCreate", .date)
@@ -187,6 +187,16 @@ extension AppDatabase {
                 table.belongsTo("transaction", inTable: "transactionDB")
                 
                 table.primaryKey(["tagId", "transactionId"])
+            }
+            
+            try db.create(table: "idMappingDB") { table in
+                table.column("localID", .integer)
+                    .notNull()
+                table.column("serverID", .integer)
+                table.column("modelType", .text)
+                    .notNull()
+                
+                table.primaryKey(["localID", "serverID", "modelType"])
             }
         }
         

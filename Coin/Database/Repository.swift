@@ -320,6 +320,12 @@ extension AppDatabase {
         }
     }
     
+    func getIDsMapping() async throws -> [IDMappingDB] {
+        try await reader.read { db in
+            return try IDMappingDB.fetchAll(db)
+        }
+    }
+    
     func getTransactions(
         offset: Int = 0,
         limit: Int? = nil,
@@ -409,4 +415,16 @@ extension AppDatabase {
             return result
         }
     }
+    func updateServerID(
+        localID: UInt32,
+        modelType: ModelType,
+        serverID: UInt32
+    ) async throws {
+        try await dbWriter.write { db in
+            _ = try IDMappingDB
+                .filter(IDMappingDB.Columns.localID == localID && IDMappingDB.Columns.modelType == modelType.rawValue)
+                .updateAll(db, IDMappingDB.Columns.serverID.set(to: serverID))
+        }
+    }
+    
 }
