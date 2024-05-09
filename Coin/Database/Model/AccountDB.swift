@@ -79,7 +79,7 @@ struct AccountDB {
         self.remainder = res.remainder
         self.type = res.type
         self.visible = res.visible
-//        self.parentAccountId = res.parentAccountID
+        self.parentAccountId = res.parentAccountID
         self.serialNumber = res.serialNumber
         self.isParent = res.isParent
         self.budgetAmount = res.budget.amount
