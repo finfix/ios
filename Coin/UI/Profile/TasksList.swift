@@ -28,6 +28,25 @@ struct TasksList: View {
                 }
             }
         }
+        .toolbar(content: {
+            ToolbarItem {
+                Button(role: .destructive) {
+                    Task {
+                        do {
+                            try await vm.deleteAllTasks()
+                            try await vm.load()
+                        } catch {
+                            alert(error)
+                            return
+                        }
+                    }
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        })
         .task{
             do {
                 try await vm.load()

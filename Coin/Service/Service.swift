@@ -53,6 +53,10 @@ extension Service {
         return try await db.getSyncTasks()
     }
     
+    func deleteAllTasks() async throws {
+        return try await db.deleteAllTasks()
+    }
+    
     func getCountTasks() async throws -> UInt32 {
         return try await db.getCountTasks()
     }

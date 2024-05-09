@@ -222,6 +222,13 @@ extension AppDatabase {
         }
     }
     
+    func deleteAllTasks() async throws {
+        try await dbWriter.write { db in
+            _ = try SyncTaskValueDB.deleteAll(db)
+            _ = try SyncTaskDB.deleteAll(db)
+        }
+    }
+    
     func getSyncTasks(limit: UInt32? = nil) async throws -> [SyncTask] {
         try await reader.read { db in
             
