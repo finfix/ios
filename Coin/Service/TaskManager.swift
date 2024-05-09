@@ -57,7 +57,7 @@ class TaskManager {
                     value: String(localID)
                 ))
             }
-            try await executeTask(SyncTask(
+            try await db.createTask(SyncTask(
                 localID: localObjectID,
                 actionName: actionName,
                 tryCount: 0,
@@ -126,11 +126,7 @@ class TaskManager {
             task.tryCount += 1
             task.error = "\(error)"
             do {
-                if task.id != 0 {
-                    try await db.updateTask(task)
-                } else {
-                    try await db.createTask(task)
-                }
+                try await db.updateTask(task)
             } catch {
                 logger.warning("\(error)")
             }
