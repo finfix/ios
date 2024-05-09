@@ -88,7 +88,9 @@ struct CreateAccountReq: Encodable, FieldExtractable {
         self.accountingInCharts = Bool(map["accountingInCharts"]!)!
         self.budget = CreateAccountBudgetReq(
             amount: Decimal(string: map["budget.amount"]!)!,
-            gradualFilling: Bool(map["budget.gradualFilling"]!)!
+            gradualFilling: Bool(map["budget.gradualFilling"]!)!,
+            daysOffset: Int8(map["budget.daysOffset"]!)!,
+            fixedSum: Decimal(string: map["budget.fixedSum"]!)!
         )
         self.currency = map["currency"]!
         self.iconID = UInt32(map["iconID"]!)!
@@ -108,6 +110,8 @@ struct CreateAccountReq: Encodable, FieldExtractable {
         
         fields.append(SyncTaskValue(name: "budget.amount", value: self.budget.amount.stringValue))
         fields.append(SyncTaskValue(name: "budget.gradualFilling", value: String(self.budget.gradualFilling)))
+        fields.append(SyncTaskValue(name: "budget.daysOffset", value: String(self.budget.daysOffset)))
+        fields.append(SyncTaskValue(name: "budget.fixedSum", value: self.budget.fixedSum.stringValue))
         
         fields.append(SyncTaskValue(name: "currency", value: self.currency))
         fields.append(SyncTaskValue(objectType: .icon, name: "iconID", value: String(self.iconID)))
@@ -128,6 +132,8 @@ struct CreateAccountReq: Encodable, FieldExtractable {
 struct CreateAccountBudgetReq: Encodable {
     var amount: Decimal
     var gradualFilling: Bool
+    var daysOffset: Int8
+    var fixedSum: Decimal
 }
 
 
@@ -135,6 +141,8 @@ struct CreateAccountRes: Decodable {
     var id: UInt32
     var serialNumber: UInt32
     var balancingTransactionID: UInt32?
+    var balancingAccountID: UInt32?
+    var balancingAccountSerialNumber: UInt32?
 }
 
 struct UpdateAccountRes: Decodable {

@@ -81,6 +81,15 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         self.type = map["type"]!
         self.isExecuted = Bool(map["isExecuted"]!)!
         self.tagIDs = []
+        var i = 1
+        while true {
+            if let tag = map["tag\(i)"] {
+                self.tagIDs.append(UInt32(tag)!)
+            } else {
+                break
+            }
+            i += 1
+        }
         self.datetimeCreate = DateFormatters.fullTime.date(from: map["datetimeCreate"]!)!
     }
     
@@ -94,7 +103,9 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         fields.append(SyncTaskValue(name: "note", value: String(self.note)))
         fields.append(SyncTaskValue(name: "type", value: String(self.type)))
         fields.append(SyncTaskValue(name: "isExecuted", value: String(self.isExecuted)))
-        //        fields.append(SyncTaskValue(name: "tagIDs", value: String(self.tagIDs)))
+        for (i, tagID) in self.tagIDs.enumerated() {
+            fields.append(SyncTaskValue(objectType: .tag, name: "tag\(i)", value: String(tagID)))
+        }
         fields.append(SyncTaskValue(name: "datetimeCreate", value: DateFormatters.fullTime.string(from: self.datetimeCreate)))
         return fields
     }
@@ -167,16 +178,20 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
         self.amountTo = Decimal(string: map["amountTo"] ?? "")
         self.dateTransaction = DateFormatters.onlyDate.date(from: map["dateTransaction"] ?? "")
         self.note = map["note"]
-        if let tagsIDs = map["tagIDs"] {
-            let tagsString = tagsIDs.components(separatedBy: ", ")
-            for tagString in tagsString {
+        var i = 0
+        if map["deleteAllTags"] != nil {
+            self.tagIDs = []
+        }
+        while true {
+            if let tag = map["tag\(i)"] {
                 if self.tagIDs == nil {
                     self.tagIDs = []
                 }
-                if tagString != "" {
-                    self.tagIDs!.append(UInt32(tagString)!)
-                }
+                self.tagIDs!.append(UInt32(tag)!)
+            } else {
+                break
             }
+            i += 1
         }
         self.id = UInt32(map["id"]!)!
     }
@@ -203,11 +218,12 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
             fields.append(SyncTaskValue(name: "note", value: String(note)))
         }
         if let tagIDs = self.tagIDs {
-            var tagIDsString: [String] = []
-            for tagID in tagIDs {
-                tagIDsString.append(String(tagID))
+            for (i, tagID) in tagIDs.enumerated() {
+                fields.append(SyncTaskValue(objectType: .tag, name: "tag\(i)", value: String(tagID)))
             }
-            fields.append(SyncTaskValue(name: "tagIDs", value: tagIDsString.joined(separator: ", ")))
+            if tagIDs.isEmpty {
+                fields.append(SyncTaskValue(name: "deleteAllTags", value: "true"))
+            }
         }
         return fields
     }

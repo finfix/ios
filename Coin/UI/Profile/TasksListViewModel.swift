@@ -17,4 +17,8 @@ class TasksListViewModel {
     func load() async throws {
         tasks = try await service.getSyncTasks()
     }
+    
+    func deleteAllTasks() async throws {
+        try await service.deleteTasks()
+    }
 }

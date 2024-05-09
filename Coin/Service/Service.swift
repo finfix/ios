@@ -49,8 +49,16 @@ extension Service {
         return Currency.convertFromDBModel(try await db.getCurrencies())
     }
     
-    func getSyncTasks() async throws -> [SyncTask] {
-        return try await db.getSyncTasks()
+    func getSyncTasks(
+        ids: [UInt32]? = nil
+    ) async throws -> [SyncTask] {
+        return try await db.getSyncTasks(ids: ids)
+    }
+    
+    func deleteTasks(
+        ids: [UInt32]? = nil
+    ) async throws {
+        return try await db.deleteTasks(ids: ids)
     }
     
     func getCountTasks() async throws -> UInt32 {
@@ -164,19 +172,86 @@ extension Service {
         account.remainder = account.remainder.round(factor: 6)
         
         try validateAccount(account)
+        
+        var addictionalMapping: [String: UInt32] = [:]
+        
+        account.id = try await db.createAccount(account)
+        
+        if account.remainder != 0 {
+            // Получаем балансировочный счет группы счетов
+            var balancingAccount = try await getAccounts(
+                accountGroup: account.accountGroup,
+                types: [.balancing],
+                currencyCode: account.currency.code,
+                isParent: false
+            ).first
+            
+            // Если балансировочный счет не найден
+            if balancingAccount == nil {
                 
-        let id = try await db.createAccount(account)
+                // Получаем родительский балансировочный счет группы счетов
+                let parentBalancingAccount = try await getAccounts(
+                    accountGroup: account.accountGroup,
+                    types: [.balancing],
+                    isParent: true
+                ).first
+                
+                guard parentBalancingAccount != nil else {
+                    throw ErrorModel(humanTextError: "Не смогли найти родительский балансировочный счет для группы счетов \(account.accountGroup.id)")
+                }
+                
+                // Создаем и получаем балансировочный счет группы счетов
+                balancingAccount = try await db.createAccountAndReturn(Account(
+                    accountingInHeader: true,
+                    accountingInCharts: true,
+                    icon: Icon(id: 1),
+                    name: "Балансировочный",
+                    remainder: 0,
+                    type: .balancing,
+                    visible: true,
+                    serialNumber: 0,
+                    isParent: false,
+                    budgetAmount: 0,
+                    showingBudgetAmount: 0,
+                    budgetFixedSum: 0,
+                    budgetDaysOffset: 0,
+                    budgetGradualFilling: false,
+                    parentAccountID: parentBalancingAccount!.id,
+                    accountGroup: account.accountGroup,
+                    currency: account.currency,
+                    childrenAccounts: []
+                ))
+                addictionalMapping["balancingAccountID"] = balancingAccount?.id
+            }
+            
+            addictionalMapping["balancingTransactionID"] = try await db.createTransaction(Transaction(
+                accounting: true,
+                amountFrom: account.remainder,
+                amountTo: account.remainder,
+                dateTransaction: Date.now.stripTime(),
+                isExecuted: true,
+                note: "",
+                type: .balancing,
+                datetimeCreate: Date.now,
+                accountFrom: balancingAccount!,
+                accountTo: account)
+            )
+            
+            try await recalculateAccountBalance([balancingAccount!])
+        }
         
         taskManager.createTask(
             actionName: .createAccount,
-            localObjectID: id,
+            localObjectID: account.id,
             reqModel: CreateAccountReq(
                 accountGroupID: account.accountGroup.id,
                 accountingInHeader: account.accountingInHeader,
                 accountingInCharts: account.accountingInCharts,
                 budget: CreateAccountBudgetReq (
                     amount: account.budgetAmount,
-                    gradualFilling: account.budgetGradualFilling
+                    gradualFilling: account.budgetGradualFilling,
+                    daysOffset: account.budgetDaysOffset,
+                    fixedSum: account.budgetFixedSum
                 ),
                 currency: account.currency.code,
                 iconID: account.icon.id,
@@ -186,7 +261,8 @@ extension Service {
                 isParent: account.isParent,
                 parentAccountID: account.parentAccountID,
                 datetimeCreate: account.datetimeCreate
-            )
+            ),
+            addictionalMapping: addictionalMapping
         )
     }
     
@@ -260,10 +336,10 @@ extension Service {
                 }
                 
                 // Создаем и получаем балансировочный счет группы счетов
-                addictionalMapping["balancingAccountID"] = try await db.createAccount(Account(
+                balancingAccount = try await db.createAccountAndReturn(Account(
                     accountingInHeader: true,
                     accountingInCharts: true,
-                    icon: Icon(),
+                    icon: Icon(id: 1),
                     name: "Балансировочный",
                     remainder: 0,
                     type: .balancing,
@@ -280,6 +356,7 @@ extension Service {
                     currency: newAccount.currency,
                     childrenAccounts: []
                 ))
+                addictionalMapping["balancingAccountID"] = balancingAccount?.id
             }
             
             addictionalMapping["balancingTransactionID"] = try await db.createTransaction(Transaction(
@@ -553,6 +630,9 @@ extension Service {
     }
     
     func compareLocalAndServerData() async throws -> String? {
+        guard try await db.getCountTasks() == 0 else {
+            throw ErrorModel(humanTextError: "Вам необходимо дождаться выполнения всех фоновых задач")
+        }
         logger.log("Начали сравнение серверных данных с локальными")
         
         var differences: String = ""
@@ -596,14 +676,19 @@ extension Service {
         let accountIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .account)
         for (i, localAccount) in localAccounts.enumerated() {
             localAccounts[i].id = accountIDsMapping[localAccount.id!]
+            localAccounts[i].accountGroupId = accountGroupIDsMapping[localAccount.accountGroupId]!
+            localAccounts[i].iconID = iconIDsMapping[localAccount.iconID]!
         }
         let tagIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .tag)
         for (i, localTag) in localTags.enumerated() {
             localTags[i].id = tagIDsMapping[localTag.id!]
+            localTags[i].accountGroupID = accountGroupIDsMapping[localTag.accountGroupID]!
         }
         let transactionIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .transaction)
         for (i, localTransaction) in localTransactions.enumerated() {
             localTransactions[i].id = transactionIDsMapping[localTransaction.id!]
+            localTransactions[i].accountFromId = accountIDsMapping[localTransaction.accountFromId]!
+            localTransactions[i].accountToId = accountIDsMapping[localTransaction.accountToId]!
         }
         
         let iconsDifferences = IconDB.compareTwoArrays(try await serverIcons, localIcons)
@@ -657,6 +742,9 @@ extension Service {
 // MARK: - Sync
 extension Service {
     func sync() async throws {
+        guard try await db.getCountTasks() == 0 else {
+            throw ErrorModel(humanTextError: "Вам необходимо дождаться выполнения всех фоновых задач")
+        }
         logger.info("Синхронизируем данные")
                 
         // Получаем данные текущего месяца для запроса
