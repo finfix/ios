@@ -661,6 +661,9 @@ extension Service {
 // MARK: - Sync
 extension Service {
     func sync() async throws {
+        guard try await db.getCountTasks() == 0 else {
+            throw ErrorModel(humanTextError: "Вам необходимо дождаться выполнения всех фоновых задач")
+        }
         logger.info("Синхронизируем данные")
                 
         // Получаем данные текущего месяца для запроса
