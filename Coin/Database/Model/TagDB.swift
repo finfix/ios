@@ -29,7 +29,7 @@ struct TagDB {
     
     // Инициализатор из бизнес модели
     init(_ model: Tag) {
-                self.id = model.id
+        self.id = model.id
         if self.id == 0 {
             self.id = nil
         }

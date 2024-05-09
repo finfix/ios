@@ -19,6 +19,6 @@ class TasksListViewModel {
     }
     
     func deleteAllTasks() async throws {
-        try await service.deleteAllTasks()
+        try await service.deleteTasks()
     }
 }

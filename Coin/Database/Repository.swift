@@ -117,6 +117,15 @@ extension AppDatabase {
         }
     }
     
+    func createAccountAndReturn(_ account: Account) async throws -> Account {
+        try await dbWriter.write { db in
+            let account = try AccountDB(account).insertAndFetch(db)
+            try IDMappingDB(localID: account!.id!, serverID: nil, modelType: .account)
+                .insert(db)
+            return Account(account!, currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil)
+        }
+    }
+    
     func updateAccount(_ account: Account) async throws {
         try await dbWriter.write { db in
             _ = try AccountDB(account).update(db)
@@ -222,14 +231,24 @@ extension AppDatabase {
         }
     }
     
-    func deleteAllTasks() async throws {
+    func deleteTasks(
+        ids: [UInt32]? = nil
+    ) async throws {
         try await dbWriter.write { db in
-            _ = try SyncTaskValueDB.deleteAll(db)
-            _ = try SyncTaskDB.deleteAll(db)
+                                    
+            var request = SyncTaskDB.filter(SyncTaskDB.Columns.id != 0)
+            if let ids {
+                request = request.filter(ids.contains(SyncTaskDB.Columns.id))
+            }
+            
+            _ = try request.deleteAll(db)
         }
     }
     
-    func getSyncTasks(limit: UInt32? = nil) async throws -> [SyncTask] {
+    func getSyncTasks(
+        ids: [UInt32]? = nil,
+        limit: UInt32? = nil
+    ) async throws -> [SyncTask] {
         try await reader.read { db in
             
             var request = SyncTaskDB
@@ -238,6 +257,10 @@ extension AppDatabase {
             
             if let limit {
                 request = request.limit(Int(limit))
+            }
+            
+            if let ids {
+                request = request.filter(ids.contains(SyncTaskDB.Columns.id))
             }
             
             let syncTaskDBs = try request.fetchAll(db)
@@ -522,15 +545,6 @@ extension AppDatabase {
             _ = try IDMappingDB
                 .filter(IDMappingDB.Columns.localID == localID && IDMappingDB.Columns.modelType == modelType.rawValue)
                 .updateAll(db, IDMappingDB.Columns.serverID.set(to: serverID))
-        }
-    }
-    
-    func deleteTask(_ task: SyncTask) async throws {
-        try await dbWriter.write { db in
-            _ = try SyncTaskValueDB
-                .filter(SyncTaskValueDB.Columns.syncTaskID == task.id)
-                .deleteAll(db)
-            _ = try SyncTaskDB(task).delete(db)
         }
     }
 }

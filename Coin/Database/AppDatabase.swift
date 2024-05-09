@@ -213,7 +213,7 @@ extension AppDatabase {
                     .notNull()
                 table.column("value", .text)
                 
-                table.belongsTo("syncTask", inTable: "syncTaskDB")
+                table.belongsTo("syncTask", inTable: "syncTaskDB", onDelete: .cascade)
 
             }
             

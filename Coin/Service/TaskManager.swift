@@ -61,7 +61,7 @@ class TaskManager {
                 localID: localObjectID,
                 actionName: actionName,
                 tryCount: 0,
-                fields: reqModel.convertToFields(),
+                fields: fields,
                 enabled: true
             ))
         }
@@ -89,6 +89,21 @@ class TaskManager {
             case .createAccount:
                 let model = try await AccountAPI().CreateAccount(req: CreateAccountReq(fields))
                 try await db.updateServerID(localID: task.localID, modelType: .account, serverID: model.id)
+                if let localBalancingTransactionID = fields["balancingTransactionID"] {
+                    if let serverBalancingTransactionID = model.balancingTransactionID {
+                        try await db.updateServerID(localID: UInt32(localBalancingTransactionID)!, modelType: .transaction, serverID: serverBalancingTransactionID)
+                    } else {
+                        logger.error("С сервера не пришел идентификатор транзакции балансировки для счета ID: \(fields["id"] ?? "")")
+                    }
+                }
+                if let localBalancingAccountID = fields["balancingAccountID"] {
+                    if let serverBalancingAccountID = model.balancingAccountID {
+                        try await db.updateServerID(localID: UInt32(localBalancingAccountID)!, modelType: .account, serverID: serverBalancingAccountID)
+                    } else {
+                        logger.error("С сервера не пришел идентификатор нового балансировочного счета")
+                    }
+                }
+
                 
             case .updateAccount:
                 let model = try await AccountAPI().UpdateAccount(req: UpdateAccountReq(fields))
@@ -133,7 +148,7 @@ class TaskManager {
             throw error
         }
         
-        try await db.deleteTask(task)
+        try await db.deleteTasks(ids: [task.id])
     }
 }
 

@@ -8,33 +8,38 @@
 import SwiftUI
 
 struct TaskDetails: View {
+        
+    @State private var vm: TasksDetailsViewModel
+    @Environment (\.dismiss) private var dismiss
     
-    let task: SyncTask
+    init(task: SyncTask) {
+        self.vm = TasksDetailsViewModel(task: task)
+    }
     
     var body: some View {
         Form {
             HStack {
                 Text("ID:")
                 Spacer()
-                Text("\(task.id)")
+                Text("\(vm.task.id)")
             }
             HStack {
                 Text("Название действия:")
                 Spacer()
-                Text("\(task.actionName)")
+                Text("\(vm.task.actionName)")
             }
             HStack {
                 Text("Количество попыток:")
                 Spacer()
-                Text("\(task.tryCount)")
+                Text("\(vm.task.tryCount)")
             }
             HStack {
                 Text("Локальный идентификатор объекта:")
                 Spacer()
-                Text("\(task.localID)")
+                Text("\(vm.task.localID)")
             }
             Section(header: Text("Параметры")) {
-                ForEach(task.fields) { field in
+                ForEach(vm.task.fields) { field in
                     HStack {
                         Text(field.name)
                         Spacer()
@@ -44,10 +49,37 @@ struct TaskDetails: View {
             }
             Section(header: Text("Ошибка")) {
                 HStack {
-                    Text(task.error ?? "")
+                    Text(vm.task.error ?? "")
                 }
             }
         }
+        .refreshable {
+            Task {
+                do {
+                    try await vm.load()
+                } catch {
+                    dismiss()
+                }
+            }
+        }
+        .toolbar(content: {
+            ToolbarItem {
+                Button(role: .destructive) {
+                    Task {
+                        do {
+                            try await vm.delete()
+                        } catch {
+                            
+                        }
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        })
     }
 }
 
