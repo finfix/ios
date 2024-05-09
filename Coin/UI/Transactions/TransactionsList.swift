@@ -20,8 +20,12 @@ struct TransactionsList: View {
     var searchText: String
     var dateFrom: Date?
     var dateTo: Date?
+    var transactionType: TransactionType?
+    var currency: Currency?
     
     @Binding var path: NavigationPath
+    
+    let width: CGFloat = UIScreen.main.bounds.width
     
     init(
         path: Binding<NavigationPath>,
@@ -29,13 +33,17 @@ struct TransactionsList: View {
         account: Account? = nil,
         searchText: String = "",
         dateFrom: Date? = nil,
-        dateTo: Date? = nil
+        dateTo: Date? = nil,
+        transactionType: TransactionType? = nil,
+        currency: Currency? = nil
     ) {
         self._selectedAccountGroup = selectedAccountGroup
         self._path = path
         self.dateTo = dateTo
         self.dateFrom = dateFrom
         self.searchText = searchText
+        self.transactionType = transactionType
+        self.currency = currency
         vm = TransactionsListViewModel(account: account)
     }
     
@@ -46,12 +54,14 @@ struct TransactionsList: View {
     
     var body: some View {
         List {
+            Section(footer:
+            ChartTab(selectedAccountGroup: selectedAccountGroup)
+                .frame(width: width, height: 400)
+            ){}
             ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                 Section(header: Text(date, style: .date).font(.headline)) {
                     ForEach(groupedTransactionByDate[date] ?? []) { transaction in
-                        Button {
-                            path.append(TransactionsListRoute.editTransaction(transaction))
-                        } label: {
+                        NavigationLink(value: TransactionsListRoute.editTransaction(transaction)) {
                             TransactionRow(transaction: transaction)
                         }
                         .buttonStyle(.plain)
@@ -73,7 +83,7 @@ struct TransactionsList: View {
                 Text("Загрузка...")
                     .task {
                         do {
-                            try await vm.load(refresh: false, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                            try await vm.load(refresh: false, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                         } catch {
                             alert(error)
                         }
@@ -83,7 +93,7 @@ struct TransactionsList: View {
         .task {
             if vm.transactions.count != 0 {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                 } catch {
                     alert(error)
                 }
@@ -92,7 +102,7 @@ struct TransactionsList: View {
         .onChange(of: dateFrom) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                 } catch {
                     alert(error)
                 }
@@ -101,7 +111,7 @@ struct TransactionsList: View {
         .onChange(of: dateTo) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                 } catch {
                     alert(error)
                 }
@@ -110,7 +120,25 @@ struct TransactionsList: View {
         .onChange(of: searchText) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText)
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
+                } catch {
+                    alert(error)
+                }
+            }
+        }
+        .onChange(of: transactionType) { _, _ in
+            Task {
+                do {
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
+                } catch {
+                    alert(error)
+                }
+            }
+        }
+        .onChange(of: currency) { _, _ in
+            Task {
+                do {
+                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
                 } catch {
                     alert(error)
                 }

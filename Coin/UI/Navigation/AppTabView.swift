@@ -39,12 +39,6 @@ struct AppTabView: View {
                     Image(systemName: "person.fill")
                     Text("Профиль")
                 }
-            ChartTab(selectedAccountGroup: selectedAccountGroup)
-                .tag(5)
-                .tabItem {
-                    Image(systemName: "5.circle")
-                    Text("График")
-                }
         }
     }
 }

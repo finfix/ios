@@ -29,9 +29,7 @@ struct TagsList: View {
     var body: some View {
         List {
             ForEach(vm.tags) { tag in
-                Button {
-                    path.append(TagsListRoute.editTag(tag))
-                } label: {
+                NavigationLink(value: TagsListRoute.editTag(tag)) {
                     Text(tag.name)
                 }
                 .buttonStyle(.plain)
@@ -50,9 +48,7 @@ struct TagsList: View {
         }
         .toolbar{
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    path.append(TagsListRoute.createTag)
-                } label: {
+                NavigationLink(value: TagsListRoute.createTag) {
                     Image(systemName: "plus")
                 }
             }

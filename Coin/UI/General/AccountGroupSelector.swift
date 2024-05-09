@@ -16,9 +16,10 @@ struct AccountGroupSelector: View {
     @State private var vm = AccountGroupSelectorViewModel()
     @Binding var selectedAccountGroup: AccountGroup
     @AppStorage("selectedAccountGroupID") var selectedAccountGroupID: Int?
+    var pickerName: String = ""
     
     var body: some View {
-        Picker("", selection: $selectedAccountGroup) {
+        Picker(pickerName, selection: $selectedAccountGroup) {
             ForEach(vm.accountGroups) { accountGroup in
                 Text(accountGroup.name)
                     .tag(accountGroup)

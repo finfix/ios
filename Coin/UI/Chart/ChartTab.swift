@@ -70,6 +70,11 @@ struct ChartTab: View {
                 alert(error)
             }
         }
+        .onChange(of: selectedAccountGroup) { _, _ in
+            Task {
+                try await vm.load(accountGroupID: selectedAccountGroup.id)
+            }
+        }
     }
 }
 

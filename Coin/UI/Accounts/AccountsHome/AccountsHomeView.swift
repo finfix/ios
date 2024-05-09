@@ -54,6 +54,20 @@ struct AccountsHomeView: View {
                     EditTransaction(transactionType: transactionType, accountGroup: selectedAccountGroup, path: $path)
                 }
             }
+            .navigationDestination(for: EditTransactionRoute.self) { screen in
+                switch screen {
+                case .tagsList:
+                    TagsList(accountGroup: selectedAccountGroup, path: $path)
+                }
+            }
+            .navigationDestination(for: TagsListRoute.self) { screen in
+                switch screen {
+                case .createTag:
+                    EditTag(selectedAccountGroup: selectedAccountGroup, path: $path)
+                case .editTag(let tag):
+                    EditTag(tag, path: $path)
+                }
+            }
         }
         .task {
             do {
@@ -84,23 +98,17 @@ struct CirclesCreateTransaction: View {
                 CircleTypeTransaction(imageName: chooseBlurIsOpened ? "arrow.uturn.backward" : "plus")
             }
             if chooseBlurIsOpened {
-                Button {
-                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.consumption))
-                } label: {
+                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.consumption)) {
                     CircleTypeTransaction(imageName: "minus")
                 }
                 .padding(.bottom, 90)
                 
-                Button {
-                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.income))
-                } label: {
+                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.income)) {
                     CircleTypeTransaction(imageName: "plus")
                 }
                 .padding(.trailing, 90)
                 
-                Button {
-                    path.append(CirclesCreateTransactionRoute.createTrasnaction(.transfer))
-                } label: {
+                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.transfer)) {
                     CircleTypeTransaction(imageName: "arrow.left.arrow.right")
                 }
                 .padding(.trailing, 75)

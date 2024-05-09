@@ -27,7 +27,7 @@ struct User {
     
     // Инициализатор из модели базы данных
     init(_ dbModel: UserDB, currenciesMap: [String: Currency]?) {
-        self.id = dbModel.id
+        self.id = dbModel.id!
         self.name = dbModel.name
         self.email = dbModel.email
         self.defaultCurrency = currenciesMap?[dbModel.defaultCurrencyCode]! ?? Currency()
