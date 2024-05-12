@@ -40,6 +40,7 @@ struct EditTransaction: View {
     init(transactionType: TransactionType, accountGroup: AccountGroup, path: Binding<NavigationPath>) {
         vm = EditTransactionViewModel(
             currentTransaction: Transaction(
+                accountingInCharts: true, 
                 type: transactionType
             ),
             accountGroup: accountGroup,
@@ -162,6 +163,9 @@ struct EditTransaction: View {
             }
             Section {
                 TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
+            }
+            Section {
+                Toggle("Учитывать транзакцию в графиках", isOn: $vm.currentTransaction.accountingInCharts)
             }
             Section {
                 Button {
