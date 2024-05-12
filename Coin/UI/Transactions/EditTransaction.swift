@@ -16,12 +16,15 @@ enum EditTransactionRoute: Hashable {
 
 struct EditTransaction: View {
     
+    private enum Field: Hashable {
+        case amountFromSelector, amountToSelector
+    }
+    @FocusState private var focusedField: Field?
+    
     @Environment (\.dismiss) private var dismiss
     @State private var vm: EditTransactionViewModel
     @Environment (AlertManager.self) private var alert
     
-    @State var shouldDisableUI = false
-    @State var shouldShowProgress = false
     @Binding var path: NavigationPath
     
     init(_ transaction: Transaction, path: Binding<NavigationPath>) {
@@ -83,13 +86,21 @@ struct EditTransaction: View {
             if vm.currentTransaction.type != .balancing {
                 Section {
                     Pickers(
+                        isPickerShowing: $vm.shouldShowPickerAccountFrom,
                         buttonName: "Счет списания",
                         account: $vm.currentTransaction.accountFrom,
                         accounts: vm.accounts,
                         position: .up,
                         transactionType: vm.currentTransaction.type
                     )
+                    .onChange(of: vm.currentTransaction.accountFrom) { _, _ in
+                        withAnimation {
+                            vm.shouldShowPickerAccountFrom = false
+                            vm.shouldShowPickerAccountTo = true
+                        }
+                    }
                     Pickers(
+                        isPickerShowing: $vm.shouldShowPickerAccountTo,
                         buttonName: "Счет пополнения",
                         account: $vm.currentTransaction.accountTo,
                         accounts: vm.accounts,
@@ -97,6 +108,12 @@ struct EditTransaction: View {
                         transactionType: vm.currentTransaction.type,
                         excludeAccount: vm.currentTransaction.accountFrom
                     )
+                    .onChange(of: vm.currentTransaction.accountTo) { _, _ in
+                        withAnimation {
+                            vm.shouldShowPickerAccountTo = false
+                            focusedField = .amountFromSelector
+                        }
+                    }
                 }
                 .pickerStyle(.wheel)
             }
@@ -104,10 +121,24 @@ struct EditTransaction: View {
                 if vm.currentTransaction.type != .balancing {
                     TextField(vm.intercurrency ? "Сумма списания" : "Сумма", value: $vm.currentTransaction.amountFrom, format: .number)
                         .keyboardType(.decimalPad)
+                        .focused($focusedField, equals: .amountFromSelector)
+                        .onSubmit {
+                            if vm.intercurrency {
+                                focusedField = .amountToSelector
+                            } else {
+                                vm.shouldShowDatePicker = true
+                            }
+                        }
                 }
                 if vm.intercurrency || vm.currentTransaction.type == .balancing {
                     TextField("Сумма начисления", value: $vm.currentTransaction.amountTo, format: .number)
                         .keyboardType(.decimalPad)
+                        .focused($focusedField, equals: .amountToSelector)
+                        .onSubmit {
+                            withAnimation {
+                                vm.shouldShowDatePicker = true
+                            }
+                        }
                 }
             } footer: {
                 if vm.intercurrency && vm.currentTransaction.type != .balancing {
@@ -115,8 +146,16 @@ struct EditTransaction: View {
                 }
             }
             Section {
-                DatePicker(selection: $vm.currentTransaction.dateTransaction, displayedComponents: .date) {
-                    Text("Дата транзакции")
+                ExpandableDatePicker(
+                    buttonName: "Дата",
+                    isCalendarShowing: $vm.shouldShowDatePicker,
+                    date: Binding<Date?>($vm.currentTransaction.dateTransaction),
+                    showClearButton: false
+                )
+                .onChange (of: vm.currentTransaction.dateTransaction) { _, _ in
+                    withAnimation {
+                        vm.shouldShowDatePicker = false
+                    }
                 }
             }
             Section {
@@ -125,11 +164,11 @@ struct EditTransaction: View {
             Section {
                 Button {
                     Task {
-                        shouldDisableUI = true
-                        shouldShowProgress = true
+                        vm.shouldDisableUI = true
+                        vm.shouldShowProgress = true
                         defer {
-                            shouldDisableUI = false
-                            shouldShowProgress = false
+                            vm.shouldDisableUI = false
+                            vm.shouldShowProgress = false
                         }
                         
                         do {
@@ -145,7 +184,7 @@ struct EditTransaction: View {
                         dismiss()
                     }
                 } label: {
-                    if shouldShowProgress {
+                    if vm.shouldShowProgress {
                         ProgressView()
                     } else {
                         Text("Сохранить")
@@ -162,14 +201,38 @@ struct EditTransaction: View {
             ) {}
 			
         }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                HStack {
+                    Spacer()
+                    Button("Следующее поле") {
+                        switch focusedField {
+                        case  .amountFromSelector:
+                            if vm.intercurrency {
+                                focusedField = .amountToSelector
+                            } else {
+                                vm.shouldShowDatePicker = true
+                                focusedField = nil
+                            }
+                        case .amountToSelector:
+                            vm.shouldShowDatePicker = true
+                            focusedField = nil
+                        default:
+                            focusedField = nil
+                        }
+                    }
+                }
+            }
+        }
         .task {
+            vm.shouldShowPickerAccountFrom = true
             do {
                 try await vm.load()
             } catch {
                 alert(error)
             }
         }
-		.disabled(shouldDisableUI)
+        .disabled(vm.shouldDisableUI)
     }
 }
 
@@ -239,7 +302,7 @@ func getAccountsForShowingInCreate(accounts: [Account], position: Position, tran
 private struct Pickers: View {
     
     
-    @State private var isPickerShowing = false
+    @Binding var isPickerShowing: Bool
     var buttonName: String
     @Binding var account: Account
     var accounts: [Account]
