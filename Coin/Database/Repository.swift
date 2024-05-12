@@ -479,39 +479,55 @@ extension AppDatabase {
     
     func getStatisticByMonth(
         transactionType: TransactionType,
-        accountGroupID: UInt32
+        accountGroupID: UInt32,
+        accountParameterIgnore: Bool = false,
+        transactionParameterIgnore: Bool = false
     ) async throws -> [Date: Decimal] {
         try await reader.read { db in
-            var amountField = ""
             var accountType = ""
             var accountField = ""
             switch transactionType {
             case .consumption:
-                amountField = "amountTo"
                 accountField = "accountToId"
                 accountType = "expense"
             case .income:
-                amountField = "amountFrom"
                 accountField = "accountFromId"
                 accountType = "earnings"
             default:
                 return [:]
             }
+            
+            var requestParameters: [String] = [
+                "a.type = :accountType",
+                "ag.id = :accountGroupID"
+            ]
+            var args: StatementArguments = [
+                "accountType": accountType,
+                "accountGroupID": accountGroupID
+            ]
+            
+            if !accountParameterIgnore {
+                requestParameters.append("a.accountingInCharts = :accountAccountingInCharts")
+                _ = args.append(contentsOf: ["accountAccountingInCharts": true])
+            }
+            if !transactionParameterIgnore {
+                requestParameters.append("t.accountingInCharts = :transactionAccountingInCharts")
+                _ = args.append(contentsOf: ["transactionAccountingInCharts": true])
+            }
+            
             let req = """
                 SELECT
                   strftime('%Y-%m-01', t.dateTransaction) AS "month",
-                  ROUND(SUM(t.\(amountField) * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
+                  ROUND(SUM(t.amountFrom * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
                 FROM transactionDB t
                 JOIN accountDB a ON a.id = t.\(accountField)
                 JOIN accountGroupDB ag  ON a.accountGroupId = ag.id
-                WHERE a.type = '\(accountType)'
-                AND ag.id = ?
-                AND a.accountingInCharts = true
+                WHERE \(requestParameters.joined(separator: " AND "))
                 GROUP BY "month";
             """
             
             var result: [Date: Decimal] = [:]
-            let rows = try Row.fetchCursor(db, sql: req, arguments: [accountGroupID])
+            let rows = try Row.fetchCursor(db, sql: req, arguments: args)
             while let row = try rows.next() {
                 result[row["month"]] = row["remainder"]
             }
