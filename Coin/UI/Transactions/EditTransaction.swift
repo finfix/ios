@@ -93,7 +93,8 @@ struct EditTransaction: View {
                         position: .up,
                         transactionType: vm.currentTransaction.type
                     )
-                    .onChange(of: vm.currentTransaction.accountFrom) { _, _ in
+                    .onChange(of: vm.currentTransaction.accountFrom) { _, newValue in
+                        guard newValue.id != 0 else { return }
                         withAnimation {
                             vm.shouldShowPickerAccountFrom = false
                             vm.shouldShowPickerAccountTo = true
@@ -108,7 +109,8 @@ struct EditTransaction: View {
                         transactionType: vm.currentTransaction.type,
                         excludeAccount: vm.currentTransaction.accountFrom
                     )
-                    .onChange(of: vm.currentTransaction.accountTo) { _, _ in
+                    .onChange(of: vm.currentTransaction.accountTo) { _, newValue in
+                        guard newValue.id != 0 else { return }
                         withAnimation {
                             vm.shouldShowPickerAccountTo = false
                             focusedField = .amountFromSelector
@@ -274,7 +276,7 @@ enum Position {
 }
 
 func getAccountsForShowingInCreate(accounts: [Account], position: Position, transactionType: TransactionType, excludedAccount: Account?) -> [Account] {
-    var subfiltered = accounts.filter { $0.visible && $0.id != excludedAccount?.id ?? 0 && !$0.isParent }
+    var subfiltered = accounts.filter { $0.visible && $0.id != excludedAccount?.id ?? 0 }
     
     switch transactionType {
     case .consumption:
@@ -296,7 +298,7 @@ func getAccountsForShowingInCreate(accounts: [Account], position: Position, tran
     default:
         subfiltered = []
     }
-    return subfiltered.sorted(by: { $1.serialNumber > $0.serialNumber })
+    return Account.groupAccounts(subfiltered.sorted(by: { $1.serialNumber > $0.serialNumber }))
 }
 
 private struct Pickers: View {
@@ -304,11 +306,13 @@ private struct Pickers: View {
     
     @Binding var isPickerShowing: Bool
     var buttonName: String
+    @State var parentAccount = Account()
     @Binding var account: Account
     var accounts: [Account]
     var position: Position
     var transactionType: TransactionType
     var excludeAccount: Account?
+    @State var openSecondPicker: Bool = false
     
     var accountsToShow: [Account] {
         getAccountsForShowingInCreate(accounts: accounts, position: position, transactionType: transactionType, excludedAccount: excludeAccount)
@@ -329,15 +333,40 @@ private struct Pickers: View {
                     .foregroundColor(.secondary)
             }
             if isPickerShowing {
-                Picker("", selection: $account) {
-                    ForEach (accountsToShow) { account in
-                        HStack {
-                            Text(account.name)
-                            Spacer()
-                            Text(account.currency.symbol)
-                                .foregroundColor(.secondary)
+                HStack {
+                    Picker("", selection: $parentAccount) {
+                        Text("Не выбрано")
+                            .tag(Account())
+                        ForEach (accountsToShow) { account in
+                            HStack {
+                                Text(account.name)
+                            }
+                            .tag(account)
                         }
-                        .tag(account)
+                    }
+                    .onChange(of: parentAccount) { _, newValue in
+                        if !newValue.isParent {
+                            account = parentAccount
+                        } else {
+                            withAnimation {
+                                openSecondPicker = true
+                            }
+                        }
+                    }
+                    if openSecondPicker {
+                        Picker("", selection: $account) {
+                            Text("Не выбрано")
+                                .tag(Account())
+                            ForEach (parentAccount.childrenAccounts) { account in
+                                HStack {
+                                    Text(account.name)
+                                    Spacer()
+                                    Text(account.currency.symbol)
+                                        .foregroundColor(.secondary)
+                                }
+                                .tag(account)
+                            }
+                        }
                     }
                 }
             }
