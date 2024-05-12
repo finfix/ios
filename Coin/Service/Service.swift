@@ -225,7 +225,7 @@ extension Service {
             }
             
             addictionalMapping["balancingTransactionID"] = try await db.createTransaction(Transaction(
-                accounting: true,
+                accountingInCharts: true,
                 amountFrom: account.remainder,
                 amountTo: account.remainder,
                 dateTransaction: Date.now.stripTime(),
@@ -360,7 +360,7 @@ extension Service {
             }
             
             addictionalMapping["balancingTransactionID"] = try await db.createTransaction(Transaction(
-                accounting: true,
+                accountingInCharts: true,
                 amountFrom: newAccount.remainder-oldAccount.remainder,
                 amountTo: newAccount.remainder-oldAccount.remainder,
                 dateTransaction: Date.now.stripTime(),
@@ -520,7 +520,8 @@ extension Service {
                 type: transaction.type.rawValue,
                 isExecuted: true,
                 tagIDs: tagIDs,
-                datetimeCreate: transaction.datetimeCreate
+                datetimeCreate: transaction.datetimeCreate,
+                accountingInCharts: transaction.accountingInCharts
             )
         )
 }
@@ -571,6 +572,7 @@ extension Service {
             dateTransaction: newTransaction.dateTransaction != oldTransaction.dateTransaction ? newTransaction.dateTransaction : nil,
             note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
             tagIDs: oldTransactionTagIDs != newTransactionTagIDs ? newTransactionTagIDs : nil,
+            accountingInCharts: newTransaction.accountingInCharts != oldTransaction.accountingInCharts ? newTransaction.accountingInCharts : nil,
             id: newTransaction.id))
     }
     

@@ -48,9 +48,9 @@ extension AppDatabase {
     private var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
         
-        #if DEBUG
-        migrator.eraseDatabaseOnSchemaChange = true
-        #endif
+//        #if DEBUG
+//        migrator.eraseDatabaseOnSchemaChange = true
+//        #endif
         
         migrator.registerMigration("createCurrency") { db in
             try db.create(table: "currencyDB") { table in
@@ -225,6 +225,12 @@ extension AppDatabase {
                     .notNull()
                 
                 table.primaryKey(["localID", "serverID", "modelType"])
+            }
+        }
+        
+        migrator.registerMigration("renameTransactionFieldAccounting") { db in
+            try db.alter(table: "transactionDB") { table in
+                table.rename(column: "accounting", to: "accountingInCharts")
             }
         }
         

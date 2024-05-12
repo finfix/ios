@@ -9,7 +9,7 @@ import Foundation
 
 struct Transaction: Identifiable {
     var id: UInt32
-    var accounting: Bool
+    var accountingInCharts: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
     var dateTransaction: Date
@@ -23,7 +23,7 @@ struct Transaction: Identifiable {
     
     init(
         id: UInt32 = 0,
-        accounting: Bool = true,
+        accountingInCharts: Bool = true,
         amountFrom: Decimal = 0,
         amountTo: Decimal = 0,
         dateTransaction: Date = Date(),
@@ -35,7 +35,7 @@ struct Transaction: Identifiable {
         accountTo: Account = Account(),
         tags: [Tag] = []
     ) {
-        self.accounting = accounting
+        self.accountingInCharts = accountingInCharts
         self.amountFrom = amountFrom
         self.amountTo = amountTo
         self.dateTransaction = dateTransaction
@@ -58,7 +58,7 @@ extension Transaction {
         tagsToTransactions: [TagToTransactionDB],
         tagsMap: [UInt32: Tag]?
     ) {
-        self.accounting = dbModel.accounting
+        self.accountingInCharts = dbModel.accountingInCharts
         self.amountFrom = dbModel.amountFrom
         self.amountTo = dbModel.amountTo
         self.dateTransaction = dbModel.dateTransaction
