@@ -623,6 +623,44 @@ extension Service {
         data.append(Series(name: "Расходы", data: expenses))
         let incomes = try await db.getStatisticByMonth(transactionType: .income, accountGroupID: accountGroupID)
         data.append(Series(name: "Доходы", data: incomes))
+        
+        var minDate: Date = .now
+        var maxDate: Date = .now
+        
+        // Проходимся по каждой статье и получаем дату самой первой и самой последней записи
+        for data in data {
+            if let minDateOfData = data.data.keys.min() {
+                if minDate > minDateOfData {
+                    minDate = minDateOfData
+                }
+            }
+            if let maxDateOfData = data.data.keys.max() {
+                if maxDate < maxDateOfData {
+                    maxDate = maxDateOfData
+                }
+            }
+        }
+        
+        // Проходимся по каждой статье
+        for (i, series) in data.enumerated() {
+            
+            // Обозначаем самую раннюю дату, которая должна быть у каждой статьи
+            var lastDate: Date = minDate
+            
+            // Проходимся по датам, отсортированным в порядке увеличения
+            while true {
+                
+                if series.data[lastDate] == nil {
+                    data[i].data[lastDate] = 0
+                }
+                                
+                // Обновляем последнюю проверенную дату
+                lastDate = lastDate.adding(.month, value: 1)
+                if lastDate > maxDate {
+                    break
+                }
+            }
+        }
         return data
     }
     

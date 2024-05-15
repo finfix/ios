@@ -29,22 +29,6 @@ struct ChartTab: View {
     
     let chartHeight: CGFloat = UIScreen.main.bounds.height * 0.3 // Треть экрана
     
-    var selectedDate: Date? {
-        if let rawSelectedDate {
-            return vm.data.first?.data.first(where: {
-                let endOfMonth = endOfMonth(for: $0.key)
-                
-                return ($0.key ... endOfMonth).contains(rawSelectedDate)
-            })?.key
-        }
-        
-        return nil
-    }
-    
-    func endOfMonth(for date: Date) -> Date {
-        calendar.date(byAdding: .month, value: 1, to: date)!
-    }
-    
     var body: some View {
         List {
             ChartView(data: vm.data, rawSelectedDate: $rawSelectedDate, colorPerName: colorPerName)
@@ -58,7 +42,7 @@ struct ChartTab: View {
                         Text(series.name)
                     }
                     Spacer()
-                    Text(formatter.string(number: series.data[selectedDate ?? endOfMonth(for: Date.now)] ?? 0))
+                    Text(formatter.string(number: series.data[rawSelectedDate?.startOfMonth(inUTC: true) ?? Date.now.startOfMonth(inUTC: true)] ?? 0))
                 }
             }
         }

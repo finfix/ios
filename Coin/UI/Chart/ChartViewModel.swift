@@ -22,5 +22,5 @@ class ChartViewModel {
 struct Series {
     
     let name: String
-    let data: [Date: Decimal]
+    var data: [Date: Decimal]
 }
