@@ -55,7 +55,7 @@ struct TransactionsList: View {
     var body: some View {
         List {
             Section(footer:
-            ChartTab(selectedAccountGroup: selectedAccountGroup)
+            ChartTab(selectedAccountGroup: selectedAccountGroup, account: vm.account)
                 .frame(width: width, height: 400)
             ){}
             ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in

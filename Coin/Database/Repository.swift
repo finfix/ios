@@ -481,7 +481,8 @@ extension AppDatabase {
         transactionType: TransactionType,
         accountGroupID: UInt32,
         accountParameterIgnore: Bool = false,
-        transactionParameterIgnore: Bool = false
+        transactionParameterIgnore: Bool = false,
+        accountIDs: [UInt32] = []
     ) async throws -> [Date: Decimal] {
         try await reader.read { db in
             var accountType = ""
@@ -498,21 +499,29 @@ extension AppDatabase {
             }
             
             var requestParameters: [String] = [
-                "a.type = :accountType",
-                "ag.id = :accountGroupID"
+                "a.type = ?",
+                "ag.id = ?"
             ]
             var args: StatementArguments = [
-                "accountType": accountType,
-                "accountGroupID": accountGroupID
+                accountType,
+                accountGroupID
             ]
             
             if !accountParameterIgnore {
-                requestParameters.append("a.accountingInCharts = :accountAccountingInCharts")
-                _ = args.append(contentsOf: ["accountAccountingInCharts": true])
+                requestParameters.append("a.accountingInCharts = ?")
+                _ = args.append(contentsOf: [true])
             }
             if !transactionParameterIgnore {
-                requestParameters.append("t.accountingInCharts = :transactionAccountingInCharts")
-                _ = args.append(contentsOf: ["transactionAccountingInCharts": true])
+                requestParameters.append("t.accountingInCharts = ?")
+                _ = args.append(contentsOf: [true])
+            }
+            if !accountIDs.isEmpty {
+                var questions: [String] = []
+                for accountID in accountIDs {
+                    questions.append("?")
+                    _ = args.append(contentsOf: [accountID])
+                }
+                requestParameters.append("a.id in (\(questions.joined(separator: ", ")))")
             }
             
             let req = """
@@ -531,6 +540,8 @@ extension AppDatabase {
             while let row = try rows.next() {
                 result[row["month"]] = row["remainder"]
             }
+
+                
             return result
         }
     }

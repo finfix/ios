@@ -617,11 +617,14 @@ extension Service {
         return (leftObjectsExclusive, rightObjectsExclusive)
     }
     
-    func getStatisticByMonth(accountGroupID: UInt32) async throws -> [Series] {
+    func getStatisticByMonth(
+        accountGroupID: UInt32,
+        accountIDs: [UInt32] = []
+    ) async throws -> [Series] {
         var data: [Series] = []
-        let expenses = try await db.getStatisticByMonth(transactionType: .consumption, accountGroupID: accountGroupID)
+        let expenses = try await db.getStatisticByMonth(transactionType: .consumption, accountGroupID: accountGroupID, accountIDs: accountIDs)
         data.append(Series(name: "Расходы", data: expenses))
-        let incomes = try await db.getStatisticByMonth(transactionType: .income, accountGroupID: accountGroupID)
+        let incomes = try await db.getStatisticByMonth(transactionType: .income, accountGroupID: accountGroupID, accountIDs: accountIDs)
         data.append(Series(name: "Доходы", data: incomes))
         
         var minDate: Date = .now
