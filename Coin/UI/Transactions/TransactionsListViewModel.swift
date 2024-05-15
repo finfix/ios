@@ -17,6 +17,7 @@ class TransactionsListViewModel {
     var transactionsCancelled = false
     let pageSize = 100
     var accountIDs: [UInt32] = []
+    var account: Account? = nil
     
     init(account: Account? = nil) {
         if let account = account {
@@ -25,6 +26,7 @@ class TransactionsListViewModel {
                 self.accountIDs.append(childAccount.id)
             }
         }
+        self.account = account
     }
     
     func load(

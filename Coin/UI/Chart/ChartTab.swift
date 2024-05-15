@@ -11,7 +11,7 @@ import Charts
 struct ChartTab: View {
     @Environment(AlertManager.self) private var alert
     var selectedAccountGroup: AccountGroup
-    @State private var vm = ChartViewModel()
+    @State private var vm: ChartViewModel
     @State var rawSelectedDate: Date?
     @Environment(\.calendar) var calendar
     
@@ -20,9 +20,13 @@ struct ChartTab: View {
         "Доходы": .green
     ]
     
-    init(selectedAccountGroup: AccountGroup) {
+    init(
+        selectedAccountGroup: AccountGroup,
+        account: Account? = nil
+    ) {
         self.formatter = CurrencyFormatter(currency: selectedAccountGroup.currency, withUnits: false)
         self.selectedAccountGroup = selectedAccountGroup
+        vm = ChartViewModel(account: account)
     }
     
     var formatter: CurrencyFormatter
