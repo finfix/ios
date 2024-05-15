@@ -12,6 +12,8 @@ struct TransactionFilterView: View {
     @Environment(\.dismiss) var dissmiss
     @Environment(AlertManager.self) var alert
     @State private var vm = TransactionFilterViewModel()
+    @State private var shouldShowDateFrom = false
+    @State private var shouldShowDateTo = false
     @Binding var dateFrom: Date?
     @Binding var dateTo: Date?
     @Binding var transactionType: TransactionType?
@@ -23,8 +25,8 @@ struct TransactionFilterView: View {
             Form {
                 Section {
                     Label("Дата", systemImage: "calendar")
-                    Сalendar(buttonName: "C", date: $dateFrom)
-                    Сalendar(buttonName: "По", date: $dateTo)
+                    ExpandableDatePicker(buttonName: "C", isCalendarShowing: $shouldShowDateFrom, date: $dateFrom)
+                    ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $dateTo)
                 }
                 Section {
                     Picker("Тип транзакции", selection: $transactionType) {
@@ -70,11 +72,12 @@ struct TransactionFilterView: View {
     }
 }
 
-private struct Сalendar: View {
+struct ExpandableDatePicker: View {
     
     var buttonName: String
-    @State private var isCalendarShowing = false
+    @Binding var isCalendarShowing: Bool
     @Binding var date: Date?
+    var showClearButton: Bool = true
     
     var body: some View {
         Group {
@@ -93,7 +96,7 @@ private struct Сalendar: View {
                     }
                 }
                 .foregroundStyle(.secondary)
-                if date != nil {
+                if date != nil && showClearButton {
                     Button {
                         withAnimation {
                             date = nil
@@ -110,6 +113,7 @@ private struct Сalendar: View {
                 DatePicker(buttonName,
                            selection: Binding<Date>(get: {date ?? Date()}, set: {date = $0}),
                            displayedComponents: .date)
+                .datePickerStyle(.graphical)
             }
         }
     }

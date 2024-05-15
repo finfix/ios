@@ -18,6 +18,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
     var isExecuted: Bool
     var tagIDs: [UInt32]
     var datetimeCreate: Date
+    var accountingInCharts: Bool
     
     init(
         accountFromID: UInt32,
@@ -29,7 +30,8 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         type: String,
         isExecuted: Bool,
         tagIDs: [UInt32],
-        datetimeCreate: Date
+        datetimeCreate: Date,
+        accountingInCharts: Bool
     ) {
         self.accountFromID = accountFromID
         self.accountToID = accountToID
@@ -41,6 +43,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         self.isExecuted = isExecuted
         self.tagIDs = tagIDs
         self.datetimeCreate = datetimeCreate
+        self.accountingInCharts = accountingInCharts
     }
     
     enum CodingKeys: String, CodingKey {
@@ -54,6 +57,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         case isExecuted
         case tagIDs
         case datetimeCreate
+        case accountingInCharts
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -69,6 +73,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         try container.encode(isExecuted, forKey: .isExecuted)
         try container.encode(tagIDs, forKey: .tagIDs)
         try container.encode(DateFormatters.fullTime.string(from: datetimeCreate), forKey: .datetimeCreate)
+        try container.encode(accountingInCharts, forKey: .accountingInCharts)
     }
     
     init(_ map: [String: String]) {
@@ -91,6 +96,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
             i += 1
         }
         self.datetimeCreate = DateFormatters.fullTime.date(from: map["datetimeCreate"]!)!
+        self.accountingInCharts = Bool(map["accountingInCharts"]!)!
     }
     
     func convertToFields() -> [SyncTaskValue] {
@@ -107,6 +113,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
             fields.append(SyncTaskValue(objectType: .tag, name: "tag\(i)", value: String(tagID)))
         }
         fields.append(SyncTaskValue(name: "datetimeCreate", value: DateFormatters.fullTime.string(from: self.datetimeCreate)))
+        fields.append(SyncTaskValue(name: "accountingInCharts", value: String(self.accountingInCharts)))
         return fields
     }
 }
@@ -123,6 +130,7 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
     var dateTransaction: Date?
     var note: String?
     var tagIDs: [UInt32]?
+    var accountingInCharts: Bool?
     var id: UInt32
     
     init(
@@ -133,6 +141,7 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
         dateTransaction: Date? = nil,
         note: String? = nil,
         tagIDs: [UInt32]? = nil,
+        accountingInCharts: Bool? = nil,
         id: UInt32
     ) {
         self.accountFromID = accountFromID
@@ -142,6 +151,7 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
         self.dateTransaction = dateTransaction
         self.note = note
         self.tagIDs = tagIDs
+        self.accountingInCharts = accountingInCharts
         self.id = id
     }
     
@@ -153,6 +163,7 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
         case dateTransaction
         case note
         case tagIDs
+        case accountingInCharts
         case id
     }
     
@@ -168,6 +179,7 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
         }
         try container.encode(tagIDs, forKey: .tagIDs)
         try container.encode(note, forKey: .note)
+        try container.encode(accountingInCharts, forKey: .accountingInCharts)
         try container.encode(id, forKey: .id)
     }
     
@@ -178,6 +190,7 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
         self.amountTo = Decimal(string: map["amountTo"] ?? "")
         self.dateTransaction = DateFormatters.onlyDate.date(from: map["dateTransaction"] ?? "")
         self.note = map["note"]
+        self.accountingInCharts = Bool(map["accountingInCharts"] ?? "")
         var i = 0
         if map["deleteAllTags"] != nil {
             self.tagIDs = []
@@ -217,6 +230,9 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
         if let note = self.note {
             fields.append(SyncTaskValue(name: "note", value: String(note)))
         }
+        if let accountingInCharts = self.accountingInCharts {
+            fields.append(SyncTaskValue(name: "accountingInCharts", value: String(accountingInCharts)))
+        }
         if let tagIDs = self.tagIDs {
             for (i, tagID) in tagIDs.enumerated() {
                 fields.append(SyncTaskValue(objectType: .tag, name: "tag\(i)", value: String(tagID)))
@@ -240,7 +256,7 @@ struct GetTransactionReq: Encodable {
 
 struct GetTransactionsRes: Decodable {
     var id: UInt32
-    var accounting: Bool
+    var accountingInCharts: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
     var dateTransaction: Date
@@ -253,7 +269,7 @@ struct GetTransactionsRes: Decodable {
     
     enum CodingKeys: String, CodingKey {
         case id
-        case accounting
+        case accountingInCharts
         case amountFrom
         case amountTo
         case dateTransaction
@@ -269,7 +285,7 @@ struct GetTransactionsRes: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.id = try container.decode(UInt32.self, forKey: .id)
-        self.accounting = try container.decode(Bool.self, forKey: .accounting)
+        self.accountingInCharts = try container.decode(Bool.self, forKey: .accountingInCharts)
         self.amountFrom = try container.decode(Decimal.self, forKey: .amountFrom)
         self.amountTo = try container.decode(Decimal.self, forKey: .amountTo)
         self.isExecuted = try container.decode(Bool.self, forKey: .isExecuted)

@@ -13,14 +13,26 @@ class ChartViewModel {
     let service = Service.shared
     
     var data: [Series] = []
+    private var accountIDs: [UInt32] = []
+    
+    init(
+        account: Account? = nil
+    ) {
+        if let account = account {
+            self.accountIDs = [account.id]
+            for childAccount in account.childrenAccounts {
+                self.accountIDs.append(childAccount.id)
+            }
+        }
+    }
     
     func load(accountGroupID: UInt32) async throws {
-        data = try await service.getStatisticByMonth(accountGroupID: accountGroupID)
+        data = try await service.getStatisticByMonth(accountGroupID: accountGroupID, accountIDs: accountIDs)
     }
 }
 
 struct Series {
     
     let name: String
-    let data: [Date: Decimal]
+    var data: [Date: Decimal]
 }

@@ -18,10 +18,6 @@ struct ChartView: View {
     @State var xPosition = Date.now.addingTimeInterval(TimeInterval(-1 * 60 * 60 * 24 * 30 * 6))
     var colorPerName: [String: Color]
     
-    func endOfMonth(for date: Date) -> Date {
-        calendar.date(byAdding: .month, value: 1, to: date)!
-    }
-    
     var maxSum: Int {
         let dateRange = xPosition-TimeInterval(oneMonthRange)...xPosition + TimeInterval(visibleRange + oneMonthRange)
         var maxValue: Int = 0
@@ -34,20 +30,6 @@ struct ChartView: View {
         }
         return maxValue
     }
-    
-    var selectedDate: Date? {
-        if let rawSelectedDate {
-            return data.first?.data.first(where: {
-                let endOfMonth = endOfMonth(for: $0.key)
-                
-                return ($0.key ... endOfMonth).contains(rawSelectedDate)
-            })?.key
-        }
-        
-        return nil
-    }
-    
-
     
     var body: some View {
         VStack {
@@ -63,9 +45,9 @@ struct ChartView: View {
                     .interpolationMethod(.catmullRom)
                 }
                 
-                if let selectedDate {
+                if let rawSelectedDate {
                     RuleMark(
-                        x: .value("Selected", selectedDate, unit: .month)
+                        x: .value("Selected", rawSelectedDate, unit: .month)
                     )
                     .foregroundStyle(Color.gray.opacity(0.3))
                     .offset(yStart: -10)
@@ -88,7 +70,7 @@ struct ChartView: View {
                                     visibleRange < 24 * oneMonthRange ? .dateTime.month(visibleRange < 12 * oneMonthRange ? .abbreviated : .narrow) : .dateTime.year(), centered: true)
                 }
             }
-            Text(selectedDate?.formatted(.dateTime.year(.defaultDigits).month(.wide)) ?? " ")
+            Text(rawSelectedDate?.formatted(.dateTime.year(.defaultDigits).month(.wide)) ?? " ")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
             Stepper (
