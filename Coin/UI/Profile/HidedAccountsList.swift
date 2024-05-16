@@ -26,7 +26,7 @@ struct HidedAccountsList: View {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
                     ForEach(accounts) { account in
-                        AccountCircleItem(account, path: $path, selectedAccountGroup: $selectedAccountGroup)
+                        AccountCircleItem(account, path: $path)
                     }
                 }
             }

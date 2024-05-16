@@ -144,8 +144,23 @@ struct EditTransaction: View {
                         }
                 }
             } footer: {
-                if vm.intercurrency && vm.currentTransaction.type != .balancing {
-                    Rate(vm.currentTransaction)
+                VStack {
+                    HStack {
+                        if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency {
+                            Text("В валюте группы счетов: " + CurrencyFormatter().string(
+                                number: vm.currentTransaction.amountFrom * (vm.accountGroup.currency.rate / vm.currentTransaction.accountFrom.currency.rate),
+                                currency: vm.accountGroup.currency,
+                                withUnits: false
+                            ))
+                        }
+                        Spacer()
+                    }
+                    HStack {
+                        if vm.intercurrency && vm.currentTransaction.type != .balancing {
+                            Rate(vm.currentTransaction)
+                        }
+                        Spacer()
+                    }
                 }
             }
             Section {
@@ -190,18 +205,34 @@ struct EditTransaction: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            
-            Section(footer:
-                VStack(alignment: .leading) {
-                    Text("ID: \(vm.currentTransaction.id)")
-                    Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
-                }
-            ) {}
+            if vm.mode == .update {
+                Section(footer:
+                    VStack(alignment: .leading) {
+                        Text("ID: \(vm.currentTransaction.id)")
+                        Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
+                    }
+                ) {}
+            }
 			
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 HStack {
+                    if focusedField == .amountFromSelector && vm.currentTransaction.accountFrom.remainder != 0 && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer )  {
+                        Button("Весь баланс: " + CurrencyFormatter().string(
+                                        number: vm.currentTransaction.accountFrom.remainder,
+                                        currency: vm.currentTransaction.accountFrom.currency
+                                    )
+                        ) {
+                            vm.currentTransaction.amountFrom = vm.currentTransaction.accountFrom.remainder
+                            if vm.intercurrency {
+                                focusedField = .amountToSelector
+                            } else {
+                                vm.shouldShowDatePicker = true
+                                focusedField = nil
+                            }
+                        }
+                    }
                     Spacer()
                     Button(focusedField == .note ? "Сохранить" : "Следующее поле") {
                         switch focusedField {
