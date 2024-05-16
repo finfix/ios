@@ -188,6 +188,9 @@ struct EditAccount: View {
         .task {
             do {
                 try await vm.load()
+                if vm.mode == .create && vm.currentAccount.currency != Currency() {
+                    vm.currentAccount.currency = vm.currencies.first(where: { $0 == selectedAccountGroup.currency }) ?? Currency()
+                }
             } catch {
                 alert(error)
             }
