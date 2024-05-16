@@ -31,7 +31,12 @@ struct MyApp: App {
                           message:
                             Text(alert.message),
                           dismissButton:
-                            .cancel(Text("OK"))
+                            .cancel(
+                                Text(alert.buttonText),
+                                action: {
+                                    alert.callback()
+                                }
+                            )
                     )
                 }
                 .environment(AlertManager(handle: {
@@ -45,15 +50,36 @@ struct AlertModel: Identifiable {
     let id = UUID()
     let title: String
     let message: String
+    let buttonText: String
+    let callback: () -> Void
 }
 
 @Observable
 class AlertManager {
     let handle: (AlertModel) -> Void
     
-    func callAsFunction(_ error: Error, file: String = #file, line: Int = #line) {
-        logger.error("\(file):\(line) \(error)")
-        handle(AlertModel(title: "Произошла ошибка", message: error.localizedDescription))
+    func callAsFunction(
+        _ error: Error,
+        title: String = "Произошла ошибка",
+        buttonText: String = "OK",
+        callback: @escaping () -> Void = {},
+        file: String = #file,
+        line: Int = #line
+    ) {
+        logger.error("\(file):\(line)\n\(error)")
+        handle(AlertModel(title: title, message: error.localizedDescription, buttonText: buttonText, callback: callback))
+    }
+    
+    func callAsFunction(
+        title: String,
+        message: String,
+        buttonText: String = "OK",
+        callback: @escaping () -> Void = {},
+        file: String = #file,
+        line: Int = #line
+    ) {
+        logger.error("\(file):\(line)\n\(title)\n\(message)")
+        handle(AlertModel(title: title, message: message, buttonText: buttonText, callback: callback))
     }
     
     init(handle: @escaping (AlertModel) -> Void) {

@@ -668,7 +668,7 @@ extension Service {
     }
     
     func getServerVersion() async throws -> (String, String) {
-        let versionModel = try await SettingsAPI().GetVersion()
+        let versionModel = try await SettingsAPI().GetVersion(.server)
         return (versionModel.version, versionModel.build)
     }
     
