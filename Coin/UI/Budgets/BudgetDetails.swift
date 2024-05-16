@@ -22,21 +22,26 @@ struct BudgetDetails: View {
     let daysInMonth = Calendar.current.range(of: .day, in: .month, for: Date())!.count
     let height: CGFloat = 60
     
+    var daysOffsetForCalculations: Decimal {
+        Decimal(account.budgetDaysOffset == 0 ? 1 : account.budgetDaysOffset)
+    }
+    
     var remainderForToday: Decimal {
         if today <= account.budgetDaysOffset {
             return dailyBudgetByFixedSum * Decimal(today) - account.showingRemainder
         }
-        let totalBudgetByFixedSum = dailyBudgetByFixedSum * Decimal(account.budgetDaysOffset)
+        let totalBudgetByFixedSum = dailyBudgetByFixedSum * daysOffsetForCalculations
         return totalBudgetByFixedSum + dailyBudgetLeftSum * Decimal(today - Int(account.budgetDaysOffset)) - account.showingRemainder
     }
     
     var dailyBudgetByFixedSum: Decimal {
-        let daysOffset = Decimal(account.budgetDaysOffset == 0 ? 1 : account.budgetDaysOffset)
-        return account.budgetFixedSum / daysOffset
+        return account.budgetFixedSum / daysOffsetForCalculations
     }
     
     var dailyBudgetLeftSum: Decimal {
-        return (account.showingBudgetAmount - dailyBudgetByFixedSum * Decimal(account.budgetDaysOffset)) / Decimal(daysInMonth - Int(account.budgetDaysOffset))
+        let totalBudgetByFixedSum = dailyBudgetByFixedSum * daysOffsetForCalculations
+        let totalBudgetLeft = account.showingBudgetAmount - totalBudgetByFixedSum
+        return totalBudgetLeft / Decimal(daysInMonth - Int(account.budgetDaysOffset))
     }
     
     var body: some View {
@@ -53,7 +58,7 @@ struct BudgetDetails: View {
                 Text(currencyFormatter.string(number: account.showingRemainder))
                 Text(currencyFormatter.string(number: account.showingBudgetAmount - account.showingRemainder))
                 Text(currencyFormatter.string(number: remainderForToday))
-                Text(currencyFormatter.string(number: today <= account.budgetDaysOffset ? dailyBudgetByFixedSum : dailyBudgetLeftSum))
+                Text(currencyFormatter.string(number: today < account.budgetDaysOffset ? dailyBudgetByFixedSum : dailyBudgetLeftSum))
             }
         }
     }
@@ -62,10 +67,10 @@ struct BudgetDetails: View {
 #Preview {
     BudgetRow(account:
                     Account(
-                        showingRemainder: 4470000,
-                        showingBudgetAmount: 7200000,
-                        budgetFixedSum: 4420000,
-                        budgetDaysOffset: 16
+                        showingRemainder: 200,
+                        showingBudgetAmount: 1000,
+                        budgetFixedSum: 200,
+                        budgetDaysOffset: 1
                     ),
               isDetailsOpened: true, 
               today: 16

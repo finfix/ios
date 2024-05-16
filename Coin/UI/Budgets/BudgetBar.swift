@@ -34,7 +34,8 @@ struct BudgetBar: View {
             if account.budgetDaysOffset != 0, today <= account.budgetDaysOffset {
                 return partWidthFixed * CGFloat(today)
             }
-            return partWidthFixed * CGFloat(account.budgetDaysOffset) + partWidthLeft * CGFloat(today-Int(account.budgetDaysOffset))
+            let daysOffset = account.budgetDaysOffset == 0 ? 1 : account.budgetDaysOffset
+            return partWidthFixed * CGFloat(daysOffset) + partWidthLeft * CGFloat(today-Int(account.budgetDaysOffset))
         }
         return partWidthLeft * CGFloat(today)
     }
@@ -46,7 +47,7 @@ struct BudgetBar: View {
             HStack(spacing: 0) {
                 ForEach(0 ..< Int(account.budgetDaysOffset == 0 ? 1 : account.budgetDaysOffset), id: \.self) { index in
                     Rectangle()
-                        .fill(index % 2 == 0 ? .white : Color("LightGray"))
+                        .fill(account.budgetDaysOffset == 0 ? Color("LightGray") : index % 2 == 0 ? .white : Color("LightGray"))
                         .frame(width: partWidthFixed, height: height)
                 }
                 ForEach(Int(account.budgetDaysOffset) ..< daysInMonth, id: \.self) { index in
@@ -83,12 +84,12 @@ struct BudgetBar: View {
 #Preview {
     BudgetBar(account:
                 Account(
-                    showingRemainder: 4420000,
-                    showingBudgetAmount: 7200000,
-                    budgetFixedSum: 4420000,
-                    budgetDaysOffset: 16
+                    showingRemainder: 0,
+                    showingBudgetAmount: 1000,
+                    budgetFixedSum: 200,
+                    budgetDaysOffset: 0
                 ),
-              today: 17
+              today: 16
     )
         .environment(AlertManager(handle: {_ in }))
 }
