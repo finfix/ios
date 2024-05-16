@@ -485,13 +485,16 @@ extension AppDatabase {
         accountIDs: [UInt32] = []
     ) async throws -> [Date: Decimal] {
         try await reader.read { db in
+            var amountField = ""
             var accountType = ""
             var accountField = ""
             switch transactionType {
             case .consumption:
+                amountField = "amountTo"
                 accountField = "accountToId"
                 accountType = "expense"
             case .income:
+                amountField = "amountFrom"
                 accountField = "accountFromId"
                 accountType = "earnings"
             default:
@@ -527,7 +530,7 @@ extension AppDatabase {
             let req = """
                 SELECT
                   strftime('%Y-%m-01', t.dateTransaction) AS "month",
-                  ROUND(SUM(t.amountFrom * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
+                  ROUND(SUM(t.\(amountField) * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
                 FROM transactionDB t
                 JOIN accountDB a ON a.id = t.\(accountField)
                 JOIN accountGroupDB ag  ON a.accountGroupId = ag.id
