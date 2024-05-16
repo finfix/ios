@@ -144,8 +144,23 @@ struct EditTransaction: View {
                         }
                 }
             } footer: {
-                if vm.intercurrency && vm.currentTransaction.type != .balancing {
-                    Rate(vm.currentTransaction)
+                VStack {
+                    HStack {
+                        if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency {
+                            Text("В валюте группы счетов: " + CurrencyFormatter().string(
+                                number: vm.currentTransaction.amountFrom * (vm.accountGroup.currency.rate / vm.currentTransaction.accountFrom.currency.rate),
+                                currency: vm.accountGroup.currency,
+                                withUnits: false
+                            ))
+                        }
+                        Spacer()
+                    }
+                    HStack {
+                        if vm.intercurrency && vm.currentTransaction.type != .balancing {
+                            Rate(vm.currentTransaction)
+                        }
+                        Spacer()
+                    }
                 }
             }
             Section {
