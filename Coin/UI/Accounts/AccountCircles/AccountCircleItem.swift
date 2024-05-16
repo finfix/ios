@@ -63,14 +63,13 @@ struct AccountCircleItem: View {
                         .frame(width: 20)
                 }
             }
+            .frame(height: 40)
             Text(formatter.string(number: account.showingRemainder))
                 .lineLimit(1)
             
-            if account.showingBudgetAmount != 0 {
-                Text(formatter.string(number: account.showingBudgetAmount))
-                    .lineLimit(1)
-                    .foregroundColor(.secondary)
-            }
+            Text(account.showingBudgetAmount != 0 ? formatter.string(number: account.showingBudgetAmount) : " ")
+                .lineLimit(1)
+                .foregroundColor(.secondary)
         }
         .onTapGesture(count: 2) {
             if !account.childrenAccounts.isEmpty {
