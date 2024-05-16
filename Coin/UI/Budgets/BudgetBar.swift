@@ -37,7 +37,7 @@ struct BudgetBar: View {
         ZStack(alignment: .leading) {
             // Бюджет
             HStack(spacing: 0) {
-                ForEach(0 ..< Int(account.budgetDaysOffset), id: \.self) { index in
+                ForEach(0 ..< Int(account.budgetDaysOffset == 0 ? 1 : account.budgetDaysOffset), id: \.self) { index in
                     Rectangle()
                         .fill(index % 2 == 0 ? .white : Color("LightGray"))
                         .frame(width: partWidthFixed, height: height)
@@ -68,11 +68,12 @@ struct BudgetBar: View {
                 .foregroundColor(Color.black)
                 .padding(.leading)
         }
+        .frame(width: width)
         .cornerRadius(10)
     }
 }
 
 #Preview {
-    BudgetBar(account: Account())
+    BudgetBar(account: Account(showingRemainder: 50, showingBudgetAmount: 100, budgetFixedSum: 1))
         .environment(AlertManager(handle: {_ in }))
 }
