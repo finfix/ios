@@ -202,6 +202,15 @@ struct EditTransaction: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 HStack {
+                    if focusedField == .amountFromSelector && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer )  {
+                        Button("Весь баланс: " + CurrencyFormatter().string(
+                                        number: vm.currentTransaction.accountFrom.remainder,
+                                        currency: vm.currentTransaction.accountFrom.currency
+                                    )
+                        ) {
+                            vm.currentTransaction.amountFrom = vm.currentTransaction.accountFrom.remainder
+                        }
+                    }
                     Spacer()
                     Button(focusedField == .note ? "Сохранить" : "Следующее поле") {
                         switch focusedField {
