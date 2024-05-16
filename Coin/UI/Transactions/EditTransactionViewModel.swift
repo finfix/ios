@@ -48,11 +48,17 @@ class EditTransactionViewModel {
         tags = try await service.getTags(accountGroup: accountGroup)
     }
     
-    func createTransaction() async throws {
-        try await service.createTransaction(currentTransaction)
-    }
-    
-    func updateTransaction() async throws {
-        try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
+    func save() async throws {
+        shouldDisableUI = true
+        shouldShowProgress = true
+        defer {
+            shouldDisableUI = false
+            shouldShowProgress = false
+        }
+        
+        switch mode {
+        case .create: try await service.createTransaction(currentTransaction)
+        case .update: try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
+        }
     }
 }

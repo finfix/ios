@@ -17,7 +17,7 @@ enum EditTransactionRoute: Hashable {
 struct EditTransaction: View {
     
     private enum Field: Hashable {
-        case amountFromSelector, amountToSelector
+        case amountFromSelector, amountToSelector, note
     }
     @FocusState private var focusedField: Field?
     
@@ -158,11 +158,13 @@ struct EditTransaction: View {
                 .onChange (of: vm.currentTransaction.dateTransaction) { _, _ in
                     withAnimation {
                         vm.shouldShowDatePicker = false
+                        focusedField = .note
                     }
                 }
             }
             Section {
                 TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
+                    .focused($focusedField, equals: .note)
             }
             Section {
                 Toggle("Учитывать транзакцию в графиках", isOn: $vm.currentTransaction.accountingInCharts)
@@ -170,18 +172,8 @@ struct EditTransaction: View {
             Section {
                 Button {
                     Task {
-                        vm.shouldDisableUI = true
-                        vm.shouldShowProgress = true
-                        defer {
-                            vm.shouldDisableUI = false
-                            vm.shouldShowProgress = false
-                        }
-                        
                         do {
-                            switch vm.mode {
-                            case .create: try await vm.createTransaction()
-                            case .update: try await vm.updateTransaction()
-                            }
+                            try await vm.save()
                         } catch {
                             alert(error)
                             return
@@ -211,7 +203,7 @@ struct EditTransaction: View {
             ToolbarItemGroup(placement: .keyboard) {
                 HStack {
                     Spacer()
-                    Button("Следующее поле") {
+                    Button(focusedField == .note ? "Сохранить" : "Следующее поле") {
                         switch focusedField {
                         case  .amountFromSelector:
                             if vm.intercurrency {
@@ -223,6 +215,17 @@ struct EditTransaction: View {
                         case .amountToSelector:
                             vm.shouldShowDatePicker = true
                             focusedField = nil
+                        case .note:
+                            focusedField = nil
+                            Task {
+                                do {
+                                    try await vm.save()
+                                } catch {
+                                    alert(error)
+                                    return
+                                }
+                                dismiss()
+                            }
                         default:
                             focusedField = nil
                         }
@@ -231,7 +234,9 @@ struct EditTransaction: View {
             }
         }
         .task {
-            vm.shouldShowPickerAccountFrom = true
+            if vm.mode == .create {
+                vm.shouldShowPickerAccountFrom = true
+            }
             do {
                 try await vm.load()
             } catch {
@@ -351,9 +356,16 @@ private struct Pickers: View {
                     .onChange(of: parentAccount) { _, newValue in
                         if !newValue.isParent {
                             account = parentAccount
-                        } else {
                             withAnimation {
-                                openSecondPicker = true
+                                openSecondPicker = false
+                            }
+                        } else {
+                            if newValue.childrenAccounts.count == 1 {
+                                account = newValue.childrenAccounts[0]
+                            } else {
+                                withAnimation {
+                                    openSecondPicker = true
+                                }
                             }
                         }
                     }
