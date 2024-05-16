@@ -11,7 +11,7 @@ import GRDB
 struct TransactionDB {
     
     var id: UInt32?
-    var accounting: Bool
+    var accountingInCharts: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
     var dateTransaction: Date
@@ -24,7 +24,7 @@ struct TransactionDB {
     
     // Инициализатор из сетевой модели
     init(_ res: GetTransactionsRes) {
-        self.accounting = res.accounting
+        self.accountingInCharts = res.accountingInCharts
         self.amountFrom = res.amountFrom
         self.amountTo = res.amountTo
         self.dateTransaction = res.dateTransaction
@@ -43,7 +43,7 @@ struct TransactionDB {
         if self.id == 0 {
             self.id = nil
         }
-        self.accounting = model.accounting
+        self.accountingInCharts = model.accountingInCharts
         self.amountFrom = model.amountFrom
         self.amountTo = model.amountTo
         self.dateTransaction = model.dateTransaction
@@ -80,8 +80,8 @@ struct TransactionDB {
             if serverModel.id! != localModels[i].id {
                 difference["id"] = (server: serverModel.id!, local: localModels[i].id!)
             }
-            if serverModel.accounting != localModels[i].accounting {
-                difference["accounting"] = (server: serverModel.accounting, local: localModels[i].accounting)
+            if serverModel.accountingInCharts != localModels[i].accountingInCharts {
+                difference["accountingInCharts"] = (server: serverModel.accountingInCharts, local: localModels[i].accountingInCharts)
             }
             if serverModel.amountFrom != localModels[i].amountFrom {
                 difference["amountFrom"] = (server: serverModel.amountFrom, local: localModels[i].amountFrom)
@@ -122,7 +122,7 @@ struct TransactionDB {
 extension TransactionDB: Codable, FetchableRecord, PersistableRecord {
     enum Columns {
         static let id = Column(CodingKeys.id)
-        static let accounting = Column(CodingKeys.accounting)
+        static let accountingInCharts = Column(CodingKeys.accountingInCharts)
         static let amountFrom = Column(CodingKeys.amountFrom)
         static let amountTo = Column(CodingKeys.amountTo)
         static let dateTransaction = Column(CodingKeys.dateTransaction)

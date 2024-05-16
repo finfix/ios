@@ -225,7 +225,7 @@ extension Service {
             }
             
             addictionalMapping["balancingTransactionID"] = try await db.createTransaction(Transaction(
-                accounting: true,
+                accountingInCharts: true,
                 amountFrom: account.remainder,
                 amountTo: account.remainder,
                 dateTransaction: Date.now.stripTime(),
@@ -360,7 +360,7 @@ extension Service {
             }
             
             addictionalMapping["balancingTransactionID"] = try await db.createTransaction(Transaction(
-                accounting: true,
+                accountingInCharts: true,
                 amountFrom: newAccount.remainder-oldAccount.remainder,
                 amountTo: newAccount.remainder-oldAccount.remainder,
                 dateTransaction: Date.now.stripTime(),
@@ -520,7 +520,8 @@ extension Service {
                 type: transaction.type.rawValue,
                 isExecuted: true,
                 tagIDs: tagIDs,
-                datetimeCreate: transaction.datetimeCreate
+                datetimeCreate: transaction.datetimeCreate,
+                accountingInCharts: transaction.accountingInCharts
             )
         )
 }
@@ -571,6 +572,7 @@ extension Service {
             dateTransaction: newTransaction.dateTransaction != oldTransaction.dateTransaction ? newTransaction.dateTransaction : nil,
             note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
             tagIDs: oldTransactionTagIDs != newTransactionTagIDs ? newTransactionTagIDs : nil,
+            accountingInCharts: newTransaction.accountingInCharts != oldTransaction.accountingInCharts ? newTransaction.accountingInCharts : nil,
             id: newTransaction.id))
     }
     
@@ -615,12 +617,53 @@ extension Service {
         return (leftObjectsExclusive, rightObjectsExclusive)
     }
     
-    func getStatisticByMonth(accountGroupID: UInt32) async throws -> [Series] {
+    func getStatisticByMonth(
+        accountGroupID: UInt32,
+        accountIDs: [UInt32] = []
+    ) async throws -> [Series] {
         var data: [Series] = []
-        let expenses = try await db.getStatisticByMonth(transactionType: .consumption, accountGroupID: accountGroupID)
+        let expenses = try await db.getStatisticByMonth(transactionType: .consumption, accountGroupID: accountGroupID, accountIDs: accountIDs)
         data.append(Series(name: "Расходы", data: expenses))
-        let incomes = try await db.getStatisticByMonth(transactionType: .income, accountGroupID: accountGroupID)
+        let incomes = try await db.getStatisticByMonth(transactionType: .income, accountGroupID: accountGroupID, accountIDs: accountIDs)
         data.append(Series(name: "Доходы", data: incomes))
+        
+        var minDate: Date = .now
+        var maxDate: Date = .now
+        
+        // Проходимся по каждой статье и получаем дату самой первой и самой последней записи
+        for data in data {
+            if let minDateOfData = data.data.keys.min() {
+                if minDate > minDateOfData {
+                    minDate = minDateOfData
+                }
+            }
+            if let maxDateOfData = data.data.keys.max() {
+                if maxDate < maxDateOfData {
+                    maxDate = maxDateOfData
+                }
+            }
+        }
+        
+        // Проходимся по каждой статье
+        for (i, series) in data.enumerated() {
+            
+            // Обозначаем самую раннюю дату, которая должна быть у каждой статьи
+            var lastDate: Date = minDate
+            
+            // Проходимся по датам, отсортированным в порядке увеличения
+            while true {
+                
+                if series.data[lastDate] == nil {
+                    data[i].data[lastDate] = 0
+                }
+                                
+                // Обновляем последнюю проверенную дату
+                lastDate = lastDate.adding(.month, value: 1)
+                if lastDate > maxDate {
+                    break
+                }
+            }
+        }
         return data
     }
     

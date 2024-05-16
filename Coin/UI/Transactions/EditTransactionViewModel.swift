@@ -11,14 +11,20 @@ import SwiftUI
 @Observable
 class EditTransactionViewModel {
     private let service = Service.shared
-        
+    
+    // View states
+    var shouldDisableUI = false
+    var shouldShowProgress = false
+    var shouldShowPickerAccountFrom = false
+    var shouldShowPickerAccountTo = false
+    var shouldShowDatePicker = false
+    
+    // Data
     var accounts: [Account] = []
     var tags: [Tag] = []
-    
     var currentTransaction = Transaction()
     var oldTransaction = Transaction()
     var accountGroup = AccountGroup()
-    
     var mode: mode
     
     var intercurrency: Bool {
@@ -40,18 +46,19 @@ class EditTransactionViewModel {
     func load() async throws {
         accounts = try await service.getAccounts(accountGroup: accountGroup)
         tags = try await service.getTags(accountGroup: accountGroup)
-        if mode == .create {
-            let accountFrom = getAccountsForShowingInCreate(accounts: accounts, position: .up, transactionType: currentTransaction.type, excludedAccount: nil).first ?? Account()
-            currentTransaction.accountFrom = accountFrom
-            currentTransaction.accountTo = getAccountsForShowingInCreate(accounts: accounts, position: .down, transactionType: currentTransaction.type, excludedAccount: accountFrom).first ?? Account()
+    }
+    
+    func save() async throws {
+        shouldDisableUI = true
+        shouldShowProgress = true
+        defer {
+            shouldDisableUI = false
+            shouldShowProgress = false
         }
-    }
-    
-    func createTransaction() async throws {
-        try await service.createTransaction(currentTransaction)
-    }
-    
-    func updateTransaction() async throws {
-        try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
+        
+        switch mode {
+        case .create: try await service.createTransaction(currentTransaction)
+        case .update: try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
+        }
     }
 }
