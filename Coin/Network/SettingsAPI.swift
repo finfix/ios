@@ -21,9 +21,13 @@ class SettingsAPI: API {
         return try decode(data, model: [GetCurrenciesRes].self)
     }
     
-    func GetVersion() async throws -> GetVersionRes {
+    enum ApplicationType: String {
+        case ios, server
+    }
+    
+    func GetVersion(_ name: ApplicationType) async throws -> GetVersionRes {
         let data = try await request(
-            url: apiBasePath + settingsBasePath + "/version",
+            url: apiBasePath + settingsBasePath + "/version/\(name.rawValue)",
             method: .get
         )
         
