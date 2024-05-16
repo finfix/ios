@@ -9,7 +9,7 @@ import SwiftUI
 
 enum ProfileViews: Hashable {
     case hidedAccounts
-    case currencyRates
+    case currencyConverter
     case settings
 }
 
@@ -57,7 +57,7 @@ struct Profile: View {
                 #endif
                 Section {
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
-                    NavigationLink("Курсы валют", value: ProfileViews.currencyRates)
+                    NavigationLink("Конвертер валют", value: ProfileViews.currencyConverter)
                 }
                 .buttonStyle(.plain)
                 Section {
@@ -123,7 +123,7 @@ struct Profile: View {
             .navigationDestination(for: ProfileViews.self) { screen in
                 switch screen {
                 case .hidedAccounts: HidedAccountsList(selectedAccountGroup: $selectedAccountGroup, path: $path)
-                case .currencyRates: CurrencyRates()
+                case .currencyConverter: CurrencyConverter()
                 case .settings: Settings(path: $path)
                 }
             }
