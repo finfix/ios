@@ -20,7 +20,6 @@ struct AccountCircleItem: View {
     @State var isChildrenOpen = false
     @State var isTransactionOpen = false
     @Binding var path: NavigationPath
-    @Binding var selectedAccountGroup: AccountGroup
     var isAlreadyOpened: Bool
     
     var formatter: CurrencyFormatter
@@ -28,8 +27,7 @@ struct AccountCircleItem: View {
     init(
         _ account: Account,
         isAlreadyOpened: Bool = false,
-        path: Binding<NavigationPath>,
-        selectedAccountGroup: Binding<AccountGroup>
+        path: Binding<NavigationPath>
     ) {
         self.formatter = CurrencyFormatter(currency: account.currency)
         self.account = account
@@ -38,7 +36,6 @@ struct AccountCircleItem: View {
         }
         self.isAlreadyOpened = isAlreadyOpened
         self._path = path
-        self._selectedAccountGroup = selectedAccountGroup
     }
     
     
@@ -97,8 +94,7 @@ struct AccountCircleItem: View {
                 ForEach(account.childrenAccounts) { account in
                     AccountCircleItem(account, 
                                       isAlreadyOpened: true,
-                                      path: $path,
-                                      selectedAccountGroup: $selectedAccountGroup)
+                                      path: $path)
                 }
                 .presentationCompactAdaptation(.popover)
                 .padding()
@@ -108,6 +104,6 @@ struct AccountCircleItem: View {
 }
 
 #Preview {
-    AccountCircleItem(Account(), path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup()))
+    AccountCircleItem(Account(), path: .constant(NavigationPath()))
         .environment(AlertManager(handle: {_ in }))
 }

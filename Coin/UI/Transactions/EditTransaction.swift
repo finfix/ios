@@ -205,25 +205,32 @@ struct EditTransaction: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            
-            Section(footer:
-                VStack(alignment: .leading) {
-                    Text("ID: \(vm.currentTransaction.id)")
-                    Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
-                }
-            ) {}
+            if vm.mode == .update {
+                Section(footer:
+                    VStack(alignment: .leading) {
+                        Text("ID: \(vm.currentTransaction.id)")
+                        Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
+                    }
+                ) {}
+            }
 			
         }
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 HStack {
-                    if focusedField == .amountFromSelector && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer )  {
+                    if focusedField == .amountFromSelector && vm.currentTransaction.accountFrom.remainder != 0 && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer )  {
                         Button("Весь баланс: " + CurrencyFormatter().string(
                                         number: vm.currentTransaction.accountFrom.remainder,
                                         currency: vm.currentTransaction.accountFrom.currency
                                     )
                         ) {
                             vm.currentTransaction.amountFrom = vm.currentTransaction.accountFrom.remainder
+                            if vm.intercurrency {
+                                focusedField = .amountToSelector
+                            } else {
+                                vm.shouldShowDatePicker = true
+                                focusedField = nil
+                            }
                         }
                     }
                     Spacer()
