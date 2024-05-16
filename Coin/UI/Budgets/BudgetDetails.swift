@@ -10,25 +10,38 @@ import SwiftUI
 struct BudgetDetails: View {
     
     var account: Account
+    var today: Int
+    private var currencyFormatter: CurrencyFormatter
     
-    let daysInMonth = Calendar.current.range(of: .day, in: .month, for: Date())!.count
-    let width: CGFloat = UIScreen.main.bounds.width * 0.9
-    let height: CGFloat = 60
-    let today = Calendar.current.component(.day, from: Date())
-    
-    var dailyBudget: Decimal {
-        account.showingBudgetAmount / Decimal(daysInMonth)
-    }
-    
-    var availableExpense: Decimal {
-        dailyBudget * Decimal(today) - account.showingRemainder
-    }
-    
-    var currencyFormatter: CurrencyFormatter
-    
-    init(account: Account) {
+    init(account: Account, today: Int) {
         self.currencyFormatter = CurrencyFormatter(currency: account.currency, maximumFractionDigits: 0)
         self.account = account
+        self.today = today
+    }
+    
+    let daysInMonth = Calendar.current.range(of: .day, in: .month, for: Date())!.count
+    let height: CGFloat = 60
+    
+    var daysOffsetForCalculations: Decimal {
+        Decimal(account.budgetDaysOffset == 0 ? 1 : account.budgetDaysOffset)
+    }
+    
+    var remainderForToday: Decimal {
+        if today <= account.budgetDaysOffset {
+            return dailyBudgetByFixedSum * Decimal(today) - account.showingRemainder
+        }
+        let totalBudgetByFixedSum = dailyBudgetByFixedSum * daysOffsetForCalculations
+        return totalBudgetByFixedSum + dailyBudgetLeftSum * Decimal(today - Int(account.budgetDaysOffset)) - account.showingRemainder
+    }
+    
+    var dailyBudgetByFixedSum: Decimal {
+        return account.budgetFixedSum / daysOffsetForCalculations
+    }
+    
+    var dailyBudgetLeftSum: Decimal {
+        let totalBudgetByFixedSum = dailyBudgetByFixedSum * daysOffsetForCalculations
+        let totalBudgetLeft = account.showingBudgetAmount - totalBudgetByFixedSum
+        return totalBudgetLeft / Decimal(daysInMonth - Int(account.budgetDaysOffset))
     }
     
     var body: some View {
@@ -44,14 +57,23 @@ struct BudgetDetails: View {
                 Text(currencyFormatter.string(number: account.showingBudgetAmount))
                 Text(currencyFormatter.string(number: account.showingRemainder))
                 Text(currencyFormatter.string(number: account.showingBudgetAmount - account.showingRemainder))
-                Text(currencyFormatter.string(number: availableExpense))
-                Text(currencyFormatter.string(number: dailyBudget))
+                Text(currencyFormatter.string(number: remainderForToday))
+                Text(currencyFormatter.string(number: today < account.budgetDaysOffset ? dailyBudgetByFixedSum : dailyBudgetLeftSum))
             }
         }
     }
 }
 
 #Preview {
-    BudgetDetails(account: Account())
-        .environment(AlertManager(handle: {_ in }))
+    BudgetRow(account:
+                    Account(
+                        showingRemainder: 200,
+                        showingBudgetAmount: 1000,
+                        budgetFixedSum: 200,
+                        budgetDaysOffset: 1
+                    ),
+              isDetailsOpened: true, 
+              today: 16
+    )
+    .environment(AlertManager(handle: {_ in }))
 }

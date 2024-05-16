@@ -49,6 +49,11 @@ extension Service {
         return Currency.convertFromDBModel(try await db.getCurrencies())
     }
     
+    func getUsers() async throws -> [User] {
+        let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await db.getCurrencies()))
+        return User.convertFromDBModel(try await db.getUsers(), currenciesMap: currenciesMap)
+    }
+    
     func getSyncTasks(
         ids: [UInt32]? = nil
     ) async throws -> [SyncTask] {
@@ -668,7 +673,7 @@ extension Service {
     }
     
     func getServerVersion() async throws -> (String, String) {
-        let versionModel = try await SettingsAPI().GetVersion()
+        let versionModel = try await SettingsAPI().GetVersion(.server)
         return (versionModel.version, versionModel.build)
     }
     

@@ -13,7 +13,7 @@ struct BudgetRow: View {
     @State var isDetailsOpened = false
     
     let daysInMonth = Calendar.current.range(of: .day, in: .month, for: Date())!.count
-    let today = Calendar.current.component(.day, from: Date())
+    var today = Calendar.current.component(.day, from: Date())
 
     var body: some View {
         Button {
@@ -21,10 +21,10 @@ struct BudgetRow: View {
                 isDetailsOpened.toggle()
             }
         } label: {
-            BudgetBar(account: account)
+            BudgetBar(account: account, today: today)
         }
         if isDetailsOpened {
-            BudgetDetails(account: account)
+            BudgetDetails(account: account, today: today)
         }
     }
 }

@@ -15,7 +15,7 @@ struct AccountCategoryView: View {
     var totalSum: Decimal {
         var total: Decimal = 0
         for account in accounts {
-            total += account.showingRemainder
+            total += account.remainder
         }
         return total
     }
