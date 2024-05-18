@@ -15,7 +15,7 @@ struct TransactionsTab: View {
     
     var body: some View {
         NavigationStack(path: $path) {
-            TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup)
+            TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, chartType: .earningsAndExpenses)
                 .navigationDestination(for: TransactionsListRoute.self) { screen in
                     switch screen {
                     case .editTransaction(let transaction):
@@ -34,6 +34,14 @@ struct TransactionsTab: View {
                         EditTag(selectedAccountGroup: selectedAccountGroup, path: $path)
                     case .editTag(let tag):
                         EditTag(tag, path: $path)
+                    }
+                }
+                .navigationDestination(for: ChartTabRoute.self) { screen in
+                    switch screen {
+                    case .transactionList(account: let account):
+                        TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
+                    case .transactionList1(chartType: let chartType):
+                        TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, chartType: chartType)
                     }
                 }
         }

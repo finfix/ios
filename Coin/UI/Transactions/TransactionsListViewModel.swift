@@ -18,6 +18,7 @@ class TransactionsListViewModel {
     let pageSize = 100
     var accountIDs: [UInt32] = []
     var account: Account? = nil
+    var heightCoef: CGFloat = 0.5
     
     init(account: Account? = nil) {
         if let account = account {

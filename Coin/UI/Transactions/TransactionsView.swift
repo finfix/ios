@@ -18,6 +18,7 @@ struct TransactionsView: View {
     @State var currency: Currency?
     @Binding var selectedAccountGroup: AccountGroup
     var account: Account? = nil
+    var chartType: ChartType = .earningsAndExpenses
     
     
     var body: some View {
@@ -29,7 +30,8 @@ struct TransactionsView: View {
             dateFrom: dateFrom,
             dateTo: dateTo,
             transactionType: transactionType,
-            currency: currency
+            currency: currency,
+            chartType: chartType
         )
             .searchable(text: $searchText)
             .toolbar {
@@ -52,5 +54,6 @@ struct TransactionsView: View {
 }
 
 #Preview {
-    TransactionsView(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup()))
+    TransactionsView(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup(id: 1, currency: Currency(symbol: "USD"))))
+        .environment(AlertManager(handle: {_ in }))
 }

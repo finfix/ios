@@ -22,10 +22,12 @@ struct TransactionsList: View {
     var dateTo: Date?
     var transactionType: TransactionType?
     var currency: Currency?
+    var chartType: ChartType
     
     @Binding var path: NavigationPath
     
     let width: CGFloat = UIScreen.main.bounds.width
+    let height: CGFloat = UIScreen.main.bounds.height
     
     init(
         path: Binding<NavigationPath>,
@@ -35,7 +37,8 @@ struct TransactionsList: View {
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         transactionType: TransactionType? = nil,
-        currency: Currency? = nil
+        currency: Currency? = nil,
+        chartType: ChartType
     ) {
         self._selectedAccountGroup = selectedAccountGroup
         self._path = path
@@ -44,6 +47,7 @@ struct TransactionsList: View {
         self.searchText = searchText
         self.transactionType = transactionType
         self.currency = currency
+        self.chartType = chartType
         vm = TransactionsListViewModel(account: account)
     }
     
@@ -55,8 +59,15 @@ struct TransactionsList: View {
     var body: some View {
         List {
             Section(footer:
-            ChartTab(selectedAccountGroup: selectedAccountGroup, account: vm.account)
-                .frame(width: width, height: 400)
+                VStack {
+                    ChartTab(chartType: chartType, selectedAccountGroup: selectedAccountGroup, account: vm.account, path: $path)
+                    Button {
+                        vm.heightCoef = vm.heightCoef != 1 ? 1 : 0.5
+                    } label: {
+                        Text("Больше информации")
+                    }
+                }
+                .frame(width: width, height: height * vm.heightCoef)
             ){}
             ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                 Section(header: Text(date, style: .date).font(.headline)) {
@@ -150,6 +161,6 @@ struct TransactionsList: View {
 }
 
 #Preview {
-    TransactionsList(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup()))
+    TransactionsList(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup(id: 4, currency: Currency(symbol: "₽"))), chartType: .earningsAndExpenses)
         .environment(AlertManager(handle: {_ in }))
 }

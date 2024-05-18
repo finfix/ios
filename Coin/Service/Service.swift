@@ -633,14 +633,42 @@ extension Service {
     }
     
     func getStatisticByMonth(
+        chartType: ChartType,
         accountGroupID: UInt32,
         accountIDs: [UInt32] = []
     ) async throws -> [Series] {
         var data: [Series] = []
-        let expenses = try await db.getStatisticByMonth(transactionType: .consumption, accountGroupID: accountGroupID, accountIDs: accountIDs)
-        data.append(Series(name: "Расходы", data: expenses))
-        let incomes = try await db.getStatisticByMonth(transactionType: .income, accountGroupID: accountGroupID, accountIDs: accountIDs)
-        data.append(Series(name: "Доходы", data: incomes))
+        let accountsMap = Account.convertToMap(Account.groupAccounts(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil)))
+        
+        switch chartType {
+        case .earningsAndExpenses:
+            var expenses = try await db.getStatisticByMonth(chartType: chartType, transactionType: .consumption, accountGroupID: accountGroupID, accountIDs: accountIDs)
+            if !expenses.isEmpty {
+                expenses[0].type = "Расход"
+                expenses[0].color = .red
+                data.append(contentsOf: expenses)
+            }
+            var earnings = try await db.getStatisticByMonth(chartType: chartType, transactionType: .income, accountGroupID: accountGroupID, accountIDs: accountIDs)
+            if !earnings.isEmpty {
+                earnings[0].type = "Доход"
+                earnings[0].color = .green
+                data.append(contentsOf: earnings)
+            }
+        case .earnings:
+            data = try await db.getStatisticByMonth(chartType: chartType, transactionType: .income, accountGroupID: accountGroupID, accountIDs: accountIDs)
+        case .expenses:
+            data = try await db.getStatisticByMonth(chartType: chartType, transactionType: .consumption, accountGroupID: accountGroupID, accountIDs: accountIDs)
+        }
+        
+        if chartType != .earningsAndExpenses {
+            for (i, dataItem) in data.enumerated() {
+                data[i].account = accountsMap[UInt32(dataItem.type)!]!
+            }
+            data = data.sorted(by: { $0.account!.serialNumber < $1.account!.serialNumber })
+            for (i, dataItem) in data.enumerated() {
+                data[i].color = defaultColors[i%defaultColors.count]
+            }
+        }
         
         var minDate: Date = .now
         var maxDate: Date = .now

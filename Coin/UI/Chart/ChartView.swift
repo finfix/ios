@@ -8,82 +8,131 @@
 import SwiftUI
 import Charts
 
+let defaultColors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple, .brown, .cyan, .indigo, .mint, .pink, .teal]
+
 struct ChartView: View {
     
+    var chartType: ChartType
     let data: [Series]
     @Environment(\.calendar) var calendar
-    @Binding var rawSelectedDate: Date?
+    @State private var rawSelectedDate: Date?
+    @Binding var lastSelectedDate: Date
     let oneMonthRange = 60 * 60 * 24 * 30
     @State var visibleRange = 60 * 60 * 24 * 30 * 6
     @State var xPosition = Date.now.addingTimeInterval(TimeInterval(-1 * 60 * 60 * 24 * 30 * 6))
-    var colorPerName: [String: Color]
     
-    var maxSum: Int {
-        let dateRange = xPosition-TimeInterval(oneMonthRange)...xPosition + TimeInterval(visibleRange + oneMonthRange)
-        var maxValue: Int = 0
-        for series in data {
-            if let value = series.data.filter({ dateRange.contains($0.key) }).values.max() {
-                if Double(maxValue) < value.doubleValue {
-                    maxValue = Int(value.doubleValue * 1.2)
+    var maxSum: Double {
+        var maxValue: Double = 0
+        
+        switch chartType {
+        case .earnings, .expenses:
+            let maxDate: Date = xPosition + TimeInterval(visibleRange + oneMonthRange)
+            var currentDate: Date = (xPosition - TimeInterval(oneMonthRange)).startOfMonth(inUTC: true)
+            
+            while true {
+                if currentDate > maxDate {
+                    break
+                }
+                let sumOfSeriesOnDate: Double = (data.map { $0.data.filter( { $0.key == currentDate } ).values.reduce(0) { $0 + $1 } }.reduce(0) { $0 + $1 }).doubleValue
+                if maxValue < sumOfSeriesOnDate {
+                    maxValue = sumOfSeriesOnDate
+                }
+                currentDate = currentDate.adding(.month, value: 1)
+            }
+            
+        case .earningsAndExpenses:
+            let dateRange = xPosition...xPosition + TimeInterval(visibleRange)
+            
+            for series in data {
+                if let value = series.data.filter({ dateRange.contains($0.key) }).values.max() {
+                    if maxValue < value.doubleValue {
+                        maxValue = value.doubleValue
+                    }
                 }
             }
         }
-        return maxValue
+        if maxValue == 0 {
+            maxValue = 1
+        }
+        return maxValue * 1.1
     }
     
     var body: some View {
         VStack {
             Chart {
-                ForEach(data, id: \.name) { series in
+                ForEach(Array(data.enumerated()), id: \.element) { (i, series) in
                     ForEach(series.data.sorted(by: >), id: \.key) { month, amount in
-                        LineMark(
-                            x: .value("Day", month, unit: .month),
-                            y: .value("Sales", amount)
-                        )
+                        if chartType != .earningsAndExpenses {
+                            AreaMark(
+                                x: .value("Период", month, unit: .month),
+                                y: .value("Сумма", amount),
+                                stacking: .standard
+                            )
+                            .opacity(0.8)
+                        } else {
+                            LineMark(
+                                x: .value("Период", month, unit: .month),
+                                y: .value("Сумма", amount)
+                            )
+                        }
                     }
-                    .foregroundStyle(by: .value("Вид", series.name))
-                    .interpolationMethod(.catmullRom)
+                    .foregroundStyle(by: .value("Категория", i))
+                    .interpolationMethod(.monotone)
                 }
                 
-                if let rawSelectedDate {
-                    RuleMark(
-                        x: .value("Selected", rawSelectedDate, unit: .month)
-                    )
-                    .foregroundStyle(Color.gray.opacity(0.3))
-                    .offset(yStart: -10)
-                    .zIndex(-1)
-                }
+                RuleMark(
+                    x: .value("Selected", lastSelectedDate, unit: .month)
+                )
+                .foregroundStyle(Color.gray.opacity(0.3))
+                .offset(yStart: -10)
+                .zIndex(-1)
             }
             .chartLegend(.hidden)
-            .chartForegroundStyleScale { colorPerName[$0] ?? .white }
+            .chartForegroundStyleScale { data[$0].color }
             .chartScrollableAxes(.horizontal)
             .chartScrollPosition(x: $xPosition)
             .chartXVisibleDomain(length: visibleRange)
             .chartYScale(domain: 0...maxSum)
-            .animation(.linear(duration: 0.2), value: maxSum)
             .chartXSelection(value: $rawSelectedDate)
             .chartXAxis {
                 AxisMarks(values: .stride(by: visibleRange < 24 * oneMonthRange ? .month : .year)) { _ in
                     AxisTick()
-                    AxisGridLine()
                     AxisValueLabel(format:
-                                    visibleRange < 24 * oneMonthRange ? .dateTime.month(visibleRange < 12 * oneMonthRange ? .abbreviated : .narrow) : .dateTime.year(), centered: true)
+                                    visibleRange < 24 * oneMonthRange ? 
+                        .dateTime.month(visibleRange < 12 * oneMonthRange ? .abbreviated : .narrow) :
+                        .dateTime.year(), centered: true)
                 }
             }
-            Text(rawSelectedDate?.formatted(.dateTime.year(.defaultDigits).month(.wide)) ?? " ")
+            .chartYAxis {
+//                AxisValueLabel(format: CurrencyFormatter())
+//                AxisMarks(values: .automatic(desiredCount: 4))
+                AxisMarks(preset: .inset)
+            }
+            Text(lastSelectedDate.formatted(.dateTime.year(.defaultDigits).month(.wide)))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-            Stepper (
-                value: $visibleRange,
-                in: 6*oneMonthRange...72*oneMonthRange,
-                step: oneMonthRange
-            ) {
-                Text("Количество месяцев для показа: \(visibleRange / oneMonthRange)")
+            if let firstSeries = data.first {
+                Stepper (
+                    value: $visibleRange,
+                    in: 2 * oneMonthRange...(firstSeries.data.count + 2) * oneMonthRange,
+                    step: oneMonthRange
+                ) {
+                    Text("Количество месяцев для показа: \(visibleRange / oneMonthRange)")
+                }
+            }
+        }
+        .onChange(of: rawSelectedDate) { _, newValue in
+            if let newValue {
+                lastSelectedDate = newValue.startOfMonth(inUTC: true)
             }
         }
     }
 }
 
 #Preview {
-    ChartView(data: [], rawSelectedDate: .constant(Date.now), colorPerName: [:])
+    ChartTab(
+        selectedAccountGroup: AccountGroup(id: 5, currency: Currency(symbol: "₽")),
+        path: .constant(NavigationPath())
+    )
+        .environment(AlertManager(handle: {_ in }))
 }
