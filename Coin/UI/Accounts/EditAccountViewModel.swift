@@ -50,7 +50,7 @@ class EditAccountViewModel {
         if !isHiddenView {
             visible = true
         }
-        accounts = try await service.getAccounts(visible: visible, types: [currentAccount.type], isParent: true)
+        accounts = try await service.getAccounts(visible: visible, types: [currentAccount.type])
         if mode == .create {
             if let currency = currencies.first {
                 currentAccount.currency = currency
