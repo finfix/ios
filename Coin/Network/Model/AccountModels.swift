@@ -161,6 +161,7 @@ struct UpdateAccountReq: Encodable, FieldExtractable {
     var currencyCode: String?
     var parentAccountID: UInt32?
     var iconID: UInt32?
+    var serialNumber: UInt32?
     var budget: UpdateBudgetReq
     
     init(
@@ -173,6 +174,7 @@ struct UpdateAccountReq: Encodable, FieldExtractable {
         currencyCode: String? = nil,
         parentAccountID: UInt32? = nil,
         iconID: UInt32? = nil,
+        serialNumber: UInt32? = nil,
         budget: UpdateBudgetReq
     ) {
         self.id = id
@@ -184,6 +186,7 @@ struct UpdateAccountReq: Encodable, FieldExtractable {
         self.currencyCode = currencyCode
         self.parentAccountID = parentAccountID
         self.iconID = iconID
+        self.serialNumber = serialNumber
         self.budget = budget
     }
     
@@ -197,6 +200,7 @@ struct UpdateAccountReq: Encodable, FieldExtractable {
         self.currencyCode = map["currencyCode"]
         self.parentAccountID = UInt32(map["parentAccountID"] ?? "")
         self.iconID = UInt32(map["iconID"] ?? "")
+        self.serialNumber = UInt32(map["serialNumber"] ?? "")
         self.budget = UpdateBudgetReq(
             amount: Decimal(string: map["budget.amount"] ?? ""),
             fixedSum: Decimal(string: map["budget.fixedSum"] ?? ""),
@@ -231,6 +235,9 @@ struct UpdateAccountReq: Encodable, FieldExtractable {
         }
         if let iconID = self.iconID {
             fields.append(SyncTaskValue(name: "iconID", value: String(iconID)))
+        }
+        if let serialNumber = self.serialNumber {
+            fields.append(SyncTaskValue(name: "serialNumber", value: String(serialNumber)))
         }
         if let amount = self.budget.amount {
             fields.append(SyncTaskValue(name: "budget.amount", value: amount.stringValue))

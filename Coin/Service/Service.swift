@@ -380,6 +380,15 @@ extension Service {
             try await recalculateAccountBalance([balancingAccount!])
         }
         
+        // Если изменился порядковый номер счета
+        if newAccount.serialNumber != oldAccount.serialNumber {
+            try await db.changeSerialNumbers(
+                accountGroup: newAccount.accountGroup,
+                oldValue: oldAccount.serialNumber,
+                newValue: newAccount.serialNumber
+            )
+        }
+        
         // Получаем родительский счет
         var parentAccount: Account?
         if let parentAccountID = newAccount.parentAccountID {
@@ -434,6 +443,7 @@ extension Service {
                 currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
                 parentAccountID: parentAccountIDToReq,
                 iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
+                serialNumber: oldAccount.serialNumber != newAccount.serialNumber ? newAccount.serialNumber : nil,
                 budget: UpdateBudgetReq(
                     amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
                     fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,

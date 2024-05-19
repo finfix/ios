@@ -162,6 +162,21 @@ extension AppDatabase {
         }
     }
     
+    func changeSerialNumbers(accountGroup: AccountGroup, oldValue: UInt32, newValue: UInt32) async throws {
+        try await dbWriter.write { db in
+            var req = AccountDB.filter(AccountDB.Columns.accountGroupId == accountGroup.id)
+            if newValue < oldValue {
+                try req
+                    .filter(AccountDB.Columns.serialNumber >= newValue && AccountDB.Columns.serialNumber < oldValue)
+                    .updateAll(db, AccountDB.Columns.serialNumber += 1)
+            } else {
+                try req
+                    .filter(AccountDB.Columns.serialNumber > oldValue && AccountDB.Columns.serialNumber <= newValue)
+                    .updateAll(db, AccountDB.Columns.serialNumber -= 1)
+            }
+        }
+    }
+    
     func createTag(_ tag: Tag) async throws -> UInt32 {
         try await dbWriter.write { db in
             _ = try TagDB(tag).insert(db)
