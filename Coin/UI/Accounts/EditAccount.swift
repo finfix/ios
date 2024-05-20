@@ -125,14 +125,24 @@ struct EditAccount: View {
                 .pickerStyle(.wheel)
 
             }
-            if vm.permissions.changeParentAccountID {
-                Section {
-                    Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
-                        Text("Не выбрано")
-                            .tag(nil as UInt32?)
-                        ForEach(accounts) { account in
-                            Text(account.name)
-                                .tag(account.id as UInt32?)
+            Section {
+                if vm.mode == .update {
+                    Picker("Счет, перед которым стоит этот счет", selection: $vm.currentAccount.serialNumber) {
+                        ForEach(vm.currentAccount.parentAccountID == nil ? Account.groupAccounts(accounts) : accounts.filter{ $0.parentAccountID == vm.currentAccount.parentAccountID! }) { account in
+                            Text(vm.currentAccount.parentAccountID == nil ? account.name : "\(account.name) \(account.currency.symbol)")
+                                .tag(account.serialNumber == 0 ? 0 : account.serialNumber - 1)
+                        }
+                    }
+                    if vm.permissions.changeParentAccountID {
+                        Section {
+                            Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
+                                Text("Не выбрано")
+                                    .tag(nil as UInt32?)
+                                ForEach(accounts.filter{ $0.isParent }) { account in
+                                    Text(account.name)
+                                        .tag(account.id as UInt32?)
+                                }
+                            }
                         }
                     }
                 }

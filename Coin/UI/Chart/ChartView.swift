@@ -2,88 +2,135 @@
 //  ChartView.swift
 //  Coin
 //
-//  Created by Илья on 17.04.2024.
+//  Created by Илья on 15.04.2024.
 //
 
 import SwiftUI
 import Charts
 
+enum ChartViewRoute: Hashable {
+    case transactionList(account: Account)
+    case transactionList1(chartType: ChartType)
+}
+
 struct ChartView: View {
-    
-    let data: [Series]
+    @Environment(AlertManager.self) private var alert
+    var selectedAccountGroup: AccountGroup
+    @State private var vm: ChartViewModel
+    @Binding var path: NavigationPath
+    @State var lastSelectedDate: Date = Date.now.startOfMonth(inUTC: true)
     @Environment(\.calendar) var calendar
-    @Binding var rawSelectedDate: Date?
-    let oneMonthRange = 60 * 60 * 24 * 30
-    @State var visibleRange = 60 * 60 * 24 * 30 * 6
-    @State var xPosition = Date.now.addingTimeInterval(TimeInterval(-1 * 60 * 60 * 24 * 30 * 6))
-    var colorPerName: [String: Color]
     
-    var maxSum: Int {
-        let dateRange = xPosition-TimeInterval(oneMonthRange)...xPosition + TimeInterval(visibleRange + oneMonthRange)
-        var maxValue: Int = 0
-        for series in data {
-            if let value = series.data.filter({ dateRange.contains($0.key) }).values.max() {
-                if Double(maxValue) < value.doubleValue {
-                    maxValue = Int(value.doubleValue * 1.2)
-                }
+    init(
+        chartType: ChartType = .earningsAndExpenses,
+        selectedAccountGroup: AccountGroup,
+        account: Account? = nil,
+        path: Binding<NavigationPath>
+    ) {
+        var chartType = chartType
+        self.formatter = CurrencyFormatter(currency: selectedAccountGroup.currency, withUnits: false)
+        self.selectedAccountGroup = selectedAccountGroup
+        self._path = path
+        if let account {
+            switch account.type {
+            case .earnings:
+                chartType = .earnings
+            case .expense:
+                chartType = .expenses
+            default: break
             }
         }
-        return maxValue
+        vm = ChartViewModel(chartType: chartType, account: account)
     }
+    
+    var formatter: CurrencyFormatter
+    
+    let chartHeight: CGFloat = UIScreen.main.bounds.height * 0.3 // Треть экрана
     
     var body: some View {
         VStack {
-            Chart {
-                ForEach(data, id: \.name) { series in
-                    ForEach(series.data.sorted(by: >), id: \.key) { month, amount in
-                        LineMark(
-                            x: .value("Day", month, unit: .month),
-                            y: .value("Sales", amount)
-                        )
-                    }
-                    .foregroundStyle(by: .value("Вид", series.name))
-                    .interpolationMethod(.catmullRom)
+            Picker(vm.chartType.rawValue, selection: $vm.chartType) {
+                ForEach(ChartType.allCases, id: \.self) { type in
+                    Text(type.rawValue)
+                        .tag(type)
                 }
-                
-                if let rawSelectedDate {
-                    RuleMark(
-                        x: .value("Selected", rawSelectedDate, unit: .month)
+            }
+            Group {
+                if !vm.data.isEmpty {
+                    Graph(
+                        chartType: vm.chartType,
+                        data: vm.data,
+                        lastSelectedDate: $lastSelectedDate,
+                        accountGroup: selectedAccountGroup
                     )
-                    .foregroundStyle(Color.gray.opacity(0.3))
-                    .offset(yStart: -10)
-                    .zIndex(-1)
+                } else {
+                    Text("Нет данных для отображения")
                 }
             }
-            .chartLegend(.hidden)
-            .chartForegroundStyleScale { colorPerName[$0] ?? .white }
-            .chartScrollableAxes(.horizontal)
-            .chartScrollPosition(x: $xPosition)
-            .chartXVisibleDomain(length: visibleRange)
-            .chartYScale(domain: 0...maxSum)
-            .animation(.linear(duration: 0.2), value: maxSum)
-            .chartXSelection(value: $rawSelectedDate)
-            .chartXAxis {
-                AxisMarks(values: .stride(by: visibleRange < 24 * oneMonthRange ? .month : .year)) { _ in
-                    AxisTick()
-                    AxisGridLine()
-                    AxisValueLabel(format:
-                                    visibleRange < 24 * oneMonthRange ? .dateTime.month(visibleRange < 12 * oneMonthRange ? .abbreviated : .narrow) : .dateTime.year(), centered: true)
+            .frame(height: chartHeight)
+            List {
+                ForEach(Array(vm.data.enumerated()), id: \.element) { (i, series) in
+                    Button {
+                        if let account = series.account {
+                            path.append(ChartViewRoute.transactionList(account: account))
+                        }
+                        switch series.type {
+                        case "Расход":
+                            path.append(ChartViewRoute.transactionList1(chartType: .expenses))
+                        case "Доход":
+                            path.append(ChartViewRoute.transactionList1(chartType: .earnings))
+                        default: break
+                        }
+                    } label: {
+                        HStack {
+                            Text(series.account != nil ? series.account!.name : series.type)
+                                .foregroundStyle(series.color)
+                            Spacer()
+                            Text(formatter.string(number: series.data[lastSelectedDate] ?? 0))
+                        }
+                        .frame(minHeight: 35)
+                        .bold(false)
+                    }
+                    .buttonStyle(.plain)
                 }
+                .padding(.horizontal, 15)
             }
-            Text(rawSelectedDate?.formatted(.dateTime.year(.defaultDigits).month(.wide)) ?? " ")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            Stepper (
-                value: $visibleRange,
-                in: 6*oneMonthRange...72*oneMonthRange,
-                step: oneMonthRange
-            ) {
-                Text("Количество месяцев для показа: \(visibleRange / oneMonthRange)")
+            if vm.chartType != .earningsAndExpenses {
+                HStack {
+                    Text("Всего:")
+                    Spacer()
+                    Text(formatter.string(number: vm.data.map { $0.data.filter( { $0.key == lastSelectedDate } ).values.reduce(0) { $0 + $1 } }.reduce(0) { $0 + $1 }))
+                }
+                .padding(.horizontal)
+                .font(.title2)
+            }
+        }
+        .listStyle(.plain)
+        .task {
+            do {
+                try await vm.load(accountGroupID: selectedAccountGroup.id)
+            } catch {
+                alert(error)
+            }
+        }
+        .onChange(of: selectedAccountGroup) { _, _ in
+            Task {
+                try await vm.load(accountGroupID: selectedAccountGroup.id)
+            }
+        }
+        .onChange(of: vm.chartType) { _, _ in
+            Task {
+                try await vm.load(accountGroupID: selectedAccountGroup.id)
             }
         }
     }
 }
 
 #Preview {
-    ChartView(data: [], rawSelectedDate: .constant(Date.now), colorPerName: [:])
+    ChartView(
+        chartType: .expenses, 
+        selectedAccountGroup: AccountGroup(id: 5, currency: Currency(symbol: "₽")),
+        path: .constant(NavigationPath())
+    )
+        .environment(AlertManager(handle: {_ in }))
 }
