@@ -493,12 +493,13 @@ extension AppDatabase {
     }
     
     func getStatisticByMonth(
+        chartType: ChartType,
         transactionType: TransactionType,
         accountGroupID: UInt32,
         accountParameterIgnore: Bool = false,
         transactionParameterIgnore: Bool = false,
         accountIDs: [UInt32] = []
-    ) async throws -> [Date: Decimal] {
+    ) async throws -> [Series] {
         try await reader.read { db in
             var amountField = ""
             var accountType = ""
@@ -513,7 +514,7 @@ extension AppDatabase {
                 accountField = "accountFromId"
                 accountType = "earnings"
             default:
-                return [:]
+                return []
             }
             
             var requestParameters: [String] = [
@@ -541,26 +542,66 @@ extension AppDatabase {
                 }
                 requestParameters.append("a.id in (\(questions.joined(separator: ", ")))")
             }
+            var req: String = ""
             
-            let req = """
-                SELECT
-                  strftime('%Y-%m-01', t.dateTransaction) AS "month",
-                  ROUND(SUM(t.\(amountField) * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
-                FROM transactionDB t
-                JOIN accountDB a ON a.id = t.\(accountField)
-                JOIN accountGroupDB ag  ON a.accountGroupId = ag.id
-                WHERE \(requestParameters.joined(separator: " AND "))
-                GROUP BY "month";
-            """
-            
-            var result: [Date: Decimal] = [:]
-            let rows = try Row.fetchCursor(db, sql: req, arguments: args)
-            while let row = try rows.next() {
-                result[row["month"]] = row["remainder"]
+            switch chartType {
+            case .earningsAndExpenses:
+                req = """
+                    SELECT
+                      strftime('%Y-%m-01', t.dateTransaction) AS "month",
+                      ROUND(SUM(t.\(amountField) * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
+                    FROM transactionDB t
+                    JOIN accountDB a ON a.id = t.\(accountField)
+                    JOIN accountGroupDB ag  ON a.accountGroupId = ag.id
+                    WHERE \(requestParameters.joined(separator: " AND "))
+                    GROUP BY "month"
+                """
+            case .expenses, .earnings:
+                req = """
+                    SELECT
+                      strftime('%Y-%m-01', t.dateTransaction) AS "month",
+                      CASE WHEN a.parentAccountId IS NULL
+                        THEN a.id
+                        ELSE a.parentAccountId
+                      END AS accountId,
+                      ROUND(SUM(t.\(amountField) * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
+                    FROM transactionDB t
+                    JOIN accountDB a ON a.id = t.\(accountField)
+                    JOIN accountGroupDB ag  ON a.accountGroupId = ag.id
+                    WHERE \(requestParameters.joined(separator: " AND "))
+                    GROUP BY "month", "accountId"
+                """
             }
-
                 
-            return result
+            var result: [String: [Date: Decimal]] = [:]
+            let rows = try Row.fetchCursor(db, sql: req, arguments: args)
+            
+            var series: [Series] = []
+            while let row = try rows.next() {
+                switch chartType {
+                case .earningsAndExpenses:
+                    if result[""] == nil {
+                        result[""] = [:]
+                    }
+                    result[""]?[row["month"]] = row["remainder"]
+                case .expenses, .earnings:
+                    let accountID: String = row["accountId"]
+                    if result[accountID] == nil {
+                        result[accountID] = [:]
+                    }
+                    result[accountID]?[row["month"]] = row["remainder"]
+                }
+            }
+            
+            for (categoryName, monthData) in result {
+                series.append(Series(
+                    account: nil,
+                    type: String(categoryName),
+                    data: monthData
+                ))
+            }
+                            
+            return series
         }
     }
     

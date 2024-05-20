@@ -6,33 +6,52 @@
 //
 
 import Foundation
+import SwiftUI
+
+enum ChartType: String, CaseIterable {
+    case earningsAndExpenses = "Доходы и расходы"
+    case earnings = "Доходы"
+    case expenses = "Расходы"
+}
 
 @Observable
 class ChartViewModel {
     
     let service = Service.shared
     
+    var chartType: ChartType
     var data: [Series] = []
-    private var accountIDs: [UInt32] = []
-    
-    init(
-        account: Account? = nil
-    ) {
+    private var accountIDs: [UInt32] {
+        var ids: [UInt32] = []
         if let account = account {
-            self.accountIDs = [account.id]
+            ids = [account.id]
             for childAccount in account.childrenAccounts {
-                self.accountIDs.append(childAccount.id)
+                ids.append(childAccount.id)
             }
         }
+        return ids
     }
     
+    init(
+        chartType: ChartType,
+        account: Account? = nil
+    ) {
+        self.chartType = chartType
+        self.account = account
+    }
+    
+    var account: Account?
+    
     func load(accountGroupID: UInt32) async throws {
-        data = try await service.getStatisticByMonth(accountGroupID: accountGroupID, accountIDs: accountIDs)
+        data = try await service.getStatisticByMonth(chartType: chartType, accountGroupID: accountGroupID, accountIDs: accountIDs)
     }
 }
 
-struct Series {
-    
-    let name: String
+struct Series: Identifiable, Hashable {
+    let id = UUID()
+    var account: Account?
+    var type: String
+    var serialNumber: UInt32 = 0
+    var color: Color = .white
     var data: [Date: Decimal]
 }
