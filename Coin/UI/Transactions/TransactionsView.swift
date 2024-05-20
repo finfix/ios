@@ -54,6 +54,6 @@ struct TransactionsView: View {
 }
 
 #Preview {
-    TransactionsView(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup(id: 1, currency: Currency(symbol: "USD"))))
+    TransactionsView(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup(id: 4, currency: Currency(symbol: "$"))))
         .environment(AlertManager(handle: {_ in }))
 }

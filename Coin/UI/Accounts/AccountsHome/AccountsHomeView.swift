@@ -124,15 +124,15 @@ struct CircleTypeTransaction: View {
     var imageName: String
     
     var body: some View {
-        ZStack {
-            Circle()
-                .frame(width: 50, height: 50)
-                .padding(20)
-                .foregroundColor(.gray)
-            Image(systemName: imageName)
-                .foregroundColor(.black)
-                .font(.system(size: 20))
-        }
+        Circle()
+            .frame(width: 50, height: 50)
+            .padding(20)
+            .foregroundColor(.gray)
+            .overlay {
+                Image(systemName: imageName)
+                    .foregroundColor(.black)
+                    .font(.system(size: 20))
+            }
     }
 }
     

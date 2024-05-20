@@ -36,7 +36,7 @@ struct TransactionsTab: View {
                         EditTag(tag, path: $path)
                     }
                 }
-                .navigationDestination(for: ChartTabRoute.self) { screen in
+                .navigationDestination(for: ChartViewRoute.self) { screen in
                     switch screen {
                     case .transactionList(account: let account):
                         TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
@@ -49,6 +49,6 @@ struct TransactionsTab: View {
 }
 
 #Preview {
-    TransactionsTab(selectedAccountGroup: .constant(AccountGroup()))
+    TransactionsTab(selectedAccountGroup: .constant(AccountGroup(id: 4)))
         .environment(AlertManager(handle: {_ in }))
 }

@@ -59,15 +59,13 @@ struct TransactionsList: View {
     var body: some View {
         List {
             Section(footer:
-                VStack {
-                    ChartTab(chartType: chartType, selectedAccountGroup: selectedAccountGroup, account: vm.account, path: $path)
-                    Button {
-                        vm.heightCoef = vm.heightCoef != 1 ? 1 : 0.5
-                    } label: {
-                        Text("Больше информации")
-                    }
-                }
-                .frame(width: width, height: height * vm.heightCoef)
+                ChartView(
+                    chartType: chartType,
+                    selectedAccountGroup: selectedAccountGroup, 
+                    account: vm.account,
+                    path: $path
+                )
+                .frame(width: width, height: height*0.6)
             ){}
             ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                 Section(header: Text(date, style: .date).font(.headline)) {
@@ -161,6 +159,15 @@ struct TransactionsList: View {
 }
 
 #Preview {
-    TransactionsList(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup(id: 4, currency: Currency(symbol: "₽"))), chartType: .earningsAndExpenses)
-        .environment(AlertManager(handle: {_ in }))
+    TransactionsList(
+        path: .constant(NavigationPath()),
+        selectedAccountGroup: .constant(AccountGroup(
+            id: 4,
+            currency: Currency(
+                symbol: "₽"
+            )
+        )),
+        chartType: .earningsAndExpenses
+    )
+    .environment(AlertManager(handle: {_ in }))
 }

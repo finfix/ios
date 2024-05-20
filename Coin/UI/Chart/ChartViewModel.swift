@@ -51,6 +51,7 @@ struct Series: Identifiable, Hashable {
     let id = UUID()
     var account: Account?
     var type: String
+    var serialNumber: UInt32 = 0
     var color: Color = .white
     var data: [Date: Decimal]
 }

@@ -664,8 +664,9 @@ extension Service {
             for (i, dataItem) in data.enumerated() {
                 data[i].account = accountsMap[UInt32(dataItem.type)!]!
             }
-            data = data.sorted(by: { $0.account!.serialNumber < $1.account!.serialNumber })
+            data = data.sorted(by: { $0.data.map{$0.value}.reduce(0){$0+$1} > $1.data.map{$0.value}.reduce(0){$0+$1} })
             for (i, dataItem) in data.enumerated() {
+                data[i].serialNumber = UInt32(i)
                 data[i].color = defaultColors[i%defaultColors.count]
             }
         }
