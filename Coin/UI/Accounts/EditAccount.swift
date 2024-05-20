@@ -130,7 +130,7 @@ struct EditAccount: View {
                     Picker("Счет, перед которым стоит этот счет", selection: $vm.currentAccount.serialNumber) {
                         ForEach(vm.currentAccount.parentAccountID == nil ? Account.groupAccounts(accounts) : accounts.filter{ $0.parentAccountID == vm.currentAccount.parentAccountID! }) { account in
                             Text(vm.currentAccount.parentAccountID == nil ? account.name : "\(account.name) \(account.currency.symbol)")
-                                .tag(account.serialNumber - 1)
+                                .tag(account.serialNumber == 0 ? 0 : account.serialNumber - 1)
                         }
                     }
                     if vm.permissions.changeParentAccountID {
