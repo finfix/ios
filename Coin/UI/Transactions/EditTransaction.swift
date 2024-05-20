@@ -62,17 +62,14 @@ struct EditTransaction: View {
                                     vm.currentTransaction.tags.append(tag)
                                 }
                             } label: {
-                                ZStack {
-                                    Text("#\(tag.name)")
-                                        .padding(5)
-                                        .overlay {
-                                            if vm.currentTransaction.tags.contains(tag) {
-                                                RoundedRectangle(cornerRadius: 5)
-                                                    .foregroundStyle(.secondary)
-                                            }
+                                Text("#\(tag.name)")
+                                    .padding(5)
+                                    .overlay {
+                                        if vm.currentTransaction.tags.contains(tag) {
+                                            RoundedRectangle(cornerRadius: 5)
+                                                .foregroundStyle(.secondary)
                                         }
-                                    
-                                }
+                                    }
                             }
                         }
                     }
