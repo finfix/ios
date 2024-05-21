@@ -557,13 +557,21 @@ extension AppDatabase {
                     GROUP BY "month"
                 """
             case .expenses, .earnings:
+                var selectAccountStatement = ""
+                if accountIDs.isEmpty {
+                    selectAccountStatement = """
+                          CASE WHEN a.parentAccountId IS NULL
+                            THEN a.id
+                            ELSE a.parentAccountId
+                          END AS accountId,
+                    """
+                } else {
+                    selectAccountStatement = "a.id AS accountId,"
+                }
                 req = """
                     SELECT
                       strftime('%Y-%m-01', t.dateTransaction) AS "month",
-                      CASE WHEN a.parentAccountId IS NULL
-                        THEN a.id
-                        ELSE a.parentAccountId
-                      END AS accountId,
+                      \(selectAccountStatement)
                       ROUND(SUM(t.\(amountField) * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
                     FROM transactionDB t
                     JOIN accountDB a ON a.id = t.\(accountField)

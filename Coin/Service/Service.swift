@@ -638,7 +638,17 @@ extension Service {
         accountIDs: [UInt32] = []
     ) async throws -> [Series] {
         var data: [Series] = []
-        let accountsMap = Account.convertToMap(Account.groupAccounts(Account.convertFromDBModel(try await db.getAccounts(), currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil)))
+        let accountsMap = Account.convertToMap(
+            Account.groupAccounts(
+                Account.convertFromDBModel(
+                    try await db.getAccounts(),
+                    currenciesMap: nil,
+                    accountGroupsMap: nil,
+                    iconsMap: nil
+                ),
+                saveChildren: true
+            )
+        )
         
         switch chartType {
         case .earningsAndExpenses:
@@ -665,7 +675,7 @@ extension Service {
                 data[i].account = accountsMap[UInt32(dataItem.type)!]!
             }
             data = data.sorted(by: { $0.data.map{$0.value}.reduce(0){$0+$1} > $1.data.map{$0.value}.reduce(0){$0+$1} })
-            for (i, dataItem) in data.enumerated() {
+            for (i, _) in data.enumerated() {
                 data[i].serialNumber = UInt32(i)
                 data[i].color = defaultColors[i%defaultColors.count]
             }

@@ -179,7 +179,14 @@ struct ScaleButton: View {
 
 #Preview {
     ChartView(
-        selectedAccountGroup: AccountGroup(id: 5, currency: Currency(symbol: "₽")),
+        selectedAccountGroup: AccountGroup(
+            id: 5,
+            currency:
+                Currency(
+                    symbol: "₽"
+                )
+        ),
+        filters: TransactionFilters(),
         path: .constant(NavigationPath())
     )
         .environment(AlertManager(handle: {_ in }))

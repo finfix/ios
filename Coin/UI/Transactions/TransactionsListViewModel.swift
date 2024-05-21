@@ -16,26 +16,10 @@ class TransactionsListViewModel {
     var page = 0
     var transactionsCancelled = false
     let pageSize = 100
-    var accountIDs: [UInt32] = []
-    var account: Account? = nil
-    
-    init(account: Account? = nil) {
-        if let account = account {
-            self.accountIDs = [account.id]
-            for childAccount in account.childrenAccounts {
-                self.accountIDs.append(childAccount.id)
-            }
-        }
-        self.account = account
-    }
     
     func load(
         refresh: Bool,
-        dateFrom: Date? = nil,
-        dateTo: Date? = nil,
-        searchText: String = "",
-        transactionType: TransactionType? = nil,
-        currency: Currency? = nil
+        filters: TransactionFilters
     ) async throws {
         var offset = 0
         var limit = 0
@@ -49,15 +33,24 @@ class TransactionsListViewModel {
             page += 1
         }
         
+        var accountIDs: [UInt32] = []
+        if let account = filters.account {
+            accountIDs = [account.id]
+            for childAccount in account.childrenAccounts {
+                accountIDs.append(childAccount.id)
+            }
+        }
+
+        
         let transactions = try await service.getTransactions(
             limit: limit,
             offset: offset,
-            dateFrom: dateFrom,
-            dateTo: dateTo,
-            searchText: searchText,
+            dateFrom: filters.dateFrom,
+            dateTo: filters.dateTo,
+            searchText: filters.searchText,
             accountIDs: accountIDs,
-            transactionType: transactionType,
-            currency: currency
+            transactionType: filters.transactionType,
+            currency: filters.currency
         )
         
         if transactions.isEmpty {

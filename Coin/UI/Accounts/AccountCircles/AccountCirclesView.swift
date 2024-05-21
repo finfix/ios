@@ -105,6 +105,14 @@ struct AccountCirclesView: View {
                     EditTag(tag, path: $path)
                 }
             }
+            .navigationDestination(for: ChartViewRoute.self) { screen in
+                switch screen {
+                case .transactionList(account: let account):
+                    TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
+                case .transactionList1(chartType: let chartType):
+                    TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, chartType: chartType)
+                }
+            }
         }
     }
 }
