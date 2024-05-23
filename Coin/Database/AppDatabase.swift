@@ -129,7 +129,7 @@ extension AppDatabase {
                     .notNull()
                 table.column("budgetGradualFilling", .boolean)
                     .notNull()
-                table.column("datetimeCreate", .date)
+                table.column("datetimeCreate", .datetime)
                     .notNull()
                 
                 table.belongsTo("icon", inTable: "iconDB")
@@ -157,7 +157,7 @@ extension AppDatabase {
                     .notNull()
                 table.column("note", .text)
                     .notNull()
-                table.column("datetimeCreate", .date)
+                table.column("datetimeCreate", .datetime)
                     .notNull()
                 table.column("type", .text)
                     .notNull()
@@ -232,6 +232,14 @@ extension AppDatabase {
             try db.alter(table: "transactionDB") { table in
                 table.rename(column: "accounting", to: "accountingInCharts")
             }
+        }
+        
+        migrator.registerMigration("addDatetimeCreateInAccountGroups") { db in
+            try db.alter(table: "accountGroupDB") { table in
+                table.add(column: "datetimeCreate", .datetime)
+                    .notNull()
+            }
+            try db.execute(sql: "UPDATE accountGroupDB SET datetimeCreate = DATETIME()")
         }
         
         return migrator

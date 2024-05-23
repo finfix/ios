@@ -15,7 +15,7 @@ struct AccountGroupSelector: View {
     @Environment (AlertManager.self) private var alert
     @State private var vm = AccountGroupSelectorViewModel()
     @Binding var selectedAccountGroup: AccountGroup
-    @AppStorage("selectedAccountGroupID") var selectedAccountGroupID: Int?
+    @AppStorage("selectedAccountGroupID") var selectedAccountGroupID: Int = 0
     var pickerName: String = ""
     
     var body: some View {
@@ -29,12 +29,14 @@ struct AccountGroupSelector: View {
         .task {
             do {
                 try await vm.load()
-                if selectedAccountGroup.id == 0 {
-                    if let selectedAccountGroupID = selectedAccountGroupID {
-                        selectedAccountGroup = vm.accountGroups.first { $0.id == UInt32(selectedAccountGroupID) } ?? vm.accountGroups.first ?? AccountGroup()
-                    } else {
-                        selectedAccountGroup = vm.accountGroups.first ?? AccountGroup()
+                if let selectedAccountGroup = vm.accountGroups.first(where: { $0.id == UInt32(selectedAccountGroupID) }) {
+                    if selectedAccountGroup.currency != self.selectedAccountGroup.currency {
+                        self.selectedAccountGroup = AccountGroup() // TODO: Поправить костыль
+                        self.selectedAccountGroup = selectedAccountGroup
                     }
+                    self.selectedAccountGroup = selectedAccountGroup
+                } else {
+                    self.selectedAccountGroup = vm.accountGroups.first ?? AccountGroup()
                 }
             } catch {
                 alert(error)
