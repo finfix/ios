@@ -539,7 +539,57 @@ extension Service {
                 accountingInCharts: transaction.accountingInCharts
             )
         )
-}
+    }
+    
+    func createAccountGroup(_ accountGroup: AccountGroup) async throws {
+        var accountGroup = accountGroup
+        
+        try validateAccountGroup(accountGroup)
+        
+        let id = try await db.createAccountGroup(accountGroup)
+        accountGroup.id = id
+        
+        taskManager.createTask(
+            actionName: .createAccountGroup,
+            localObjectID: id,
+            reqModel: CreateAccountGroupReq(
+                name: accountGroup.name,
+                currency: accountGroup.currency.code,
+                datetimeCreate: accountGroup.datetimeCreate
+            )
+        )
+    }
+    
+    func updateAccountGroup(newAccountGroup: AccountGroup, oldAccountGroup: AccountGroup) async throws {
+        
+        try validateAccountGroup(newAccountGroup)
+        
+        try await db.updateAccountGroup(newAccountGroup)
+        
+        taskManager.createTask(
+            actionName: .updateAccountGroup,
+            localObjectID: newAccountGroup.id,
+            reqModel: UpdateAccountGroupReq(
+                id: newAccountGroup.id,
+                name: newAccountGroup.name != oldAccountGroup.name ? newAccountGroup.name : nil,
+                currency: newAccountGroup.currency != oldAccountGroup.currency ? newAccountGroup.currency.code : nil
+            )
+        )
+    }
+    
+    func deleteAccountGroup(_ accountGroup: AccountGroup) async throws {
+        try await db.deleteAccountGroup(accountGroup)
+        
+        taskManager.createTask(
+            actionName: .deleteAccountGroup,
+            localObjectID: accountGroup.id,
+            reqModel: DeleteAccountGroupReq(id: accountGroup.id)
+        )
+    }
+    
+    private func validateAccountGroup(_ accountGroup: AccountGroup) throws {
+        guard accountGroup.name != "" else { throw ErrorModel(humanTextError: "Группа счетов не может быть без имени") }
+    }
         
     func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = transaction
@@ -741,7 +791,7 @@ extension Service {
         async let serverIcons = IconDB.convertFromApiModel(try await SettingsAPI().GetIcons())
         async let serverCurrencies = CurrencyDB.convertFromApiModel(try await SettingsAPI().GetCurrencies())
         async let serverUser = UserDB(try await UserAPI().GetUser())
-        async let serverAccountGroups = AccountGroupDB.convertFromApiModel(try await AccountAPI().GetAccountGroups())
+        async let serverAccountGroups = AccountGroupDB.convertFromApiModel(try await AccountGroupAPI().GetAccountGroups())
         async let serverAccounts = AccountDB.convertFromApiModel(try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo)))
         async let serverTags = TagDB.convertFromApiModel(try await TagAPI().GetTags())
         async let serverTagsToTransactions = TagToTransactionDB.convertFromApiModel(try await TagAPI().GetTagsToTransaction())
@@ -851,7 +901,7 @@ extension Service {
         async let _icons = try await SettingsAPI().GetIcons()
         async let _currencies = try await SettingsAPI().GetCurrencies()
         async let _user = try await UserAPI().GetUser()
-        async let _accountGroups = try await AccountAPI().GetAccountGroups()
+        async let _accountGroups = try await AccountGroupAPI().GetAccountGroups()
         async let _accounts = try await AccountAPI().GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
         async let _tags = try await TagAPI().GetTags()
         async let _tagsToTransactions = try await TagAPI().GetTagsToTransaction()

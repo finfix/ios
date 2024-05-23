@@ -11,6 +11,7 @@ enum ProfileViews: Hashable {
     case hidedAccounts
     case currencyConverter
     case settings
+    case accountGroupsList
 }
 
 struct Profile: View {
@@ -58,6 +59,7 @@ struct Profile: View {
                 Section {
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
                     NavigationLink("Конвертер валют", value: ProfileViews.currencyConverter)
+                    NavigationLink("Группы счетов", value: ProfileViews.accountGroupsList)
                 }
                 .buttonStyle(.plain)
                 Section {
@@ -125,8 +127,15 @@ struct Profile: View {
                 case .hidedAccounts: HidedAccountsList(selectedAccountGroup: $selectedAccountGroup, path: $path)
                 case .currencyConverter: CurrencyConverter()
                 case .settings: Settings(path: $path)
+                case .accountGroupsList: AccountGroupList(path: $path)
                 }
             }
+            .navigationDestination(for: AccountGroupListRoute.self, destination: { screen in
+                switch screen {
+                case .createAccountGroup: EditAccountGroup(path: $path)
+                case .updateAccountGroup(let accountGroup): EditAccountGroup(accountGroup, path: $path)
+                }
+            })
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                 switch screen {
                 case .accountTransactions(let account): TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)

@@ -20,8 +20,13 @@ struct QuickStatisticView: View {
         return vm.calculateStatistic(accounts: filteredAccounts, targetCurrency: selectedAccountGroup.currency)
     }
         
-    var formatter: CurrencyFormatter {
-        CurrencyFormatter(currency: selectedAccountGroup.currency, maximumFractionDigits: 0)
+    var formatter: CurrencyFormatter
+    
+    init(
+        selectedAccountGroup: AccountGroup
+    ) {
+        self.selectedAccountGroup = selectedAccountGroup
+        formatter = CurrencyFormatter(currency: selectedAccountGroup.currency, maximumFractionDigits: 0)
     }
         
     var body: some View {

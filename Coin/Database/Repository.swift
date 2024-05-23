@@ -208,6 +208,28 @@ extension AppDatabase {
             _ = try TransactionDB(transaction).update(db)
         }
     }
+    
+    func updateAccountGroup(_ accountGroup: AccountGroup) async throws {
+        try await dbWriter.write { db in
+            _ = try AccountGroupDB(accountGroup).update(db)
+        }
+    }
+    
+    func deleteAccountGroup(_ accountGroup: AccountGroup) async throws {
+        try await dbWriter.write { db in
+            _ = try AccountGroupDB(accountGroup).delete(db)
+        }
+    }
+    
+    func createAccountGroup(_ accountGroup: AccountGroup) async throws -> UInt32 {
+        try await dbWriter.write { db in
+            _ = try AccountGroupDB(accountGroup).insert(db)
+            let id = UInt32(db.lastInsertedRowID)
+            try IDMappingDB(localID: id, serverID: nil, modelType: .accountGroup)
+                .insert(db)
+            return id
+        }
+    }
 }
 
 enum ModelType: String, Codable {
