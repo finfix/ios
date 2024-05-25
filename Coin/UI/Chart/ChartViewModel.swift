@@ -21,28 +21,26 @@ class ChartViewModel {
     
     var chartType: ChartType
     var data: [Series] = []
-    private var accountIDs: [UInt32] {
-        var ids: [UInt32] = []
-        if let account = account {
-            ids = [account.id]
-            for childAccount in account.childrenAccounts {
-                ids.append(childAccount.id)
-            }
-        }
-        return ids
-    }
+    var filters: TransactionFilters
     
     init(
         chartType: ChartType,
-        account: Account? = nil
+        filters: TransactionFilters
     ) {
         self.chartType = chartType
-        self.account = account
+        self.filters = filters
     }
-    
-    var account: Account?
-    
+        
     func load(accountGroupID: UInt32) async throws {
+        
+        var accountIDs: [UInt32] = []
+        if let account = filters.account {
+            accountIDs = [account.id]
+            for childAccount in account.childrenAccounts {
+                accountIDs.append(childAccount.id)
+            }
+        }
+
         data = try await service.getStatisticByMonth(chartType: chartType, accountGroupID: accountGroupID, accountIDs: accountIDs)
     }
 }

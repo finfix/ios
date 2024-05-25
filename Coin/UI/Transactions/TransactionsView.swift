@@ -7,53 +7,71 @@
 
 import SwiftUI
 
+struct TransactionFilters: Equatable {
+    var searchText = ""
+    var dateFrom: Date?
+    var dateTo: Date?
+    var transactionType: TransactionType?
+    var currency: Currency?
+    var account: Account? = nil
+}
+
 struct TransactionsView: View {
     
     @Binding var path: NavigationPath
     @State var isFilterOpen = false
-    @State private var searchText = ""
-    @State var dateFrom: Date?
-    @State var dateTo: Date?
-    @State var transactionType: TransactionType?
-    @State var currency: Currency?
+    @State var filters: TransactionFilters
     @Binding var selectedAccountGroup: AccountGroup
-    var account: Account? = nil
-    var chartType: ChartType = .earningsAndExpenses
+    var chartType: ChartType
     
+    init(
+        path: Binding<NavigationPath>,
+        selectedAccountGroup: Binding<AccountGroup>,
+        account: Account? = nil,
+        chartType: ChartType = .earningsAndExpenses
+    ) {
+        self._path = path
+        self._selectedAccountGroup = selectedAccountGroup
+        self.filters = TransactionFilters(account: account)
+        self.chartType = chartType
+    }
     
     var body: some View {
         TransactionsList(
             path: $path,
             selectedAccountGroup: $selectedAccountGroup,
-            account: account, 
-            searchText: searchText,
-            dateFrom: dateFrom,
-            dateTo: dateTo,
-            transactionType: transactionType,
-            currency: currency,
+            filters: filters,
             chartType: chartType
         )
-            .searchable(text: $searchText)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    // Фильтры
-                    Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
-                }
+        .searchable(text: $filters.searchText)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                // Фильтры
+                Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
             }
-            .sheet(isPresented: $isFilterOpen) {
-                TransactionFilterView(
-                    dateFrom: $dateFrom,
-                    dateTo: $dateTo,
-                    transactionType: $transactionType,
-                    accountGroup: $selectedAccountGroup,
-                    currency: $currency
-                )
-            }
+        }
+        .sheet(isPresented: $isFilterOpen) {
+            TransactionFilterView(
+                accountGroup: $selectedAccountGroup, 
+                filters: $filters
+            )
+        }
 
     }
 }
 
 #Preview {
-    TransactionsView(path: .constant(NavigationPath()), selectedAccountGroup: .constant(AccountGroup(id: 4, currency: Currency(symbol: "$"))))
-        .environment(AlertManager(handle: {_ in }))
+    TransactionsView(
+        path: .constant(NavigationPath()),
+        selectedAccountGroup: .constant(
+            AccountGroup(
+                id: 4,
+                currency:
+                    Currency(
+                        symbol: "$"
+                    )
+            )
+        )
+    )
+    .environment(AlertManager(handle: {_ in }))
 }

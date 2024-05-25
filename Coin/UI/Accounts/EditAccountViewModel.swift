@@ -21,6 +21,21 @@ class EditAccountViewModel {
     var accounts: [Account] = []
     
     var currentAccount = Account()
+    var remainder: Double {
+        didSet {
+            currentAccount.remainder = Decimal(floatLiteral: remainder)
+        }
+    }
+    var budgetAmount: Double {
+        didSet {
+            currentAccount.budgetAmount = Decimal(floatLiteral: budgetAmount)
+        }
+    }
+    var budgetFixedSum: Double {
+        didSet {
+            currentAccount.budgetFixedSum = Decimal(floatLiteral: budgetFixedSum)
+        }
+    }
     var oldAccount = Account()
     
     var mode: mode
@@ -36,13 +51,16 @@ class EditAccountViewModel {
         self.oldAccount = oldAccount
         self.mode = mode
         self.isHiddenView = isHiddenView
+        self.budgetAmount = currentAccount.budgetAmount.doubleValue
+        self.budgetFixedSum = currentAccount.budgetFixedSum.doubleValue
+        self.remainder = currentAccount.remainder.doubleValue
     }
     
     var permissions: AccountPermissions {
         GetPermissions(account: currentAccount)
     }
         
-    func load() async throws {
+    func load(accountGroup: AccountGroup) async throws {
         currencies = try await service.getCurrencies()
         accountGroups = try await service.getAccountGroups()
         icons = try await service.getIcons()
@@ -51,10 +69,10 @@ class EditAccountViewModel {
             visible = true
         }
         accounts = try await service.getAccounts(visible: visible, types: [currentAccount.type])
-        if mode == .create {
-            if let currency = currencies.first {
-                currentAccount.currency = currency
-            }
+        if currentAccount.currency.code == "" {
+            currentAccount.currency = currencies.first(where: { accountGroup.currency.code == $0.code }) ?? currencies.first ?? Currency()
+        }
+        if currentAccount.icon.id == 0 {
             if let icon = icons.first {
                 currentAccount.icon = icon
             }

@@ -134,6 +134,16 @@ class TaskManager {
 
             case .deleteTag:
                 try await TagAPI().DeleteTag(req: DeleteTagReq(fields))
+                
+            case .createAccountGroup:
+                let model = try await AccountGroupAPI().CreateAccountGroup(req: CreateAccountGroupReq(fields))
+                try await db.updateServerID(localID: task.localID, modelType: .accountGroup, serverID: model.id)
+                
+            case .updateAccountGroup:
+                try await AccountGroupAPI().UpdateAccountGroup(req: UpdateAccountGroupReq(fields))
+                
+            case .deleteAccountGroup:
+                try await AccountGroupAPI().DeleteAccountGroup(req: DeleteAccountGroupReq(fields))
             }
         } catch {
             logger.warning("\(error)")
@@ -156,6 +166,7 @@ enum ActionName: String, Codable {
     case createTransaction, updateTransaction, deleteTransaction
     case createAccount, updateAccount, deleteAccount
     case createTag, updateTag, deleteTag
+    case createAccountGroup, updateAccountGroup, deleteAccountGroup
 }
 
 protocol FieldExtractable {

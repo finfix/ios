@@ -262,13 +262,6 @@ struct UpdateBudgetReq: Encodable {
     var gradualFilling: Bool?
 }
 
-struct GetAccountGroupsRes: Decodable {
-    var id: UInt32
-    var name: String
-    var currency: String
-    var serialNumber: UInt32
-}
-
 struct DeleteAccountReq: Encodable, FieldExtractable {
     var id: UInt32
     

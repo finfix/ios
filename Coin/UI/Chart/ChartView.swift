@@ -24,14 +24,14 @@ struct ChartView: View {
     init(
         chartType: ChartType = .earningsAndExpenses,
         selectedAccountGroup: AccountGroup,
-        account: Account? = nil,
+        filters: TransactionFilters,
         path: Binding<NavigationPath>
     ) {
         var chartType = chartType
         self.formatter = CurrencyFormatter(currency: selectedAccountGroup.currency, withUnits: false)
         self.selectedAccountGroup = selectedAccountGroup
         self._path = path
-        if let account {
+        if let account = filters.account {
             switch account.type {
             case .earnings:
                 chartType = .earnings
@@ -40,7 +40,7 @@ struct ChartView: View {
             default: break
             }
         }
-        vm = ChartViewModel(chartType: chartType, account: account)
+        vm = ChartViewModel(chartType: chartType, filters: filters)
     }
     
     var formatter: CurrencyFormatter
@@ -129,7 +129,15 @@ struct ChartView: View {
 #Preview {
     ChartView(
         chartType: .expenses, 
-        selectedAccountGroup: AccountGroup(id: 5, currency: Currency(symbol: "₽")),
+        selectedAccountGroup: 
+            AccountGroup(
+                id: 5,
+                currency:
+                    Currency(
+                        symbol: "₽"
+                    )
+            ),
+        filters: TransactionFilters(),
         path: .constant(NavigationPath())
     )
         .environment(AlertManager(handle: {_ in }))

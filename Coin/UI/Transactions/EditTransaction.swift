@@ -119,26 +119,41 @@ struct EditTransaction: View {
             }
             Section {
                 if vm.currentTransaction.type != .balancing {
-                    TextField(vm.intercurrency ? "Сумма списания" : "Сумма", value: $vm.currentTransaction.amountFrom, format: .number)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .amountFromSelector)
-                        .onSubmit {
-                            if vm.intercurrency {
-                                focusedField = .amountToSelector
-                            } else {
-                                vm.shouldShowDatePicker = true
-                            }
+                    TextField(
+                        vm.intercurrency ? "Сумма списания" : "Сумма",
+                        value: $vm.amountFrom,
+                        formatter: NumberFormatters.textField
+                    )
+                    .keyboardType(.decimalPad)
+                    .focused($focusedField, equals: .amountFromSelector)
+                    .onSubmit {
+                        if vm.intercurrency {
+                            focusedField = .amountToSelector
+                        } else {
+                            vm.shouldShowDatePicker = true
                         }
+                    }
+                    .overlay(alignment: .trailing) {
+                        Text(vm.currentTransaction.accountFrom.currency.symbol)
+                    }
+
                 }
                 if vm.intercurrency || vm.currentTransaction.type == .balancing {
-                    TextField("Сумма начисления", value: $vm.currentTransaction.amountTo, format: .number)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .amountToSelector)
-                        .onSubmit {
-                            withAnimation {
-                                vm.shouldShowDatePicker = true
-                            }
+                    TextField(
+                        "Сумма начисления",
+                        value: $vm.amountTo,
+                        formatter: NumberFormatters.textField
+                    )
+                    .keyboardType(.decimalPad)
+                    .focused($focusedField, equals: .amountToSelector)
+                    .onSubmit {
+                        withAnimation {
+                            vm.shouldShowDatePicker = true
                         }
+                    }
+                    .overlay(alignment: .trailing) {
+                        Text(vm.currentTransaction.accountTo.currency.symbol)
+                    }
                 }
             } footer: {
                 VStack {
@@ -276,8 +291,12 @@ struct EditTransaction: View {
 }
 
 #Preview {
-    EditTransaction(Transaction(), path: .constant(NavigationPath()))
-        .environment(AlertManager(handle: {_ in }))
+    EditTransaction(
+        transactionType: .consumption,
+        accountGroup: AccountGroup(id: 4),
+        path: .constant(NavigationPath())
+    )
+    .environment(AlertManager(handle: {_ in }))
 }
 
 private struct Rate: View {

@@ -7,22 +7,25 @@
 
 import Foundation
 
-struct AccountGroup: Identifiable {
+struct AccountGroup: Identifiable, Equatable {
     var id: UInt32
     var name: String
     var serialNumber: UInt32
     var currency: Currency
+    var datetimeCreate: Date
     
     init(
         id: UInt32 = 0,
         name: String = "",
         serialNumber: UInt32 = 0,
-        currency: Currency = Currency()
+        currency: Currency = Currency(),
+        datetimeCreate: Date = Date.now
     ) {
         self.id = id
         self.name = name
         self.serialNumber = serialNumber
         self.currency = currency
+        self.datetimeCreate = datetimeCreate
     }
     
     // Инициализатор из модели базы данных
@@ -31,6 +34,7 @@ struct AccountGroup: Identifiable {
         self.name = dbModel.name
         self.serialNumber = dbModel.serialNumber
         self.currency = currenciesMap?[dbModel.currencyCode]! ?? Currency()
+        self.datetimeCreate = dbModel.datetimeCreate
     }
     
     static func convertFromDBModel(_ accountGroupsDB: [AccountGroupDB], currenciesMap: [String: Currency]?) -> [AccountGroup] {
