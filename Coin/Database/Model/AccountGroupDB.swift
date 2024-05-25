@@ -10,10 +10,11 @@ import GRDB
 
 struct AccountGroupDB {
     
-    var id: UInt32!
+    var id: UInt32?
     var name: String
     var serialNumber: UInt32
     var currencyCode: String
+    var datetimeCreate: Date
     
     // Инициализатор из сетевой модели
     init(_ res: GetAccountGroupsRes) {
@@ -21,6 +22,19 @@ struct AccountGroupDB {
         self.name = res.name
         self.serialNumber = res.serialNumber
         self.currencyCode = res.currency
+        self.datetimeCreate = res.datetimeCreate
+    }
+    
+    // Инициализатор из бизнес модели
+    init(_ model: AccountGroup) {
+        self.id = model.id
+        if self.id == 0 {
+            self.id = nil
+        }
+        self.name = model.name
+        self.serialNumber = model.serialNumber
+        self.currencyCode = model.currency.code
+        self.datetimeCreate = model.datetimeCreate
     }
     
     static func convertFromApiModel(_ accountGroups: [GetAccountGroupsRes]) -> [AccountGroupDB] {
@@ -57,6 +71,9 @@ struct AccountGroupDB {
             if serverModel.currencyCode != localModels[i].currencyCode {
                 difference["currencyCode"] = (server: serverModel.currencyCode, local: localModels[i].currencyCode)
             }
+            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
+                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
+            }
             if !difference.isEmpty {
                 differences[serverModel.id!] = difference
             }
@@ -72,6 +89,7 @@ extension AccountGroupDB: Codable, FetchableRecord, PersistableRecord {
         static let name = Column(CodingKeys.name)
         static let currencyCode = Column(CodingKeys.currencyCode)
         static let serialNumber = Column(CodingKeys.serialNumber)
+        static let datetimeCreate = Column(CodingKeys.datetimeCreate)
     }
 }
 

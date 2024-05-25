@@ -7,6 +7,15 @@
 
 import Foundation
 
+enum NumberFormatters {
+    static let textField: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.zeroSymbol = ""
+        formatter.maximumFractionDigits = 7
+        return formatter
+    }()
+}
+
 class CurrencyFormatter: NumberFormatter {
     
     // Передано ли minimumFractionDigits в функцию

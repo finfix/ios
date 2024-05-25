@@ -17,11 +17,7 @@ struct TransactionsList: View {
     @State private var vm: TransactionsListViewModel
     @Binding var selectedAccountGroup: AccountGroup
     
-    var searchText: String
-    var dateFrom: Date?
-    var dateTo: Date?
-    var transactionType: TransactionType?
-    var currency: Currency?
+    var filters: TransactionFilters
     var chartType: ChartType
     
     @Binding var path: NavigationPath
@@ -32,23 +28,14 @@ struct TransactionsList: View {
     init(
         path: Binding<NavigationPath>,
         selectedAccountGroup: Binding<AccountGroup>,
-        account: Account? = nil,
-        searchText: String = "",
-        dateFrom: Date? = nil,
-        dateTo: Date? = nil,
-        transactionType: TransactionType? = nil,
-        currency: Currency? = nil,
+        filters: TransactionFilters,
         chartType: ChartType
     ) {
         self._selectedAccountGroup = selectedAccountGroup
         self._path = path
-        self.dateTo = dateTo
-        self.dateFrom = dateFrom
-        self.searchText = searchText
-        self.transactionType = transactionType
-        self.currency = currency
+        self.filters = filters
         self.chartType = chartType
-        vm = TransactionsListViewModel(account: account)
+        self.vm = TransactionsListViewModel()
     }
     
     var groupedTransactionByDate: [Date: [Transaction]] {
@@ -62,7 +49,7 @@ struct TransactionsList: View {
                 ChartView(
                     chartType: chartType,
                     selectedAccountGroup: selectedAccountGroup, 
-                    account: vm.account,
+                    filters: filters,
                     path: $path
                 )
                 .frame(width: width, height: height*0.6)
@@ -92,7 +79,7 @@ struct TransactionsList: View {
                 Text("Загрузка...")
                     .task {
                         do {
-                            try await vm.load(refresh: false, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
+                            try await vm.load(refresh: false, filters: filters)
                         } catch {
                             alert(error)
                         }
@@ -102,52 +89,16 @@ struct TransactionsList: View {
         .task {
             if vm.transactions.count != 0 {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
+                    try await vm.load(refresh: true, filters: filters)
                 } catch {
                     alert(error)
                 }
             }
         }
-        .onChange(of: dateFrom) { _, _ in
+        .onChange(of: filters) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
-                } catch {
-                    alert(error)
-                }
-            }
-        }
-        .onChange(of: dateTo) { _, _ in
-            Task {
-                do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
-                } catch {
-                    alert(error)
-                }
-            }
-        }
-        .onChange(of: searchText) { _, _ in
-            Task {
-                do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
-                } catch {
-                    alert(error)
-                }
-            }
-        }
-        .onChange(of: transactionType) { _, _ in
-            Task {
-                do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
-                } catch {
-                    alert(error)
-                }
-            }
-        }
-        .onChange(of: currency) { _, _ in
-            Task {
-                do {
-                    try await vm.load(refresh: true, dateFrom: dateFrom, dateTo: dateTo, searchText: searchText, transactionType: transactionType, currency: currency)
+                    try await vm.load(refresh: true, filters: filters)
                 } catch {
                     alert(error)
                 }
@@ -166,7 +117,8 @@ struct TransactionsList: View {
             currency: Currency(
                 symbol: "₽"
             )
-        )),
+        )), 
+        filters: TransactionFilters(),
         chartType: .earningsAndExpenses
     )
     .environment(AlertManager(handle: {_ in }))

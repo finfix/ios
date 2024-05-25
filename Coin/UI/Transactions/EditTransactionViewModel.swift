@@ -23,6 +23,16 @@ class EditTransactionViewModel {
     var accounts: [Account] = []
     var tags: [Tag] = []
     var currentTransaction = Transaction()
+    var amountFrom: Double = 0 {
+        didSet {
+            currentTransaction.amountFrom = Decimal(floatLiteral: amountFrom).round(factor: 7)
+        }
+    }
+    var amountTo: Double = 0 {
+        didSet {
+            currentTransaction.amountTo = Decimal(floatLiteral: amountTo).round(factor: 7)
+        }
+    }
     var oldTransaction = Transaction()
     var accountGroup = AccountGroup()
     var mode: mode
@@ -41,6 +51,8 @@ class EditTransactionViewModel {
         self.oldTransaction = oldTransaction
         self.accountGroup = accountGroup
         self.mode = mode
+        self.amountFrom = currentTransaction.amountFrom.doubleValue
+        self.amountTo = currentTransaction.amountTo.doubleValue
     }
             
     func load() async throws {

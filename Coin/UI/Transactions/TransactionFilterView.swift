@@ -14,22 +14,19 @@ struct TransactionFilterView: View {
     @State private var vm = TransactionFilterViewModel()
     @State private var shouldShowDateFrom = false
     @State private var shouldShowDateTo = false
-    @Binding var dateFrom: Date?
-    @Binding var dateTo: Date?
-    @Binding var transactionType: TransactionType?
     @Binding var accountGroup: AccountGroup
-    @Binding var currency: Currency?
+    @Binding var filters: TransactionFilters
     
     var body: some View {
         NavigationStack {
             Form {
                 Section {
                     Label("Дата", systemImage: "calendar")
-                    ExpandableDatePicker(buttonName: "C", isCalendarShowing: $shouldShowDateFrom, date: $dateFrom)
-                    ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $dateTo)
+                    ExpandableDatePicker(buttonName: "C", isCalendarShowing: $shouldShowDateFrom, date: $filters.dateFrom)
+                    ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $filters.dateTo)
                 }
                 Section {
-                    Picker("Тип транзакции", selection: $transactionType) {
+                    Picker("Тип транзакции", selection: $filters.transactionType) {
                         Text("Тип не выбран")
                             .tag(nil as TransactionType?)
                         ForEach(TransactionType.allCases, id: \.rawValue) { type in
@@ -43,7 +40,7 @@ struct TransactionFilterView: View {
                     AccountGroupSelector(selectedAccountGroup: $accountGroup, pickerName: "Группа счетов")
                 }
                 Section {
-                    Picker("Валюта транзакции", selection: $currency) {
+                    Picker("Валюта транзакции", selection: $filters.currency) {
                         Text("Валюта не выбрана")
                             .tag(nil as Currency?)
                         ForEach(vm.currencies) { currency in
@@ -121,11 +118,8 @@ struct ExpandableDatePicker: View {
 
 #Preview {
     TransactionFilterView(
-        dateFrom: .constant(Date()),
-        dateTo: .constant(Date()),
-        transactionType: .constant(TransactionType.balancing),
         accountGroup: .constant(AccountGroup()),
-        currency: .constant(Currency())
+        filters: .constant(TransactionFilters())
     )
     .environment(AlertManager(handle: {_ in }))
 }

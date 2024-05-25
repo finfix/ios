@@ -169,7 +169,10 @@ enum AccountType: String, Codable, CaseIterable {
 }
 
 extension Account {
-    static func groupAccounts(_ accounts: [Account]) -> [Account] {
+    static func groupAccounts(
+        _ accounts: [Account],
+        saveChildren: Bool = false
+    ) -> [Account] {
         
         // Делаем контейнер для сбора счетов и счетов с аггрегацией
         var accountsContainer = [Account]()
@@ -211,6 +214,11 @@ extension Account {
                         
                         // Добавляем счет в дочерние счета родителя
                         accountsContainer[parentAccountIndex].childrenAccounts.append(account)
+                        
+                        // Если нам надо сохранить при этом в массиве счетов все дочерние счета, тоже добавляем его в контейнер
+                        if saveChildren {
+                            accountsContainer.append(account)
+                        }
                         
                         continue
                     } else { // Если не находим

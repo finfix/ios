@@ -92,7 +92,7 @@ struct Graph: View {
                             }
                         }
                         .foregroundStyle(by: .value("Категория", i))
-//                                            .interpolationMethod(.monotone) // TODO: что-то с ним придумать
+                        .interpolationMethod(.catmullRom) // TODO: что-то с ним придумать
                     }
                     
                     RuleMark(
@@ -130,15 +130,15 @@ struct Graph: View {
                 if let firstSeries = data.first {
                     VStack {
                         Button {
-                            if visibleRange < firstSeries.data.count+2 {
-                                visibleRange += 1
+                            if 2 < visibleRange {
+                                visibleRange -= 1
                             }
                         } label: {
                             ScaleButton(imageName: "plus")
                         }
                         Button {
-                            if 2 < visibleRange {
-                                visibleRange -= 1
+                            if visibleRange < firstSeries.data.count+2 {
+                                visibleRange += 1
                             }
                         } label: {
                             ScaleButton(imageName: "minus")
@@ -179,7 +179,14 @@ struct ScaleButton: View {
 
 #Preview {
     ChartView(
-        selectedAccountGroup: AccountGroup(id: 5, currency: Currency(symbol: "₽")),
+        selectedAccountGroup: AccountGroup(
+            id: 4,
+            currency:
+                Currency(
+                    symbol: "₽"
+                )
+        ),
+        filters: TransactionFilters(),
         path: .constant(NavigationPath())
     )
         .environment(AlertManager(handle: {_ in }))

@@ -36,16 +36,6 @@ class AccountAPI: API {
         return try decode(data, model: [GetAccountsRes].self)
     }
     
-    func GetAccountGroups() async throws -> [GetAccountGroupsRes] {
-        let data = try await request(
-            url: apiBasePath + accountBasePath + "/accountGroups",
-            method: .get,
-            headers: getBaseHeaders()
-        )
-        
-        return try decode(data, model: [GetAccountGroupsRes].self)
-    }
-    
     func CreateAccount(req: CreateAccountReq) async throws -> CreateAccountRes {
         let data = try await request(
             url: apiBasePath + accountBasePath,
