@@ -19,6 +19,15 @@ struct TransactionRow: View {
         }
     }
     
+    var color: Color {
+        switch transaction.type {
+        case .income: .green
+        case .consumption: .red
+        case .balancing: .secondary
+        default: .primary
+        }
+    }
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -34,19 +43,24 @@ struct TransactionRow: View {
             }
             Spacer()
             VStack(alignment: .trailing) {
-                if transaction.amountFrom != transaction.amountTo && transaction.type != .balancing {
-                    Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom.currency, withUnits: false))
-                        .font(.footnote)
+                VStack(alignment: .trailing) {
+                    if transaction.amountFrom != transaction.amountTo && transaction.type != .balancing {
+                        Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom.currency, withUnits: false))
+                            .font(.footnote)
+                    }
+                    Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo.currency, withUnits: false))
                 }
-                Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo.currency, withUnits: false))
+                .foregroundStyle(color)
                 if transaction.note != "" {
                     Text(transaction.note)
                         .font(.footnote)
                         .lineLimit(2)
                 }
-                ForEach(transaction.tags) { tag in
-                    Text("#\(tag.name)")
-                        .font(.caption2)
+                HStack {
+                    ForEach(transaction.tags) { tag in
+                        Text("#\(tag.name)")
+                            .font(.caption2)
+                    }
                 }
             }
         }
@@ -55,7 +69,40 @@ struct TransactionRow: View {
 
 #Preview {
     List {
-        TransactionRow(transaction: Transaction())
+        TransactionRow(
+            transaction: 
+                Transaction(
+                    amountFrom: 1000,
+                    amountTo: 10,
+                    dateTransaction: Date.now.stripTime(),
+                    isExecuted: true,
+                    note: "Заметка\nВторая линия\nТретья линия",
+                    type: .consumption,
+                    datetimeCreate: Date.now,
+                    accountFrom:
+                        Account(
+                            name: "Обычный счет",
+                            currency:
+                                Currency(
+                                    code: "₽"
+                                )
+                        ),
+                    accountTo:
+                        Account(
+                            name: "Счет расхода",
+                            currency:
+                                Currency(
+                                    code: "$"
+                                )
+                        ),
+                    tags: [
+                        Tag(name: "tag1"),
+                        Tag(name: "tag2"),
+                        Tag(name: "tag3 very very long text")
+                    ]
+                )
+        )
             .environment(AlertManager(handle: {_ in }))
     }
+    .listStyle(.plain)
 }
