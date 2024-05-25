@@ -237,9 +237,9 @@ extension AppDatabase {
         migrator.registerMigration("addDatetimeCreateInAccountGroups") { db in
             try db.alter(table: "accountGroupDB") { table in
                 table.add(column: "datetimeCreate", .datetime)
+                    .defaults(to: Date.now)
                     .notNull()
             }
-            try db.execute(sql: "UPDATE accountGroupDB SET datetimeCreate = DATETIME()")
         }
         
         return migrator
