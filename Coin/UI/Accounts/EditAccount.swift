@@ -38,7 +38,8 @@ struct EditAccount: View {
         vm = EditAccountViewModel(
             currentAccount: Account(
                 type: accountType,
-                accountGroup: accountGroup
+                accountGroup: accountGroup,
+                currency: accountGroup.currency
             ),
             mode: .create
         )
@@ -63,8 +64,11 @@ struct EditAccount: View {
                 TextField("Название счета", text: $vm.currentAccount.name)
                 
                 if vm.permissions.changeRemainder {
-                    TextField(vm.mode == .create ? "Начальный баланс" : "Баланс", value: $vm.currentAccount.remainder, format: .number)
+                    TextField(vm.mode == .create ? "Начальный баланс" : "Баланс", value: $vm.remainder, formatter: NumberFormatters.textField)
                         .keyboardType(.decimalPad)
+                        .overlay(alignment: .trailing) {
+                            Text(vm.currentAccount.currency.symbol)
+                        }
                 }
                 
             }
@@ -74,15 +78,27 @@ struct EditAccount: View {
                     if vm.currentAccount.showingBudgetAmount != vm.currentAccount.budgetAmount {
                         Text(vm.currentAccount.showingBudgetAmount, format: .number)
                             .foregroundColor(.secondary)
+                            .overlay(alignment: .trailing) {
+                                Text(vm.currentAccount.currency.symbol)
+                            }
                     }
-                    TextField("Бюджет", value: $vm.currentAccount.budgetAmount, format: .number)
+                    TextField("Бюджет", value: $vm.budgetAmount, formatter: NumberFormatters.textField)
                         .keyboardType(.decimalPad)
+                        .overlay(alignment: .trailing) {
+                            Text(vm.currentAccount.currency.symbol)
+                        }
                     if vm.currentAccount.budgetAmount != 0 {
-                        TextField("Фиксированная сумма", value: $vm.currentAccount.budgetFixedSum, format: .number)
+                        TextField("Фиксированная сумма", value: $vm.budgetFixedSum, formatter: NumberFormatters.textField)
                             .keyboardType(.decimalPad)
+                            .overlay(alignment: .trailing) {
+                                Text(vm.currentAccount.currency.symbol)
+                            }
                         if vm.currentAccount.budgetFixedSum != 0 {
-                            TextField("Отступ в днях", value: $vm.currentAccount.budgetDaysOffset, format: .number)
+                            TextField("Отступ в днях", value: $vm.currentAccount.budgetDaysOffset, formatter: NumberFormatters.textField)
                                 .keyboardType(.numberPad)
+                                .overlay(alignment: .trailing) {
+                                    Text("дней")
+                                }
                         }
                     }
                     Toggle("Плавное заполнение бюджета", isOn: $vm.currentAccount.budgetGradualFilling)
@@ -197,7 +213,7 @@ struct EditAccount: View {
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
         .task {
             do {
-                try await vm.load()
+                try await vm.load(accountGroup: selectedAccountGroup)
                 if vm.mode == .create && vm.currentAccount.currency != Currency() {
                     vm.currentAccount.currency = vm.currencies.first(where: { $0 == selectedAccountGroup.currency }) ?? Currency()
                 }
@@ -240,7 +256,42 @@ struct EditAccount: View {
     }
 }
 
-#Preview {
-    EditAccount(accountType: .regular, accountGroup: AccountGroup())
+#Preview("Создание счета") {
+        EditAccount(
+            accountType: .expense,
+            accountGroup:
+                AccountGroup(
+                    currency:
+                        Currency(
+                            symbol: "$"
+                        )
+                )
+        )
         .environment(AlertManager(handle: {_ in }))
+}
+
+#Preview("Редактирование счета") {
+    EditAccount(
+        Account(
+            accountingInHeader: true,
+            accountingInCharts: true,
+            icon: Icon(id: 1),
+            name: "Тестовый счет",
+            type: .expense,
+            visible: true,
+            serialNumber: 2,
+            isParent: false,
+            budgetAmount: 1000,
+            showingBudgetAmount: 1000,
+            budgetFixedSum: 500,
+            budgetDaysOffset: 5,
+            budgetGradualFilling: true,
+            datetimeCreate: Date.now,
+            accountGroup: AccountGroup(id: 4),
+            currency: Currency(symbol: "$")
+        ),
+        selectedAccountGroup: AccountGroup(),
+        isHiddenView: false
+    )
+    .environment(AlertManager(handle: {_ in }))
 }
