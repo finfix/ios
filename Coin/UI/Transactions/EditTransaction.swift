@@ -133,6 +133,9 @@ struct EditTransaction: View {
                             vm.shouldShowDatePicker = true
                         }
                     }
+                    .overlay(alignment: .trailing) {
+                        Text(vm.currentTransaction.accountFrom.currency.symbol)
+                    }
 
                 }
                 if vm.intercurrency || vm.currentTransaction.type == .balancing {
@@ -147,6 +150,9 @@ struct EditTransaction: View {
                         withAnimation {
                             vm.shouldShowDatePicker = true
                         }
+                    }
+                    .overlay(alignment: .trailing) {
+                        Text(vm.currentTransaction.accountTo.currency.symbol)
                     }
                 }
             } footer: {

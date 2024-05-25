@@ -51,6 +51,9 @@ struct CurrencyConverter: View {
                     }
                 TextField("Сумма второй валюты", value: $number2, formatter: NumberFormatters.textField)
                     .focused($focusedField, equals: Field.number2)
+                    .overlay(alignment: .trailing) {
+                        Text(currency2.symbol)
+                    }
                     .onChange(of: number2) { _, newValue in
                         number1 = newValue * (currency1.rate / currency2.rate).doubleValue
                     }
