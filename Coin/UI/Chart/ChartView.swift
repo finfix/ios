@@ -18,7 +18,6 @@ struct ChartView: View {
     var selectedAccountGroup: AccountGroup
     @State private var vm: ChartViewModel
     @Binding var path: NavigationPath
-    @State var lastSelectedDate: Date = Date.now.startOfMonth(inUTC: true)
     @Environment(\.calendar) var calendar
     
     init(
@@ -60,7 +59,7 @@ struct ChartView: View {
                     Graph(
                         chartType: vm.chartType,
                         data: vm.data,
-                        lastSelectedDate: $lastSelectedDate,
+                        lastSelectedDate: $vm.lastSelectedDate,
                         accountGroup: selectedAccountGroup
                     )
                 } else {
@@ -68,44 +67,93 @@ struct ChartView: View {
                 }
             }
             .frame(height: chartHeight)
-            List {
-                ForEach(Array(vm.data.enumerated()), id: \.element) { (i, series) in
-                    Button {
-                        if let account = series.account {
-                            path.append(ChartViewRoute.transactionList(account: account))
-                        }
-                        switch series.type {
-                        case "Расход":
-                            path.append(ChartViewRoute.transactionList1(chartType: .expenses))
-                        case "Доход":
-                            path.append(ChartViewRoute.transactionList1(chartType: .earnings))
-                        default: break
-                        }
-                    } label: {
-                        HStack {
-                            Text(series.account != nil ? series.account!.name : series.type)
-                                .foregroundStyle(series.color)
-                            Spacer()
-                            Text(formatter.string(number: series.data[lastSelectedDate] ?? 0))
-                        }
-                        .frame(minHeight: 35)
-                        .bold(false)
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 15)
-            }
-            if vm.chartType != .earningsAndExpenses {
+            VStack {
                 HStack {
-                    Text("Всего:")
-                    Spacer()
-                    Text(formatter.string(number: vm.data.map { $0.data.filter( { $0.key == lastSelectedDate } ).values.reduce(0) { $0 + $1 } }.reduce(0) { $0 + $1 }))
+                    HStack {
+                        Text("Категория")
+                        Spacer()
+                    }
+                    .frame(minWidth: 150)
+                    ZStack {
+                        // Custom picker label
+                        HStack {
+                            Spacer()
+                            Text(vm.aggregationMethod.rawValue)
+                                .foregroundColor(.blue)
+                        }
+                        
+                        // Invisible picker
+                        Picker("", selection: $vm.aggregationMethod) {
+                            ForEach(ChartViewModel.AggregationMethod.allCases.filter{
+                                vm.chartType == .earningsAndExpenses
+                                ? ($0 != .percent && $0 != .budget)
+                                : true
+                            }, id: \.self) { method in
+                                Text(method.rawValue)
+                                    .tag(method)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .opacity(0.025)
+                    }
+                    HStack {
+                        Spacer()
+                        Text("Сумма")
+                    }
                 }
-                .padding(.horizontal)
-                .font(.title2)
+                .bold()
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.flexible(minimum: 150)), GridItem(.flexible()), GridItem(.flexible())]) {
+                        ForEach(Array(vm.data.enumerated()), id: \.element) { (i, series) in
+                            Button {
+                                if let account = series.account {
+                                    path.append(ChartViewRoute.transactionList(account: account))
+                                }
+                                switch series.type {
+                                case "Расход":
+                                    path.append(ChartViewRoute.transactionList1(chartType: .expenses))
+                                case "Доход":
+                                    path.append(ChartViewRoute.transactionList1(chartType: .earnings))
+                                default: break
+                                }
+                            } label: {
+                                HStack {
+                                    Text(series.account != nil ? series.account!.name : series.type)
+                                        .foregroundStyle(series.color)
+                                        .frame(height: 30)
+                                    Spacer()
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            HStack {
+                                Spacer()
+                                if vm.aggregationMethod == .percent {
+                                    Text(vm.aggregationInformation[series.id] ?? 0, format: .percent.precision(.fractionLength(0)))
+                                } else {
+                                    Text(formatter.string(number: vm.aggregationInformation[series.id] ?? 0))
+                                }
+                            }
+                            .foregroundStyle(.secondary)
+                            HStack {
+                                Spacer()
+                                Text(formatter.string(number: series.data[vm.lastSelectedDate] ?? 0))
+                            }
+                        }
+                    }
+                }
+                .font(.callout)
+                if vm.chartType != .earningsAndExpenses {
+                    HStack {
+                        Text("Всего:")
+                        Spacer()
+                        Text(formatter.string(number: vm.totalBySelectedDate))
+                    }
+                    .padding(.top)
+                    .font(.title2)
+                }
             }
+            .padding(.horizontal, 15)
         }
-        .listStyle(.plain)
         .task {
             do {
                 try await vm.load(accountGroupID: selectedAccountGroup.id)
