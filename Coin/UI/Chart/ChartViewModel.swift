@@ -23,6 +23,45 @@ class ChartViewModel {
     var data: [Series] = []
     var filters: TransactionFilters
     
+    var lastSelectedDate: Date = Date.now.startOfMonth(inUTC: true)
+    
+    var aggregationInformation: [UUID: Decimal] {
+        var result: [UUID: Decimal] = [:]
+        let totalBySelectedDate = totalBySelectedDate
+        for series in data {
+            switch aggregationMethod {
+            case .total:
+                result[series.id] = data.filter{ $0.id == series.id }.first!.data.values.reduce(0) { $0 + $1 }
+            case .average:
+                result[series.id] = data.filter{ $0.id == series.id }.first!.data.values.reduce(0) { $0 + $1 / Decimal(data.first!.data.count) }
+            case .min:
+                result[series.id] = data.filter{ $0.id == series.id }.first!.data.values.min()
+            case .max:
+                result[series.id] = data.filter{ $0.id == series.id }.first!.data.values.max()
+            case .budget:
+                result[series.id] = data.filter{ $0.id == series.id }.first!.account?.budgetAmount ?? 0
+            case .percent:
+                result[series.id] = totalBySelectedDate == 0 ? 0 : (series.data[lastSelectedDate] ?? 0) / totalBySelectedDate
+            }
+        }
+        return result
+    }
+    
+    var totalBySelectedDate: Decimal {
+        data.map { $0.data.filter( { $0.key == lastSelectedDate } ).values.reduce(0) { $0 + $1 } }.reduce(0) { $0 + $1 }
+    }
+        
+    enum AggregationMethod: String, CaseIterable {
+        case total = "Всего"
+        case average = "Среднее"
+        case percent = "Процент"
+        case min = "Миниммум"
+        case max = "Максимум"
+        case budget = "Бюджет"
+    }
+    
+    var aggregationMethod: AggregationMethod = .percent
+    
     init(
         chartType: ChartType,
         filters: TransactionFilters
