@@ -16,11 +16,8 @@ struct AccountCircleItem: View {
     
     var account: Account
     
-    @Environment(\.dismiss) var dismiss
-    @State var isChildrenOpen = false
     @State var isTransactionOpen = false
     @Environment(PathSharedState.self) var path
-    var isAlreadyOpened: Bool
     
     var formatter: CurrencyFormatter
     
@@ -33,7 +30,6 @@ struct AccountCircleItem: View {
         if account.type == .balancing && account.showingRemainder < 0 && account.isParent {
             self.account.showingRemainder *= -1
         }
-        self.isAlreadyOpened = isAlreadyOpened
     }
     
     
@@ -41,24 +37,26 @@ struct AccountCircleItem: View {
         VStack {
             Text(account.name)
                 .lineLimit(1)
+            
             ZStack {
                 if account.isParent && account.type != .balancing {
                     Circle()
                         .fill(.clear)
-                        .strokeBorder(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.showingRemainder ? .green : .red, lineWidth: 1)
-                        .frame(width: 35)
+                        .strokeBorder(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.showingRemainder ? .green : .red, lineWidth: 2)
+                        .frame(width: 46)
                 }
                 Circle()
                     .fill(account.showingBudgetAmount == 0 ? .gray : account.showingBudgetAmount >= account.showingRemainder ? .green : .red)
-                    .frame(width: 30)
+                    .frame(width: 40)
                 AsyncImage(url: URL.documentsDirectory.appending(path: account.icon.url)) { image in
                     image.image?
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 20)
+                        .frame(width: 25)
                 }
             }
-            .frame(height: 40)
+            .frame(height: 50)
+            
             Text(formatter.string(number: account.showingRemainder))
                 .lineLimit(1)
             
@@ -66,43 +64,26 @@ struct AccountCircleItem: View {
                 .lineLimit(1)
                 .foregroundColor(.secondary)
         }
-        .onTapGesture(count: 2) {
-            if !account.childrenAccounts.isEmpty {
-                isChildrenOpen = true
-            }
-        }
-        .onTapGesture(count: 1) {
-            if isAlreadyOpened {
-                dismiss()
-            }
-            path.path.append(AccountCircleItemRoute.accountTransactions(account))
-        }
-        .onLongPressGesture {
-            if isAlreadyOpened {
-                dismiss()
-            }
-            path.path.append(AccountCircleItemRoute.editAccount(account))
-        }
-
         .font(.caption)
-        .frame(width: 80, height: 100)
         .opacity(account.accountingInHeader ? 1 : 0.5)
-        .popover(isPresented: $isChildrenOpen) {
-            ScrollView {
-                ForEach(account.childrenAccounts) { account in
-                    AccountCircleItem(
-                        account,
-                        isAlreadyOpened: true
-                    )
-                }
-                .presentationCompactAdaptation(.popover)
-                .padding()
-            }
-        }
     }
 }
 
 #Preview {
-    AccountCircleItem(Account())
-        .environment(AlertManager(handle: {_ in }))
+    AccountCircleItem(
+        Account(
+            accountingInHeader: true,
+            icon: Icon(url: "dollar.png"),
+            name: "Имя счета",
+            remainder: 10,
+            showingRemainder: 10,
+            type: .expense,
+            visible: true,
+            isParent: true,
+            budgetAmount: 20,
+            showingBudgetAmount: 20,
+            currency: Currency(symbol: "$")
+        )
+    )
+    .environment(AlertManager(handle: {_ in }))
 }

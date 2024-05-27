@@ -115,6 +115,7 @@
 		B5D6DE242BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE232BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift */; };
 		B5D6DE262BB1DBA800A06D67 /* TransactionsListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */; };
 		B5D6DE282BB1E04000A06D67 /* AccountCirclesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */; };
+		B5DDFD682C05DF52003BD753 /* DraggableAccountCircleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DDFD672C05DF52003BD753 /* DraggableAccountCircleItem.swift */; };
 		B5DEFCDB2C07015A001D7E61 /* AccountCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2028FDC7C000AA33A9 /* AccountCategoryView.swift */; };
 		B5DEFCDC2C07015A001D7E61 /* AccountAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B72906B4F800875037 /* AccountAPI.swift */; };
 		B5DEFCDD2C07015A001D7E61 /* EditTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB32BD57D8900780460 /* EditTag.swift */; };
@@ -123,6 +124,7 @@
 		B5DEFCE02C07015A001D7E61 /* AccountModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B596E6092A278CC1007D7E6D /* AccountModels.swift */; };
 		B5DEFCE12C07015A001D7E61 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50DBAD62BCD8CD900A58B53 /* ChartView.swift */; };
 		B5DEFCE22C07015A001D7E61 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
+		B5DEFCE32C07015A001D7E61 /* DraggableAccountCircleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DDFD672C05DF52003BD753 /* DraggableAccountCircleItem.swift */; };
 		B5DEFCE42C07015A001D7E61 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B707232BA59A3700A07DB6 /* AppDatabase.swift */; };
 		B5DEFCE52C07015A001D7E61 /* TaskDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4C3F42BDFA233007CCFC9 /* TaskDetails.swift */; };
 		B5DEFCE62C07015A001D7E61 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* API.swift */; };
@@ -342,6 +344,7 @@
 		B5D6DE232BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroupSelectorViewModel.swift; sourceTree = "<group>"; };
 		B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsListViewModel.swift; sourceTree = "<group>"; };
 		B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCirclesViewModel.swift; sourceTree = "<group>"; };
+		B5DDFD672C05DF52003BD753 /* DraggableAccountCircleItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraggableAccountCircleItem.swift; sourceTree = "<group>"; };
 		B5DEFD4F2C07015A001D7E61 /* CoinDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoinDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DEFD502C07015A001D7E61 /* CoinDev-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "CoinDev-Info.plist"; path = "/Users/bonavi/Projects/Coin/App/CoinDev-Info.plist"; sourceTree = "<absolute>"; };
 		B5E6C1932AF2AF9500097067 /* CurrencyConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyConverter.swift; sourceTree = "<group>"; };
@@ -558,6 +561,7 @@
 		B5B950482ADF17C400798F8C /* AccountCircles */ = {
 			isa = PBXGroup;
 			children = (
+				B5DDFD672C05DF52003BD753 /* DraggableAccountCircleItem.swift */,
 				B59F0F2528FDD30F00AA33A9 /* AccountCirclesView.swift */,
 				B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */,
 				B5B950522ADF24A900798F8C /* AccountCircleItem.swift */,
@@ -827,6 +831,7 @@
 				B5DEFCE02C07015A001D7E61 /* AccountModels.swift in Sources */,
 				B5DEFCE12C07015A001D7E61 /* ChartView.swift in Sources */,
 				B5DEFCE22C07015A001D7E61 /* BudgetsList.swift in Sources */,
+				B5DEFCE32C07015A001D7E61 /* DraggableAccountCircleItem.swift in Sources */,
 				B5DEFCE42C07015A001D7E61 /* AppDatabase.swift in Sources */,
 				B5DEFCE52C07015A001D7E61 /* TaskDetails.swift in Sources */,
 				B5DEFCE62C07015A001D7E61 /* API.swift in Sources */,
@@ -944,6 +949,7 @@
 				B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */,
 				B50DBAD72BCD8CD900A58B53 /* ChartView.swift in Sources */,
 				B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */,
+				B5DDFD682C05DF52003BD753 /* DraggableAccountCircleItem.swift in Sources */,
 				B5B707242BA59A3700A07DB6 /* AppDatabase.swift in Sources */,
 				B5F4C3F52BDFA233007CCFC9 /* TaskDetails.swift in Sources */,
 				B557AA0E290D959F00631421 /* API.swift in Sources */,
@@ -1066,8 +1072,8 @@
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEV=1",
 					"$(inherited)",
+					"DEV=1",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "CoinDev-Info.plist";
@@ -1264,6 +1270,10 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Coin/Preview Content\"";
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEV=1",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Coin/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Coin;
@@ -1284,6 +1294,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG DEV";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
