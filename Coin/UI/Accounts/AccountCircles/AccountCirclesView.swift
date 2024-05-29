@@ -13,32 +13,32 @@ private let logger = Logger(subsystem: "Coin", category: "AccountCirclesView")
 struct AccountCirclesView: View {
     
     @Environment (AlertManager.self) private var alert
-    @Binding var selectedAccountGroup: AccountGroup
-    @State var path = NavigationPath()
+    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
+    @State var path = PathSharedState()
     @State var vm = AccountCirclesViewModel()
     
     let horizontalSpacing: CGFloat = 10
     
     var groupedAccounts: [Account] {
         Account.groupAccounts(vm.accounts.filter {
-            $0.accountGroup == selectedAccountGroup
+            $0.accountGroup == selectedAccountGroup.selectedAccountGroup
         })
     }
     
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack() {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
-                    QuickStatisticView(selectedAccountGroup: selectedAccountGroup)
-                    AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
+                    QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
+                    AccountGroupSelector()
                 }
                 VStack {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.showingRemainder > 0) }) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account)
                             }
-                            PlusNewAccount(path: $path, accountType: .earnings)
+                            PlusNewAccount(accountType: .earnings)
                         }
                     }
                     
@@ -47,9 +47,9 @@ struct AccountCirclesView: View {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .regular }) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account)
                             }
-                            PlusNewAccount(path: $path, accountType: .regular)
+                            PlusNewAccount(accountType: .regular)
                         }
                     }
                     
@@ -58,9 +58,9 @@ struct AccountCirclesView: View {
                     ScrollView(.horizontal) {
                         LazyHGrid(rows: [GridItem(.adaptive(minimum: 100))], alignment: .top, spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .expense || ($0.type == .balancing && $0.showingRemainder < 0)}) { account in
-                                AccountCircleItem(account, path: $path)
+                                AccountCircleItem(account)
                             }
-                            PlusNewAccount(path: $path, accountType: .expense)
+                            PlusNewAccount(accountType: .expense)
                         }
                     }
                 }
@@ -77,47 +77,48 @@ struct AccountCirclesView: View {
             }
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                 switch screen {
-                case .accountTransactions(let account): TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
-                case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup, isHiddenView: false)
+                case .accountTransactions(let account): TransactionsView(account: account)
+                case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup, isHiddenView: false)
                 }
             }
             .navigationDestination(for: PlusNewAccountRoute.self) { screen in
                 switch screen {
-                case .createAccount(let accountType): EditAccount(accountType: accountType, accountGroup: selectedAccountGroup)
+                case .createAccount(let accountType): EditAccount(accountType: accountType, accountGroup: selectedAccountGroup.selectedAccountGroup)
                 }
             }
             .navigationDestination(for: TransactionsListRoute.self) { screen in
                 switch screen {
-                case .editTransaction(let transaction): EditTransaction(transaction, path: $path)
+                case .editTransaction(let transaction): EditTransaction(transaction)
                 }
             }
             .navigationDestination(for: EditTransactionRoute.self) { screen in
                 switch screen {
                 case .tagsList:
-                    TagsList(accountGroup: selectedAccountGroup, path: $path)
+                    TagsList(accountGroup: selectedAccountGroup.selectedAccountGroup)
                 }
             }
             .navigationDestination(for: TagsListRoute.self) { screen in
                 switch screen {
                 case .createTag:
-                    EditTag(selectedAccountGroup: selectedAccountGroup, path: $path)
+                    EditTag(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                 case .editTag(let tag):
-                    EditTag(tag, path: $path)
+                    EditTag(tag)
                 }
             }
             .navigationDestination(for: ChartViewRoute.self) { screen in
                 switch screen {
                 case .transactionList(account: let account):
-                    TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
+                    TransactionsView(account: account)
                 case .transactionList1(chartType: let chartType):
-                    TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, chartType: chartType)
+                    TransactionsView(chartType: chartType)
                 }
             }
+            .environment(path)
         }
     }
 }
 
 #Preview {
-    AccountCirclesView(selectedAccountGroup: .constant(AccountGroup()))
+    AccountCirclesView()
         .environment(AlertManager(handle: {_ in }))
 }

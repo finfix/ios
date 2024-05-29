@@ -19,7 +19,7 @@ struct Profile: View {
     @Environment (AlertManager.self) private var alert
     @State var vm = ProfileViewModel()
     
-    @Binding var selectedAccountGroup: AccountGroup
+    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     
     @AppStorage("accessToken") private var accessToken: String?
     @AppStorage("refreshToken") private var refreshToken: String?
@@ -32,10 +32,10 @@ struct Profile: View {
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     
-    @State var path = NavigationPath()
+    @State var path = PathSharedState()
     
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: $path.path) {
             Form {
 #if DEV
                 Section {
@@ -124,32 +124,32 @@ struct Profile: View {
             }
             .navigationDestination(for: ProfileViews.self) { screen in
                 switch screen {
-                case .hidedAccounts: HidedAccountsList(selectedAccountGroup: $selectedAccountGroup, path: $path)
+                case .hidedAccounts: HidedAccountsList()
                 case .currencyConverter: CurrencyConverter()
-                case .settings: Settings(path: $path)
-                case .accountGroupsList: AccountGroupList(path: $path)
+                case .settings: Settings()
+                case .accountGroupsList: AccountGroupList()
                 }
             }
             .navigationDestination(for: AccountGroupListRoute.self, destination: { screen in
                 switch screen {
-                case .createAccountGroup: EditAccountGroup(path: $path)
-                case .updateAccountGroup(let accountGroup): EditAccountGroup(accountGroup, path: $path)
+                case .createAccountGroup: EditAccountGroup()
+                case .updateAccountGroup(let accountGroup): EditAccountGroup(accountGroup)
                 }
             })
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                 switch screen {
-                case .accountTransactions(let account): TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
-                case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup, isHiddenView: false)
+                case .accountTransactions(let account): TransactionsView(account: account)
+                case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup, isHiddenView: false)
                 }
             }
             .navigationDestination(for: TransactionsListRoute.self) { screen in
                 switch screen {
-                case .editTransaction(let transaction): EditTransaction(transaction, path: $path)
+                case .editTransaction(let transaction): EditTransaction(transaction)
                 }
             }
             .navigationDestination(for: SettingsRoute.self, destination: { screen in
                 switch screen {
-                case .tasksList: TasksList(path: $path)
+                case .tasksList: TasksList()
                 }
             })
             .navigationDestination(for: TasksListRoute.self, destination: { screen in
@@ -166,9 +166,10 @@ struct Profile: View {
             }
             .navigationTitle("Профиль")
         }
+        .environment(path)
     }
 }
 
 #Preview {
-    Profile(selectedAccountGroup: .constant(AccountGroup()))
+    Profile()
 }

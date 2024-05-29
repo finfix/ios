@@ -17,19 +17,17 @@ struct ChartView: View {
     @Environment(AlertManager.self) private var alert
     var selectedAccountGroup: AccountGroup
     @State private var vm: ChartViewModel
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     @Environment(\.calendar) var calendar
     
     init(
         chartType: ChartType = .earningsAndExpenses,
         selectedAccountGroup: AccountGroup,
-        filters: TransactionFilters,
-        path: Binding<NavigationPath>
+        filters: TransactionFilters
     ) {
         var chartType = chartType
         self.formatter = CurrencyFormatter(currency: selectedAccountGroup.currency, withUnits: false)
         self.selectedAccountGroup = selectedAccountGroup
-        self._path = path
         if let account = filters.account {
             switch account.type {
             case .earnings:
@@ -107,13 +105,13 @@ struct ChartView: View {
                         ForEach(Array(vm.data.enumerated()), id: \.element) { (i, series) in
                             Button {
                                 if let account = series.account {
-                                    path.append(ChartViewRoute.transactionList(account: account))
+                                    path.path.append(ChartViewRoute.transactionList(account: account))
                                 }
                                 switch series.type {
                                 case "Расход":
-                                    path.append(ChartViewRoute.transactionList1(chartType: .expenses))
+                                    path.path.append(ChartViewRoute.transactionList1(chartType: .expenses))
                                 case "Доход":
-                                    path.append(ChartViewRoute.transactionList1(chartType: .earnings))
+                                    path.path.append(ChartViewRoute.transactionList1(chartType: .earnings))
                                 default: break
                                 }
                             } label: {
@@ -185,8 +183,7 @@ struct ChartView: View {
                         symbol: "₽"
                     )
             ),
-        filters: TransactionFilters(),
-        path: .constant(NavigationPath())
+        filters: TransactionFilters()
     )
         .environment(AlertManager(handle: {_ in }))
 }

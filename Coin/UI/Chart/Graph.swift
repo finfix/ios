@@ -186,8 +186,7 @@ struct ScaleButton: View {
                     symbol: "₽"
                 )
         ),
-        filters: TransactionFilters(),
-        path: .constant(NavigationPath())
+        filters: TransactionFilters()
     )
         .environment(AlertManager(handle: {_ in }))
 }

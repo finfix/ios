@@ -18,28 +18,22 @@ struct TransactionFilters: Equatable {
 
 struct TransactionsView: View {
     
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     @State var isFilterOpen = false
     @State var filters: TransactionFilters
-    @Binding var selectedAccountGroup: AccountGroup
+    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     var chartType: ChartType
     
     init(
-        path: Binding<NavigationPath>,
-        selectedAccountGroup: Binding<AccountGroup>,
         account: Account? = nil,
         chartType: ChartType = .earningsAndExpenses
     ) {
-        self._path = path
-        self._selectedAccountGroup = selectedAccountGroup
         self.filters = TransactionFilters(account: account)
         self.chartType = chartType
     }
     
     var body: some View {
         TransactionsList(
-            path: $path,
-            selectedAccountGroup: $selectedAccountGroup,
             filters: filters,
             chartType: chartType
         )
@@ -52,7 +46,6 @@ struct TransactionsView: View {
         }
         .sheet(isPresented: $isFilterOpen) {
             TransactionFilterView(
-                accountGroup: $selectedAccountGroup, 
                 filters: $filters
             )
         }
@@ -61,17 +54,6 @@ struct TransactionsView: View {
 }
 
 #Preview {
-    TransactionsView(
-        path: .constant(NavigationPath()),
-        selectedAccountGroup: .constant(
-            AccountGroup(
-                id: 4,
-                currency:
-                    Currency(
-                        symbol: "$"
-                    )
-            )
-        )
-    )
+    TransactionsView()
     .environment(AlertManager(handle: {_ in }))
 }
