@@ -37,7 +37,7 @@ struct Profile: View {
     var body: some View {
         NavigationStack(path: $path) {
             Form {
-                #if DEBUG
+#if DEV
                 Section {
                     Text(isProdAPI ? "Продакшн окружение" : "Тестовое окружение")
                         .foregroundColor(isProdAPI ? .red : .yellow)
@@ -46,7 +46,7 @@ struct Profile: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                #else
+#else
                 if !isProdAPI {
                     Section {
                         Text("Тестовое окружение")
@@ -55,7 +55,7 @@ struct Profile: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                #endif
+#endif
                 Section {
                     NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
                     NavigationLink("Конвертер валют", value: ProfileViews.currencyConverter)
