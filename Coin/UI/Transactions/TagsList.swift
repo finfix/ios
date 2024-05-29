@@ -16,14 +16,12 @@ struct TagsList: View {
     
     @State private var vm: TagsListViewModel
     @Environment (AlertManager.self) private var alert
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     
     init(
-        accountGroup: AccountGroup,
-        path: Binding<NavigationPath>
+        accountGroup: AccountGroup
     ) {
         self.vm = TagsListViewModel(accountGroup: accountGroup)
-        self._path = path
     }
     
     var body: some View {
@@ -64,5 +62,5 @@ struct TagsList: View {
 }
 
 #Preview {
-    TagsList(accountGroup: AccountGroup(), path: .constant(NavigationPath()))
+    TagsList(accountGroup: AccountGroup())
 }

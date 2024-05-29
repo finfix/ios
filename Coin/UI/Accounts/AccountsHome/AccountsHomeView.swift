@@ -10,26 +10,26 @@ import SwiftUI
 struct AccountsHomeView: View {
     
     @State var vm = AccountHomeViewModel()
-    @State var path = NavigationPath()
-    @Binding var selectedAccountGroup: AccountGroup
+    @State var path = PathSharedState()
+    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     @Environment (AlertManager.self) private var alert
 
     @State var chooseBlurIsOpened = false
 
     var filteredAccounts: [Account] {
-        vm.accounts.filter { $0.accountGroup == selectedAccountGroup }
+        vm.accounts.filter { $0.accountGroup == selectedAccountGroup.selectedAccountGroup }
     }
     
     @State var showDebts = false
     @State var currentIndex = 0
             
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: $path.path) {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
                     VStack(spacing: 0) {
-                        QuickStatisticView(selectedAccountGroup: selectedAccountGroup)
-                        AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
+                        QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
+                        AccountGroupSelector()
                     }
                     ScrollView {
                         Text("Карты и счета")
@@ -45,27 +45,27 @@ struct AccountsHomeView: View {
                 }
                 .blur(radius: chooseBlurIsOpened ? 5 : 0)
         
-                CirclesCreateTransaction(path: $path, chooseBlurIsOpened: $chooseBlurIsOpened)
+                CirclesCreateTransaction(chooseBlurIsOpened: $chooseBlurIsOpened)
 
             }
             .navigationDestination(for: CirclesCreateTransactionRoute.self ) { screen in
                 switch screen {
                 case .createTrasnaction(let transactionType):
-                    EditTransaction(transactionType: transactionType, accountGroup: selectedAccountGroup, path: $path)
+                    EditTransaction(transactionType: transactionType, accountGroup: selectedAccountGroup.selectedAccountGroup)
                 }
             }
             .navigationDestination(for: EditTransactionRoute.self) { screen in
                 switch screen {
                 case .tagsList:
-                    TagsList(accountGroup: selectedAccountGroup, path: $path)
+                    TagsList(accountGroup: selectedAccountGroup.selectedAccountGroup)
                 }
             }
             .navigationDestination(for: TagsListRoute.self) { screen in
                 switch screen {
                 case .createTag:
-                    EditTag(selectedAccountGroup: selectedAccountGroup, path: $path)
+                    EditTag(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                 case .editTag(let tag):
-                    EditTag(tag, path: $path)
+                    EditTag(tag)
                 }
             }
         }
@@ -76,6 +76,7 @@ struct AccountsHomeView: View {
                 alert(error)
             }
         }
+        .environment(path)
     }
 }
 
@@ -85,7 +86,7 @@ enum CirclesCreateTransactionRoute: Hashable {
 
 struct CirclesCreateTransaction: View {
     
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     @Binding var chooseBlurIsOpened: Bool
     
     var body: some View {
@@ -137,6 +138,6 @@ struct CircleTypeTransaction: View {
 }
     
 #Preview {
-    AccountsHomeView(selectedAccountGroup: .constant(AccountGroup()))
+    AccountsHomeView()
         .environment(AlertManager(handle: {_ in }))
 }

@@ -9,46 +9,47 @@ import SwiftUI
 
 struct TransactionsTab: View {
     
-    @State var path = NavigationPath()
+    @State var path = PathSharedState()
     
-    @Binding var selectedAccountGroup: AccountGroup
+    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     
     var body: some View {
-        NavigationStack(path: $path) {
-            TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, chartType: .earningsAndExpenses)
+        NavigationStack(path: $path.path) {
+            TransactionsView(chartType: .earningsAndExpenses)
                 .navigationDestination(for: TransactionsListRoute.self) { screen in
                     switch screen {
                     case .editTransaction(let transaction):
-                        EditTransaction(transaction, path: $path)
+                        EditTransaction(transaction)
                     }
                 }
                 .navigationDestination(for: EditTransactionRoute.self) { screen in
                     switch screen {
                     case .tagsList:
-                        TagsList(accountGroup: selectedAccountGroup, path: $path)
+                        TagsList(accountGroup: selectedAccountGroup.selectedAccountGroup)
                     }
                 }
                 .navigationDestination(for: TagsListRoute.self) { screen in
                     switch screen {
                     case .createTag:
-                        EditTag(selectedAccountGroup: selectedAccountGroup, path: $path)
+                        EditTag(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                     case .editTag(let tag):
-                        EditTag(tag, path: $path)
+                        EditTag(tag)
                     }
                 }
                 .navigationDestination(for: ChartViewRoute.self) { screen in
                     switch screen {
                     case .transactionList(account: let account):
-                        TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, account: account)
+                        TransactionsView(account: account)
                     case .transactionList1(chartType: let chartType):
-                        TransactionsView(path: $path, selectedAccountGroup: $selectedAccountGroup, chartType: chartType)
+                        TransactionsView(chartType: chartType)
                     }
                 }
+                .environment(path)
         }
     }
 }
 
 #Preview {
-    TransactionsTab(selectedAccountGroup: .constant(AccountGroup(id: 4)))
+    TransactionsTab()
         .environment(AlertManager(handle: {_ in }))
 }

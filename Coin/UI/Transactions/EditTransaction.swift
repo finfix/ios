@@ -25,19 +25,18 @@ struct EditTransaction: View {
     @State private var vm: EditTransactionViewModel
     @Environment (AlertManager.self) private var alert
     
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     
-    init(_ transaction: Transaction, path: Binding<NavigationPath>) {
+    init(_ transaction: Transaction) {
         vm = EditTransactionViewModel(
             currentTransaction: transaction,
             oldTransaction: transaction,
             accountGroup: transaction.accountFrom.accountGroup,
             mode: .update
         )
-        self._path = path
     }
     
-    init(transactionType: TransactionType, accountGroup: AccountGroup, path: Binding<NavigationPath>) {
+    init(transactionType: TransactionType, accountGroup: AccountGroup) {
         vm = EditTransactionViewModel(
             currentTransaction: Transaction(
                 accountingInCharts: true, 
@@ -46,7 +45,6 @@ struct EditTransaction: View {
             accountGroup: accountGroup,
             mode: .create
         )
-        self._path = path
     }
     
     var body: some View {
@@ -75,7 +73,7 @@ struct EditTransaction: View {
                     }
                 }
                 Button {
-                    path.append(EditTransactionRoute.tagsList)
+                    path.path.append(EditTransactionRoute.tagsList)
                 } label: {
                     Image(systemName: "ellipsis")
                 }
@@ -293,8 +291,7 @@ struct EditTransaction: View {
 #Preview {
     EditTransaction(
         transactionType: .consumption,
-        accountGroup: AccountGroup(id: 4),
-        path: .constant(NavigationPath())
+        accountGroup: AccountGroup(id: 4)
     )
     .environment(AlertManager(handle: {_ in }))
 }

@@ -34,9 +34,9 @@ extension AppDatabase {
             }
         }
         
-        #if DEBUG
+#if DEV
         config.publicStatementArguments = true
-        #endif
+#endif
         
         return config
     }
@@ -48,9 +48,9 @@ extension AppDatabase {
     private var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
         
-//        #if DEBUG
+//#if DEV
 //        migrator.eraseDatabaseOnSchemaChange = true
-//        #endif
+//#endif
         
         migrator.registerMigration("createCurrency") { db in
             try db.create(table: "currencyDB") { table in
