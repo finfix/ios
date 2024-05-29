@@ -11,15 +11,18 @@ import Foundation
 class TransactionsListViewModel {
     private let service = Service.shared
     
-    var transactions: [Transaction] = []
+    private var transactions: [Transaction] = []
     
     var page = 0
     var transactionsCancelled = false
     let pageSize = 100
     
+    var groupedTransactionByDate: [Date: [Transaction]] = [:]
+    
     func load(
         refresh: Bool,
-        filters: TransactionFilters
+        filters: TransactionFilters,
+        selectedAccountGroup: AccountGroup
     ) async throws {
         var offset = 0
         var limit = 0
@@ -62,13 +65,20 @@ class TransactionsListViewModel {
         } else {
             self.transactions.append(contentsOf: transactions)
         }
+        
+        regroup(selectedAccountGroup: selectedAccountGroup)
     }
     
-    func deleteTransaction(_ transaction: Transaction) async throws {
+    func regroup(selectedAccountGroup: AccountGroup) { // TODO: Убрать логику в бд, когда научусь делать JOIN'ы
+        self.groupedTransactionByDate = Dictionary(grouping: transactions.filter { $0.accountFrom.accountGroup == selectedAccountGroup }, by: { $0.dateTransaction })
+    }
+    
+    func deleteTransaction(_ transaction: Transaction, selectedAccountGroup: AccountGroup) async throws {
         guard let index = transactions.firstIndex(of: transaction) else {
             throw ErrorModel(humanTextError: "Не смогли найти позицию транзакции №\(transaction.id) в массиве")
         }
         _ = transactions.remove(at: index)
+        regroup(selectedAccountGroup: selectedAccountGroup)
         try await service.deleteTransaction(transaction)
     }
 }

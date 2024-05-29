@@ -38,11 +38,6 @@ struct TransactionsList: View {
         self.vm = TransactionsListViewModel()
     }
     
-    var groupedTransactionByDate: [Date: [Transaction]] {
-        let filteredTransactions = vm.transactions.filter { $0.accountFrom.accountGroup == selectedAccountGroup }
-        return Dictionary(grouping: filteredTransactions, by: { $0.dateTransaction })
-    }
-    
     var body: some View {
         List {
             Section(footer:
@@ -54,9 +49,9 @@ struct TransactionsList: View {
                 )
                 .frame(width: width, height: height*0.6)
             ){}
-            ForEach(groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
+            ForEach(vm.groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
                 Section(header: Text(date, style: .date).font(.headline)) {
-                    ForEach(groupedTransactionByDate[date] ?? []) { transaction in
+                    ForEach(vm.groupedTransactionByDate[date] ?? []) { transaction in
                         NavigationLink(value: TransactionsListRoute.editTransaction(transaction)) {
                             TransactionRow(transaction: transaction)
                         }
@@ -66,7 +61,7 @@ struct TransactionsList: View {
                         for i in $0.makeIterator() {
                             Task {
                                 do {
-                                    try await vm.deleteTransaction(groupedTransactionByDate[date]![i])
+                                    try await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i], selectedAccountGroup: selectedAccountGroup)
                                 } catch {
                                     alert(error)
                                 }
@@ -79,7 +74,7 @@ struct TransactionsList: View {
                 Text("Загрузка...")
                     .task {
                         do {
-                            try await vm.load(refresh: false, filters: filters)
+                            try await vm.load(refresh: false, filters: filters, selectedAccountGroup: selectedAccountGroup)
                         } catch {
                             alert(error)
                         }
@@ -87,9 +82,9 @@ struct TransactionsList: View {
             }
         }
         .task {
-            if vm.transactions.count != 0 {
+            if vm.groupedTransactionByDate.count != 0 {
                 do {
-                    try await vm.load(refresh: true, filters: filters)
+                    try await vm.load(refresh: true, filters: filters, selectedAccountGroup: selectedAccountGroup)
                 } catch {
                     alert(error)
                 }
@@ -98,7 +93,7 @@ struct TransactionsList: View {
         .onChange(of: filters) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, filters: filters)
+                    try await vm.load(refresh: true, filters: filters, selectedAccountGroup: selectedAccountGroup)
                 } catch {
                     alert(error)
                 }
