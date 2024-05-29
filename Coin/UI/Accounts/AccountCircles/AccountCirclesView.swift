@@ -26,7 +26,7 @@ struct AccountCirclesView: View {
     }
     
     var body: some View {
-        NavigationStack() {
+        NavigationStack(path: $path.path) {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
                     QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
@@ -113,8 +113,8 @@ struct AccountCirclesView: View {
                     TransactionsView(chartType: chartType)
                 }
             }
-            .environment(path)
         }
+        .environment(path)
     }
 }
 
