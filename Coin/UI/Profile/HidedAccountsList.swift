@@ -11,27 +11,27 @@ struct HidedAccountsList: View {
     
     @Environment (AlertManager.self) private var alert
     @State private var vm = HidedAccountViewModel()
-    @Binding var selectedAccountGroup: AccountGroup
-    @Binding var path: NavigationPath
+    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
+    @Environment(PathSharedState.self) var path
     
     var accounts: [Account] {
         vm.accounts.filter {
-            $0.accountGroup == selectedAccountGroup
+            $0.accountGroup == selectedAccountGroup.selectedAccountGroup
         }
     }
     
     var body: some View {
         VStack(spacing: 0) {
-            AccountGroupSelector(selectedAccountGroup: $selectedAccountGroup)
+            AccountGroupSelector()
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
                     ForEach(accounts) { account in
-                        AccountCircleItem(account, path: $path)
+                        AccountCircleItem(account)
                     }
                 }
             }
         }
-        .navigationDestination(for: Account.self) { EditAccount($0, selectedAccountGroup: selectedAccountGroup, isHiddenView: true) }
+        .navigationDestination(for: Account.self) { EditAccount($0, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup, isHiddenView: true) }
         .contentMargins(.horizontal, 10, for: .automatic)
         .toolbar {
             Picker("Тип счета", selection: $vm.type) {
@@ -61,6 +61,6 @@ struct HidedAccountsList: View {
 }
 
 #Preview {
-    HidedAccountsList(selectedAccountGroup: .constant(AccountGroup()), path: .constant(NavigationPath()))
+    HidedAccountsList()
         .environment(AlertManager(handle: {_ in }))
 }

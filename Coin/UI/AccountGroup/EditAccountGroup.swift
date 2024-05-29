@@ -19,7 +19,7 @@ struct EditAccountGroup: View {
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     
-    init(_ accountGroup: AccountGroup, path: Binding<NavigationPath>) {
+    init(_ accountGroup: AccountGroup) {
         vm = EditAccountGroupViewModel(
             currentAccountGroup: accountGroup,
             oldAccountGroup: accountGroup,
@@ -27,7 +27,7 @@ struct EditAccountGroup: View {
         )
     }
     
-    init(path: Binding<NavigationPath>) {
+    init() {
         vm = EditAccountGroupViewModel(
             currentAccountGroup: AccountGroup(),
             mode: .create
@@ -123,6 +123,6 @@ struct EditAccountGroup: View {
 }
 
 #Preview {
-    EditAccountGroup(AccountGroup(), path: .constant(NavigationPath()))
+    EditAccountGroup(AccountGroup())
         .environment(AlertManager(handle: {_ in }))
 }

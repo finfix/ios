@@ -15,24 +15,20 @@ struct TransactionsList: View {
     
     @Environment (AlertManager.self) private var alert
     @State private var vm: TransactionsListViewModel
-    @Binding var selectedAccountGroup: AccountGroup
+    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     
     var filters: TransactionFilters
     var chartType: ChartType
     
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     
     let width: CGFloat = UIScreen.main.bounds.width
     let height: CGFloat = UIScreen.main.bounds.height
     
     init(
-        path: Binding<NavigationPath>,
-        selectedAccountGroup: Binding<AccountGroup>,
         filters: TransactionFilters,
         chartType: ChartType
     ) {
-        self._selectedAccountGroup = selectedAccountGroup
-        self._path = path
         self.filters = filters
         self.chartType = chartType
         self.vm = TransactionsListViewModel()
@@ -43,9 +39,8 @@ struct TransactionsList: View {
             Section(footer:
                 ChartView(
                     chartType: chartType,
-                    selectedAccountGroup: selectedAccountGroup, 
-                    filters: filters,
-                    path: $path
+                    selectedAccountGroup: selectedAccountGroup.selectedAccountGroup,
+                    filters: filters
                 )
                 .frame(width: width, height: height*0.6)
             ){}
@@ -61,7 +56,7 @@ struct TransactionsList: View {
                         for i in $0.makeIterator() {
                             Task {
                                 do {
-                                    try await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i], selectedAccountGroup: selectedAccountGroup)
+                                    try await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i], selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                                 } catch {
                                     alert(error)
                                 }
@@ -74,7 +69,7 @@ struct TransactionsList: View {
                 Text("Загрузка...")
                     .task {
                         do {
-                            try await vm.load(refresh: false, filters: filters, selectedAccountGroup: selectedAccountGroup)
+                            try await vm.load(refresh: false, filters: filters, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                         } catch {
                             alert(error)
                         }
@@ -84,7 +79,7 @@ struct TransactionsList: View {
         .task {
             if vm.groupedTransactionByDate.count != 0 {
                 do {
-                    try await vm.load(refresh: true, filters: filters, selectedAccountGroup: selectedAccountGroup)
+                    try await vm.load(refresh: true, filters: filters, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                 } catch {
                     alert(error)
                 }
@@ -93,7 +88,7 @@ struct TransactionsList: View {
         .onChange(of: filters) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, filters: filters, selectedAccountGroup: selectedAccountGroup)
+                    try await vm.load(refresh: true, filters: filters, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                 } catch {
                     alert(error)
                 }
@@ -106,13 +101,6 @@ struct TransactionsList: View {
 
 #Preview {
     TransactionsList(
-        path: .constant(NavigationPath()),
-        selectedAccountGroup: .constant(AccountGroup(
-            id: 4,
-            currency: Currency(
-                symbol: "₽"
-            )
-        )), 
         filters: TransactionFilters(),
         chartType: .earningsAndExpenses
     )

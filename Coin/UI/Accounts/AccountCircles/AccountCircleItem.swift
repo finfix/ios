@@ -19,15 +19,14 @@ struct AccountCircleItem: View {
     @Environment(\.dismiss) var dismiss
     @State var isChildrenOpen = false
     @State var isTransactionOpen = false
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     var isAlreadyOpened: Bool
     
     var formatter: CurrencyFormatter
     
     init(
         _ account: Account,
-        isAlreadyOpened: Bool = false,
-        path: Binding<NavigationPath>
+        isAlreadyOpened: Bool = false
     ) {
         self.formatter = CurrencyFormatter(currency: account.currency)
         self.account = account
@@ -35,7 +34,6 @@ struct AccountCircleItem: View {
             self.account.showingRemainder *= -1
         }
         self.isAlreadyOpened = isAlreadyOpened
-        self._path = path
     }
     
     
@@ -77,13 +75,13 @@ struct AccountCircleItem: View {
             if isAlreadyOpened {
                 dismiss()
             }
-            path.append(AccountCircleItemRoute.accountTransactions(account))
+            path.path.append(AccountCircleItemRoute.accountTransactions(account))
         }
         .onLongPressGesture {
             if isAlreadyOpened {
                 dismiss()
             }
-            path.append(AccountCircleItemRoute.editAccount(account))
+            path.path.append(AccountCircleItemRoute.editAccount(account))
         }
 
         .font(.caption)
@@ -92,9 +90,10 @@ struct AccountCircleItem: View {
         .popover(isPresented: $isChildrenOpen) {
             ScrollView {
                 ForEach(account.childrenAccounts) { account in
-                    AccountCircleItem(account, 
-                                      isAlreadyOpened: true,
-                                      path: $path)
+                    AccountCircleItem(
+                        account,
+                        isAlreadyOpened: true
+                    )
                 }
                 .presentationCompactAdaptation(.popover)
                 .padding()
@@ -104,6 +103,6 @@ struct AccountCircleItem: View {
 }
 
 #Preview {
-    AccountCircleItem(Account(), path: .constant(NavigationPath()))
+    AccountCircleItem(Account())
         .environment(AlertManager(handle: {_ in }))
 }

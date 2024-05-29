@@ -14,56 +14,54 @@ struct TransactionFilterView: View {
     @State private var vm = TransactionFilterViewModel()
     @State private var shouldShowDateFrom = false
     @State private var shouldShowDateTo = false
-    @Binding var accountGroup: AccountGroup
+    @Environment(AccountGroupSharedState.self) var accountGroup
     @Binding var filters: TransactionFilters
     
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    Label("Дата", systemImage: "calendar")
-                    ExpandableDatePicker(buttonName: "C", isCalendarShowing: $shouldShowDateFrom, date: $filters.dateFrom)
-                    ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $filters.dateTo)
-                }
-                Section {
-                    Picker("Тип транзакции", selection: $filters.transactionType) {
-                        Text("Тип не выбран")
-                            .tag(nil as TransactionType?)
-                        ForEach(TransactionType.allCases, id: \.rawValue) { type in
-                            Text(type.rawValue)
-                                .tag(type as TransactionType?)
-                        }
+        Form {
+            Section {
+                Label("Дата", systemImage: "calendar")
+                ExpandableDatePicker(buttonName: "C", isCalendarShowing: $shouldShowDateFrom, date: $filters.dateFrom)
+                ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $filters.dateTo)
+            }
+            Section {
+                Picker("Тип транзакции", selection: $filters.transactionType) {
+                    Text("Тип не выбран")
+                        .tag(nil as TransactionType?)
+                    ForEach(TransactionType.allCases, id: \.rawValue) { type in
+                        Text(type.rawValue)
+                            .tag(type as TransactionType?)
                     }
-                    .pickerStyle(.menu)
                 }
-                Section {
-                    AccountGroupSelector(selectedAccountGroup: $accountGroup, pickerName: "Группа счетов")
-                }
-                Section {
-                    Picker("Валюта транзакции", selection: $filters.currency) {
-                        Text("Валюта не выбрана")
-                            .tag(nil as Currency?)
-                        ForEach(vm.currencies) { currency in
-                            Text(currency.name)
-                                .tag(currency as Currency?)
-                        }
+                .pickerStyle(.menu)
+            }
+            Section {
+                AccountGroupSelector(pickerName: "Группа счетов")
+            }
+            Section {
+                Picker("Валюта транзакции", selection: $filters.currency) {
+                    Text("Валюта не выбрана")
+                        .tag(nil as Currency?)
+                    ForEach(vm.currencies) { currency in
+                        Text(currency.name)
+                            .tag(currency as Currency?)
                     }
                 }
             }
-            .task {
-                do {
-                    try await vm.load()
-                } catch {
-                    alert(error)
-                }
+        }
+        .task {
+            do {
+                try await vm.load()
+            } catch {
+                alert(error)
             }
-            .datePickerStyle(.graphical)
-            .navigationTitle("Фильтры")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button("Готово") { dissmiss() }
-                }
+        }
+        .datePickerStyle(.graphical)
+        .navigationTitle("Фильтры")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("Готово") { dissmiss() }
             }
         }
     }
@@ -118,7 +116,6 @@ struct ExpandableDatePicker: View {
 
 #Preview {
     TransactionFilterView(
-        accountGroup: .constant(AccountGroup()),
         filters: .constant(TransactionFilters())
     )
     .environment(AlertManager(handle: {_ in }))

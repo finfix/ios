@@ -16,7 +16,7 @@ struct Settings: View {
     @Environment(AlertManager.self) var alert
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
     @AppStorage("apiBasePath") private var apiBasePath = defaultApiBasePath
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
@@ -106,6 +106,6 @@ struct Settings: View {
 }
 
 #Preview {
-    Settings(path: .constant(NavigationPath()))
+    Settings()
         .environment(AlertManager(handle: {_ in }))
 }
