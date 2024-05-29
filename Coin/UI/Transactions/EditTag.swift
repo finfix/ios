@@ -19,7 +19,7 @@ struct EditTag: View {
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     
-    init(_ tag: Tag, path: Binding<NavigationPath>) {
+    init(_ tag: Tag) {
         vm = EditTagViewModel(
             currentTag: tag,
             oldTag: tag,
@@ -27,7 +27,7 @@ struct EditTag: View {
         )
     }
     
-    init(selectedAccountGroup: AccountGroup, path: Binding<NavigationPath>) {
+    init(selectedAccountGroup: AccountGroup) {
         vm = EditTagViewModel(
             currentTag: Tag(
                 accountGroup: selectedAccountGroup
@@ -93,6 +93,6 @@ struct EditTag: View {
 }
 
 #Preview {
-    EditTag(Tag(), path: .constant(NavigationPath()))
+    EditTag(Tag())
         .environment(AlertManager(handle: {_ in }))
 }

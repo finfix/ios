@@ -15,11 +15,11 @@ struct ErrorModel: LocalizedError, Decodable {
     
     var errorDescription: String? {
         var description = self.humanTextError
-        #if DEBUG
+#if DEV
         if self.developerTextError != "" {
             description += "\n\n" + self.developerTextError
         }
-        #endif
+#endif
         return description
     }
 }

@@ -15,15 +15,14 @@ struct Settings: View {
     
     @Environment(AlertManager.self) var alert
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
-    @AppStorage("isDevMode") private var isDevMode = defaultIsDevMode
     @AppStorage("apiBasePath") private var apiBasePath = defaultApiBasePath
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     @State var shouldShowAlert = false
     @State var differences: String? = nil
-
+    
     @State private var vm = SettingsViewModel()
     
     var body: some View {
@@ -34,19 +33,9 @@ struct Settings: View {
                         .foregroundColor(.primary)
                 }
             }
-            Section(header: Text("Инструменты разработчика")) {
-                Toggle(isOn: $isDevMode) {
-                    Label("Режим разработчика", systemImage: "hammer.fill")
-                        .foregroundColor(.primary)
-                }
-                .onChange(of: isDevMode) { _, newValue in
-                    if newValue == true {
-                        apiBasePath = defaultApiBasePath
-                    }
-                }
-            }
-            if isDevMode {
-                Section {
+#if DEV
+            Group {
+                Section(header: Text("Инструменты разработчика")) {
                     HStack {
                         TextField("", text: $apiBasePath)
                             .autocapitalization(.none)
@@ -86,7 +75,18 @@ struct Settings: View {
                     NavigationLink("Показать все задачи", value: SettingsRoute.tasksList)
                 }
                 .frame(maxWidth: .infinity)
+                .alert(isPresented: $shouldShowAlert) {
+                    Alert(title:
+                            Text(differences == nil ? "Все данные совпадают" : "Данные не совпадают"),
+                          message:
+                            Text(differences != nil ? "Вы можете скачать несовпадающие данные" : ""),
+                          dismissButton:
+                            .cancel(Text("OK"))
+                    )
+                }
             }
+            .disabled(shouldDisableUI)
+#endif
             Section(footer:
                 VStack {
                     Text("Version \(vm.appVersion) (Build \(vm.appBuildNumber))")
@@ -94,16 +94,6 @@ struct Settings: View {
                 }
                 .frame(maxWidth: .infinity)
             ) {}
-        }
-        .disabled(shouldDisableUI)
-        .alert(isPresented: $shouldShowAlert) {
-            Alert(title:
-                    Text(differences == nil ? "Все данные совпадают" : "Данные не совпадают"),
-                  message:
-                    Text(differences != nil ? "Вы можете скачать несовпадающие данные" : ""),
-                  dismissButton:
-                    .cancel(Text("OK"))
-            )
         }
         .task {
             do {
@@ -116,6 +106,6 @@ struct Settings: View {
 }
 
 #Preview {
-    Settings(path: .constant(NavigationPath()))
+    Settings()
         .environment(AlertManager(handle: {_ in }))
 }

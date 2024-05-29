@@ -13,7 +13,7 @@ enum PlusNewAccountRoute: Hashable {
 
 struct PlusNewAccount: View {
     
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     var accountType: AccountType
     
     var body: some View {
@@ -35,6 +35,6 @@ struct PlusNewAccount: View {
 }
 
 #Preview {
-    PlusNewAccount(path: .constant(NavigationPath()), accountType: .regular)
+    PlusNewAccount(accountType: .regular)
         .environment(AlertManager(handle: {_ in }))
 }

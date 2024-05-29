@@ -157,7 +157,7 @@ struct LoginView: View {
             }
             .navigationDestination(for: SettingsRoute.self) { screen in
                 switch screen {
-                case .tasksList: TasksList(path: $path)
+                case .tasksList: TasksList()
                 }
             }
             .navigationDestination(for: TasksListRoute.self) { screen in
@@ -167,7 +167,7 @@ struct LoginView: View {
             }
             .navigationDestination(for: LoginRoute.self) { screen in
                 switch screen {
-                case .settings: Settings(path: $path)
+                case .settings: Settings()
                 }
             }
         }

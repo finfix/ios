@@ -16,7 +16,7 @@ struct AccountGroupList: View {
     
     let vm = AccountGroupListViewModel()
     @Environment(AlertManager.self) var alert
-    @Binding var path: NavigationPath
+    @Environment(PathSharedState.self) var path
     
     var body: some View {
         List {
@@ -44,5 +44,5 @@ struct AccountGroupList: View {
 }
 
 #Preview {
-    AccountGroupList(path: .constant(NavigationPath()))
+    AccountGroupList()
 }
