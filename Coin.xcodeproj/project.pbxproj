@@ -1026,7 +1026,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.CoinDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1066,7 +1066,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.CoinDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1243,6 +1243,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"Coin/Preview Content\"";
 				DEVELOPMENT_TEAM = 235DAB995B;
 				ENABLE_PREVIEWS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "DEV=1";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Coin/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Coin;
@@ -1263,6 +1264,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEV;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

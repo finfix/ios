@@ -9,6 +9,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>webcredentials:bonavii.com</string>
+		<string>applinks:bonavii.com</string>
 	</array>
 	<key>com.apple.developer.authentication-services.autofill-credential-provider</key>
 	<true/>
