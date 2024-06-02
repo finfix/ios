@@ -7,11 +7,13 @@
 
 import SwiftUI
 import OSLog
+import DeviceKit
 
 private let logger = Logger(subsystem: "Coin", category: "Login")
 
 enum LoginRoute {
     case settings
+    case developerTools
 }
 
 struct LoginView: View {
@@ -141,6 +143,13 @@ struct LoginView: View {
             .contentMargins(.top, 200)
             .navigationTitle(mode == .login ? "Вход" : "Регистрация")
             .toolbar {
+#if DEV
+                ToolbarItem {
+                    NavigationLink(value: LoginRoute.developerTools) {
+                        Image(systemName: "hammer.fill")
+                    }
+                }
+#endif
                 ToolbarItem {
                     NavigationLink(value: LoginRoute.settings) {
                         Image(systemName: "gearshape")
@@ -159,6 +168,7 @@ struct LoginView: View {
             .navigationDestination(for: LoginRoute.self) { screen in
                 switch screen {
                 case .settings: Settings()
+                case .developerTools: DeveloperTools()
                 }
             }
         }
@@ -174,7 +184,8 @@ struct LoginView: View {
             let response = try await AuthAPI().Auth(req: AuthReq(
                 email: login,
                 password: password,
-                bundleID: bundleID
+                application: getApplicationInformation(),
+                device: getDeviceInformation()
             ))
             accessToken = response.token.accessToken
             refreshToken = response.token.refreshToken
@@ -194,7 +205,8 @@ struct LoginView: View {
                 email: login,
                 password: password,
                 name: name,
-                bundleID: bundleID
+                application: getApplicationInformation(),
+                device: getDeviceInformation()
             ))
             accessToken = response.token.accessToken
             refreshToken = response.token.refreshToken
