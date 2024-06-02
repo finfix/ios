@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct TransactionsTab: View {
-    
-    @State var path = PathSharedState()
-    
+        
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
+    @Environment(PathSharedState.self) var path
     
     var body: some View {
+        @Bindable var path = path
         NavigationStack(path: $path.path) {
             TransactionsView(chartType: .earningsAndExpenses)
                 .navigationDestination(for: TransactionsListRoute.self) { screen in
@@ -44,7 +44,6 @@ struct TransactionsTab: View {
                         TransactionsView(chartType: chartType)
                     }
                 }
-                .environment(path)
         }
     }
 }

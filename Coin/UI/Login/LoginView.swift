@@ -25,7 +25,7 @@ struct LoginView: View {
     }
     
     @State private var service = Service.shared
-    @State private var path = NavigationPath()
+    @State private var path = PathSharedState()
     @Environment (AlertManager.self) private var alert
     
     @AppStorage("isLogin") var isLogin: Bool = false
@@ -42,7 +42,8 @@ struct LoginView: View {
     @State private var shouldShowProgress = false
     
     var body: some View {
-        NavigationStack {
+        @Bindable var path = path
+        NavigationStack(path: $path.path) {
             Form {
                 Section {
                     if mode == .register {
@@ -171,6 +172,7 @@ struct LoginView: View {
                 }
             }
         }
+        .environment(path)
         .disabled(shouldDisableUI)
     }
     

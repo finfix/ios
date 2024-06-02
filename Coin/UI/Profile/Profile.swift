@@ -32,9 +32,10 @@ struct Profile: View {
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     
-    @State var path = PathSharedState()
+    @Environment(PathSharedState.self) var path
     
     var body: some View {
+        @Bindable var path = path
         NavigationStack(path: $path.path) {
             Form {
 #if DEV
@@ -166,7 +167,6 @@ struct Profile: View {
             }
             .navigationTitle("Профиль")
         }
-        .environment(path)
     }
 }
 

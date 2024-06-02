@@ -14,7 +14,7 @@ struct AccountCirclesView: View {
     
     @Environment (AlertManager.self) private var alert
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
-    @State var path = PathSharedState()
+    @Environment(PathSharedState.self) var path
     @State var vm = AccountCirclesViewModel()
     
     let horizontalSpacing: CGFloat = 10
@@ -26,6 +26,7 @@ struct AccountCirclesView: View {
     }
     
     var body: some View {
+        @Bindable var path = path
         NavigationStack(path: $path.path) {
             VStack(spacing: 5) {
                 VStack(spacing: 0) {
@@ -114,7 +115,6 @@ struct AccountCirclesView: View {
                 }
             }
         }
-        .environment(path)
     }
 }
 

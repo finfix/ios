@@ -38,6 +38,12 @@ struct AppTabView: View {
     
     @State var selectionTab = 1
     
+    @State var accountHomeViewPath = PathSharedState()
+    @State var accountCirclesPath = PathSharedState()
+    @State var transactionTabPath = PathSharedState()
+    @State var profilePath = PathSharedState()
+
+    
     var body: some View {
         TabView(selection: $selectionTab) {
             AccountsHomeView()
@@ -46,24 +52,28 @@ struct AppTabView: View {
                     Image(systemName: "list.bullet.rectangle.fill")
                     Text("Счета")
                 }
+                .environment(accountHomeViewPath)
             AccountCirclesView()
                 .tag(2)
                 .tabItem {
                     Image(systemName: "2.circle")
                     Text("Счета 2")
                 }
+                .environment(accountCirclesPath)
             TransactionsTab()
                 .tag(3)
                 .tabItem {
                     Image(systemName: "3.circle")
                     Text("Транзакции")
                 }
+                .environment(transactionTabPath)
             Profile()
                 .tag(4)
                 .tabItem {
                     Image(systemName: "person.fill")
                     Text("Профиль")
                 }
+                .environment(profilePath)
         }
         .environment(selectedAccountGroup)
     }

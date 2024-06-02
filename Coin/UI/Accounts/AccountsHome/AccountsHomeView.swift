@@ -10,7 +10,7 @@ import SwiftUI
 struct AccountsHomeView: View {
     
     @State var vm = AccountHomeViewModel()
-    @State var path = PathSharedState()
+    @Environment(PathSharedState.self) var path
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     @Environment (AlertManager.self) private var alert
 
@@ -24,6 +24,7 @@ struct AccountsHomeView: View {
     @State var currentIndex = 0
             
     var body: some View {
+        @Bindable var path = path
         NavigationStack(path: $path.path) {
             ZStack(alignment: .bottomTrailing) {
                 VStack(spacing: 30) {
@@ -76,7 +77,6 @@ struct AccountsHomeView: View {
                 alert(error)
             }
         }
-        .environment(path)
     }
 }
 
