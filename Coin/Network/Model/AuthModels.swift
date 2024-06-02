@@ -6,20 +6,61 @@
 //
 
 import Foundation
+import SwiftUI
+import DeviceKit
 
 struct AuthReq: Encodable {
     var email: String
     var password: String
-    let os: String = "iOS"
+    let application: ApplicationInformation
+    let device: DeviceInformation
+}
+
+struct ApplicationInformation: Encodable {
     let bundleID: String
+    let version: String
+    let build: String
+}
+
+struct DeviceInformation: Encodable {
+    let nameOS: String
+    let versionOS: String
+    let deviceName: String
+    let modelName: String
 }
 
 struct RegisterReq: Encodable {
     var email: String
     var password: String
     var name: String
-    let os: String = "iOS"
-    let bundleID: String
+    let application: ApplicationInformation
+    let device: DeviceInformation
+}
+
+func getDeviceInformation() -> DeviceInformation {
+    return DeviceInformation(
+        nameOS: UIDevice.current.systemName,
+        versionOS: UIDevice.current.systemVersion,
+        deviceName: UIDevice.current.model,
+        modelName: Device.current.description
+    )
+}
+
+func getApplicationInformation() throws -> ApplicationInformation {
+    guard let bundleID = Bundle.main.bundleIdentifier else {
+        throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
+    }
+    guard let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
+        throw ErrorModel(humanTextError: "Не смогли получить версию приложения")
+    }
+    guard let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String else {
+        throw ErrorModel(humanTextError: "Не смогли получить билд приложения")
+    }
+    return ApplicationInformation(
+        bundleID: bundleID,
+        version: appVersion,
+        build: buildNumber
+    )
 }
 
 struct AuthRes: Decodable {
@@ -39,4 +80,6 @@ struct RefreshTokensRes: Decodable {
 
 struct RefreshTokensReq: Encodable {
     var token: String
+    let application: ApplicationInformation
+    let device: DeviceInformation
 }

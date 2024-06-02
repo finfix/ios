@@ -122,7 +122,11 @@ class API {
         guard let refreshToken else {
             throw ErrorModel(humanTextError: "Refresh token отсутствует")
         }
-        let tokens = try await AuthAPI().RefreshToken(req: RefreshTokensReq(token: refreshToken))
+        let tokens = try await AuthAPI().RefreshToken(req: RefreshTokensReq(
+            token: refreshToken,
+            application: try getApplicationInformation(),
+            device: getDeviceInformation()
+        ))
         self.refreshToken = tokens.refreshToken
         self.accessToken = tokens.accessToken
         return tokens.accessToken

@@ -75,6 +75,8 @@
 		B58133672C0CAE0B004EB2B6 /* DeveloperToolsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133652C0CAE0B004EB2B6 /* DeveloperToolsTab.swift */; };
 		B58133682C0CAE7A004EB2B6 /* DeveloperTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133572C0CAA32004EB2B6 /* DeveloperTools.swift */; };
 		B58133692C0CAE7D004EB2B6 /* DeveloperToolsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133592C0CAA7C004EB2B6 /* DeveloperToolsViewModel.swift */; };
+		B581336D2C0CF439004EB2B6 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B581336C2C0CF439004EB2B6 /* DeviceKit */; };
+		B581336F2C0CF43F004EB2B6 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B581336E2C0CF43F004EB2B6 /* DeviceKit */; };
 		B58705762900956D004C77DD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
 		B58CAB2A2BCFE6A200B472FA /* Graph.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58CAB292BCFE6A200B472FA /* Graph.swift */; };
 		B58CAB2C2BD02E0700B472FA /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58CAB2B2BD02E0700B472FA /* TransactionsView.swift */; };
@@ -370,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5DEFD462C07015A001D7E61 /* GRDB in Frameworks */,
+				B581336F2C0CF43F004EB2B6 /* DeviceKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -378,6 +381,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5B068EF2BAC6E5500AEEC98 /* GRDB in Frameworks */,
+				B581336D2C0CF439004EB2B6 /* DeviceKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,6 +496,13 @@
 				B58133592C0CAA7C004EB2B6 /* DeveloperToolsViewModel.swift */,
 			);
 			path = DeveloperTools;
+			sourceTree = "<group>";
+		};
+		B581336B2C0CF423004EB2B6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		B58EAE0D2BFD0F7B0054E359 /* AccountGroup */ = {
@@ -623,6 +634,7 @@
 				B5F9CC6128F01CA80037A21A /* Coin */,
 				B5F9CC6028F01CA80037A21A /* Products */,
 				B5DEFD502C07015A001D7E61 /* CoinDev-Info.plist */,
+				B581336B2C0CF423004EB2B6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -712,6 +724,7 @@
 			name = CoinDev;
 			packageProductDependencies = (
 				B5DEFCD82C07015A001D7E61 /* GRDB */,
+				B581336E2C0CF43F004EB2B6 /* DeviceKit */,
 			);
 			productName = Coin;
 			productReference = B5DEFD4F2C07015A001D7E61 /* CoinDev.app */;
@@ -732,6 +745,7 @@
 			name = Coin;
 			packageProductDependencies = (
 				B5B068EE2BAC6E5500AEEC98 /* GRDB */,
+				B581336C2C0CF439004EB2B6 /* DeviceKit */,
 			);
 			productName = Coin;
 			productReference = B5F9CC5F28F01CA80037A21A /* Coin.app */;
@@ -762,6 +776,7 @@
 			mainGroup = B5F9CC5628F01CA80037A21A;
 			packageReferences = (
 				B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */,
+				B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */,
 			);
 			productRefGroup = B5F9CC6028F01CA80037A21A /* Products */;
 			projectDirPath = "";
@@ -1070,7 +1085,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.CoinDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1110,7 +1125,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.CoinDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1265,7 +1280,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1304,7 +1319,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1348,6 +1363,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devicekit/DeviceKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.4.0;
+			};
+		};
 		B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
@@ -1367,6 +1390,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B581336C2C0CF439004EB2B6 /* DeviceKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */;
+			productName = DeviceKit;
+		};
+		B581336E2C0CF43F004EB2B6 /* DeviceKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */;
+			productName = DeviceKit;
+		};
 		B5B068EE2BAC6E5500AEEC98 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */;
