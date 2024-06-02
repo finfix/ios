@@ -13,62 +13,37 @@ struct AccountsHomeView: View {
     @Environment(PathSharedState.self) var path
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     @Environment (AlertManager.self) private var alert
-
+    
     @State var chooseBlurIsOpened = false
-
+    
     var filteredAccounts: [Account] {
         vm.accounts.filter { $0.accountGroup == selectedAccountGroup.selectedAccountGroup }
     }
     
     @State var showDebts = false
     @State var currentIndex = 0
-            
+    
     var body: some View {
-        @Bindable var path = path
-        NavigationStack(path: $path.path) {
-            ZStack(alignment: .bottomTrailing) {
-                VStack(spacing: 30) {
-                    VStack(spacing: 0) {
-                        QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                        AccountGroupSelector()
-                    }
-                    ScrollView {
-                        Text("Карты и счета")
-                        SnapCarouselView(spacing: 30, index: $currentIndex, items: filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
-                            GeometryReader { proxy in
-                                AccountCard(size: proxy.size, account: account)
-                            }
+        ZStack(alignment: .bottomTrailing) {
+            VStack(spacing: 30) {
+                VStack(spacing: 0) {
+                    QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
+                    AccountGroupSelector()
+                }
+                ScrollView {
+                    Text("Карты и счета")
+                    SnapCarouselView(spacing: 30, index: $currentIndex, items: filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
+                        GeometryReader { proxy in
+                            AccountCard(size: proxy.size, account: account)
                         }
-                        .frame(height: 150)
-        
-                        AccountCategoryView(header: "Долги", accounts: filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
                     }
-                }
-                .blur(radius: chooseBlurIsOpened ? 5 : 0)
-        
-                CirclesCreateTransaction(chooseBlurIsOpened: $chooseBlurIsOpened)
-
-            }
-            .navigationDestination(for: CirclesCreateTransactionRoute.self ) { screen in
-                switch screen {
-                case .createTrasnaction(let transactionType):
-                    EditTransaction(transactionType: transactionType, accountGroup: selectedAccountGroup.selectedAccountGroup)
+                    .frame(height: 150)
+                    
+                    AccountCategoryView(header: "Долги", accounts: filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
                 }
             }
-            .navigationDestination(for: EditTransactionRoute.self) { screen in
-                switch screen {
-                case .tagsList:
-                    TagsList(accountGroup: selectedAccountGroup.selectedAccountGroup)
-                }
-            }
-            .navigationDestination(for: TagsListRoute.self) { screen in
-                switch screen {
-                case .createTag:
-                    EditTag(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                case .editTag(let tag):
-                    EditTag(tag)
-                }
-            }
+            .blur(radius: chooseBlurIsOpened ? 5 : 0)
+            CirclesCreateTransaction(chooseBlurIsOpened: $chooseBlurIsOpened)
         }
         .task {
             do {
@@ -119,7 +94,7 @@ struct CirclesCreateTransaction: View {
         .onDisappear { chooseBlurIsOpened = false }
     }
 }
-    
+
 struct CircleTypeTransaction: View {
     
     var imageName: String
@@ -136,7 +111,7 @@ struct CircleTypeTransaction: View {
             }
     }
 }
-    
+
 #Preview {
     AccountsHomeView()
         .environment(AlertManager(handle: {_ in }))

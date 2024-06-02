@@ -156,16 +156,6 @@ struct LoginView: View {
                     }
                 }
             }
-            .navigationDestination(for: SettingsRoute.self) { screen in
-                switch screen {
-                case .tasksList: TasksList()
-                }
-            }
-            .navigationDestination(for: TasksListRoute.self) { screen in
-                switch screen {
-                case .taskDetails(let task): TaskDetails(task: task)
-                }
-            }
             .navigationDestination(for: LoginRoute.self) { screen in
                 switch screen {
                 case .settings: Settings()
