@@ -10,12 +10,16 @@ import Foundation
 struct AuthReq: Encodable {
     var email: String
     var password: String
+    let os: String = "iOS"
+    let bundleID: String
 }
 
 struct RegisterReq: Encodable {
     var email: String
     var password: String
     var name: String
+    let os: String = "iOS"
+    let bundleID: String
 }
 
 struct AuthRes: Decodable {

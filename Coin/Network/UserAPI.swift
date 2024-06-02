@@ -13,11 +13,20 @@ class UserAPI: API {
     
     func GetUser() async throws -> GetUserRes {
         let data = try await request(
-            url: apiBasePath + userBasePath + "/",
+            url: apiBasePath + userBasePath,
             method: .get,
             headers: getBaseHeaders()
         )
         
         return try decode(data, model: GetUserRes.self)
+    }
+    
+    func UpdateUser(req: UpdateUserReq) async throws {
+        let data = try await request(
+            url: apiBasePath + userBasePath,
+            method: .patch,
+            headers: getBaseHeaders(),
+            body: req
+        )
     }
 }
