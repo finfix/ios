@@ -18,7 +18,22 @@ final class PathSharedState {
 }
 
 struct AppTabView: View {
+        
+    func requestPushAuthorization() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
+            if success {
+                print("Включили пуши")
+            } else if let error = error {
+                print(error.localizedDescription)
+            }
+        }
+    }
     
+    init() {
+        requestPushAuthorization()
+        UIApplication.shared.registerForRemoteNotifications()
+    }
+        
     @State var selectedAccountGroup = AccountGroupSharedState()
     
     @State var selectionTab = 1

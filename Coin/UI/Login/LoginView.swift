@@ -176,7 +176,14 @@ struct LoginView: View {
     
     func auth() async {
         do {
-            let response = try await AuthAPI().Auth(req: AuthReq(email: login, password: password))
+            guard let bundleID = Bundle.main.bundleIdentifier else {
+                throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
+            }
+            let response = try await AuthAPI().Auth(req: AuthReq(
+                email: login,
+                password: password,
+                bundleID: bundleID
+            ))
             accessToken = response.token.accessToken
             refreshToken = response.token.refreshToken
             try await service.sync()
@@ -188,7 +195,15 @@ struct LoginView: View {
     
     func register() async {
         do {
-            let response = try await AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name))
+            guard let bundleID = Bundle.main.bundleIdentifier else {
+                throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
+            }
+            let response = try await AuthAPI().Register(req: RegisterReq(
+                email: login,
+                password: password,
+                name: name,
+                bundleID: bundleID
+            ))
             accessToken = response.token.accessToken
             refreshToken = response.token.refreshToken
             try await service.sync()
