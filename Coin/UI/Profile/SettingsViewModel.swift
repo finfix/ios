@@ -31,8 +31,4 @@ class SettingsViewModel {
     func load() async throws {
         (serverVersion, serverBuildNumber) = try await service.getServerVersion()
     }
-    
-    func compareLocalAndServerData() async throws -> String? {
-        return try await service.compareLocalAndServerData()
-    }
 }

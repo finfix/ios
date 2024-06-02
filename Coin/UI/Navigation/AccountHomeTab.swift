@@ -1,25 +1,24 @@
 //
-//  Transaction.swift
+//  AccountHomeTab.swift
 //  Coin
 //
-//  Created by Илья on 10.10.2022.
+//  Created by Илья on 02.06.2024.
 //
 
 import SwiftUI
 
-struct TransactionsTab: View {
+struct AccountHomeTab: View {
     
     @State var path = PathSharedState()
-    
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     
     var body: some View {
         NavigationStack(path: $path.path) {
-            TransactionsView(chartType: .earningsAndExpenses)
-                .navigationDestination(for: TransactionsListRoute.self) { screen in
+            AccountsHomeView()
+                .navigationDestination(for: CirclesCreateTransactionRoute.self ) { screen in
                     switch screen {
-                    case .editTransaction(let transaction):
-                        EditTransaction(transaction)
+                    case .createTrasnaction(let transactionType):
+                        EditTransaction(transactionType: transactionType, accountGroup: selectedAccountGroup.selectedAccountGroup)
                     }
                 }
                 .navigationDestination(for: EditTransactionRoute.self) { screen in
@@ -36,20 +35,7 @@ struct TransactionsTab: View {
                         EditTag(tag)
                     }
                 }
-                .navigationDestination(for: ChartViewRoute.self) { screen in
-                    switch screen {
-                    case .transactionList(account: let account):
-                        TransactionsView(account: account)
-                    case .transactionList1(chartType: let chartType):
-                        TransactionsView(chartType: chartType)
-                    }
-                }
-                .environment(path)
         }
+        .environment(path)
     }
-}
-
-#Preview {
-    TransactionsTab()
-        .environment(AlertManager(handle: {_ in }))
 }

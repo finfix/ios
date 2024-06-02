@@ -25,7 +25,7 @@ struct LoginView: View {
     }
     
     @State private var service = Service.shared
-    @State private var path = NavigationPath()
+    @State private var path = PathSharedState()
     @Environment (AlertManager.self) private var alert
     
     @AppStorage("isLogin") var isLogin: Bool = false
@@ -42,7 +42,8 @@ struct LoginView: View {
     @State private var shouldShowProgress = false
     
     var body: some View {
-        NavigationStack {
+        @Bindable var path = path
+        NavigationStack(path: $path.path) {
             Form {
                 Section {
                     if mode == .register {
@@ -155,28 +156,26 @@ struct LoginView: View {
                     }
                 }
             }
-            .navigationDestination(for: SettingsRoute.self) { screen in
-                switch screen {
-                case .tasksList: TasksList()
-                }
-            }
-            .navigationDestination(for: TasksListRoute.self) { screen in
-                switch screen {
-                case .taskDetails(let task): TaskDetails(task: task)
-                }
-            }
             .navigationDestination(for: LoginRoute.self) { screen in
                 switch screen {
                 case .settings: Settings()
                 }
             }
         }
+        .environment(path)
         .disabled(shouldDisableUI)
     }
     
     func auth() async {
         do {
-            let response = try await AuthAPI().Auth(req: AuthReq(email: login, password: password))
+            guard let bundleID = Bundle.main.bundleIdentifier else {
+                throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
+            }
+            let response = try await AuthAPI().Auth(req: AuthReq(
+                email: login,
+                password: password,
+                bundleID: bundleID
+            ))
             accessToken = response.token.accessToken
             refreshToken = response.token.refreshToken
             try await service.sync()
@@ -188,7 +187,15 @@ struct LoginView: View {
     
     func register() async {
         do {
-            let response = try await AuthAPI().Register(req: RegisterReq(email: login, password: password, name: name))
+            guard let bundleID = Bundle.main.bundleIdentifier else {
+                throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
+            }
+            let response = try await AuthAPI().Register(req: RegisterReq(
+                email: login,
+                password: password,
+                name: name,
+                bundleID: bundleID
+            ))
             accessToken = response.token.accessToken
             refreshToken = response.token.refreshToken
             try await service.sync()
