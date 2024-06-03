@@ -144,6 +144,9 @@ class TaskManager {
                 
             case .deleteAccountGroup:
                 try await AccountGroupAPI().DeleteAccountGroup(req: DeleteAccountGroupReq(fields))
+                
+            case .updateUser:
+                try await UserAPI().UpdateUser(req: UpdateUserReq(fields))
             }
         } catch {
             logger.warning("\(error)")
@@ -167,6 +170,7 @@ enum ActionName: String, Codable {
     case createAccount, updateAccount, deleteAccount
     case createTag, updateTag, deleteTag
     case createAccountGroup, updateAccountGroup, deleteAccountGroup
+    case updateUser
 }
 
 protocol FieldExtractable {

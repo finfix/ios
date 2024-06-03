@@ -63,6 +63,20 @@
 		B5744EAC2BD2DDC0004C9AC7 /* TagToTransactionDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EAB2BD2DDC0004C9AC7 /* TagToTransactionDB.swift */; };
 		B5744EAE2BD2DE41004C9AC7 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EAD2BD2DE41004C9AC7 /* Tag.swift */; };
 		B57A6B872BBAC37200BDDEFE /* HidedAccountListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */; };
+		B58133582C0CAA32004EB2B6 /* DeveloperTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133572C0CAA32004EB2B6 /* DeveloperTools.swift */; };
+		B581335A2C0CAA7C004EB2B6 /* DeveloperToolsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133592C0CAA7C004EB2B6 /* DeveloperToolsViewModel.swift */; };
+		B581335C2C0CABA9004EB2B6 /* AccountHomeTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B581335B2C0CABA9004EB2B6 /* AccountHomeTab.swift */; };
+		B581335F2C0CACBC004EB2B6 /* AccountCirclesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B581335E2C0CACBC004EB2B6 /* AccountCirclesTab.swift */; };
+		B58133612C0CADA6004EB2B6 /* ProfileTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133602C0CADA6004EB2B6 /* ProfileTab.swift */; };
+		B58133622C0CADF7004EB2B6 /* AccountHomeTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B581335B2C0CABA9004EB2B6 /* AccountHomeTab.swift */; };
+		B58133632C0CADF9004EB2B6 /* AccountCirclesTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B581335E2C0CACBC004EB2B6 /* AccountCirclesTab.swift */; };
+		B58133642C0CADFC004EB2B6 /* ProfileTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133602C0CADA6004EB2B6 /* ProfileTab.swift */; };
+		B58133662C0CAE0B004EB2B6 /* DeveloperToolsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133652C0CAE0B004EB2B6 /* DeveloperToolsTab.swift */; };
+		B58133672C0CAE0B004EB2B6 /* DeveloperToolsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133652C0CAE0B004EB2B6 /* DeveloperToolsTab.swift */; };
+		B58133682C0CAE7A004EB2B6 /* DeveloperTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133572C0CAA32004EB2B6 /* DeveloperTools.swift */; };
+		B58133692C0CAE7D004EB2B6 /* DeveloperToolsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58133592C0CAA7C004EB2B6 /* DeveloperToolsViewModel.swift */; };
+		B581336D2C0CF439004EB2B6 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B581336C2C0CF439004EB2B6 /* DeviceKit */; };
+		B581336F2C0CF43F004EB2B6 /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = B581336E2C0CF43F004EB2B6 /* DeviceKit */; };
 		B58705762900956D004C77DD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
 		B58CAB2A2BCFE6A200B472FA /* Graph.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58CAB292BCFE6A200B472FA /* Graph.swift */; };
 		B58CAB2C2BD02E0700B472FA /* TransactionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58CAB2B2BD02E0700B472FA /* TransactionsView.swift */; };
@@ -286,6 +300,12 @@
 		B5744EAB2BD2DDC0004C9AC7 /* TagToTransactionDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagToTransactionDB.swift; sourceTree = "<group>"; };
 		B5744EAD2BD2DE41004C9AC7 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		B57A6B862BBAC37200BDDEFE /* HidedAccountListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HidedAccountListViewModel.swift; sourceTree = "<group>"; };
+		B58133572C0CAA32004EB2B6 /* DeveloperTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperTools.swift; sourceTree = "<group>"; };
+		B58133592C0CAA7C004EB2B6 /* DeveloperToolsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperToolsViewModel.swift; sourceTree = "<group>"; };
+		B581335B2C0CABA9004EB2B6 /* AccountHomeTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountHomeTab.swift; sourceTree = "<group>"; };
+		B581335E2C0CACBC004EB2B6 /* AccountCirclesTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCirclesTab.swift; sourceTree = "<group>"; };
+		B58133602C0CADA6004EB2B6 /* ProfileTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTab.swift; sourceTree = "<group>"; };
+		B58133652C0CAE0B004EB2B6 /* DeveloperToolsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperToolsTab.swift; sourceTree = "<group>"; };
 		B58705752900956D004C77DD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B58CAB292BCFE6A200B472FA /* Graph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graph.swift; sourceTree = "<group>"; };
 		B58CAB2B2BD02E0700B472FA /* TransactionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsView.swift; sourceTree = "<group>"; };
@@ -352,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5DEFD462C07015A001D7E61 /* GRDB in Frameworks */,
+				B581336F2C0CF43F004EB2B6 /* DeviceKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,6 +381,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5B068EF2BAC6E5500AEEC98 /* GRDB in Frameworks */,
+				B581336D2C0CF439004EB2B6 /* DeviceKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -458,8 +480,29 @@
 			isa = PBXGroup;
 			children = (
 				B56361A32B04FC000044CDD8 /* AppTabView.swift */,
+				B581335B2C0CABA9004EB2B6 /* AccountHomeTab.swift */,
+				B581335E2C0CACBC004EB2B6 /* AccountCirclesTab.swift */,
+				B5FB6AA328F3D62D00C2A2AC /* TransactionsTab.swift */,
+				B58133602C0CADA6004EB2B6 /* ProfileTab.swift */,
+				B58133652C0CAE0B004EB2B6 /* DeveloperToolsTab.swift */,
 			);
 			path = Navigation;
+			sourceTree = "<group>";
+		};
+		B58133562C0CA9E8004EB2B6 /* DeveloperTools */ = {
+			isa = PBXGroup;
+			children = (
+				B58133572C0CAA32004EB2B6 /* DeveloperTools.swift */,
+				B58133592C0CAA7C004EB2B6 /* DeveloperToolsViewModel.swift */,
+			);
+			path = DeveloperTools;
+			sourceTree = "<group>";
+		};
+		B581336B2C0CF423004EB2B6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		B58EAE0D2BFD0F7B0054E359 /* AccountGroup */ = {
@@ -569,6 +612,7 @@
 		B5E8933829007C53002AC30C /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				B58133562C0CA9E8004EB2B6 /* DeveloperTools */,
 				B58EAE0D2BFD0F7B0054E359 /* AccountGroup */,
 				B50DBAD52BCD8CCC00A58B53 /* Chart */,
 				B5F9CC7028F01E1A0037A21A /* ContentView.swift */,
@@ -590,6 +634,7 @@
 				B5F9CC6128F01CA80037A21A /* Coin */,
 				B5F9CC6028F01CA80037A21A /* Products */,
 				B5DEFD502C07015A001D7E61 /* CoinDev-Info.plist */,
+				B581336B2C0CF423004EB2B6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -634,7 +679,6 @@
 		B5FB6AA128F3D5EF00C2A2AC /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
-				B5FB6AA328F3D62D00C2A2AC /* TransactionsTab.swift */,
 				B58CAB2B2BD02E0700B472FA /* TransactionsView.swift */,
 				B50DBAD32BCD2D2600A58B53 /* TransactionsList.swift */,
 				B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */,
@@ -680,6 +724,7 @@
 			name = CoinDev;
 			packageProductDependencies = (
 				B5DEFCD82C07015A001D7E61 /* GRDB */,
+				B581336E2C0CF43F004EB2B6 /* DeviceKit */,
 			);
 			productName = Coin;
 			productReference = B5DEFD4F2C07015A001D7E61 /* CoinDev.app */;
@@ -700,6 +745,7 @@
 			name = Coin;
 			packageProductDependencies = (
 				B5B068EE2BAC6E5500AEEC98 /* GRDB */,
+				B581336C2C0CF439004EB2B6 /* DeviceKit */,
 			);
 			productName = Coin;
 			productReference = B5F9CC5F28F01CA80037A21A /* Coin.app */;
@@ -730,6 +776,7 @@
 			mainGroup = B5F9CC5628F01CA80037A21A;
 			packageReferences = (
 				B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */,
+				B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */,
 			);
 			productRefGroup = B5F9CC6028F01CA80037A21A /* Products */;
 			projectDirPath = "";
@@ -771,6 +818,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B58133622C0CADF7004EB2B6 /* AccountHomeTab.swift in Sources */,
 				B5DEFCDB2C07015A001D7E61 /* AccountCategoryView.swift in Sources */,
 				B5DEFCDC2C07015A001D7E61 /* AccountAPI.swift in Sources */,
 				B5DEFCDD2C07015A001D7E61 /* EditTag.swift in Sources */,
@@ -799,6 +847,8 @@
 				B5DEFCF52C07015A001D7E61 /* ProfileViewModel.swift in Sources */,
 				B5DEFCF62C07015A001D7E61 /* TagToTransactionDB.swift in Sources */,
 				B5DEFCF72C07015A001D7E61 /* TransactionFilterViewModel.swift in Sources */,
+				B58133672C0CAE0B004EB2B6 /* DeveloperToolsTab.swift in Sources */,
+				B58133632C0CADF9004EB2B6 /* AccountCirclesTab.swift in Sources */,
 				B5DEFCF82C07015A001D7E61 /* AccountDB.swift in Sources */,
 				B5DEFCF92C07015A001D7E61 /* EditAccountGroupViewModel.swift in Sources */,
 				B5DEFCFA2C07015A001D7E61 /* Service.swift in Sources */,
@@ -820,7 +870,9 @@
 				B5DEFD0A2C07015A001D7E61 /* TransactionModels.swift in Sources */,
 				B5DEFD0B2C07015A001D7E61 /* Line.swift in Sources */,
 				B5DEFD0C2C07015A001D7E61 /* AccountCirclesViewModel.swift in Sources */,
+				B58133642C0CADFC004EB2B6 /* ProfileTab.swift in Sources */,
 				B5DEFD0D2C07015A001D7E61 /* TaskDetailsViewModel.swift in Sources */,
+				B58133682C0CAE7A004EB2B6 /* DeveloperTools.swift in Sources */,
 				B5DEFD0E2C07015A001D7E61 /* TransactionAPI.swift in Sources */,
 				B5DEFD0F2C07015A001D7E61 /* EditAccountGroup.swift in Sources */,
 				B5DEFD102C07015A001D7E61 /* BudgetDetails.swift in Sources */,
@@ -834,6 +886,7 @@
 				B5DEFD182C07015A001D7E61 /* TransactionsView.swift in Sources */,
 				B5DEFD192C07015A001D7E61 /* SyncTask.swift in Sources */,
 				B5DEFD1A2C07015A001D7E61 /* TransactionsListViewModel.swift in Sources */,
+				B58133692C0CAE7D004EB2B6 /* DeveloperToolsViewModel.swift in Sources */,
 				B5DEFD1B2C07015A001D7E61 /* HidedAccountListViewModel.swift in Sources */,
 				B5DEFD1C2C07015A001D7E61 /* EditTransaction.swift in Sources */,
 				B5DEFD1D2C07015A001D7E61 /* AuthModels.swift in Sources */,
@@ -898,6 +951,7 @@
 				B54F3DB62BD57DBB00780460 /* EditTagViewModel.swift in Sources */,
 				B5744E9D2BD29276004C9AC7 /* SettingsModels.swift in Sources */,
 				B5B068EC2BAC6E2600AEEC98 /* User.swift in Sources */,
+				B581335A2C0CAA7C004EB2B6 /* DeveloperToolsViewModel.swift in Sources */,
 				B5F4C3ED2BDF6DCD007CCFC9 /* SyncTaskDB.swift in Sources */,
 				B5B068E42BAC6DD800AEEC98 /* Account.swift in Sources */,
 				B5024EB22AE1A20F00F60449 /* EditAccount.swift in Sources */,
@@ -923,6 +977,7 @@
 				B5744EA62BD2DA9B004C9AC7 /* TagAPI.swift in Sources */,
 				B504B7E52AE46EEB0078643A /* UserAPI.swift in Sources */,
 				B5F4C3F12BDF9B82007CCFC9 /* TasksListViewModel.swift in Sources */,
+				B58133662C0CAE0B004EB2B6 /* DeveloperToolsTab.swift in Sources */,
 				B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */,
 				B5192F982BFF4AE5004A8BFD /* AccountGroupModels.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* AccountGroupSelector.swift in Sources */,
@@ -937,6 +992,7 @@
 				B5192F932BFF4807004A8BFD /* EditAccountGroup.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
 				B5D6DE242BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift in Sources */,
+				B581335C2C0CABA9004EB2B6 /* AccountHomeTab.swift in Sources */,
 				B5744E982BD29180004C9AC7 /* SettingsViewModel.swift in Sources */,
 				B5744EA32BD2A579004C9AC7 /* IconDB.swift in Sources */,
 				B5B068E82BAC6E0400AEEC98 /* AccountGroup.swift in Sources */,
@@ -973,10 +1029,13 @@
 				B5F4C3EB2BDF6CAC007CCFC9 /* TaskManager.swift in Sources */,
 				B5B9504F2ADF235A00798F8C /* Profile.swift in Sources */,
 				B514D4922BA477A30019AED6 /* Persistense.swift in Sources */,
+				B581335F2C0CACBC004EB2B6 /* AccountCirclesTab.swift in Sources */,
 				B5D6DE222BB1D21E00A06D67 /* AccountHomeViewModel.swift in Sources */,
 				B5B950572ADF261700798F8C /* QuickStatisticView.swift in Sources */,
+				B58133612C0CADA6004EB2B6 /* ProfileTab.swift in Sources */,
 				B5B950432ADF16B300798F8C /* BudgetRow.swift in Sources */,
 				B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */,
+				B58133582C0CAA32004EB2B6 /* DeveloperTools.swift in Sources */,
 				B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */,
 				B59F0F2628FDD30F00AA33A9 /* AccountCirclesView.swift in Sources */,
 				B51710082BB2D61000950EE0 /* EditAccountViewModel.swift in Sources */,
@@ -997,7 +1056,7 @@
 		B5DEFD4D2C07015A001D7E61 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDev;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Coin/Coin.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -1026,7 +1085,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.CoinDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1040,7 +1099,7 @@
 		B5DEFD4E2C07015A001D7E61 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDev;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Coin/Coin.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -1066,7 +1125,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.CoinDev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1221,7 +1280,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1260,7 +1319,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.1.6;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bonavii.Coin;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1304,6 +1363,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devicekit/DeviceKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.4.0;
+			};
+		};
 		B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
@@ -1323,6 +1390,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B581336C2C0CF439004EB2B6 /* DeviceKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */;
+			productName = DeviceKit;
+		};
+		B581336E2C0CF43F004EB2B6 /* DeviceKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */;
+			productName = DeviceKit;
+		};
 		B5B068EE2BAC6E5500AEEC98 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */;

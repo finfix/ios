@@ -641,6 +641,16 @@ extension Service {
             id: newTransaction.id))
     }
     
+    func registerNotifications(token: String) {
+        taskManager.createTask(
+            actionName: .updateUser,
+            localObjectID: 0,
+            reqModel: UpdateUserReq(
+                notificationToken: token
+            )
+        )
+    }
+    
     func updateTag(newTag tag: Tag, oldTag: Tag) async throws {
         var newTag = tag
         
