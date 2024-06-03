@@ -33,6 +33,7 @@ struct LoginView: View {
     @AppStorage("isLogin") var isLogin: Bool = false
     @AppStorage("accessToken") var accessToken: String?
     @AppStorage("refreshToken") var refreshToken: String?
+    @AppStorage("isDeveloperMode") var isDevMode = false
     @FocusState private var focusedField: Field?
     
     @State private var mode: Mode = .login
@@ -144,9 +145,11 @@ struct LoginView: View {
             .navigationTitle(mode == .login ? "Вход" : "Регистрация")
             .toolbar {
 #if DEV
-                ToolbarItem {
-                    NavigationLink(value: LoginRoute.developerTools) {
-                        Image(systemName: "hammer.fill")
+                if isDevMode {
+                    ToolbarItem {
+                        NavigationLink(value: LoginRoute.developerTools) {
+                            Image(systemName: "hammer.fill")
+                        }
                     }
                 }
 #endif
@@ -169,6 +172,16 @@ struct LoginView: View {
                 switch screen {
                 case .settings: Settings()
                 case .developerTools: DeveloperTools()
+                }
+            }
+            .navigationDestination(for: DeveloperToolsRoute.self) { screen in
+                switch screen {
+                case .tasksList: TasksList()
+                }
+            }
+            .navigationDestination(for: TasksListRoute.self) { screen in
+                switch screen {
+                case .taskDetails(let task): TaskDetails(task: task)
                 }
             }
         }

@@ -36,6 +36,7 @@ struct AppTabView: View {
         
     @State var selectedAccountGroup = AccountGroupSharedState()
     @State var selectionTab = 1
+    @AppStorage("isDeveloperMode") var isDevMode = false
     
     var body: some View {
         TabView(selection: $selectionTab) {
@@ -64,12 +65,14 @@ struct AppTabView: View {
                     Text("Профиль")
                 }
 #if DEV
-            DeveloperToolsTab()
-                .tag(5)
-                .tabItem {
-                    Image(systemName: "hammer.fill")
-                    Text("Разработчик")
-                }
+            if isDevMode {
+                DeveloperToolsTab()
+                    .tag(5)
+                    .tabItem {
+                        Image(systemName: "hammer.fill")
+                        Text("Разработчик")
+                    }
+            }
 #endif
         }
         .environment(selectedAccountGroup)
