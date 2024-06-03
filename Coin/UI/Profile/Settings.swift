@@ -12,6 +12,7 @@ struct Settings: View {
     @Environment(AlertManager.self) var alert
     @AppStorage("isDarkMode") private var isDarkMode = defaultIsDarkMode
     @Environment(PathSharedState.self) var path
+    @AppStorage("isDeveloperMode") var isDevMode = false
         
     @State private var vm = SettingsViewModel()
     
@@ -20,6 +21,12 @@ struct Settings: View {
             Section {
                 Toggle(isOn: $isDarkMode) {
                     Label("Темная тема", systemImage: isDarkMode ? "moon.fill" : "sun.max.fill")
+                        .foregroundColor(.primary)
+                }
+            }
+            Section {
+                Toggle(isOn: $isDevMode) {
+                    Label("Режим разработчика", systemImage: "hammer.fill")
                         .foregroundColor(.primary)
                 }
             }

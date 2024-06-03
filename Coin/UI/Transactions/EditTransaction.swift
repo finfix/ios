@@ -234,7 +234,7 @@ struct EditTransaction: View {
                                         currency: vm.currentTransaction.accountFrom.currency
                                     )
                         ) {
-                            vm.currentTransaction.amountFrom = vm.currentTransaction.accountFrom.remainder
+                            vm.amountFrom = vm.currentTransaction.accountFrom.remainder.doubleValue
                             if vm.intercurrency {
                                 focusedField = .amountToSelector
                             } else {
