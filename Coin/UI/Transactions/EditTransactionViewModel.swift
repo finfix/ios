@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import PhotosUI
 
 @Observable
 class EditTransactionViewModel {
@@ -36,6 +37,8 @@ class EditTransactionViewModel {
     var oldTransaction = Transaction()
     var accountGroup = AccountGroup()
     var mode: mode
+    var imageSelection: PhotosPickerItem? = nil
+    var transactionImage: UIImage? = nil
     
     var intercurrency: Bool {
         currentTransaction.accountFrom.currency != currentTransaction.accountTo.currency
@@ -66,6 +69,10 @@ class EditTransactionViewModel {
         defer {
             shouldDisableUI = false
             shouldShowProgress = false
+        }
+        
+        if let transactionImage = transactionImage {
+            try await service.uploadImage(transactionImage)
         }
         
         switch mode {

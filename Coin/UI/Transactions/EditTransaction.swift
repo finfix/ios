@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "EditTransaction")
@@ -195,6 +196,13 @@ struct EditTransaction: View {
                 Toggle("Учитывать транзакцию в графиках", isOn: $vm.currentTransaction.accountingInCharts)
             }
             Section {
+                PhotosPicker(selection: $vm.imageSelection,
+                                     matching: .images,
+                                     photoLibrary: .shared()) {
+                            Text("Выбрать фото")
+                        }
+            }
+            Section {
                 Button {
                     Task {
                         do {
@@ -282,6 +290,14 @@ struct EditTransaction: View {
                 try await vm.load()
             } catch {
                 alert(error)
+            }
+        }
+        .onChange(of: vm.imageSelection) {
+            Task { @MainActor in
+                if let data = try? await vm.imageSelection?.loadTransferable(type: Data.self) {
+                    vm.transactionImage = UIImage(data:data)
+                    return
+                }
             }
         }
         .disabled(vm.shouldDisableUI)
