@@ -171,6 +171,7 @@ enum ActionName: String, Codable {
     case createTag, updateTag, deleteTag
     case createAccountGroup, updateAccountGroup, deleteAccountGroup
     case updateUser
+    case createImage
 }
 
 protocol FieldExtractable {

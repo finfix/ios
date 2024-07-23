@@ -20,6 +20,7 @@ struct Transaction: Identifiable {
     var accountFrom: Account
     var accountTo: Account
     var tags: [Tag]
+    var files: [Data]
     
     init(
         id: UInt32 = 0,
@@ -33,7 +34,8 @@ struct Transaction: Identifiable {
         datetimeCreate: Date = Date(),
         accountFrom: Account = Account(),
         accountTo: Account = Account(),
-        tags: [Tag] = []
+        tags: [Tag] = [],
+        files: [Data] = []
     ) {
         self.accountingInCharts = accountingInCharts
         self.amountFrom = amountFrom
@@ -47,6 +49,7 @@ struct Transaction: Identifiable {
         self.accountFrom = accountFrom
         self.accountTo = accountTo
         self.tags = tags
+        self.files = files
     }
 }
 

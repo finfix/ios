@@ -233,7 +233,7 @@ extension AppDatabase {
 }
 
 enum ModelType: String, Codable {
-    case account, transaction, tag, icon, user, accountGroup
+    case account, transaction, tag, icon, user, accountGroup, transactionImage
 }
 
 // MARK: - Reads

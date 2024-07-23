@@ -71,10 +71,6 @@ class EditTransactionViewModel {
             shouldShowProgress = false
         }
         
-        if let transactionImage = transactionImage {
-            try await service.uploadImage(transactionImage)
-        }
-        
         switch mode {
         case .create: try await service.createTransaction(currentTransaction)
         case .update: try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)

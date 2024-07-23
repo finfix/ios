@@ -334,3 +334,29 @@ struct DeleteTransactionReq: Encodable, FieldExtractable {
         return fields
     }
 }
+
+struct CreateTransactionImageReq: Encodable, FieldExtractable {
+    
+    var transactionID: UInt32
+    var fileName: String
+    
+    init(
+        transactionID: UInt32,
+        fileName: String
+    ) {
+        self.transactionID = transactionID
+        self.fileName = fileName
+    }
+    
+    init(_ map: [String: String]) {
+        self.transactionID = UInt32(map["transactionID"]!)!
+        self.fileName = map["fileName"]!
+    }
+    
+    func convertToFields() -> [SyncTaskValue] {
+        var fields: [SyncTaskValue] = []
+        fields.append(SyncTaskValue(objectType: .transaction, name: "transactionID", value: UInt32(self.accountToID)))
+        fields.append(SyncTaskValue(name: "fileName", value: self.amountFrom))
+        return fields
+    }
+}
