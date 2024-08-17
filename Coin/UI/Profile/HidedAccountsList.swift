@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HidedAccountsList: View {
     
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     @State private var vm = HidedAccountViewModel()
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     @Environment(PathSharedState.self) var path
@@ -26,7 +26,7 @@ struct HidedAccountsList: View {
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
                     ForEach(accounts) { account in
-                        AccountCircleItem(account)
+                        AccountCircleItem(account: account)
                     }
                 }
             }
