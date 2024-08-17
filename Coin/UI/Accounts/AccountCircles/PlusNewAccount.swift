@@ -23,7 +23,7 @@ struct PlusNewAccount: View {
                     Circle()
                         .stroke(.gray, lineWidth: 2)
                         .foregroundColor(.clear)
-                        .frame(width: 30)
+                        .frame(width: 40)
                     Image(systemName: "plus")
                         .foregroundColor(.gray)
                 }

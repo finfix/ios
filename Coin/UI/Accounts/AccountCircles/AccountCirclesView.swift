@@ -16,7 +16,7 @@ case createTransaction(TransactionType, Account, Account)
 
 struct AccountCirclesView: View {
     
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     @State var path = PathSharedState()
     @StateObject var vm = AccountCirclesViewModel()
@@ -31,16 +31,13 @@ struct AccountCirclesView: View {
     
     var body: some View {
         NavigationStack(path: $path.path) {
-            VStack(spacing: 0) {
-                QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                AccountGroupSelector()
-            }
+            QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
             ZStack {
                 VStack {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.showingRemainder > 0) }) { account in
-                                DraggableAccountCircleItem(vm: vm, account: account, path: $vm.path)
+                                DraggableAccountCircleItem(vm: vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
                             }
                             PlusNewAccount(accountType: .earnings)
                         }
@@ -51,7 +48,7 @@ struct AccountCirclesView: View {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .regular }) { account in
-                                DraggableAccountCircleItem(vm: vm, account: account, path: $vm.path)
+                                DraggableAccountCircleItem(vm: vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
                             }
                             PlusNewAccount(accountType: .regular)
                         }
@@ -62,7 +59,7 @@ struct AccountCirclesView: View {
                     ScrollView(.horizontal) {
                         LazyHGrid(rows: [GridItem(.adaptive(minimum: 100))], alignment: .top, spacing: horizontalSpacing) {
                             ForEach(groupedAccounts.filter { $0.type == .expense || ($0.type == .balancing && $0.showingRemainder < 0)}) { account in
-                                DraggableAccountCircleItem(vm: vm, account: account, path: $vm.path)
+                                DraggableAccountCircleItem(vm: vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
                             }
                             PlusNewAccount(accountType: .expense)
                         }
@@ -87,18 +84,6 @@ struct AccountCirclesView: View {
                     }
                     .position(draggableLocation)
                 }
-                Group {
-                    ForEach(vm.staticLocations.sorted(by: { _,_ in true }), id: \.key.id) { (account, location) in
-                        ZStack {
-                            Circle()
-                                .fill(.blue)
-                                .frame(width: 50, height: 50)
-                            Text(account.name)
-                        }
-                        .opacity(0.5)
-                        .position(location)
-                    }
-                }
             }
             .coordinateSpace(name: "OuterV")
             .task {
@@ -108,6 +93,9 @@ struct AccountCirclesView: View {
                 } catch {
                     alert(error)
                 }
+            }
+            .onChange(of: selectedAccountGroup.selectedAccountGroup) { _, _ in
+                vm.deleteStaticLocations()
             }
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                 switch screen {
