@@ -192,7 +192,7 @@ struct LoginView: View {
     func auth() async {
         do {
             guard let bundleID = Bundle.main.bundleIdentifier else {
-                throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
+                throw ErrorModel(humanText: "Не смогли получить Bundle Identifier приложения")
             }
             let response = try await AuthAPI().Auth(req: AuthReq(
                 email: login,
@@ -212,7 +212,7 @@ struct LoginView: View {
     func register() async {
         do {
             guard let bundleID = Bundle.main.bundleIdentifier else {
-                throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
+                throw ErrorModel(humanText: "Не смогли получить Bundle Identifier приложения")
             }
             let response = try await AuthAPI().Register(req: RegisterReq(
                 email: login,

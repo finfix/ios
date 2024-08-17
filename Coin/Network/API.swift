@@ -20,7 +20,7 @@ class API {
     func getBaseHeaders() throws -> [String: String] {
         guard let accessToken else {
             isLogin = false
-            throw ErrorModel(humanTextError: "AccessToken отсутствует")
+            throw ErrorModel(humanText: "AccessToken отсутствует")
         }
         return ["Authorization": accessToken]
     }
@@ -52,7 +52,7 @@ class API {
             urlComponents?.queryItems = urlQueryItems
         }
         
-        guard let url = urlComponents?.url else { throw ErrorModel(humanTextError: "Невалидный URL") }
+        guard let url = urlComponents?.url else { throw ErrorModel(humanText: "Невалидный URL") }
         
         // Запрос
         var request = URLRequest(url: url)
@@ -71,7 +71,7 @@ class API {
                 encoder.dateEncodingStrategy = .formatted(DateFormatters.fullTime)
                 request.httpBody = try encoder.encode(body)
             } catch {
-                throw ErrorModel(humanTextError: "Ошибка при преобразовании структуры в JSON", developerTextError: "\(error)")
+                throw ErrorModel(humanText: "Ошибка при преобразовании структуры в JSON", error: "\(error)")
             }
         }
                 
@@ -93,7 +93,7 @@ class API {
         do {
             (data, response) = try await URLSession.shared.data(for: request)
         } catch {
-            throw ErrorModel(humanTextError: error.localizedDescription, developerTextError: "\(error)")
+            throw ErrorModel(humanText: error.localizedDescription, error: "\(error)")
         }
         let res = response as! HTTPURLResponse
         
@@ -120,7 +120,7 @@ class API {
     
     private func getNewTokens() async throws -> String {
         guard let refreshToken else {
-            throw ErrorModel(humanTextError: "Refresh token отсутствует")
+            throw ErrorModel(humanText: "Refresh token отсутствует")
         }
         let tokens = try await AuthAPI().RefreshToken(req: RefreshTokensReq(
             token: refreshToken,
@@ -138,7 +138,7 @@ class API {
         do {
             return try JSONDecoder().decode(ErrorModel.self, from: data)
         } catch {
-            throw ErrorModel(humanTextError: "Ошибка декодирования", developerTextError: "\(error)")
+            throw ErrorModel(humanText: "Ошибка декодирования", error: "\(error)")
         }
     }
      
@@ -153,7 +153,7 @@ class API {
         do {
             return try decoder.decode(model.self, from: data)
         } catch {
-            throw ErrorModel(humanTextError: "Ошибка декодирования", developerTextError: "\(error)")
+            throw ErrorModel(humanText: "Ошибка декодирования", error: "\(error)")
         }
     }
 }

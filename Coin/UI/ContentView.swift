@@ -32,13 +32,13 @@ struct ContentView: View {
                 let serverVersionParts = serverVersion.version.replacingOccurrences(of: "v", with: "").split(separator: ".")
                 
                 guard let localVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
-                    alert(ErrorModel(humanTextError: "Не смогли получить версию приложения"))
+                    alert(ErrorModel(humanText: "Не смогли получить версию приложения"))
                     return
                 }
                 let localVersionParts = localVersion.replacingOccurrences(of: "v", with: "").split(separator: ".")
                 
                 guard serverVersionParts.count == 3, localVersionParts.count == 3 else {
-                    alert(ErrorModel(humanTextError: "Не смогли обработать версию с сервера или с телефона"))
+                    alert(ErrorModel(humanText: "Не смогли обработать версию с сервера или с телефона"))
                     return
                 }
                 

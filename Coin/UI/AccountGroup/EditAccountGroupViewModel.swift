@@ -32,7 +32,7 @@ class EditAccountGroupViewModel {
         
         if mode == .create {
             let users = try await service.getUsers()
-            guard let user = users.first else { throw ErrorModel(humanTextError: "Не смогли получить пользователя") }
+            guard let user = users.first else { throw ErrorModel(humanText: "Не смогли получить пользователя") }
             currentAccountGroup.currency = user.defaultCurrency
         }
     }

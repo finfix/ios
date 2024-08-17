@@ -75,7 +75,7 @@ class TransactionsListViewModel {
     
     func deleteTransaction(_ transaction: Transaction, selectedAccountGroup: AccountGroup) async throws {
         guard let index = transactions.firstIndex(of: transaction) else {
-            throw ErrorModel(humanTextError: "Не смогли найти позицию транзакции №\(transaction.id) в массиве")
+            throw ErrorModel(humanText: "Не смогли найти позицию транзакции №\(transaction.id) в массиве")
         }
         _ = transactions.remove(at: index)
         regroup(selectedAccountGroup: selectedAccountGroup)

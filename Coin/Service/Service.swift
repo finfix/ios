@@ -36,7 +36,7 @@ extension Service {
                 balance = try await db.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
             }
             guard var balance = balance else {
-                throw ErrorModel(humanTextError: "Не смогли посчитать баланс счета \(account.id)")
+                throw ErrorModel(humanText: "Не смогли посчитать баланс счета \(account.id)")
             }
             if account.type == .earnings || account.type == .balancing {
                 balance *= -1
@@ -202,7 +202,7 @@ extension Service {
                 ).first
                 
                 guard parentBalancingAccount != nil else {
-                    throw ErrorModel(humanTextError: "Не смогли найти родительский балансировочный счет для группы счетов \(account.accountGroup.id)")
+                    throw ErrorModel(humanText: "Не смогли найти родительский балансировочный счет для группы счетов \(account.accountGroup.id)")
                 }
                 
                 // Создаем и получаем балансировочный счет группы счетов
@@ -273,27 +273,27 @@ extension Service {
     
     private func validateAccount(_ account: Account) throws {
         guard account.name != "" else {
-            throw ErrorModel(humanTextError: "Имя счета не может быть пустым")
+            throw ErrorModel(humanText: "Имя счета не может быть пустым")
         }
         
         guard account.budgetAmount >= 0 else {
-            throw ErrorModel(humanTextError: "Бюджет не может быть отрицательным")
+            throw ErrorModel(humanText: "Бюджет не может быть отрицательным")
         }
         
         guard account.budgetFixedSum >= 0 else {
-            throw ErrorModel(humanTextError: "Фиксированная сумма бюджета не может быть отрицательной")
+            throw ErrorModel(humanText: "Фиксированная сумма бюджета не может быть отрицательной")
         }
         
         guard account.budgetDaysOffset >= 0 else {
-            throw ErrorModel(humanTextError: "Количество дней отступа не может быть отрицательным")
+            throw ErrorModel(humanText: "Количество дней отступа не может быть отрицательным")
         }
         
         guard account.budgetFixedSum <= account.budgetAmount else {
-            throw ErrorModel(humanTextError: "Фиксированная сумма бюджета не может быть больше бюджета")
+            throw ErrorModel(humanText: "Фиксированная сумма бюджета не может быть больше бюджета")
         }
         
         guard account.budgetDaysOffset < Calendar.current.range(of: .day, in: .month, for: Date())!.count else {
-            throw ErrorModel(humanTextError: "Количество дней отступа не может быть больше или равно количеству дней в месяце")
+            throw ErrorModel(humanText: "Количество дней отступа не может быть больше или равно количеству дней в месяце")
         }
     }
     
@@ -337,7 +337,7 @@ extension Service {
                 ).first
                 
                 guard parentBalancingAccount != nil else {
-                    throw ErrorModel(humanTextError: "Не смогли найти родительский балансировочный счет для группы счетов \(newAccount.accountGroup.id)")
+                    throw ErrorModel(humanText: "Не смогли найти родительский балансировочный счет для группы счетов \(newAccount.accountGroup.id)")
                 }
                 
                 // Создаем и получаем балансировочный счет группы счетов
@@ -494,7 +494,7 @@ extension Service {
     
     private func validateTransaction(_ transaction: Transaction) throws {
         guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
-            throw ErrorModel(humanTextError: "Транзакция не может быть с нулевой суммой списания или пополнения")
+            throw ErrorModel(humanText: "Транзакция не может быть с нулевой суммой списания или пополнения")
         }
     }
     
@@ -588,7 +588,7 @@ extension Service {
     }
     
     private func validateAccountGroup(_ accountGroup: AccountGroup) throws {
-        guard accountGroup.name != "" else { throw ErrorModel(humanTextError: "Группа счетов не может быть без имени") }
+        guard accountGroup.name != "" else { throw ErrorModel(humanText: "Группа счетов не может быть без имени") }
     }
         
     func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
@@ -655,7 +655,7 @@ extension Service {
         var newTag = tag
         
         guard tag.name != "" else {
-            throw ErrorModel(humanTextError: "Нельзя создать подкатегорию без названия")
+            throw ErrorModel(humanText: "Нельзя создать подкатегорию без названия")
         }
                 
         try await db.updateTag(newTag)
@@ -788,7 +788,7 @@ extension Service {
     
     func compareLocalAndServerData() async throws -> String? {
         guard try await db.getCountTasks() == 0 else {
-            throw ErrorModel(humanTextError: "Вам необходимо дождаться выполнения всех фоновых задач")
+            throw ErrorModel(humanText: "Вам необходимо дождаться выполнения всех фоновых задач")
         }
         logger.log("Начали сравнение серверных данных с локальными")
         
@@ -900,7 +900,7 @@ extension Service {
 extension Service {
     func sync() async throws {
         guard try await db.getCountTasks() == 0 else {
-            throw ErrorModel(humanTextError: "Вам необходимо дождаться выполнения всех фоновых задач")
+            throw ErrorModel(humanText: "Вам необходимо дождаться выполнения всех фоновых задач")
         }
         logger.info("Синхронизируем данные")
                 

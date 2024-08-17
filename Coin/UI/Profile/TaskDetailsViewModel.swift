@@ -20,7 +20,7 @@ class TasksDetailsViewModel {
     func load() async throws {
         let tasks = try await service.getSyncTasks(ids: [task.id])
         guard !tasks.isEmpty else {
-            throw ErrorModel(humanTextError: "Задача уже выполнена или удалена")
+            throw ErrorModel(humanText: "Задача уже выполнена или удалена")
         }
         task = tasks[0]
     }
