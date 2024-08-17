@@ -34,6 +34,8 @@
 		B51CE1FA2BAC442F00682D48 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51CE1F92BAC442F00682D48 /* Repository.swift */; };
 		B51CE1FE2BAC478D00682D48 /* CurrencyRatesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51CE1FD2BAC478D00682D48 /* CurrencyRatesViewModel.swift */; };
 		B529280D2B0614D100C192CA /* UserModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B529280C2B0614D100C192CA /* UserModels.swift */; };
+		B52DE5EA2C70807F00A4656E /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B52DE5E92C70807F00A4656E /* GRDB */; };
+		B52DE5EC2C7080C200A4656E /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B52DE5EB2C7080C200A4656E /* GRDB */; };
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54254842AF5218C008ECC33 /* TransactionFilterView.swift */; };
 		B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */; };
@@ -94,7 +96,6 @@
 		B5B068E82BAC6E0400AEEC98 /* AccountGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B068E72BAC6E0400AEEC98 /* AccountGroup.swift */; };
 		B5B068EA2BAC6E1B00AEEC98 /* Currency.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B068E92BAC6E1B00AEEC98 /* Currency.swift */; };
 		B5B068EC2BAC6E2600AEEC98 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B068EB2BAC6E2600AEEC98 /* User.swift */; };
-		B5B068EF2BAC6E5500AEEC98 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B5B068EE2BAC6E5500AEEC98 /* GRDB */; };
 		B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B068F02BAC70A100AEEC98 /* ProfileViewModel.swift */; };
 		B5B707242BA59A3700A07DB6 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B707232BA59A3700A07DB6 /* AppDatabase.swift */; };
 		B5B950432ADF16B300798F8C /* BudgetRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B950422ADF16B300798F8C /* BudgetRow.swift */; };
@@ -219,7 +220,6 @@
 		B5DEFD422C07015A001D7E61 /* TransactionsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB6AA328F3D62D00C2A2AC /* TransactionsTab.swift */; };
 		B5DEFD432C07015A001D7E61 /* QuickStatisticViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B512688E2BBAA1FF00B54572 /* QuickStatisticViewModel.swift */; };
 		B5DEFD442C07015A001D7E61 /* SettingsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */; };
-		B5DEFD462C07015A001D7E61 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B5DEFCD82C07015A001D7E61 /* GRDB */; };
 		B5DEFD482C07015A001D7E61 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = B58705752900956D004C77DD /* README.md */; };
 		B5DEFD492C07015A001D7E61 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5F9CC6928F01CA90037A21A /* Preview Assets.xcassets */; };
 		B5DEFD4A2C07015A001D7E61 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
@@ -371,8 +371,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5DEFD462C07015A001D7E61 /* GRDB in Frameworks */,
 				B581336F2C0CF43F004EB2B6 /* DeviceKit in Frameworks */,
+				B52DE5EC2C7080C200A4656E /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -380,8 +380,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5B068EF2BAC6E5500AEEC98 /* GRDB in Frameworks */,
 				B581336D2C0CF439004EB2B6 /* DeviceKit in Frameworks */,
+				B52DE5EA2C70807F00A4656E /* GRDB in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -723,8 +723,8 @@
 			);
 			name = CoinDev;
 			packageProductDependencies = (
-				B5DEFCD82C07015A001D7E61 /* GRDB */,
 				B581336E2C0CF43F004EB2B6 /* DeviceKit */,
+				B52DE5EB2C7080C200A4656E /* GRDB */,
 			);
 			productName = Coin;
 			productReference = B5DEFD4F2C07015A001D7E61 /* CoinDev.app */;
@@ -744,8 +744,8 @@
 			);
 			name = Coin;
 			packageProductDependencies = (
-				B5B068EE2BAC6E5500AEEC98 /* GRDB */,
 				B581336C2C0CF439004EB2B6 /* DeviceKit */,
+				B52DE5E92C70807F00A4656E /* GRDB */,
 			);
 			productName = Coin;
 			productReference = B5F9CC5F28F01CA80037A21A /* Coin.app */;
@@ -775,8 +775,8 @@
 			);
 			mainGroup = B5F9CC5628F01CA80037A21A;
 			packageReferences = (
-				B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */,
 				B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */,
+				B52DE5E82C70807F00A4656E /* XCRemoteSwiftPackageReference "GRDB" */,
 			);
 			productRefGroup = B5F9CC6028F01CA80037A21A /* Products */;
 			projectDirPath = "";
@@ -1363,6 +1363,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		B52DE5E82C70807F00A4656E /* XCRemoteSwiftPackageReference "GRDB" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/devicekit/DeviceKit";
@@ -1371,25 +1379,19 @@
 				minimumVersion = 5.4.0;
 			};
 		};
-		B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/groue/GRDB.swift";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
-		B5DEFCD92C07015A001D7E61 /* XCRemoteSwiftPackageReference "GRDB" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/groue/GRDB.swift";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B52DE5E92C70807F00A4656E /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B52DE5E82C70807F00A4656E /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
+		};
+		B52DE5EB2C7080C200A4656E /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B52DE5E82C70807F00A4656E /* XCRemoteSwiftPackageReference "GRDB" */;
+			productName = GRDB;
+		};
 		B581336C2C0CF439004EB2B6 /* DeviceKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */;
@@ -1399,16 +1401,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
-		};
-		B5B068EE2BAC6E5500AEEC98 /* GRDB */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B5B068ED2BAC6E5500AEEC98 /* XCRemoteSwiftPackageReference "GRDB" */;
-			productName = GRDB;
-		};
-		B5DEFCD82C07015A001D7E61 /* GRDB */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B5DEFCD92C07015A001D7E61 /* XCRemoteSwiftPackageReference "GRDB" */;
-			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
