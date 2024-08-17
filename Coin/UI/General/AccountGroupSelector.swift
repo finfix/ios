@@ -12,21 +12,47 @@ private let logger = Logger(subsystem: "Coin", category: "account group selector
 
 struct AccountGroupSelector: View {
     
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     @State private var vm = AccountGroupSelectorViewModel()
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     @AppStorage("selectedAccountGroupID") var selectedAccountGroupID: Int = 0
-    var pickerName: String = ""
+    
+    var pickerName: String? = nil
+    
+    enum Mode {
+        case word, icon
+    }
+    
+    var mode: Mode = .word
     
     var body: some View {
         @Bindable var selectedAccountGroup = selectedAccountGroup
-        Picker(pickerName, selection: $selectedAccountGroup.selectedAccountGroup) {
-            ForEach(vm.accountGroups) { accountGroup in
-                Text(accountGroup.name)
-                    .tag(accountGroup)
+        HStack {
+            if let pickerName {
+                Text(pickerName)
+                Spacer()
+            }
+            Menu {
+                ForEach(vm.accountGroups) { accountGroup in
+                    Button{
+                        selectedAccountGroup.selectedAccountGroup = accountGroup
+                    } label: {
+                        Text(accountGroup.name)
+                        if selectedAccountGroup.selectedAccountGroup == accountGroup {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            } label: {
+                switch mode {
+                case .word:
+                    Text(selectedAccountGroup.selectedAccountGroup.name)
+                case .icon:
+                    Image(systemName: "ellipsis.circle")
+                        .font(.system(size: 20))
+                }
             }
         }
-        .pickerStyle(.menu)
         .task {
             do {
                 try await vm.load()

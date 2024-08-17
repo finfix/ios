@@ -36,11 +36,18 @@ struct EditTransaction: View {
         )
     }
     
-    init(transactionType: TransactionType, accountGroup: AccountGroup) {
+    init(
+        transactionType: TransactionType,
+        accountFrom: Account = Account(),
+        accountTo: Account = Account(),
+        accountGroup: AccountGroup
+    ) {
         vm = EditTransactionViewModel(
             currentTransaction: Transaction(
                 accountingInCharts: true, 
-                type: transactionType
+                type: transactionType,
+                accountFrom: accountFrom,
+                accountTo: accountTo
             ),
             accountGroup: accountGroup,
             mode: .create
@@ -276,7 +283,11 @@ struct EditTransaction: View {
         }
         .task {
             if vm.mode == .create {
-                vm.shouldShowPickerAccountFrom = true
+                if vm.currentTransaction.accountFrom.id == 0 {
+                    vm.shouldShowPickerAccountFrom = true
+                } else {
+                    focusedField = .amountFromSelector
+                }
             }
             do {
                 try await vm.load()
