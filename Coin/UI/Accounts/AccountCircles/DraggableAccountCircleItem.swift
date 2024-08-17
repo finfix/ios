@@ -10,6 +10,7 @@ import SwiftUI
 struct DraggableAccountCircleItem: View {
     
     @ObservedObject var vm: AccountCirclesViewModel
+    let accountGroup: AccountGroup
     let account: Account
     @Binding var path: NavigationPath
     @State var isChildrenOpen = false
@@ -23,12 +24,10 @@ struct DraggableAccountCircleItem: View {
                 DragGesture(coordinateSpace: .named("OuterV"))
                     .onChanged { state in
                         guard account.type != .balancing && account.type != .expense else { return }
-                        guard !account.isParent else { return }
                         vm.updateDraggableLocation(location: state.location, for: account)
                     }
                     .onEnded { state in
-                        vm.confirmDraggableDrop(for: account)
-                        vm.removeChildrenPositions(account: account)
+                        confirmDraggableDrop(for: account)
                         if isAlreadyOpened {
                             dismiss()
                         }
@@ -41,7 +40,6 @@ struct DraggableAccountCircleItem: View {
                         if isAlreadyOpened {
                             dismiss()
                         }
-                        vm.removeChildrenPositions(account: account)
                     }
             )
             .gesture(
@@ -56,7 +54,6 @@ struct DraggableAccountCircleItem: View {
                 TapGesture(count: 1)
                     .onEnded {
                         if isAlreadyOpened {
-                            vm.removeChildrenPositions(account: account)
                             dismiss()
                         }
                         path.append(AccountCircleItemRoute.accountTransactions(account))
@@ -81,6 +78,7 @@ struct DraggableAccountCircleItem: View {
                         ForEach(account.childrenAccounts) { account in
                             DraggableAccountCircleItem(
                                 vm: vm,
+                                accountGroup: accountGroup,
                                 account: account,
                                 path: $path,
                                 isAlreadyOpened: true
@@ -93,11 +91,67 @@ struct DraggableAccountCircleItem: View {
                 }
             }
     }
+    
+    func confirmDraggableDrop(for draggableAccount: Account) {
+        
+        // Если какой-то счет подсвечивается (в зоне реагирования)
+        if let staticAccount = vm.highlitedAccount {
+            
+            // Выбираем тип транзакции, который получится по комбинации типов счетов
+            var transactionType: TransactionType? = nil
+            switch (true) {
+            case draggableAccount == staticAccount: break
+            case draggableAccount.type == .earnings && staticAccount.type == .regular: transactionType = .income // Доходный счет в обычный = доход
+            case draggableAccount.type == .regular && staticAccount.type == .regular: transactionType = .transfer // Обычный счет в обычный = перевод
+            case draggableAccount.type == .regular && staticAccount.type == .expense: transactionType = .consumption // Обычный счет в расходный = расход
+            default: break
+            }
+            
+            // Если смогли выбрать тип транзакции
+            if let transactionType {
+                
+                // Получаем счет списания
+                var accountFrom: Account? = draggableAccount
+                
+                // Если счет родительский
+                if draggableAccount.isParent {
+                    
+                    // Получаем первый дочерний счет (считаем его счетом по умолчанию)
+                    accountFrom = draggableAccount.childrenAccounts.first
+                }
+                
+                // Получаем счет пополнения
+                var accountTo: Account? = staticAccount
+                
+                // Если счет родительский
+                if staticAccount.isParent {
+                    
+                    //Получаем первый дочерний счет (считаем его счетом по умолчанию)
+                    accountTo = staticAccount.childrenAccounts.first
+                }
+                
+                // Если оба счета есть, независимо от предыдущей логики
+                if let accountFrom = accountFrom, let accountTo = accountTo {
+                    self.path.append(DraggableAccountRoute.createTransaction(transactionType, accountFrom, accountTo))
+                }
+            }
+        }
+                                     
+        // Сбрасываем подсвечиваемый счет
+        self.vm.highlitedAccount = nil
+                                     
+        // Убираем счет, который дергали
+        withAnimation {
+            self.vm.draggableLocation = nil
+            self.vm.draggableAccount = nil
+        }
+    }
 }
 
 #Preview {
     DraggableAccountCircleItem(
         vm: AccountCirclesViewModel(),
+        accountGroup: AccountGroup(),
         account: Account(),
         path: .constant(NavigationPath()),
         isAlreadyOpened: false
