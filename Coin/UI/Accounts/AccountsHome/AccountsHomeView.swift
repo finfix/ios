@@ -26,10 +26,7 @@ struct AccountsHomeView: View {
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 30) {
-                VStack(spacing: 0) {
-                    QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                    AccountGroupSelector()
-                }
+                QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                 ScrollView {
                     Text("Карты и счета")
                     SnapCarouselView(spacing: 30, index: $currentIndex, items: filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
