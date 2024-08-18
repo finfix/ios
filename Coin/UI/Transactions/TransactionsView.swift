@@ -57,3 +57,5 @@ struct TransactionsView: View {
     TransactionsView()
     .environment(AlertManager(handle: {_ in }))
 }
+
+// TODO: Сделать PreviewCoinApp с нужными .environment

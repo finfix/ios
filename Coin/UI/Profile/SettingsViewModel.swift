@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class SettingsViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     var appVersion: String {
         if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
@@ -29,6 +31,6 @@ class SettingsViewModel {
     var serverBuildNumber: String = "Unknown"
     
     func load() async throws {
-        (serverVersion, serverBuildNumber) = try await service.getServerVersion()
+        (serverVersion, serverBuildNumber) = try await service.getVersion(.server)
     }
 }

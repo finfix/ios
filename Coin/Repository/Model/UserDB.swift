@@ -14,6 +14,7 @@ struct UserDB {
     var name: String
     var email: String
     var defaultCurrencyCode: String
+    var notificationToken: String?
     
     // Инициализатор из сетевой модели
     init(_ res: GetUserRes) {
@@ -21,6 +22,19 @@ struct UserDB {
         self.name = res.name
         self.email = res.email
         self.defaultCurrencyCode = res.defaultCurrency
+        self.notificationToken = nil
+    }
+    
+    // Инициализатор из бизнес модели
+    init(_ model: User) {
+        self.id = model.id
+        if self.id == 0 {
+            self.id = nil
+        }
+        self.name = model.name
+        self.email = model.email
+        self.defaultCurrencyCode = model.defaultCurrency.code
+        self.notificationToken = model.notificationToken
     }
     
     static func compareTwoArrays(_ serverModels: [UserDB], _ localModels: [UserDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
@@ -64,5 +78,6 @@ extension UserDB: Codable, FetchableRecord, PersistableRecord {
         static let name = Column(CodingKeys.name)
         static let email = Column(CodingKeys.email)
         static let defaultCurrencyCode = Column(CodingKeys.defaultCurrencyCode)
+        static let notificationToken = Column(CodingKeys.notificationToken)
     }
 }

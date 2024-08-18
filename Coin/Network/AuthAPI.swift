@@ -2,51 +2,36 @@
 //  AuthAPI.swift
 //  Coin
 //
-//  Created by Илья on 24.10.2022.
+//  Created by Илья on 18.08.2024.
 //
 
-import Foundation
 import SwiftUI
 
-class AuthAPI: API {
-    
-    let authBasePath = "/auth"
+private let authBasePath = "/auth"
+
+extension APIManager {
     
     func Auth(req: AuthReq) async throws -> AuthRes {
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + authBasePath + "/signIn",
             method: .post,
-            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString], 
-            body: req,
-            handleUnauthorized: false
+            headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
+            withAuthorization: false,
+            body: req
         )
         
-        return try decode(data, model: AuthRes.self)
+        return try networkManager.decode(data, model: AuthRes.self)
     }
     
     func Register(req: RegisterReq) async throws -> AuthRes {
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + authBasePath + "/signUp",
             method: .post,
             headers: ["DeviceID": UIDevice.current.identifierForVendor!.uuidString],
-            body: req,
-            handleUnauthorized: false
+            withAuthorization: false,
+            body: req
         )
         
-        return try decode(data, model: AuthRes.self)
-    }
-    
-    func RefreshToken(req: RefreshTokensReq) async throws -> RefreshTokensRes {
-        var headers = try getBaseHeaders()
-        headers["DeviceID"] = await UIDevice.current.identifierForVendor!.uuidString
-        let data = try await request(
-            url: apiBasePath + authBasePath + "/refreshTokens",
-            method: .post,
-            headers: headers,
-            body: req,
-            handleUnauthorized: false
-        )
-        
-        return try decode(data, model: RefreshTokensRes.self)
+        return try networkManager.decode(data, model: AuthRes.self)
     }
 }

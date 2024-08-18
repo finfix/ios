@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class HidedAccountViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     var accounts: [Account] = []
     var type: AccountType = .regular

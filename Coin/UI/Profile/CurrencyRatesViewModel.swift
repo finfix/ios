@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class CurrencyRatesViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     var currencies: [Currency] = []
     var user = User()

@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import Factory
 import SwiftUI
 
 @Observable
 class EditAccountGroupViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
         
     var currentAccountGroup = AccountGroup()
     var oldAccountGroup = AccountGroup()
@@ -32,7 +34,7 @@ class EditAccountGroupViewModel {
         
         if mode == .create {
             let users = try await service.getUsers()
-            guard let user = users.first else { throw ErrorModel(humanTextError: "Не смогли получить пользователя") }
+            guard let user = users.first else { throw ErrorModel(humanText: "Не смогли получить пользователя") }
             currentAccountGroup.currency = user.defaultCurrency
         }
     }

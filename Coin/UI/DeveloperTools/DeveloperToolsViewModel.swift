@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class DeveloperToolsViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     func compareLocalAndServerData() async throws -> String? {
         return try await service.compareLocalAndServerData()

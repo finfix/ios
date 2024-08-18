@@ -14,6 +14,84 @@ enum EditTransactionRoute: Hashable {
     case tagsList
 }
 
+struct Tags: View {
+    
+    var vm: EditTransactionViewModel
+    @Environment(PathSharedState.self) var path
+    
+    var body: some View {
+        HStack {
+            ScrollView(.horizontal) {
+                VStack(alignment: .leading) {
+                    HStack {
+                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
+                            if i % 2 == 0 {
+                                Button {
+                                    withAnimation {
+                                        if vm.currentTransaction.tags.contains(tag) {
+                                            vm.currentTransaction.tags.removeAll { $0.id == tag.id }
+                                        } else {
+                                            vm.currentTransaction.tags.append(tag)
+                                        }
+                                    }
+                                } label: {
+                                    Text("#\(tag.name)")
+                                        .font(.callout)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background {
+                                            RoundedRectangle(cornerRadius: 100)
+                                                .foregroundStyle(vm.currentTransaction.tags.contains(tag) ? Color.blue : Color.clear)
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 100)
+                                                        .stroke(.secondary, lineWidth: 1)
+                                                }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                    HStack {
+                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
+                            if i % 2 != 0 {
+                                Button {
+                                    withAnimation {
+                                        if vm.currentTransaction.tags.contains(tag) {
+                                            vm.currentTransaction.tags.removeAll { $0.id == tag.id }
+                                        } else {
+                                            vm.currentTransaction.tags.append(tag)
+                                        }
+                                    }
+                                } label: {
+                                    Text("#\(tag.name)")
+                                        .font(.callout)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background {
+                                            RoundedRectangle(cornerRadius: 100)
+                                                .foregroundStyle(vm.currentTransaction.tags.contains(tag) ? Color.blue : Color.clear)
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 100)
+                                                        .stroke(.secondary, lineWidth: 1)
+                                                }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(1)
+            }
+            Button {
+                path.path.append(EditTransactionRoute.tagsList)
+            } label: {
+                Image(systemName: "ellipsis")
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct EditTransaction: View {
     
     private enum Field: Hashable {
@@ -21,9 +99,9 @@ struct EditTransaction: View {
     }
     @FocusState private var focusedField: Field?
     
-    @Environment (\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss
     @State private var vm: EditTransactionViewModel
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     
     @Environment(PathSharedState.self) var path
     
@@ -36,11 +114,18 @@ struct EditTransaction: View {
         )
     }
     
-    init(transactionType: TransactionType, accountGroup: AccountGroup) {
+    init(
+        transactionType: TransactionType,
+        accountFrom: Account = Account(),
+        accountTo: Account = Account(),
+        accountGroup: AccountGroup
+    ) {
         vm = EditTransactionViewModel(
             currentTransaction: Transaction(
                 accountingInCharts: true, 
-                type: transactionType
+                type: transactionType,
+                accountFrom: accountFrom,
+                accountTo: accountTo
             ),
             accountGroup: accountGroup,
             mode: .create
@@ -49,36 +134,9 @@ struct EditTransaction: View {
     
     var body: some View {
         Form {
-            HStack {
-                ScrollView(.horizontal) {
-                    HStack {
-                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
-                            Button {
-                                if vm.currentTransaction.tags.contains(tag) {
-                                    vm.currentTransaction.tags.removeAll { $0.id == tag.id }
-                                } else {
-                                    vm.currentTransaction.tags.append(tag)
-                                }
-                            } label: {
-                                Text("#\(tag.name)")
-                                    .padding(5)
-                                    .overlay {
-                                        if vm.currentTransaction.tags.contains(tag) {
-                                            RoundedRectangle(cornerRadius: 5)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                            }
-                        }
-                    }
-                }
-                Button {
-                    path.path.append(EditTransactionRoute.tagsList)
-                } label: {
-                    Image(systemName: "ellipsis")
-                }
+            Section {
+                Tags(vm: vm)
             }
-            .buttonStyle(.plain)
             if vm.currentTransaction.type != .balancing {
                 Section {
                     Pickers(
@@ -128,7 +186,7 @@ struct EditTransaction: View {
                         if vm.intercurrency {
                             focusedField = .amountToSelector
                         } else {
-                            vm.shouldShowDatePicker = true
+                            focusedField = .note
                         }
                     }
                     .overlay(alignment: .trailing) {
@@ -145,9 +203,7 @@ struct EditTransaction: View {
                     .keyboardType(.decimalPad)
                     .focused($focusedField, equals: .amountToSelector)
                     .onSubmit {
-                        withAnimation {
-                            vm.shouldShowDatePicker = true
-                        }
+                        focusedField = .note
                     }
                     .overlay(alignment: .trailing) {
                         Text(vm.currentTransaction.accountTo.currency.symbol)
@@ -174,48 +230,66 @@ struct EditTransaction: View {
                 }
             }
             Section {
-                ExpandableDatePicker(
-                    buttonName: "Дата",
-                    isCalendarShowing: $vm.shouldShowDatePicker,
-                    date: Binding<Date?>($vm.currentTransaction.dateTransaction),
-                    showClearButton: false
-                )
-                .onChange (of: vm.currentTransaction.dateTransaction) { _, _ in
-                    withAnimation {
-                        vm.shouldShowDatePicker = false
-                        focusedField = .note
-                    }
-                }
-            }
-            Section {
                 TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
                     .focused($focusedField, equals: .note)
             }
-            Section {
-                Toggle("Учитывать транзакцию в графиках", isOn: $vm.currentTransaction.accountingInCharts)
-            }
-            Section {
+            Section(footer:
                 Button {
-                    Task {
-                        do {
-                            try await vm.save()
-                        } catch {
-                            alert(error)
-                            return
-                        }
-                        
-                        dismiss()
+                    withAnimation {
+                        vm.shouldShowAdditionalSettings.toggle()
                     }
                 } label: {
-                    if vm.shouldShowProgress {
-                        ProgressView()
-                    } else {
-                        Text("Сохранить")
+                    HStack {
+                        Image(systemName:"chevron.down")
+                            .rotationEffect(.degrees(vm.shouldShowAdditionalSettings ? 180 : 0))
+                        Text("\(vm.shouldShowAdditionalSettings ? "Скрыть" : "Показать") дополнительные настройки")
                     }
+                    .font(.caption)
                 }
-                .frame(maxWidth: .infinity)
+                .buttonStyle(.plain)
+            ) {}
+            if vm.shouldShowAdditionalSettings {
+                Section {
+                    Toggle("Учитывать транзакцию в графиках", isOn: $vm.currentTransaction.accountingInCharts)
+                }
+            }
+            Section {
+                CarouselDatePicker(selectedDate: $vm.currentTransaction.dateTransaction)
+                    .onChange(of: vm.currentTransaction.dateTransaction) { _, _ in
+                        Task {
+                            do {
+                                try await vm.save()
+                            } catch {
+                                alert(error)
+                                return
+                            }
+                            
+                            dismiss()
+                        }
+                    }
             }
             if vm.mode == .update {
+                Section {
+                    Button {
+                        Task {
+                            do {
+                                try await vm.save()
+                            } catch {
+                                alert(error)
+                                return
+                            }
+                            
+                            dismiss()
+                        }
+                    } label: {
+                        if vm.shouldShowProgress {
+                            ProgressView()
+                        } else {
+                            Text("Сохранить")
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
                 Section(footer:
                     VStack(alignment: .leading) {
                         Text("ID: \(vm.currentTransaction.id)")
@@ -228,45 +302,58 @@ struct EditTransaction: View {
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 HStack {
-                    if focusedField == .amountFromSelector && vm.currentTransaction.accountFrom.remainder != 0 && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer )  {
+                    
+                    // Если (выбранное поле = поле ввода суммы списания) И (счет списания имеет ненулевой баланс) И (тип транзакции расход ИЛИ перевод)
+                    if focusedField == .amountFromSelector && vm.currentTransaction.accountFrom.remainder != 0 && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer)  {
+                        
+                        // Кнопка ввода всего возможного баланса в поле ввода суммы списания
                         Button("Весь баланс: " + CurrencyFormatter().string(
                                         number: vm.currentTransaction.accountFrom.remainder,
                                         currency: vm.currentTransaction.accountFrom.currency
                                     )
                         ) {
+                            
+                            // Присваиваем сумме списания весь баланс счета списания
                             vm.amountFrom = vm.currentTransaction.accountFrom.remainder.doubleValue
+                            
+                            // Если транзакция между счетами в разной валюте
                             if vm.intercurrency {
+                                
+                                // После нажатия переходим к полю ввода суммы пополнения
                                 focusedField = .amountToSelector
                             } else {
-                                vm.shouldShowDatePicker = true
-                                focusedField = nil
+                                
+                                // После нажатия переходим к полю ввода заметки
+                                focusedField = .note
                             }
                         }
                     }
                     Spacer()
-                    Button(focusedField == .note ? "Сохранить" : "Следующее поле") {
+                    
+                    // Кнопка Следующее поле / Сохранить над клавиатурой
+                    Button(focusedField == .note ? "Готово" : "Следующее поле") {
+                        
+                        // Конфигурируем логику нажатия на кнопку на клавиатуре в зависимости от поля, на котором сейчас стоим
                         switch focusedField {
-                        case  .amountFromSelector:
+                        case  .amountFromSelector: // Поле ввода суммы списания
+                            
+                            // Если транзакция между счетами с разными валютами
                             if vm.intercurrency {
+                                
+                                // Переходим к полю ввода суммы пополнения
                                 focusedField = .amountToSelector
                             } else {
-                                vm.shouldShowDatePicker = true
-                                focusedField = nil
+                                
+                                // Переходим к полю заметки
+                                focusedField = .note
                             }
-                        case .amountToSelector:
-                            vm.shouldShowDatePicker = true
+                        case .amountToSelector: // Поле выбора суммы пополнения
+                            
+                            // Переходим к полю ввода заметки
+                            focusedField = .note
+                            
+                        case .note: // Поле ввода заметки
                             focusedField = nil
-                        case .note:
-                            focusedField = nil
-                            Task {
-                                do {
-                                    try await vm.save()
-                                } catch {
-                                    alert(error)
-                                    return
-                                }
-                                dismiss()
-                            }
                         default:
                             focusedField = nil
                         }
@@ -276,7 +363,11 @@ struct EditTransaction: View {
         }
         .task {
             if vm.mode == .create {
-                vm.shouldShowPickerAccountFrom = true
+                if vm.currentTransaction.accountFrom.id == 0 {
+                    vm.shouldShowPickerAccountFrom = true
+                } else {
+                    focusedField = .amountFromSelector
+                }
             }
             do {
                 try await vm.load()
