@@ -7,47 +7,43 @@
 
 import Foundation
 
-class SettingsAPI: API {
-    
-    let settingsBasePath = "/settings"
+private let settingsBasePath = "/settings"
+
+extension APIManager {
     
     func GetCurrencies() async throws -> [GetCurrenciesRes] {
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + settingsBasePath + "/currencies",
-            method: .get,
-            headers: getBaseHeaders()
-        )
-        
-        return try decode(data, model: [GetCurrenciesRes].self)
-    }
-    
-    enum ApplicationType: String {
-        case ios, server
-    }
-    
-    func GetVersion(_ name: ApplicationType) async throws -> GetVersionRes {
-        let data = try await request(
-            url: apiBasePath + settingsBasePath + "/version/\(name.rawValue)",
             method: .get
         )
         
-        return try decode(data, model: GetVersionRes.self)
+        return try networkManager.decode(data, model: [GetCurrenciesRes].self)
+    }
+    
+    func GetVersion(_ name: String) async throws -> GetVersionRes {
+        let data = try await networkManager.request(
+            url: apiBasePath + settingsBasePath + "/version/\(name)",
+            method: .get,
+            withAuthorization: false
+        )
+        
+        return try networkManager.decode(data, model: GetVersionRes.self)
     }
     
     func GetIcons() async throws -> [GetIconsRes] {
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + settingsBasePath + "/icons",
-            method: .get,
-            headers: getBaseHeaders()
+            method: .get
         )
         
-        return try decode(data, model: [GetIconsRes].self)
+        return try networkManager.decode(data, model: [GetIconsRes].self)
     }
     
     func GetIcon(url: String) async throws -> Data {
-        return try await request(
+        return try await networkManager.request(
             url: url,
-            method: .get
+            method: .get,
+            withAuthorization: false
         )
     }
 }

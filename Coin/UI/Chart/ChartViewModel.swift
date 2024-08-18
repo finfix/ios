@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Factory
 
 enum ChartType: String, CaseIterable {
     case earningsAndExpenses = "Доходы и расходы"
@@ -17,7 +18,8 @@ enum ChartType: String, CaseIterable {
 @Observable
 class ChartViewModel {
     
-    let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     var chartType: ChartType
     var data: [Series] = []

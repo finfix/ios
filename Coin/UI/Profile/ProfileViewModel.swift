@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class ProfileViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     func sync() async throws {
         do {
@@ -19,7 +21,7 @@ class ProfileViewModel {
         }
     }
     
-    func deleteAll() async throws {
-        try await service.deleteAllData()
+    func logout() async throws {
+        try await service.logout()
     }
 }

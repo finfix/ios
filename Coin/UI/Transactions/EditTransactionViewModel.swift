@@ -7,10 +7,12 @@
 
 import Foundation
 import SwiftUI
+import Factory
 
 @Observable
 class EditTransactionViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     // View states
     var shouldDisableUI = false

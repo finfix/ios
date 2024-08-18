@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import Factory
 
 class AccountCirclesViewModel: ObservableObject {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     @Published var accounts: [Account] = []
         

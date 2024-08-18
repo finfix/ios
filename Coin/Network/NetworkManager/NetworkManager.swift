@@ -11,19 +11,25 @@ import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "API")
 
-class API {
-    @AppStorage("apiBasePath") var apiBasePath = defaultApiBasePath
-    @AppStorage("refreshToken") var refreshToken: String?
-    @AppStorage("accessToken") var accessToken: String?
-    @AppStorage("isLogin") var isLogin: Bool = false
-
-    func getBaseHeaders() throws -> [String: String] {
-        guard let accessToken else {
-            isLogin = false
-            throw ErrorModel(humanText: "AccessToken отсутствует")
-        }
-        return ["Authorization": accessToken]
+class NetworkManager {
+    
+    static let shared = makeShared()
+    
+    static func makeShared() -> NetworkManager {
+        return NetworkManager(authManager: .shared)
     }
+    
+    init(
+        authManager: AuthManager
+    ) {
+        self.authManager = authManager
+    }
+    
+//    private let decoder: JSONDecoder
+    private let authManager: AuthManager
+    
+    @AppStorage("apiBasePath") var apiBasePath = defaultApiBasePath
+    @AppStorage("isLogin") var isLogin: Bool = false
     
     enum Method: String {
         case get = "GET"
@@ -32,14 +38,24 @@ class API {
         case patch = "PATCH"
         case put = "PUT"
     }
+    
+    enum APIError: Error {
         
+        case failedAuthorization
+        case failedJsonEncodingRequest
+        case requestError(ErrorModel?)
+        case serverError(ErrorModel?)
+        case responseDataError
+        case failedDecodingError
+    }
+    
     func request(
         url urlString: String,
         method: Method,
         headers: [String: String] = [:],
+        withAuthorization: Bool = true,
         query: [String: String] = [:],
-        body: Encodable? = nil,
-        handleUnauthorized: Bool = true
+        body: Encodable? = nil
     ) async throws -> Data {
         
         // Адрес
@@ -62,8 +78,13 @@ class API {
         
         // Заголовки
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        if withAuthorization {
+            request.setValue(try await authManager.getAccessToken(), forHTTPHeaderField: "Authorization")
+        }
+        
         headers.forEach { request.setValue($1, forHTTPHeaderField: $0) }
-                
+        
         // Тело
         if let body {
             do {
@@ -74,18 +95,6 @@ class API {
                 throw ErrorModel(humanText: "Ошибка при преобразовании структуры в JSON", error: "\(error)")
             }
         }
-                
-        return try await httpRequest(
-            request: request,
-            handleUnauthorized: handleUnauthorized
-        )
-    }
-    
-    private func httpRequest(
-        request: URLRequest,
-        handleUnauthorized: Bool
-    ) async throws -> Data {
-        var request = request
         
         var data = Data()
         var response = URLResponse()
@@ -100,48 +109,19 @@ class API {
         switch res.statusCode {
         case 200:
             return data
-        case 401:
-            guard handleUnauthorized else {
-                isLogin = false
-                throw try decodeError(data)
-            }
-            
-            request.setValue(try await getNewTokens(), forHTTPHeaderField: "Authorization")
-            
-            return try await httpRequest(
-                request: request,
-                handleUnauthorized: false
-            )
-            
         default:
             throw try decodeError(data)
         }
     }
     
-    private func getNewTokens() async throws -> String {
-        guard let refreshToken else {
-            throw ErrorModel(humanText: "Refresh token отсутствует")
-        }
-        let tokens = try await AuthAPI().RefreshToken(req: RefreshTokensReq(
-            token: refreshToken,
-            application: try getApplicationInformation(),
-            device: getDeviceInformation()
-        ))
-        self.refreshToken = tokens.refreshToken
-        self.accessToken = tokens.accessToken
-        return tokens.accessToken
-    }
-    
-    private func decodeError(
-        _ data: Data
-    ) throws -> ErrorModel {
+    func decodeError(_ data: Data) throws -> ErrorModel {
         do {
             return try JSONDecoder().decode(ErrorModel.self, from: data)
         } catch {
             throw ErrorModel(humanText: "Ошибка декодирования", error: "\(error)")
         }
     }
-     
+    
     func decode<T: Decodable>(
         _ data: Data,
         model: T.Type

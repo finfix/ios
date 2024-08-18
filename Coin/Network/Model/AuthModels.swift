@@ -27,6 +27,7 @@ struct DeviceInformation: Encodable {
     let versionOS: String
     let deviceName: String
     let modelName: String
+    let deviceID: String
 }
 
 struct RegisterReq: Encodable {
@@ -42,7 +43,8 @@ func getDeviceInformation() -> DeviceInformation {
         nameOS: UIDevice.current.systemName,
         versionOS: UIDevice.current.systemVersion,
         deviceName: UIDevice.current.model,
-        modelName: Device.current.description
+        modelName: Device.current.description,
+        deviceID: UIDevice.current.identifierForVendor!.uuidString
     )
 }
 

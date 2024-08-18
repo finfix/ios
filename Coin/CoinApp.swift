@@ -7,10 +7,15 @@
 
 import SwiftUI
 import OSLog
+import Factory
 
 private let logger = Logger(subsystem: "Coin", category: "Main")
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    
+    @ObservationIgnored
+    @Injected(\.service) private var service
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         return true
@@ -21,7 +26,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let token = tokenParts.joined()
         Task {
             do {
-                try await Service.shared.registerNotifications(token: token)
+                try await service.registerNotifications(token: token)
             } catch {
                 logger.error("Не смогли обновить токен уведомлений пользователя")
             }
@@ -34,6 +39,26 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner, .badge, .sound])
+    }
+}
+
+extension Container {
+    var service: Factory<Service> {
+        Factory(self) {
+            do {
+                let authManager = AuthManager()
+                let networkManager = NetworkManager(authManager: authManager)
+                let apiManager = APIManager(networkManager: networkManager)
+                
+                let sqlite = try SQLite()
+                let repository = Repository(sqlite: sqlite)
+                
+                let taskManager = TaskManager(repository: repository, apiManager: apiManager)
+                return Service(repository: repository, apiManager: apiManager, taskManager: taskManager, authManager: authManager)
+            } catch {
+                fatalError("Произошла ошибка при инициализации зависимостей \(error)")
+            }
+        }.singleton
     }
 }
 

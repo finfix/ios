@@ -6,19 +6,21 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class TasksListViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
 
     var accountGroup = AccountGroup()
     var tasks: [SyncTask] = []
 
     func load() async throws {
-        tasks = try await service.getSyncTasks()
+        tasks = try await service.taskManager.getSyncTasks()
     }
     
     func deleteAllTasks() async throws {
-        try await service.deleteTasks()
+        try await service.taskManager.deleteTasks()
     }
 }

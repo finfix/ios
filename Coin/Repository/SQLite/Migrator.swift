@@ -1,51 +1,15 @@
 //
-//  AppDatabase.swift
+//  Migrator.swift
 //  Coin
 //
-//  Created by Илья on 16.03.2024.
+//  Created by Илья on 18.08.2024.
 //
 
 import Foundation
 import GRDB
-import os.log
 
-struct AppDatabase {
-    init(_ dbWriter: any DatabaseWriter) throws {
-        self.dbWriter = dbWriter
-        try migrator.migrate(dbWriter)
-    }
-    
-    let dbWriter: any DatabaseWriter
-}
-
-// MARK: - Database Configuration
-
-extension AppDatabase {
-    private static let sqlLogger = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "SQL")
-    
-    public static func makeConfiguration(_ base: Configuration = Configuration()) -> Configuration {
-        var config = base
-                
-        if ProcessInfo.processInfo.environment["SQL_TRACE"] != nil {
-            config.prepareDatabase { db in
-                db.trace {
-                    os_log("%{public}@", log: sqlLogger, type: .debug, String(describing: $0))
-                }
-            }
-        }
-        
-#if DEV
-        config.publicStatementArguments = true
-#endif
-        
-        return config
-    }
-}
-
-// MARK: - Database Migrations
-
-extension AppDatabase {
-    private var migrator: DatabaseMigrator {
+extension SQLite {
+    var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
         
 //#if DEV
