@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class TransactionFilterViewModel {
-    private var service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     var currencies: [Currency] = []
     

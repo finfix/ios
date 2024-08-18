@@ -27,6 +27,7 @@ struct DeviceInformation: Encodable {
     let versionOS: String
     let deviceName: String
     let modelName: String
+    let deviceID: String
 }
 
 struct RegisterReq: Encodable {
@@ -42,19 +43,20 @@ func getDeviceInformation() -> DeviceInformation {
         nameOS: UIDevice.current.systemName,
         versionOS: UIDevice.current.systemVersion,
         deviceName: UIDevice.current.model,
-        modelName: Device.current.description
+        modelName: Device.current.description,
+        deviceID: UIDevice.current.identifierForVendor!.uuidString
     )
 }
 
 func getApplicationInformation() throws -> ApplicationInformation {
     guard let bundleID = Bundle.main.bundleIdentifier else {
-        throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
+        throw ErrorModel(humanText: "Не смогли получить Bundle Identifier приложения")
     }
     guard let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
-        throw ErrorModel(humanTextError: "Не смогли получить версию приложения")
+        throw ErrorModel(humanText: "Не смогли получить версию приложения")
     }
     guard let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String else {
-        throw ErrorModel(humanTextError: "Не смогли получить билд приложения")
+        throw ErrorModel(humanText: "Не смогли получить билд приложения")
     }
     return ApplicationInformation(
         bundleID: bundleID,

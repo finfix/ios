@@ -70,7 +70,7 @@ struct Profile: View {
                 Button("Выйти", role: .destructive) {
                     Task {
                         do {
-                            try await vm.deleteAll()
+                            try await vm.logout()
                         } catch {
                             alert(error)
                         }

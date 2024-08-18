@@ -11,45 +11,41 @@ import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "AccountGroupAPI")
 
-let accountGroupBasePath = "/accountGroup"
+private let accountGroupBasePath = "/accountGroup"
 
-class AccountGroupAPI: API {
+extension APIManager {
     
     func GetAccountGroups() async throws -> [GetAccountGroupsRes] {
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + accountGroupBasePath,
-            method: .get,
-            headers: getBaseHeaders()
+            method: .get
         )
         
-        return try decode(data, model: [GetAccountGroupsRes].self)
+        return try networkManager.decode(data, model: [GetAccountGroupsRes].self)
     }
     
     func CreateAccountGroup(req: CreateAccountGroupReq) async throws -> CreateAccountGroupRes {
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + accountGroupBasePath,
             method: .post,
-            headers: getBaseHeaders(),
             body: req
         )
         
-        return try decode(data, model: CreateAccountGroupRes.self)
+        return try networkManager.decode(data, model: CreateAccountGroupRes.self)
     }
     
     func UpdateAccountGroup(req: UpdateAccountGroupReq) async throws {
-        _ = try await request(
+        _ = try await networkManager.request(
             url: apiBasePath + accountGroupBasePath,
             method: .patch,
-            headers: getBaseHeaders(),
             body: req
         )
     }
     
     func DeleteAccountGroup(req: DeleteAccountGroupReq) async throws {
-        _ = try await request(
+        _ = try await networkManager.request(
             url: apiBasePath + accountGroupBasePath,
             method: .delete,
-            headers: getBaseHeaders(),
             query: ["id": String(req.id)]
         )
     }

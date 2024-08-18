@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Factory
+
 
 enum mode {
     case create, update
@@ -13,7 +15,8 @@ enum mode {
 
 @Observable
 class EditAccountViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     var currencies: [Currency] = []
     var icons: [Icon] = []

@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class TasksDetailsViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
 
     var task: SyncTask
     
@@ -18,18 +20,18 @@ class TasksDetailsViewModel {
     }
 
     func load() async throws {
-        let tasks = try await service.getSyncTasks(ids: [task.id])
+        let tasks = try await service.taskManager.getSyncTasks(ids: [task.id])
         guard !tasks.isEmpty else {
-            throw ErrorModel(humanTextError: "Задача уже выполнена или удалена")
+            throw ErrorModel(humanText: "Задача уже выполнена или удалена")
         }
         task = tasks[0]
     }
     
     func delete() async throws {
-        try await service.deleteTasks(ids: [task.id])
+        try await service.taskManager.deleteTasks(ids: [task.id])
     }
     
     func deleteAllTasks() async throws {
-        try await service.deleteTasks()
+        try await service.taskManager.deleteTasks()
     }
 }

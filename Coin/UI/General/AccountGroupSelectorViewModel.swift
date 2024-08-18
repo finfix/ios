@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import Factory
 import SwiftUI
 
 @Observable
 class AccountGroupSelectorViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     
     var accountGroups: [AccountGroup] = []
     

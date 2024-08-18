@@ -298,7 +298,7 @@ struct GetTransactionsRes: Decodable {
         if let dateTransaction = DateFormatters.onlyDate.date(from: dateTransactionString) {
             self.dateTransaction = dateTransaction
         } else {
-            throw ErrorModel(humanTextError: "Не смогли распарсить dateTransaction")
+            throw ErrorModel(humanText: "Не смогли распарсить dateTransaction")
         }
     }
 }

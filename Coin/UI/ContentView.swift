@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import Factory
 
 struct ContentView: View {
     
     @AppStorage("isLogin") var isLogin: Bool = false
-    private let taskManager = TaskManager.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
     @Environment(AlertManager.self) var alert
     
     var body: some View {
@@ -19,7 +21,7 @@ struct ContentView: View {
                 AppTabView()
                     .task {
                         Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { _ in
-                            taskManager.executeDBTasks()
+                            service.taskManager.executeDBTasks()
                         }
                     }
             } else {
@@ -28,17 +30,17 @@ struct ContentView: View {
         }
         .task {
             do {
-                let serverVersion = try await SettingsAPI().GetVersion(.ios)
-                let serverVersionParts = serverVersion.version.replacingOccurrences(of: "v", with: "").split(separator: ".")
+                let (serverVersion, serverBuild) = try await service.getVersion(.ios)
+                let serverVersionParts = serverVersion.replacingOccurrences(of: "v", with: "").split(separator: ".")
                 
                 guard let localVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
-                    alert(ErrorModel(humanTextError: "Не смогли получить версию приложения"))
+                    alert(ErrorModel(humanText: "Не смогли получить версию приложения"))
                     return
                 }
                 let localVersionParts = localVersion.replacingOccurrences(of: "v", with: "").split(separator: ".")
                 
                 guard serverVersionParts.count == 3, localVersionParts.count == 3 else {
-                    alert(ErrorModel(humanTextError: "Не смогли обработать версию с сервера или с телефона"))
+                    alert(ErrorModel(humanText: "Не смогли обработать версию с сервера или с телефона"))
                     return
                 }
                 

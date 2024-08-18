@@ -8,6 +8,7 @@
 import SwiftUI
 import OSLog
 import DeviceKit
+import Factory
 
 private let logger = Logger(subsystem: "Coin", category: "Login")
 
@@ -18,45 +19,30 @@ enum LoginRoute {
 
 struct LoginView: View {
     
-    private enum Mode {
-        case login, register
-    }
+    @State private var path = PathSharedState()
+    @Environment(AlertManager.self) private var alert
+    @State private var vm = LoginViewModel()
     
-    private enum Field: Hashable {
+    @AppStorage("isDeveloperMode") var isDevMode = false
+    @FocusState var focusedField: Field?
+    
+    enum Field: Hashable {
         case name, login, password
     }
-    
-    @State private var service = Service.shared
-    @State private var path = PathSharedState()
-    @Environment (AlertManager.self) private var alert
-    
-    @AppStorage("isLogin") var isLogin: Bool = false
-    @AppStorage("accessToken") var accessToken: String?
-    @AppStorage("refreshToken") var refreshToken: String?
-    @AppStorage("isDeveloperMode") var isDevMode = false
-    @FocusState private var focusedField: Field?
-    
-    @State private var mode: Mode = .login
-    @State private var login = ""
-    @State private var password = ""
-    @State private var name = ""
-    @State var isShowPassword = false
-    @State private var shouldDisableUI = false
-    @State private var shouldShowProgress = false
     
     var body: some View {
         @Bindable var path = path
         NavigationStack(path: $path.path) {
             Form {
                 Section {
-                    if mode == .register {
-                        TextField("Имя", text: $name)
+                    if vm.mode == .register {
+                        TextField("Имя", text: $vm.name)
                             .focused($focusedField, equals: .name)
                             .textContentType(.givenName)
                             .onSubmit { focusedField = .login }
                             .submitLabel(.next)
                     }
-                    TextField("Email", text: $login)
+                    TextField("Email", text: $vm.login)
                         .focused($focusedField, equals: .login)
                         .keyboardType(.emailAddress)
                         .autocapitalization(.none)
@@ -66,11 +52,11 @@ struct LoginView: View {
                         .submitLabel(.next)
                     HStack {
                         Group {
-                            if !isShowPassword {
-                                SecureField("Password", text: $password)
+                            if !vm.isShowPassword {
+                                SecureField("Password", text: $vm.password)
                                     .textContentType(.password)
                             } else {
-                                TextField("Password", text: $password)
+                                TextField("Password", text: $vm.password)
                                     .textContentType(.password)
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
@@ -81,25 +67,20 @@ struct LoginView: View {
                         .textContentType(.password)
                         .onSubmit {
                             Task {
-                                shouldDisableUI = true
-                                shouldShowProgress = true
-                                
-                                switch mode {
-                                case .login: await auth()
-                                case .register: await register()
+                                do {
+                                    try await vm.auth()
+                                } catch {
+                                    alert(error)
                                 }
-                                
-                                shouldDisableUI = false
-                                shouldShowProgress = false
                             }
                         }
                         
                         Button {
-                            isShowPassword.toggle()
+                            vm.isShowPassword.toggle()
                         } label: {
                             Image(systemName: "eye")
                                 .accentColor(.secondary)
-                                .symbolVariant(isShowPassword ? .none : .slash)
+                                .symbolVariant(vm.isShowPassword ? .none : .slash)
                                 .contentTransition(.symbolEffect(.replace))
                         }
                     }
@@ -107,31 +88,26 @@ struct LoginView: View {
                 Section {
                     Button {
                         Task {
-                            shouldDisableUI = true
-                            shouldShowProgress = true
-                            
-                            switch mode {
-                            case .login: await auth()
-                            case .register: await register()
+                            do {
+                                try await vm.auth()
+                            } catch {
+                                alert(error)
                             }
-                            
-                            shouldDisableUI = false
-                            shouldShowProgress = false
                         }
                     } label: {
-                        if !shouldShowProgress{
-                            Text(mode == .login ? "Войти" : "Зарегистрироваться")
+                        if !vm.shouldShowProgress{
+                            Text(vm.mode == .login ? "Войти" : "Зарегистрироваться")
                         } else {
                             ProgressView()
                         }
                     }
                 } footer: {
-                    if mode == .login {
+                    if vm.mode == .login {
                         HStack {
                             Text("Нет аккаунта?")
                             Button("Зарегистрироваться") {
                                 withAnimation {
-                                    mode = .register
+                                    vm.mode = .register
                                 }
                             }
                         }
@@ -142,7 +118,7 @@ struct LoginView: View {
                 .frame(maxWidth: .infinity)
             }
             .contentMargins(.top, 200)
-            .navigationTitle(mode == .login ? "Вход" : "Регистрация")
+            .navigationTitle(vm.mode == .login ? "Вход" : "Регистрация")
             .toolbar {
 #if DEV
                 if isDevMode {
@@ -158,11 +134,11 @@ struct LoginView: View {
                         Image(systemName: "gearshape")
                     }
                 }
-                if mode == .register {
+                if vm.mode == .register {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Назад") {
                             withAnimation {
-                                mode = .login
+                                vm.mode = .login
                             }
                         }
                     }
@@ -186,48 +162,7 @@ struct LoginView: View {
             }
         }
         .environment(path)
-        .disabled(shouldDisableUI)
-    }
-    
-    func auth() async {
-        do {
-            guard let bundleID = Bundle.main.bundleIdentifier else {
-                throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
-            }
-            let response = try await AuthAPI().Auth(req: AuthReq(
-                email: login,
-                password: password,
-                application: getApplicationInformation(),
-                device: getDeviceInformation()
-            ))
-            accessToken = response.token.accessToken
-            refreshToken = response.token.refreshToken
-            try await service.sync()
-            isLogin = true
-        } catch {
-            alert(error)
-        }
-    }
-    
-    func register() async {
-        do {
-            guard let bundleID = Bundle.main.bundleIdentifier else {
-                throw ErrorModel(humanTextError: "Не смогли получить Bundle Identifier приложения")
-            }
-            let response = try await AuthAPI().Register(req: RegisterReq(
-                email: login,
-                password: password,
-                name: name,
-                application: getApplicationInformation(),
-                device: getDeviceInformation()
-            ))
-            accessToken = response.token.accessToken
-            refreshToken = response.token.refreshToken
-            try await service.sync()
-            isLogin = true
-        } catch {
-            alert(error)
-        }
+        .disabled(vm.shouldDisableUI)
     }
 }
 

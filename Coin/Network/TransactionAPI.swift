@@ -1,59 +1,52 @@
 //
-//  APIs.swift
+//  TransactionAPI.swift
 //  Coin
 //
-//  Created by Илья on 17.10.2022.
+//  Created by Илья on 18.08.2024.
 //
 
-import Foundation
-import SwiftUI
+private var transactionBasePath = "/transaction"
 
-class TransactionAPI: API {
-        
-    let transactionBasePath = "/transaction"
+extension APIManager {
     
     func GetTransactions(req: GetTransactionReq) async throws -> [GetTransactionsRes] {
         
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + transactionBasePath,
-            method: .get,
-            headers: getBaseHeaders()
+            method: .get
         )
         
         if data.count == 5 {
             return []
         }
         
-        return try decode(data, model: [GetTransactionsRes].self)
+        return try networkManager.decode(data, model: [GetTransactionsRes].self)
         
     }
     
     func CreateTransaction(req: CreateTransactionReq) async throws -> UInt32 {
         
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + transactionBasePath,
             method: .post,
-            headers: getBaseHeaders(),
             body: req
         )
         
-        return try decode(data, model: CreateTransactionRes.self).id
+        return try networkManager.decode(data, model: CreateTransactionRes.self).id
     }
     
     func UpdateTransaction(req: UpdateTransactionReq) async throws {
-        _ = try await request(
+        _ = try await networkManager.request(
             url: apiBasePath + transactionBasePath,
             method: .patch,
-            headers: getBaseHeaders(),
             body: req
         )
     }
     
     func DeleteTransaction(req: DeleteTransactionReq) async throws {
-        _ = try await request(
+        _ = try await networkManager.request(
             url: apiBasePath + transactionBasePath,
             method: .delete,
-            headers: getBaseHeaders(),
             query: ["id": String(req.id)]
         )
     }

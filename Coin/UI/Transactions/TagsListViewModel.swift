@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import Factory
 
 @Observable
 class TagsListViewModel {
-    private let service = Service.shared
+    @ObservationIgnored
+    @Injected(\.service) private var service
 
     var accountGroup = AccountGroup()
     var tags: [Tag] = []
@@ -26,7 +28,7 @@ class TagsListViewModel {
     
     func deleteTag(_ tag: Tag) async throws {
         guard let index = tags.firstIndex(of: tag) else {
-            throw ErrorModel(humanTextError: "Не смогли найти позицию подкатегории №\(tag.id) в массиве")
+            throw ErrorModel(humanText: "Не смогли найти позицию подкатегории №\(tag.id) в массиве")
         }
         _ = tags.remove(at: index)
         try await service.deleteTag(tag)

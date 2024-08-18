@@ -8,11 +8,16 @@
 import Foundation
 import GRDB
 
-// MARK: Writes
-extension AppDatabase {
+class Repository {
+    
+    init(sqlite: SQLite) {
+        self.sqlite = sqlite
+    }
+    
+    private let sqlite: SQLite
     
     func importIcons(_ icons: [IconDB]) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for icon in icons {
                 try IDMappingDB(localID: icon.id!, serverID: icon.id, modelType: .icon).insert(db)
                 try icon.insert(db)
@@ -21,7 +26,7 @@ extension AppDatabase {
     }
     
     func importCurrencies(_ currencies: [CurrencyDB]) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for currency in currencies {
                 try currency.insert(db)
             }
@@ -29,14 +34,14 @@ extension AppDatabase {
     }
     
     func importUser(_ user: UserDB) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             try IDMappingDB(localID: user.id!, serverID: user.id, modelType: .user).insert(db)
             try user.insert(db)
         }
     }
     
     func importAccountGroups(_ accountGroups: [AccountGroupDB]) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for accountGroup in accountGroups {
                 try IDMappingDB(localID: accountGroup.id!, serverID: accountGroup.id, modelType: .accountGroup).insert(db)
                 try accountGroup.insert(db)
@@ -45,7 +50,7 @@ extension AppDatabase {
     }
     
     func importAccounts(_ accounts: [AccountDB]) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for account in accounts {
                 try IDMappingDB(localID: account.id!, serverID: account.id, modelType: .account).insert(db)
                 try account.insert(db)
@@ -54,7 +59,7 @@ extension AppDatabase {
     }
     
     func importTags(_ tags: [TagDB]) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for tag in tags {
                 try IDMappingDB(localID: tag.id!, serverID: tag.id, modelType: .tag).insert(db)
                 try tag.insert(db)
@@ -63,7 +68,7 @@ extension AppDatabase {
     }
     
     func importTagsToTransactions(_ tagsToTransactions: [TagToTransactionDB]) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for tagToTransaction in tagsToTransactions {
                 try tagToTransaction.insert(db)
             }
@@ -71,7 +76,7 @@ extension AppDatabase {
     }
     
     func importTransactions(_ transactions: [TransactionDB]) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for transaction in transactions {
                 try IDMappingDB(localID: transaction.id!, serverID: transaction.id, modelType: .transaction).insert(db)
                 try transaction.insert(db)
@@ -80,7 +85,7 @@ extension AppDatabase {
     }
     
     func deleteAllData() async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try TagToTransactionDB.deleteAll(db)
             _ = try TransactionDB.deleteAll(db)
             _ = try AccountDB.deleteAll(db)
@@ -96,19 +101,19 @@ extension AppDatabase {
     }
     
     func deleteTransaction(_ transaction: Transaction) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try TransactionDB(transaction).delete(db)
         }
     }
     
     func deleteTag(_ tag: Tag) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try TagDB(tag).delete(db)
         }
     }
     
     func createAccount(_ account: Account) async throws -> UInt32 {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try AccountDB(account).insert(db)
             let id = UInt32(db.lastInsertedRowID)
             try IDMappingDB(localID: id, serverID: nil, modelType: .account)
@@ -118,7 +123,7 @@ extension AppDatabase {
     }
     
     func createAccountAndReturn(_ account: Account) async throws -> Account {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             let account = try AccountDB(account).insertAndFetch(db)
             try IDMappingDB(localID: account!.id!, serverID: nil, modelType: .account)
                 .insert(db)
@@ -127,25 +132,31 @@ extension AppDatabase {
     }
     
     func updateAccount(_ account: Account) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try AccountDB(account).update(db)
         }
     }
     
     func updateTag(_ tag: Tag) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try TagDB(tag).update(db)
         }
     }
     
+    func updateUser(_ user: User) async throws {
+        try await sqlite.write { db in
+            _ = try UserDB(user).update(db)
+        }
+    }
+    
     func deleteAccount(_ account: Account) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try AccountDB(account).delete(db)
         }
     }
     
     func updateBalance(id: UInt32, newBalance: Decimal) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try AccountDB
                 .filter(AccountDB.Columns.id == id)
                 .updateAll(db, AccountDB.Columns.remainder.set(to: newBalance))
@@ -153,7 +164,7 @@ extension AppDatabase {
     }
     
     func createTransaction(_ transaction: Transaction) async throws -> UInt32 {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try TransactionDB(transaction).insert(db)
             let id = UInt32(db.lastInsertedRowID)
             try IDMappingDB(localID: id, serverID: nil, modelType: .transaction)
@@ -163,7 +174,7 @@ extension AppDatabase {
     }
     
     func changeSerialNumbers(accountGroup: AccountGroup, oldValue: UInt32, newValue: UInt32) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             var req = AccountDB.filter(AccountDB.Columns.accountGroupId == accountGroup.id)
             if newValue < oldValue {
                 try req
@@ -178,7 +189,7 @@ extension AppDatabase {
     }
     
     func createTag(_ tag: Tag) async throws -> UInt32 {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try TagDB(tag).insert(db)
             let id = UInt32(db.lastInsertedRowID)
             try IDMappingDB(localID: id, serverID: nil, modelType: .tag)
@@ -188,7 +199,7 @@ extension AppDatabase {
     }
     
     func linkTagsToTransaction(_ tags: [Tag], transaction: Transaction) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for tag in tags {
                 _ = try TagToTransactionDB(transactionID: transaction.id, tagID: tag.id).insert(db)
             }
@@ -196,7 +207,7 @@ extension AppDatabase {
     }
     
     func unlinkTagsFromTransaction(_ tags: [Tag], transaction: Transaction) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             for tag in tags {
                 _ = try TagToTransactionDB(transactionID: transaction.id, tagID: tag.id).delete(db)
             }
@@ -204,25 +215,25 @@ extension AppDatabase {
     }
     
     func updateTransaction(_ transaction: Transaction) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try TransactionDB(transaction).update(db)
         }
     }
     
     func updateAccountGroup(_ accountGroup: AccountGroup) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try AccountGroupDB(accountGroup).update(db)
         }
     }
     
     func deleteAccountGroup(_ accountGroup: AccountGroup) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try AccountGroupDB(accountGroup).delete(db)
         }
     }
     
     func createAccountGroup(_ accountGroup: AccountGroup) async throws -> UInt32 {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try AccountGroupDB(accountGroup).insert(db)
             let id = UInt32(db.lastInsertedRowID)
             try IDMappingDB(localID: id, serverID: nil, modelType: .accountGroup)
@@ -230,26 +241,16 @@ extension AppDatabase {
             return id
         }
     }
-}
 
-enum ModelType: String, Codable {
-    case account, transaction, tag, icon, user, accountGroup
-}
-
-// MARK: - Reads
-extension AppDatabase {
-    var reader: DatabaseReader {
-        dbWriter
-    }
     
     func getAvailableIDForAccount() async throws -> UInt32 {
-        try await reader.read { db in
+        try await sqlite.read { db in
             return try Row.fetchOne(db, sql: "SELECT MAX(id) + 1 as max FROM AccountDB")!["max"]
         }
     }
     
     func getCurrencies() async throws -> [CurrencyDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             return try CurrencyDB.fetchAll(db).sorted { i, j in
                 i.code < j.code
             }
@@ -257,13 +258,13 @@ extension AppDatabase {
     }
     
     func getUsers() async throws -> [UserDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             return try UserDB.fetchAll(db)
         }
     }
     
     func getCountTasks() async throws -> UInt32 {
-        try await reader.read { db in
+        try await sqlite.read { db in
             return UInt32(try SyncTaskDB.fetchCount(db))
         }
     }
@@ -271,7 +272,7 @@ extension AppDatabase {
     func deleteTasks(
         ids: [UInt32]? = nil
     ) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
                                     
             var request = SyncTaskDB.filter(SyncTaskDB.Columns.id != 0)
             if let ids {
@@ -286,7 +287,7 @@ extension AppDatabase {
         ids: [UInt32]? = nil,
         limit: UInt32? = nil
     ) async throws -> [SyncTask] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             
             var request = SyncTaskDB
                 .order(SyncTaskDB.Columns.id)
@@ -338,13 +339,13 @@ extension AppDatabase {
     }
     
     func getIcons() async throws -> [IconDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             return try IconDB.fetchAll(db)
         }
     }
     
     func getAccountGroups() async throws -> [AccountGroupDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             return try AccountGroupDB.fetchAll(db).sorted { i, j in
                 i.serialNumber < j.serialNumber
             }
@@ -356,7 +357,7 @@ extension AppDatabase {
         dateFrom: Date? = nil,
         dateTo: Date? = nil
     ) async throws -> Decimal? {
-        try await reader.read { db in
+        try await sqlite.read { db in
             
             var dateFilter = ""
             var args: StatementArguments = ["id": account.id]
@@ -396,7 +397,7 @@ extension AppDatabase {
     func getTags(
         accountGroupID: UInt32? = nil
     ) async throws -> [TagDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             var request = TagDB.order(TagDB.Columns.id)
             if let accountGroupID {
                 request = request.filter(TagDB.Columns.accountGroupID == accountGroupID)
@@ -406,7 +407,7 @@ extension AppDatabase {
     }
     
     func getTagsToTransactions() async throws -> [TagToTransactionDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             return try TagToTransactionDB.fetchAll(db)
         }
     }
@@ -420,7 +421,7 @@ extension AppDatabase {
         currencyCode: String? = nil,
         isParent: Bool? = nil
     ) async throws -> [AccountDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             var request = AccountDB
                 .order(AccountDB.Columns.serialNumber)
             
@@ -461,7 +462,7 @@ extension AppDatabase {
     }
     
     func getIDsMapping() async throws -> [IDMappingDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             return try IDMappingDB.fetchAll(db)
         }
     }
@@ -477,7 +478,7 @@ extension AppDatabase {
         transactionType: TransactionType? = nil,
         currency: Currency? = nil
     ) async throws -> [TransactionDB] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             
             var request = TransactionDB
                 .order(TransactionDB.Columns.dateTransaction.desc, TransactionDB.Columns.id.desc)
@@ -522,7 +523,7 @@ extension AppDatabase {
         transactionParameterIgnore: Bool = false,
         accountIDs: [UInt32] = []
     ) async throws -> [Series] {
-        try await reader.read { db in
+        try await sqlite.read { db in
             var amountField = ""
             var accountType = ""
             var accountField = ""
@@ -636,7 +637,7 @@ extension AppDatabase {
     }
     
     func createTask(_ task: SyncTask) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try SyncTaskDB(task).insert(db)
             let taskID = db.lastInsertedRowID
             for var field in task.fields {
@@ -647,7 +648,7 @@ extension AppDatabase {
     }
     
     func updateTask(_ task: SyncTask) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try SyncTaskDB(task).update(db)
         }
     }
@@ -657,10 +658,14 @@ extension AppDatabase {
         modelType: ModelType,
         serverID: UInt32
     ) async throws {
-        try await dbWriter.write { db in
+        try await sqlite.write { db in
             _ = try IDMappingDB
                 .filter(IDMappingDB.Columns.localID == localID && IDMappingDB.Columns.modelType == modelType.rawValue)
                 .updateAll(db, IDMappingDB.Columns.serverID.set(to: serverID))
         }
     }
+}
+
+enum ModelType: String, Codable {
+    case account, transaction, tag, icon, user, accountGroup
 }

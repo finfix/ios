@@ -7,25 +7,24 @@
 
 import Foundation
 
-class UserAPI: API {
+private let userBasePath = "/user"
+
+extension APIManager {
     
-    let userBasePath = "/user"
     
     func GetUser() async throws -> GetUserRes {
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + userBasePath,
-            method: .get,
-            headers: getBaseHeaders()
+            method: .get
         )
         
-        return try decode(data, model: GetUserRes.self)
+        return try networkManager.decode(data, model: GetUserRes.self)
     }
     
     func UpdateUser(req: UpdateUserReq) async throws {
-        let data = try await request(
+        let data = try await networkManager.request(
             url: apiBasePath + userBasePath,
             method: .patch,
-            headers: getBaseHeaders(),
             body: req
         )
     }
