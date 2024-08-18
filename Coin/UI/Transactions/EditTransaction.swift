@@ -14,6 +14,84 @@ enum EditTransactionRoute: Hashable {
     case tagsList
 }
 
+struct Tags: View {
+    
+    var vm: EditTransactionViewModel
+    @Environment(PathSharedState.self) var path
+    
+    var body: some View {
+        HStack {
+            ScrollView(.horizontal) {
+                VStack(alignment: .leading) {
+                    HStack {
+                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
+                            if i % 2 == 0 {
+                                Button {
+                                    withAnimation {
+                                        if vm.currentTransaction.tags.contains(tag) {
+                                            vm.currentTransaction.tags.removeAll { $0.id == tag.id }
+                                        } else {
+                                            vm.currentTransaction.tags.append(tag)
+                                        }
+                                    }
+                                } label: {
+                                    Text("#\(tag.name)")
+                                        .font(.callout)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background {
+                                            RoundedRectangle(cornerRadius: 100)
+                                                .foregroundStyle(vm.currentTransaction.tags.contains(tag) ? Color.blue : Color.clear)
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 100)
+                                                        .stroke(.secondary, lineWidth: 1)
+                                                }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                    HStack {
+                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
+                            if i % 2 != 0 {
+                                Button {
+                                    withAnimation {
+                                        if vm.currentTransaction.tags.contains(tag) {
+                                            vm.currentTransaction.tags.removeAll { $0.id == tag.id }
+                                        } else {
+                                            vm.currentTransaction.tags.append(tag)
+                                        }
+                                    }
+                                } label: {
+                                    Text("#\(tag.name)")
+                                        .font(.callout)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background {
+                                            RoundedRectangle(cornerRadius: 100)
+                                                .foregroundStyle(vm.currentTransaction.tags.contains(tag) ? Color.blue : Color.clear)
+                                                .overlay {
+                                                    RoundedRectangle(cornerRadius: 100)
+                                                        .stroke(.secondary, lineWidth: 1)
+                                                }
+                                        }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(1)
+            }
+            Button {
+                path.path.append(EditTransactionRoute.tagsList)
+            } label: {
+                Image(systemName: "ellipsis")
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct EditTransaction: View {
     
     private enum Field: Hashable {
@@ -56,36 +134,9 @@ struct EditTransaction: View {
     
     var body: some View {
         Form {
-            HStack {
-                ScrollView(.horizontal) {
-                    HStack {
-                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
-                            Button {
-                                if vm.currentTransaction.tags.contains(tag) {
-                                    vm.currentTransaction.tags.removeAll { $0.id == tag.id }
-                                } else {
-                                    vm.currentTransaction.tags.append(tag)
-                                }
-                            } label: {
-                                Text("#\(tag.name)")
-                                    .padding(5)
-                                    .overlay {
-                                        if vm.currentTransaction.tags.contains(tag) {
-                                            RoundedRectangle(cornerRadius: 5)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                            }
-                        }
-                    }
-                }
-                Button {
-                    path.path.append(EditTransactionRoute.tagsList)
-                } label: {
-                    Image(systemName: "ellipsis")
-                }
+            Section {
+                Tags(vm: vm)
             }
-            .buttonStyle(.plain)
             if vm.currentTransaction.type != .balancing {
                 Section {
                     Pickers(
