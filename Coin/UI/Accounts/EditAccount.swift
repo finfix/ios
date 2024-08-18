@@ -75,13 +75,6 @@ struct EditAccount: View {
             
             if vm.permissions.changeBudget {
                 Section(header: Text("Бюджет")) {
-                    if vm.currentAccount.showingBudgetAmount != vm.currentAccount.budgetAmount {
-                        Text(vm.currentAccount.showingBudgetAmount, format: .number)
-                            .foregroundColor(.secondary)
-                            .overlay(alignment: .trailing) {
-                                Text(vm.currentAccount.currency.symbol)
-                            }
-                    }
                     TextField("Бюджет", value: $vm.budgetAmount, formatter: NumberFormatters.textField)
                         .keyboardType(.decimalPad)
                         .overlay(alignment: .trailing) {
@@ -149,15 +142,15 @@ struct EditAccount: View {
                                 .tag(account.serialNumber == 0 ? 0 : account.serialNumber - 1)
                         }
                     }
-                    if vm.permissions.changeParentAccountID {
-                        Section {
-                            Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
-                                Text("Не выбрано")
-                                    .tag(nil as UInt32?)
-                                ForEach(accounts.filter{ $0.isParent }) { account in
-                                    Text(account.name)
-                                        .tag(account.id as UInt32?)
-                                }
+                }
+                if vm.permissions.changeParentAccountID {
+                    Section {
+                        Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
+                            Text("Не выбрано")
+                                .tag(nil as UInt32?)
+                            ForEach(accounts.filter{ $0.isParent }) { account in
+                                Text(account.name)
+                                    .tag(account.id as UInt32?)
                             }
                         }
                     }
