@@ -28,7 +28,7 @@ struct LoginView: View {
     
     @State private var service = Service.shared
     @State private var path = PathSharedState()
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     
     @AppStorage("isLogin") var isLogin: Bool = false
     @AppStorage("accessToken") var accessToken: String?

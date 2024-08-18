@@ -49,6 +49,8 @@
 		B55EF9DD2BE2CFF5003C8882 /* Hasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
 		B5610F0428FC9A420063AFEB /* TransactionAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* TransactionAPI.swift */; };
+		B562CB162C70D2F600AFB056 /* CarouselDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB152C70D2F600AFB056 /* CarouselDatePicker.swift */; };
+		B562CB172C70D2F600AFB056 /* CarouselDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB152C70D2F600AFB056 /* CarouselDatePicker.swift */; };
 		B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
 		B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56361A32B04FC000044CDD8 /* AppTabView.swift */; };
 		B56FB60F2BEA268300CBFB1E /* IDMappingDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */; };
@@ -286,6 +288,7 @@
 		B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hasher.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* TransactionAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionAPI.swift; sourceTree = "<group>"; };
+		B562CB152C70D2F600AFB056 /* CarouselDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarouselDatePicker.swift; sourceTree = "<group>"; };
 		B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsList.swift; sourceTree = "<group>"; };
 		B56361A32B04FC000044CDD8 /* AppTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTabView.swift; sourceTree = "<group>"; };
 		B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDMappingDB.swift; sourceTree = "<group>"; };
@@ -441,6 +444,7 @@
 		B559E9D42B00FA1700A430D2 /* General */ = {
 			isa = PBXGroup;
 			children = (
+				B562CB152C70D2F600AFB056 /* CarouselDatePicker.swift */,
 				B59F0F2828FDD4C200AA33A9 /* AccountGroupSelector.swift */,
 				B5D6DE232BB1D96000A06D67 /* AccountGroupSelectorViewModel.swift */,
 				B5E8932F28FF090B002AC30C /* SnapCarousel.swift */,
@@ -896,6 +900,7 @@
 				B5DEFD1C2C07015A001D7E61 /* EditTransaction.swift in Sources */,
 				B5DEFD1D2C07015A001D7E61 /* AuthModels.swift in Sources */,
 				B5DEFD1E2C07015A001D7E61 /* AccountGroupAPI.swift in Sources */,
+				B562CB162C70D2F600AFB056 /* CarouselDatePicker.swift in Sources */,
 				B5DEFD1F2C07015A001D7E61 /* Currency.swift in Sources */,
 				B5DEFD202C07015A001D7E61 /* Graph.swift in Sources */,
 				B5DEFD212C07015A001D7E61 /* CurrencyConverter.swift in Sources */,
@@ -1015,6 +1020,7 @@
 				B5B068EA2BAC6E1B00AEEC98 /* Currency.swift in Sources */,
 				B58CAB2A2BCFE6A200B472FA /* Graph.swift in Sources */,
 				B5E6C1942AF2AF9500097067 /* CurrencyConverter.swift in Sources */,
+				B562CB172C70D2F600AFB056 /* CarouselDatePicker.swift in Sources */,
 				B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
 				B56FB60F2BEA268300CBFB1E /* IDMappingDB.swift in Sources */,
