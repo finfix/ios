@@ -138,6 +138,12 @@ extension AppDatabase {
         }
     }
     
+    func updateUser(_ user: User) async throws {
+        try await dbWriter.write { db in
+            _ = try UserDB(user).update(db)
+        }
+    }
+    
     func deleteAccount(_ account: Account) async throws {
         try await dbWriter.write { db in
             _ = try AccountDB(account).delete(db)

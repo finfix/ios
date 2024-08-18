@@ -242,6 +242,12 @@ extension AppDatabase {
             }
         }
         
+        migrator.registerMigration("addNotificationTokenInUser") { db in
+            try db.alter(table: "userDB") { table in
+                table.add(column: "notificationToken", .text)
+            }
+        }
+        
         return migrator
     }
 }
