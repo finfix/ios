@@ -17,7 +17,7 @@ class EditTransactionViewModel {
     var shouldShowProgress = false
     var shouldShowPickerAccountFrom = false
     var shouldShowPickerAccountTo = false
-    var shouldShowDatePicker = false
+    var shouldShowAdditionalSettings = false
     
     // Data
     var accounts: [Account] = []
