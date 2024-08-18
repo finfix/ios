@@ -12,17 +12,20 @@ struct User {
     var name: String
     var email: String
     var defaultCurrency: Currency
+    var notificationToken: String?
     
     init(
         id: UInt32 = 0,
         name: String = "",
         email: String = "",
-        defaultCurrency: Currency = Currency()
+        defaultCurrency: Currency = Currency(),
+        notificationToken: String? = nil
     ) {
         self.id = id
         self.name = name
         self.email = email
         self.defaultCurrency = defaultCurrency
+        self.notificationToken = notificationToken
     }
     
     // Инициализатор из модели базы данных
@@ -30,6 +33,7 @@ struct User {
         self.id = dbModel.id!
         self.name = dbModel.name
         self.email = dbModel.email
+        self.notificationToken = dbModel.notificationToken
         self.defaultCurrency = currenciesMap?[dbModel.defaultCurrencyCode]! ?? Currency()
     }
     

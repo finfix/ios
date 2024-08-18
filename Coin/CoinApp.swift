@@ -19,7 +19,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let tokenParts = deviceToken.map { data in String(format: "%02.2hhx", data) }
         let token = tokenParts.joined()
-        Service.shared.registerNotifications(token: token)
+        Task {
+            do {
+                try await Service.shared.registerNotifications(token: token)
+            } catch {
+                logger.error("Не смогли обновить токен уведомлений пользователя")
+            }
+        }
     };
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

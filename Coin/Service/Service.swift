@@ -641,14 +641,40 @@ extension Service {
             id: newTransaction.id))
     }
     
-    func registerNotifications(token: String) {
+    func updateUser(newUser: User, oldUser: User) async throws {
+
+        try await db.updateUser(newUser)
+        
         taskManager.createTask(
             actionName: .updateUser,
-            localObjectID: 0,
+            localObjectID: newUser.id,
             reqModel: UpdateUserReq(
-                notificationToken: token
+                name: newUser.name != oldUser.name ? newUser.name : nil,
+                email: newUser.email != oldUser.email ? newUser.email : nil,
+//                password: newUser.password != oldUser.password ? newUser.password : nil,
+//                oldPassword: newUser.oldPassword != oldUser.oldPassword ? newUser.oldPassword : nil,
+                defaultCurrency: newUser.defaultCurrency.code != oldUser.defaultCurrency.code ? newUser.defaultCurrency.code : nil,
+                notificationToken: newUser.notificationToken != oldUser.notificationToken ? newUser.notificationToken : nil
             )
         )
+    }
+    
+    func registerNotifications(token: String) async throws {
+        // Получаем пользователя
+        let users = try await getUsers()
+        if let oldUser = users.first {
+            
+            // Если токен пользователя из бд отличается от пришедшего
+            if token == oldUser.notificationToken ?? "" {
+                
+                var newUser = oldUser
+                
+                newUser.notificationToken = token
+                
+                // Обновляем пользователя
+                try await updateUser(newUser: newUser, oldUser: oldUser)
+            }
+        }
     }
     
     func updateTag(newTag tag: Tag, oldTag: Tag) async throws {
