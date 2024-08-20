@@ -11,10 +11,10 @@ struct CarouselDatePicker: View {
     
     @Binding var selectedDate: Date
     
-    // Массив дат для отображения, начиная с сегодняшней даты и до 30 дней в прошлом
+    // Массив дат для отображения, начиная с сегодняшней даты и до 90 дней в прошлом
     var dates: [Date] {
         var datesArray: [Date] = []
-        for i in 0..<90 {
+        for i in 0...90 {
             if let date = Calendar.current.date(byAdding: .day, value: i-90, to: Date()) {
                 datesArray.append(date)
             }
