@@ -19,6 +19,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
     var tagIDs: [UInt32]
     var datetimeCreate: Date
     var accountingInCharts: Bool
+    var accountGroupID: UInt32
     
     init(
         accountFromID: UInt32,
@@ -31,7 +32,8 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         isExecuted: Bool,
         tagIDs: [UInt32],
         datetimeCreate: Date,
-        accountingInCharts: Bool
+        accountingInCharts: Bool,
+        accountGroupID: UInt32
     ) {
         self.accountFromID = accountFromID
         self.accountToID = accountToID
@@ -44,6 +46,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         self.tagIDs = tagIDs
         self.datetimeCreate = datetimeCreate
         self.accountingInCharts = accountingInCharts
+        self.accountGroupID = accountGroupID
     }
     
     enum CodingKeys: String, CodingKey {
@@ -58,6 +61,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         case tagIDs
         case datetimeCreate
         case accountingInCharts
+        case accountGroupID
     }
     
     func encode(to encoder: any Encoder) throws {
@@ -74,6 +78,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         try container.encode(tagIDs, forKey: .tagIDs)
         try container.encode(DateFormatters.fullTime.string(from: datetimeCreate), forKey: .datetimeCreate)
         try container.encode(accountingInCharts, forKey: .accountingInCharts)
+        try container.encode(accountGroupID, forKey: .accountGroupID)
     }
     
     init(_ map: [String: String]) {
@@ -97,6 +102,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         }
         self.datetimeCreate = DateFormatters.fullTime.date(from: map["datetimeCreate"]!)!
         self.accountingInCharts = Bool(map["accountingInCharts"]!)!
+        self.accountGroupID = UInt32(map["accountGroupID"]!)!
     }
     
     func convertToFields() -> [SyncTaskValue] {
@@ -114,6 +120,7 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         }
         fields.append(SyncTaskValue(name: "datetimeCreate", value: DateFormatters.fullTime.string(from: self.datetimeCreate)))
         fields.append(SyncTaskValue(name: "accountingInCharts", value: String(self.accountingInCharts)))
+        fields.append(SyncTaskValue(name: "accountGroupID", value: String(self.accountGroupID)))
         return fields
     }
 }
@@ -266,6 +273,7 @@ struct GetTransactionsRes: Decodable {
     var accountFromID: UInt32
     var accountToID: UInt32
     var datetimeCreate: Date
+    var accountGroupID: UInt32
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -279,6 +287,7 @@ struct GetTransactionsRes: Decodable {
         case accountFromID
         case accountToID
         case datetimeCreate
+        case accountGroupID
     }
     
     init(from decoder: any Decoder) throws {
@@ -300,6 +309,7 @@ struct GetTransactionsRes: Decodable {
         } else {
             throw ErrorModel(humanText: "Не смогли распарсить dateTransaction")
         }
+        self.accountGroupID = try container.decode(UInt32.self, forKey: .accountGroupID)
     }
 }
 
