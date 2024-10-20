@@ -21,12 +21,16 @@ struct HidedAccountsList: View {
     }
     
     var body: some View {
+        @Bindable var path = path
         VStack(spacing: 0) {
             AccountGroupSelector()
             ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
                     ForEach(accounts) { account in
-                        AccountCircleItem(account: account)
+                        AccountCircleItem(
+                            account: account,
+                            path: $path.path
+                        )
                     }
                 }
             }
