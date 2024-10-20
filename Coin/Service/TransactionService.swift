@@ -48,7 +48,8 @@ extension Service {
                 isExecuted: true,
                 tagIDs: tagIDs,
                 datetimeCreate: transaction.datetimeCreate,
-                accountingInCharts: transaction.accountingInCharts
+                accountingInCharts: transaction.accountingInCharts,
+                accountGroupID: transaction.accountGroupID
             )
         )
     }

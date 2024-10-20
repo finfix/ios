@@ -125,7 +125,8 @@ struct EditTransaction: View {
                 accountingInCharts: true, 
                 type: transactionType,
                 accountFrom: accountFrom,
-                accountTo: accountTo
+                accountTo: accountTo,
+                accountGroupID: accountFrom.accountGroup.id
             ),
             accountGroup: accountGroup,
             mode: .create

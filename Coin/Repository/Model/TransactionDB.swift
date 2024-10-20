@@ -21,6 +21,7 @@ struct TransactionDB {
     var datetimeCreate: Date
     var accountFromId: UInt32
     var accountToId: UInt32
+    var accountGroupId: UInt32
     
     // Инициализатор из сетевой модели
     init(_ res: GetTransactionsRes) {
@@ -35,6 +36,7 @@ struct TransactionDB {
         self.datetimeCreate = res.datetimeCreate
         self.accountFromId = res.accountFromID
         self.accountToId = res.accountToID
+        self.accountGroupId = res.accountGroupID
     }
     
     // Инициализатор из бизнес модели
@@ -53,6 +55,7 @@ struct TransactionDB {
         self.datetimeCreate = model.datetimeCreate
         self.accountFromId = model.accountFrom.id
         self.accountToId = model.accountTo.id
+        self.accountGroupId = model.accountGroupID
     }
     
     static func convertFromApiModel(_ transactions: [GetTransactionsRes]) -> [TransactionDB] {
@@ -110,6 +113,9 @@ struct TransactionDB {
             if serverModel.accountToId != localModels[i].accountToId {
                 difference["accountToId"] = (server: serverModel.accountToId, local: localModels[i].accountToId)
             }
+            if serverModel.accountGroupId != localModels[i].accountGroupId {
+                difference["accountGroupId"] = (server: serverModel.accountGroupId, local: localModels[i].accountGroupId)
+            }
             if !difference.isEmpty {
                 differences[serverModel.id!] = difference
             }
@@ -132,6 +138,7 @@ extension TransactionDB: Codable, FetchableRecord, PersistableRecord {
         static let datetimeCreate = Column(CodingKeys.datetimeCreate)
         static let accountFromId = Column(CodingKeys.accountFromId)
         static let accountToId = Column(CodingKeys.accountToId)
+        static let accountGroupID = Column(CodingKeys.accountGroupId)
     }
 }
 
