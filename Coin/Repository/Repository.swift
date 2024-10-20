@@ -486,7 +486,7 @@ class Repository {
             if let dateFrom {
                 request = request.filter(TransactionDB.Columns.dateTransaction >= dateFrom)
             }
-            
+    
             if let dateTo {
                 request = request.filter(TransactionDB.Columns.dateTransaction <= dateTo)
             }

@@ -212,6 +212,14 @@ extension SQLite {
             }
         }
         
+        migrator.registerMigration("addAccountGroupIDIntoTransactions") { db in
+            try db.alter(table: "transactionDB") { table in
+                table.add(column: "accountGroupId").references("accountGroupDB")
+                    .defaults(to: 1)
+                    .notNull()
+            }
+        }
+        
         return migrator
     }
 }

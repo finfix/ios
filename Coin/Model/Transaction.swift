@@ -20,6 +20,7 @@ struct Transaction: Identifiable {
     var accountFrom: Account
     var accountTo: Account
     var tags: [Tag]
+    var accountGroupID: UInt32
     
     init(
         id: UInt32 = 0,
@@ -33,7 +34,8 @@ struct Transaction: Identifiable {
         datetimeCreate: Date = Date(),
         accountFrom: Account = Account(),
         accountTo: Account = Account(),
-        tags: [Tag] = []
+        tags: [Tag] = [],
+        accountGroupID: UInt32 = 0
     ) {
         self.accountingInCharts = accountingInCharts
         self.amountFrom = amountFrom
@@ -47,6 +49,7 @@ struct Transaction: Identifiable {
         self.accountFrom = accountFrom
         self.accountTo = accountTo
         self.tags = tags
+        self.accountGroupID = accountGroupID
     }
 }
 
@@ -69,6 +72,7 @@ extension Transaction {
         self.datetimeCreate = dbModel.datetimeCreate
         self.accountFrom = accountsMap?[dbModel.accountFromId] ?? Account()
         self.accountTo = accountsMap?[dbModel.accountToId] ?? Account()
+        self.accountGroupID = dbModel.accountGroupId
         var tags: [Tag] = []
         if let tagsMap = tagsMap {
             for tagToTransaction in tagsToTransactions.filter({ $0.transactionId == dbModel.id }) {
