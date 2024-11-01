@@ -78,8 +78,9 @@ extension Service {
                 type: .balancing,
                 datetimeCreate: Date.now,
                 accountFrom: balancingAccount!,
-                accountTo: account)
-            )
+                accountTo: account,
+                accountGroupID: account.accountGroup.id
+            ))
             
             try await recalculateAccountBalance([balancingAccount!])
         }
@@ -212,8 +213,9 @@ extension Service {
                 type: .balancing,
                 datetimeCreate: Date.now,
                 accountFrom: balancingAccount!,
-                accountTo: newAccount)
-            )
+                accountTo: newAccount,
+                accountGroupID: newAccount.accountGroup.id
+            ))
             
             try await recalculateAccountBalance([balancingAccount!])
         }
