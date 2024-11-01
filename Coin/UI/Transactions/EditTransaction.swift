@@ -126,7 +126,7 @@ struct EditTransaction: View {
                 type: transactionType,
                 accountFrom: accountFrom,
                 accountTo: accountTo,
-                accountGroupID: accountFrom.accountGroup.id
+                accountGroupID: accountGroup.id
             ),
             accountGroup: accountGroup,
             mode: .create
