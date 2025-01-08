@@ -14,7 +14,6 @@ struct TransactionFilterView: View {
     @State private var vm = TransactionFilterViewModel()
     @State private var shouldShowDateFrom = false
     @State private var shouldShowDateTo = false
-    @Environment(AccountGroupSharedState.self) var accountGroup
     @Binding var filters: TransactionFilters
     
     var body: some View {

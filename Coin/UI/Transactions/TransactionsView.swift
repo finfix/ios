@@ -21,6 +21,7 @@ struct TransactionsView: View {
     @Environment(PathSharedState.self) var path
     @State var isFilterOpen = false
     @State var filters: TransactionFilters
+    @State var searchText: String = ""
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     var chartType: ChartType
     
@@ -33,23 +34,29 @@ struct TransactionsView: View {
     }
     
     var body: some View {
-        TransactionsList(
-            filters: filters,
-            chartType: chartType
-        )
-        .searchable(text: $filters.searchText)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                // Фильтры
-                Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
+        ZStack {
+            // Если строка поиска пустая -> Показываем список транзакций
+            if searchText == "" {
+                TransactionsList(
+                    filters: filters,
+                    chartType: chartType
+                )
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        // Фильтры
+                        Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
+                    }
+                }
+                .sheet(isPresented: $isFilterOpen) {
+                    TransactionFilterView(
+                        filters: $filters
+                    )
+                }
+            } else { // Если в строку поиска уже что-то написали
+                SearchView(searchText: $searchText, filters: $filters)
             }
         }
-        .sheet(isPresented: $isFilterOpen) {
-            TransactionFilterView(
-                filters: $filters
-            )
-        }
-
+        .searchable(text: $searchText)
     }
 }
 

@@ -119,7 +119,8 @@ extension Service {
         accountingInHeader: Bool? = nil,
         types: [AccountType]? = nil,
         currencyCode: String? = nil,
-        isParent: Bool? = nil
+        isParent: Bool? = nil,
+        name: String? = nil
     ) async throws -> [Account] {
         let iconsMap = Icon.convertToMap(Icon.convertFromDBModel(try await repository.getIcons()))
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await repository.getCurrencies()))
@@ -131,7 +132,8 @@ extension Service {
             accountingInHeader: accountingInHeader,
             types: types,
             currencyCode: currencyCode,
-            isParent: isParent
+            isParent: isParent,
+            name: name
         ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap)
     }
     

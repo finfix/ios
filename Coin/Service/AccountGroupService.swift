@@ -30,9 +30,13 @@ extension Service {
     }
     
     // MARK: Read
-    func getAccountGroups() async throws -> [AccountGroup] {
+    func getAccountGroups(
+        name: String? = nil
+    ) async throws -> [AccountGroup] {
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await  repository.getCurrencies()))
-        return AccountGroup.convertFromDBModel(try await repository.getAccountGroups(), currenciesMap: currenciesMap)
+        return AccountGroup.convertFromDBModel(try await repository.getAccountGroups(
+            name: name
+        ), currenciesMap: currenciesMap)
     }
     
     // MARK: Update

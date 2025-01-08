@@ -344,11 +344,18 @@ class Repository {
         }
     }
     
-    func getAccountGroups() async throws -> [AccountGroupDB] {
+    func getAccountGroups(
+        name: String? = nil
+    ) async throws -> [AccountGroupDB] {
         try await sqlite.read { db in
-            return try AccountGroupDB.fetchAll(db).sorted { i, j in
-                i.serialNumber < j.serialNumber
+            
+            var request = AccountGroupDB.order(AccountGroupDB.Columns.serialNumber)
+            
+            if let name {
+                request = request.filter(AccountGroupDB.Columns.name.like("%"+name+"%"))
             }
+            
+            return try request.fetchAll(db)
         }
     }
     
@@ -395,12 +402,16 @@ class Repository {
     }
     
     func getTags(
-        accountGroupID: UInt32? = nil
+        accountGroupID: UInt32? = nil,
+        name: String? = nil
     ) async throws -> [TagDB] {
         try await sqlite.read { db in
             var request = TagDB.order(TagDB.Columns.id)
             if let accountGroupID {
                 request = request.filter(TagDB.Columns.accountGroupID == accountGroupID)
+            }
+            if let name {
+                request = request.filter(TagDB.Columns.name.like("%"+name+"%"))
             }
             return try request.fetchAll(db)
         }
@@ -419,7 +430,8 @@ class Repository {
         accountingInHeader: Bool? = nil,
         types: [AccountType]? = nil,
         currencyCode: String? = nil,
-        isParent: Bool? = nil
+        isParent: Bool? = nil,
+        name: String? = nil
     ) async throws -> [AccountDB] {
         try await sqlite.read { db in
             var request = AccountDB
@@ -447,6 +459,10 @@ class Repository {
             
             if let isParent = isParent {
                 request = request.filter(AccountDB.Columns.isParent == isParent)
+            }
+            
+            if let name = name {
+                request = request.filter(AccountDB.Columns.name.like("%"+name+"%"))
             }
             
             if let types = types {

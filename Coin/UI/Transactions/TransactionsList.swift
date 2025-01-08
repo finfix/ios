@@ -13,7 +13,7 @@ enum TransactionsListRoute: Hashable {
 
 struct TransactionsList: View {
     
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     @State private var vm: TransactionsListViewModel
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
     

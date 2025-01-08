@@ -39,6 +39,10 @@
 		B529280D2B0614D100C192CA /* UserModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B529280C2B0614D100C192CA /* UserModels.swift */; };
 		B52DE5EA2C70807F00A4656E /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B52DE5E92C70807F00A4656E /* GRDB */; };
 		B52DE5EC2C7080C200A4656E /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = B52DE5EB2C7080C200A4656E /* GRDB */; };
+		B52F764C2D2EC62D00B6E617 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F764B2D2EC62B00B6E617 /* SearchView.swift */; };
+		B52F764D2D2EC62D00B6E617 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F764B2D2EC62B00B6E617 /* SearchView.swift */; };
+		B52F764F2D2EC66E00B6E617 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F764E2D2EC66E00B6E617 /* SearchViewModel.swift */; };
+		B52F76502D2EC66E00B6E617 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F764E2D2EC66E00B6E617 /* SearchViewModel.swift */; };
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54254842AF5218C008ECC33 /* TransactionFilterView.swift */; };
 		B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */; };
@@ -302,6 +306,8 @@
 		B51CE1F92BAC442F00682D48 /* Repository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
 		B51CE1FD2BAC478D00682D48 /* CurrencyRatesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyRatesViewModel.swift; sourceTree = "<group>"; };
 		B529280C2B0614D100C192CA /* UserModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModels.swift; sourceTree = "<group>"; };
+		B52F764B2D2EC62B00B6E617 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		B52F764E2D2EC66E00B6E617 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B54254842AF5218C008ECC33 /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
 		B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMonthPeriodFromDate.swift; sourceTree = "<group>"; };
@@ -779,6 +785,8 @@
 		B5FB6AA128F3D5EF00C2A2AC /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				B52F764B2D2EC62B00B6E617 /* SearchView.swift */,
+				B52F764E2D2EC66E00B6E617 /* SearchViewModel.swift */,
 				B58CAB2B2BD02E0700B472FA /* TransactionsView.swift */,
 				B50DBAD32BCD2D2600A58B53 /* TransactionsList.swift */,
 				B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */,
@@ -951,6 +959,7 @@
 				B5DEFCF12C07015A001D7E61 /* FileStorageManager.swift in Sources */,
 				B5DEFCF22C07015A001D7E61 /* AccountsHomeView.swift in Sources */,
 				B5DEFCF32C07015A001D7E61 /* Tag.swift in Sources */,
+				B52F764D2D2EC62D00B6E617 /* SearchView.swift in Sources */,
 				B5DEFCF42C07015A001D7E61 /* TagsList.swift in Sources */,
 				B5DEFCF52C07015A001D7E61 /* ProfileViewModel.swift in Sources */,
 				B5DEFCF62C07015A001D7E61 /* TagToTransactionDB.swift in Sources */,
@@ -1036,6 +1045,7 @@
 				B5DEFD382C07015A001D7E61 /* BudgetRow.swift in Sources */,
 				B5DEFD392C07015A001D7E61 /* GetMonthPeriodFromDate.swift in Sources */,
 				B5DEFD3A2C07015A001D7E61 /* ContentView.swift in Sources */,
+				B52F76502D2EC66E00B6E617 /* SearchViewModel.swift in Sources */,
 				B5DEFD3B2C07015A001D7E61 /* AccountCirclesView.swift in Sources */,
 				B5DEFD3C2C07015A001D7E61 /* EditAccountViewModel.swift in Sources */,
 				B5DEFD3D2C07015A001D7E61 /* Settings.swift in Sources */,
@@ -1083,6 +1093,7 @@
 				B5744E9F2BD29C8B004C9AC7 /* FileStorageManager.swift in Sources */,
 				B5FB6AAE28F3D86000C2A2AC /* AccountsHomeView.swift in Sources */,
 				B5744EAE2BD2DE41004C9AC7 /* Tag.swift in Sources */,
+				B52F764C2D2EC62D00B6E617 /* SearchView.swift in Sources */,
 				B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */,
 				B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */,
 				B5744EAC2BD2DDC0004C9AC7 /* TagToTransactionDB.swift in Sources */,
@@ -1168,6 +1179,7 @@
 				B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */,
 				B58133582C0CAA32004EB2B6 /* DeveloperTools.swift in Sources */,
 				B5F9CC7128F01E1A0037A21A /* ContentView.swift in Sources */,
+				B52F764F2D2EC66E00B6E617 /* SearchViewModel.swift in Sources */,
 				B59F0F2628FDD30F00AA33A9 /* AccountCirclesView.swift in Sources */,
 				B51710082BB2D61000950EE0 /* EditAccountViewModel.swift in Sources */,
 				B5F595922B56D35F004D57A4 /* Settings.swift in Sources */,
