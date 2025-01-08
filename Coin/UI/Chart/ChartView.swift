@@ -8,6 +8,21 @@
 import SwiftUI
 import Charts
 
+enum ChartViewGroupBy {
+    case byTag, byAccount, byAccountGroup
+    
+    var name: String {
+        switch self {
+        case .byAccount:
+            "Счет"
+        case .byAccountGroup:
+            "Группа счетов"
+        case .byTag:
+            "Подкатегория"
+        }
+    }
+}
+
 enum ChartViewRoute: Hashable {
     case transactionList(account: Account)
     case transactionList1(chartType: ChartType)
@@ -16,18 +31,21 @@ enum ChartViewRoute: Hashable {
 struct ChartView: View {
     @Environment(AlertManager.self) private var alert
     var selectedAccountGroup: AccountGroup
+    var chartViewGroupBy: ChartViewGroupBy
     @State private var vm: ChartViewModel
     @Environment(PathSharedState.self) var path
     @Environment(\.calendar) var calendar
     
     init(
         chartType: ChartType = .earningsAndExpenses,
+        chartViewGroupBy: ChartViewGroupBy = .byAccount,
         selectedAccountGroup: AccountGroup,
         filters: TransactionFilters
     ) {
         var chartType = chartType
         self.formatter = CurrencyFormatter(currency: selectedAccountGroup.currency, withUnits: false)
         self.selectedAccountGroup = selectedAccountGroup
+        self.chartViewGroupBy = chartViewGroupBy
         if let account = filters.account {
             switch account.type {
             case .earnings:
@@ -68,32 +86,32 @@ struct ChartView: View {
             VStack {
                 HStack {
                     HStack {
-                        Text("Категория")
+                        Text(chartViewGroupBy.name)
                         Spacer()
                     }
                     .frame(minWidth: 150)
-                    ZStack {
-                        // Custom picker label
-                        HStack {
-                            Spacer()
-                            Text(vm.aggregationMethod.rawValue)
-                                .foregroundColor(.blue)
-                        }
-                        
-                        // Invisible picker
+                    
+                    Menu {
                         Picker("", selection: $vm.aggregationMethod) {
                             ForEach(ChartViewModel.AggregationMethod.allCases.filter{
                                 vm.chartType == .earningsAndExpenses
                                 ? ($0 != .percent && $0 != .budget)
                                 : true
                             }, id: \.self) { method in
-                                Text(method.rawValue)
+                                Text(method.name)
                                     .tag(method)
                             }
                         }
-                        .pickerStyle(.menu)
-                        .opacity(0.025)
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text(vm.aggregationMethod.name)
+                            Image(systemName: "chevron.up.chevron.down")
+                        }
+                        .font(.caption)
+                        .foregroundColor(.blue)
                     }
+                    .id(vm.aggregationMethod)
                     HStack {
                         Spacer()
                         Text("Сумма")

@@ -52,14 +52,20 @@ class ChartViewModel {
     var totalBySelectedDate: Decimal {
         data.map { $0.data.filter( { $0.key == lastSelectedDate } ).values.reduce(0) { $0 + $1 } }.reduce(0) { $0 + $1 }
     }
+    
+    enum AggregationMethod: CaseIterable {
+        case total, average, percent, min, max, budget
         
-    enum AggregationMethod: String, CaseIterable {
-        case total = "Всего"
-        case average = "Среднее"
-        case percent = "Процент"
-        case min = "Миниммум"
-        case max = "Максимум"
-        case budget = "Бюджет"
+        var name: String {
+            switch self {
+            case .total: "Всего"
+            case .average: "Среднее"
+            case .percent: "Процент"
+            case .min: "Миниммум"
+            case .max: "Максимум"
+            case .budget: "Бюджет"
+            }
+        }
     }
     
     var aggregationMethod: AggregationMethod = .percent
@@ -71,7 +77,7 @@ class ChartViewModel {
         self.chartType = chartType
         self.filters = filters
     }
-        
+    
     func load(accountGroupID: UInt32) async throws {
         
         var accountIDs: [UInt32] = []
@@ -81,7 +87,7 @@ class ChartViewModel {
                 accountIDs.append(childAccount.id)
             }
         }
-
+        
         data = try await service.getStatisticByMonth(chartType: chartType, accountGroupID: accountGroupID, accountIDs: accountIDs)
     }
 }
