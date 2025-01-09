@@ -31,7 +31,7 @@ struct ProfileTab: View {
                 }
                 .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                     switch screen {
-                    case .accountTransactions(let account): TransactionsView(account: account)
+                    case .accountTransactions(let account): TransactionsView(filters: TransactionFilters(accounts: [account]))
                     case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup, isHiddenView: false)
                     }
                 }

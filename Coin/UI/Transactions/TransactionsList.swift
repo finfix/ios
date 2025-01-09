@@ -14,11 +14,9 @@ enum TransactionsListRoute: Hashable {
 struct TransactionsList: View {
     
     @Environment(AlertManager.self) private var alert
-    @State private var vm: TransactionsListViewModel
-    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
+    @State private var vm: TransactionsListViewModel = TransactionsListViewModel()
     
     var filters: TransactionFilters
-    var chartType: ChartType
     
     @Environment(PathSharedState.self) var path
     
@@ -26,83 +24,77 @@ struct TransactionsList: View {
     let height: CGFloat = UIScreen.main.bounds.height
     
     init(
-        filters: TransactionFilters,
-        chartType: ChartType
+        filters: TransactionFilters
     ) {
         self.filters = filters
-        self.chartType = chartType
-        self.vm = TransactionsListViewModel()
     }
     
     var body: some View {
-        List {
-            Section(footer:
-                ChartView(
-                    chartType: chartType,
-                    selectedAccountGroup: selectedAccountGroup.selectedAccountGroup,
-                    filters: filters
-                )
-                .frame(width: width, height: height*0.6)
-            ){}
-            ForEach(vm.groupedTransactionByDate.keys.sorted(by: >), id: \.self) { date in
-                Section(header: Text(date, style: .date).font(.headline)) {
-                    ForEach(vm.groupedTransactionByDate[date] ?? []) { transaction in
+        VStack(spacing: 0) {
+            ForEach(Array(zip(vm.transactions.indices, vm.transactions)), id: \.0) { i, transaction in
+                VStack(spacing: 0) {
+                    Group {
+                        if i == 0 || vm.transactions[i-1].dateTransaction != vm.transactions[i].dateTransaction {
+                            HStack {
+                                Text(transaction.dateTransaction.formatted(date: .complete, time: .omitted).uppercased())
+                                    .font(.headline)
+                                    .foregroundStyle(.secondary)
+                                    .padding(.top, 30)
+                                    .padding(.bottom, 10)
+                                    .padding(.horizontal, 10)
+                                Spacer()
+                            }
+                            Divider()
+                        }
+                    }
+                    VStack(spacing: 0) {
                         NavigationLink(value: TransactionsListRoute.editTransaction(transaction)) {
                             TransactionRow(transaction: transaction)
+                                .contentShape(Rectangle())
                         }
+                        .padding(.horizontal)
+                        .frame(minHeight: 55)
                         .buttonStyle(.plain)
+                        Divider()
                     }
-                    .onDelete {
-                        for i in $0.makeIterator() {
-                            Task {
-                                do {
-                                    try await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i], selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                                } catch {
-                                    alert(error)
-                                }
-                            }
-                        }
-                    }
+                    .background(Color(.systemGray6))
+                    //                .onDelete {
+                    //                    for i in $0.makeIterator() {
+                    //                        Task {
+                    //                            do {
+                    //                                try await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i])
+                    //                            } catch {
+                    //                                alert(error)
+                    //                            }
+                    //                        }
+                    //                    }
+                    //                }
                 }
-            }
-            if !vm.transactionsCancelled {
-                Text("Загрузка...")
-                    .task {
-                        do {
-                            try await vm.load(refresh: false, filters: filters, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                        } catch {
-                            alert(error)
-                        }
-                    }
             }
         }
         .task {
-            if vm.groupedTransactionByDate.count != 0 {
-                do {
-                    try await vm.load(refresh: true, filters: filters, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                } catch {
-                    alert(error)
-                }
+            do {
+                try await vm.load(filters: filters)
+            } catch {
+                alert(error)
             }
         }
         .onChange(of: filters) { _, _ in
             Task {
                 do {
-                    try await vm.load(refresh: true, filters: filters, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
+                    try await vm.load(filters: filters)
                 } catch {
                     alert(error)
                 }
             }
         }
-        .listStyle(.grouped)
         .navigationTitle("Транзакции")
     }
 }
 
 #Preview {
     TransactionsList(
-        filters: TransactionFilters(),
-        chartType: .earningsAndExpenses
+        filters: TransactionFilters()
     )
     .environment(AlertManager(handle: {_ in }))
 }

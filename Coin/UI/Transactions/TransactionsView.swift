@@ -7,13 +7,15 @@
 
 import SwiftUI
 
-struct TransactionFilters: Equatable {
+struct TransactionFilters: Equatable, Hashable {
     var searchText = ""
     var dateFrom: Date?
     var dateTo: Date?
     var transactionType: TransactionType?
     var currency: Currency?
-    var account: Account? = nil
+    var accounts: [Account] = []
+    var tags: [Tag] = []
+    var accountGroups: [AccountGroup] = []
 }
 
 struct TransactionsView: View {
@@ -22,25 +24,39 @@ struct TransactionsView: View {
     @State var isFilterOpen = false
     @State var filters: TransactionFilters
     @State var searchText: String = ""
-    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
-    var chartType: ChartType
+    @State var chartType: ChartType
+    @State var chartGroupBy: ChartViewGroupBy = .byAccount
+    @State var vm: TransactionsViewModel = TransactionsViewModel()
     
-    init(
-        account: Account? = nil,
-        chartType: ChartType = .earningsAndExpenses
-    ) {
-        self.filters = TransactionFilters(account: account)
-        self.chartType = chartType
+    var currency: Currency {
+        if filters.accountGroups.count == 1 {
+            return filters.accountGroups[0].currency
+        } else {
+            return vm.user.defaultCurrency
+        }
     }
     
+    init(
+        filters: TransactionFilters,
+        chartType: ChartType = .earningsAndExpenses
+    ) {
+        self.filters = filters
+        self.chartType = chartType
+    }
+
     var body: some View {
         ZStack {
             // Если строка поиска пустая -> Показываем список транзакций
             if searchText == "" {
-                TransactionsList(
-                    filters: filters,
-                    chartType: chartType
-                )
+                ScrollView {
+                    ChartView(
+                        chartType: chartType,
+                        chartViewGroupBy: $chartGroupBy,
+                        filters: filters,
+                        currency: currency
+                    )
+                    TransactionsList(filters: filters)
+                }
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
                         // Фильтры
@@ -53,7 +69,14 @@ struct TransactionsView: View {
                     )
                 }
             } else { // Если в строку поиска уже что-то написали
-                SearchView(searchText: $searchText, filters: $filters)
+                SearchView(searchText: $searchText, filters: $filters, chartType: $chartType)
+            }
+        }
+        .task {
+            do {
+                try await vm.load()
+            } catch {
+                
             }
         }
         .searchable(text: $searchText)
@@ -61,7 +84,7 @@ struct TransactionsView: View {
 }
 
 #Preview {
-    TransactionsView()
+    TransactionsView(filters: TransactionFilters())
     .environment(AlertManager(handle: {_ in }))
 }
 

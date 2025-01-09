@@ -15,7 +15,7 @@ enum TagsListRoute: Hashable {
 struct TagsList: View {
     
     @State private var vm: TagsListViewModel
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     @Environment(PathSharedState.self) var path
     
     init(

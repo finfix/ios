@@ -9,10 +9,16 @@ import Foundation
 import SwiftUI
 import Factory
 
-enum ChartType: String, CaseIterable {
-    case earningsAndExpenses = "Доходы и расходы"
-    case earnings = "Доходы"
-    case expenses = "Расходы"
+enum ChartType: CaseIterable {
+    case earningsAndExpenses, earnings, expenses
+    
+    var name: String {
+        switch self {
+        case .earningsAndExpenses: return "Доходы и расходы"
+        case .earnings: return "Доходы"
+        case .expenses: return "Расходы"
+        }
+    }
 }
 
 @Observable
@@ -78,24 +84,45 @@ class ChartViewModel {
         self.filters = filters
     }
     
-    func load(accountGroupID: UInt32) async throws {
+    @MainActor
+    func load(
+        groupBy: ChartViewGroupBy
+    ) async throws {
         
         var accountIDs: [UInt32] = []
-        if let account = filters.account {
-            accountIDs = [account.id]
+        for account in filters.accounts {
+            accountIDs.append(account.id)
             for childAccount in account.childrenAccounts {
                 accountIDs.append(childAccount.id)
             }
         }
         
-        data = try await service.getStatisticByMonth(chartType: chartType, accountGroupID: accountGroupID, accountIDs: accountIDs)
+        var accountGroupIDs: [UInt32] = []
+        for accountGroup in filters.accountGroups {
+            accountGroupIDs.append(accountGroup.id)
+        }
+        
+        data = try await service.getStatisticByMonth(chartType: chartType, groupBy: groupBy, accountGroupIDs: accountGroupIDs, accountIDs: accountIDs)
+    }
+}
+
+enum SeriesType: Hashable {
+    case income, expense
+    
+    var name: String {
+        switch self {
+        case .income: "Доход"
+        case .expense: "Расход"
+        }
     }
 }
 
 struct Series: Identifiable, Hashable {
     let id = UUID()
     var account: Account?
-    var type: String
+    var tag: Tag?
+    var type: SeriesType?
+    var objectID: UInt32?
     var serialNumber: UInt32 = 0
     var color: Color = .white
     var data: [Date: Decimal]

@@ -14,54 +14,62 @@ struct SearchView: View {
     
     @Binding var searchText: String
     @Binding var filters: TransactionFilters
+    @Binding var chartType: ChartType
     
     let width: CGFloat = UIScreen.main.bounds.width
     let height: CGFloat = UIScreen.main.bounds.height
     
     var body: some View {
         List {
-            ForEach(SearchViewListHeaders.allCases, id: \.rawValue) { header in
-                Section(header: Text(header.name).font(.headline)) {
-                    switch header {
-                    case .earningAccounts:
-                        ForEach(vm.earnings) { account in
-                            Button(account.name) {
-                                filters.account = account
-                                searchText = ""
-                            }
-                        }
-                    case .regularAccounts:
-                        ForEach(vm.regulars) { account in
-                            Button(account.name) {
-                                filters.account = account
-                                searchText = ""
-                            }
-                        }
-                    case .expenseAccounts:
-                        ForEach(vm.expenses) { account in
-                            Button(account.name) {
-                                filters.account = account
-                                searchText = ""
-                            }
-                        }
-                    case .accountGroups:
-                        ForEach(vm.accountGroups) { accountGroup in
-                            Button(accountGroup.name) {
-                                searchText = ""
-                            }
-                        }
-                    case .tags:
-                        ForEach(vm.tags) { tag in
-                            Button(tag.name) {
-                                searchText = ""
-                            }
-                        }
-                    case .noteTransaction:
-                        Button("Искать транзакции по заметке по строке: \(searchText)") {
-                            filters.searchText = searchText
-                            searchText = ""
-                        }
+            Section(header: Text("Доходы")) {
+                ForEach(vm.earnings) { account in
+                    Button(account.name) {
+                        filters.accounts.append(account)
+                        chartType = .earnings
+                        searchText = ""
                     }
+                }
+            }
+            Section(header: Text("Счета")) {
+                ForEach(vm.regulars) { account in
+                    Button(account.name) {
+                        filters.accounts.append(account)
+                        chartType = .earningsAndExpenses
+                        searchText = ""
+                    }
+                }
+            }
+            Section(header: Text("Расходы")) {
+                ForEach(vm.expenses) { account in
+                    Button(account.name) {
+                        filters.accounts.append(account)
+                        chartType = .expenses
+                        searchText = ""
+                    }
+                }
+            }
+            Section(header: Text("Группы счетов")) {
+                ForEach(vm.accountGroups) { accountGroup in
+                    Button(accountGroup.name) {
+                        filters.accountGroups.append(accountGroup)
+                        chartType = .earningsAndExpenses
+                        searchText = ""
+                    }
+                }
+            }
+            Section(header: Text("Подкатегории")) {
+                ForEach(vm.tags) { tag in
+                    Button(tag.name) {
+                        filters.tags.append(tag)
+                        chartType = .earningsAndExpenses
+                        searchText = ""
+                    }
+                }
+            }
+            Section(header: Text("Заметки")) {
+                Button("Искать транзакции по заметке по строке: \(searchText)") {
+                    filters.searchText = searchText
+                    searchText = ""
                 }
             }
         }
@@ -88,8 +96,7 @@ struct SearchView: View {
 
 #Preview {
     TransactionsList(
-        filters: TransactionFilters(),
-        chartType: .earningsAndExpenses
+        filters: TransactionFilters()
     )
     .environment(AlertManager(handle: {_ in }))
 }

@@ -14,7 +14,7 @@ enum TasksListRoute: Hashable {
 struct TasksList: View {
     
     @State private var vm = TasksListViewModel()
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     @Environment (\.dismiss) private var dismiss
     @Environment(PathSharedState.self) var path
     

@@ -12,7 +12,7 @@ struct AccountsHomeView: View {
     @State var vm = AccountHomeViewModel()
     @Environment(PathSharedState.self) var path
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     
     @State var chooseBlurIsOpened = false
     

@@ -63,7 +63,9 @@ extension Service {
         searchText: String = "",
         accountIDs: [UInt32] = [],
         transactionType: TransactionType? = nil,
-        currency: Currency? = nil
+        currency: Currency? = nil,
+        tagsIDs: [UInt32] = [],
+        accountGroupIDs: [UInt32] = []
     ) async throws -> [Transaction] {
         
         let dateFrom: Date? = dateFrom?.stripTime()
@@ -82,6 +84,7 @@ extension Service {
                 dateTo: dateTo,
                 searchText: searchText,
                 accountIDs: accountIDs,
+                accountGroupIDs: accountGroupIDs,
                 transactionType: transactionType,
                 currency: currency
             ),

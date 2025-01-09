@@ -17,7 +17,7 @@ struct AccountCirclesTab: View {
             AccountCirclesView()
                 .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                     switch screen {
-                    case .accountTransactions(let account): TransactionsView(account: account)
+                    case .accountTransactions(let account): TransactionsView(filters: TransactionFilters(accounts: [account]))
                     case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup, isHiddenView: false)
                     }
                 }
@@ -47,10 +47,8 @@ struct AccountCirclesTab: View {
                 }
                 .navigationDestination(for: ChartViewRoute.self) { screen in
                     switch screen {
-                    case .transactionList(account: let account):
-                        TransactionsView(account: account)
-                    case .transactionList1(chartType: let chartType):
-                        TransactionsView(chartType: chartType)
+                    case .transactionList(let filters, let chartType):
+                        TransactionsView(filters: filters, chartType: chartType)
                     }
                 }
         }

@@ -8,32 +8,6 @@
 import Foundation
 import Factory
 
-enum SearchViewListHeaders: String, Hashable, CaseIterable {
-    case earningAccounts
-    case regularAccounts
-    case expenseAccounts
-    case tags
-    case accountGroups
-    case noteTransaction
-    
-    var name: String {
-        switch self {
-        case .accountGroups:
-            return "Группы счетов"
-        case .earningAccounts:
-            return "Доходы"
-        case .regularAccounts:
-            return "Счета"
-        case .expenseAccounts:
-            return "Расходы"
-        case .tags:
-            return "Подкатегории"
-        case .noteTransaction:
-            return "Замеки"
-        }
-    }
-}
-
 @Observable
 class SearchViewModel {
     @ObservationIgnored
@@ -47,6 +21,7 @@ class SearchViewModel {
     
     var tags: [Tag] = []
     
+    @MainActor
     func load(
         searchText: String = ""
     ) async throws {

@@ -34,8 +34,58 @@ struct TransactionFilterView: View {
                 }
                 .pickerStyle(.menu)
             }
-            Section {
-                AccountGroupSelector(pickerName: "Группа счетов")
+            if !filters.accountGroups.isEmpty {
+                Section(header: Text("Группы счетов")) {
+                    List {
+                        ForEach(Array(zip(filters.accountGroups.indices, filters.accountGroups)), id: \.0) { i, accountGroup in
+                            HStack {
+                                Text(accountGroup.name)
+                                Spacer()
+                                Button {
+                                    filters.accountGroups.remove(at: i)
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                }
+                            }
+                        }
+                        .onDelete { i in
+                            filters.accountGroups.remove(atOffsets: i)
+                        }
+                    }
+                }
+            }
+            if !filters.accounts.isEmpty {
+                Section(header: Text("Счета")) {
+                    List {
+                        ForEach(Array(zip(filters.accounts.indices, filters.accounts)), id: \.0) { i, account in
+                            HStack {
+                                Text(account.name)
+                                Spacer()
+                                Button {
+                                    filters.accounts.remove(at: i)
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                }
+                            }
+                        }
+                        .onDelete { i in
+                            filters.accounts.remove(atOffsets: i)
+                        }
+                    }
+                }
+            }
+            if !filters.searchText.isEmpty {
+                Section(header: Text("Заметка")) {
+                    HStack {
+                        Text(filters.searchText)
+                        Spacer()
+                        Button {
+                            filters.searchText.removeAll()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                        }
+                    }
+                }
             }
             Section {
                 Picker("Валюта транзакции", selection: $filters.currency) {
@@ -58,11 +108,6 @@ struct TransactionFilterView: View {
         .datePickerStyle(.graphical)
         .navigationTitle("Фильтры")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button("Готово") { dissmiss() }
-            }
-        }
     }
 }
 

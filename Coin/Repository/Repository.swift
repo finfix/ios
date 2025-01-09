@@ -490,9 +490,10 @@ class Repository {
         dateTo: Date? = nil,
         searchText: String = "",
         accountIDs: [UInt32] = [],
-        accountGroupID: UInt32? = nil,
+        accountGroupIDs: [UInt32] = [],
         transactionType: TransactionType? = nil,
-        currency: Currency? = nil
+        currency: Currency? = nil,
+        tagIDs: [UInt32] = []
     ) async throws -> [TransactionDB] {
         try await sqlite.read { db in
             
@@ -515,6 +516,14 @@ class Repository {
                 request = request.filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))
             }
             
+            if !accountGroupIDs.isEmpty {
+                request = request.filter(accountGroupIDs.contains(TransactionDB.Columns.accountGroupID))
+            }
+            
+//            if !tagIDs.isEmpty {
+//                request = request.filter(tagIDs.contains())
+//            }
+            
             if let transactionType {
                 request = request.filter(TransactionDB.Columns.type == transactionType.rawValue)
             }
@@ -533,8 +542,9 @@ class Repository {
     
     func getStatisticByMonth(
         chartType: ChartType,
+        groupBy: ChartViewGroupBy,
         transactionType: TransactionType,
-        accountGroupID: UInt32,
+        accountGroupIDs: [UInt32],
         accountParameterIgnore: Bool = false,
         transactionParameterIgnore: Bool = false,
         accountIDs: [UInt32] = []
@@ -557,12 +567,10 @@ class Repository {
             }
             
             var requestParameters: [String] = [
-                "a.type = ?",
-                "ag.id = ?"
+                "a.type = ?"
             ]
             var args: StatementArguments = [
-                accountType,
-                accountGroupID
+                accountType
             ]
             
             if !accountParameterIgnore {
@@ -580,6 +588,14 @@ class Repository {
                     _ = args.append(contentsOf: [accountID])
                 }
                 requestParameters.append("a.id in (\(questions.joined(separator: ", ")))")
+            }
+            if !accountGroupIDs.isEmpty {
+                var questions: [String] = []
+                for accountGroupID in accountGroupIDs {
+                    questions.append("?")
+                    _ = args.append(contentsOf: [accountGroupID])
+                }
+                requestParameters.append("ag.id in (\(questions.joined(separator: ", ")))")
             }
             var req: String = ""
             
@@ -620,19 +636,19 @@ class Repository {
                 """
             }
                 
-            var result: [String: [Date: Decimal]] = [:]
+            var result: [UInt32: [Date: Decimal]] = [:]
             let rows = try Row.fetchCursor(db, sql: req, arguments: args)
             
             var series: [Series] = []
             while let row = try rows.next() {
                 switch chartType {
                 case .earningsAndExpenses:
-                    if result[""] == nil {
-                        result[""] = [:]
+                    if result[0] == nil {
+                        result[0] = [:]
                     }
-                    result[""]?[row["month"]] = row["remainder"]
+                    result[0]?[row["month"]] = row["remainder"]
                 case .expenses, .earnings:
-                    let accountID: String = row["accountId"]
+                    let accountID: UInt32 = row["accountId"]
                     if result[accountID] == nil {
                         result[accountID] = [:]
                     }
@@ -643,7 +659,9 @@ class Repository {
             for (categoryName, monthData) in result {
                 series.append(Series(
                     account: nil,
-                    type: String(categoryName),
+                    tag: nil,
+                    type: nil,
+                    objectID: UInt32(categoryName),
                     data: monthData
                 ))
             }

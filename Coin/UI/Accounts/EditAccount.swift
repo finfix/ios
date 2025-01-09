@@ -10,7 +10,7 @@ import SwiftUI
 struct EditAccount: View {
     
     @Environment(\.dismiss) var dismiss
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
 
     @State private var vm: EditAccountViewModel
     
