@@ -58,7 +58,7 @@ class EditTransactionViewModel {
     }
             
     func load() async throws {
-        accounts = try await service.getAccounts(accountGroup: accountGroup)
+        accounts = try await service.getAccounts(accountGroups: [accountGroup])
         tags = try await service.getTags(accountGroup: accountGroup)
     }
     

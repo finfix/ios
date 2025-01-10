@@ -29,18 +29,20 @@ struct ChartView: View {
     @State private var vm: ChartViewModel
     @Environment(PathSharedState.self) var path
     @Environment(\.calendar) var calendar
+    @Binding var filters: TransactionFilters
     var currency: Currency
     
     init(
         chartType: ChartType = .earningsAndExpenses,
         chartViewGroupBy: Binding<ChartViewGroupBy>,
-        filters: TransactionFilters,
+        filters: Binding<TransactionFilters>,
         currency: Currency
     ) {
         self.formatter = CurrencyFormatter(currency: currency, withUnits: false)
         self._chartViewGroupBy = chartViewGroupBy
-        vm = ChartViewModel(chartType: chartType, filters: filters)
+        vm = ChartViewModel(chartType: chartType)
         self.currency = currency
+        self._filters = filters
     }
     
     var formatter: CurrencyFormatter
@@ -126,7 +128,8 @@ struct ChartView: View {
                                 chartViewGroupBy: chartViewGroupBy,
                                 vm: $vm,
                                 series: series,
-                                currency: currency
+                                currency: currency,
+                                filters: $filters
                             )
                         }
                     }
@@ -146,14 +149,14 @@ struct ChartView: View {
         }
         .task {
             do {
-                try await vm.load(groupBy: chartViewGroupBy)
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters)
             } catch {
                 alert(error)
             }
         }
         .onChange(of: vm.chartType) { _, _ in
             Task {
-                try await vm.load(groupBy: chartViewGroupBy)
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters)
             }
         }
     }
@@ -163,7 +166,7 @@ struct ChartView: View {
     ChartView(
         chartType: .expenses,
         chartViewGroupBy: .constant(ChartViewGroupBy.byAccount),
-        filters: TransactionFilters(),
+        filters: .constant(TransactionFilters()),
         currency:
             Currency(
                 symbol: "₽"

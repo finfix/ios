@@ -425,7 +425,7 @@ class Repository {
     
     func getAccounts(
         ids: [UInt32]? = nil,
-        accountGroupID: UInt32? = nil,
+        accountGroupIDs: [UInt32]? = nil,
         visible: Bool? = nil,
         accountingInHeader: Bool? = nil,
         types: [AccountType]? = nil,
@@ -441,8 +441,8 @@ class Repository {
                 request = request.filter(keys: ids)
             }
             
-            if let accountGroupID = accountGroupID {
-                request = request.filter(AccountDB.Columns.accountGroupId == accountGroupID)
+            if let accountGroupIDs {
+                request = request.filter(accountGroupIDs.contains(AccountDB.Columns.accountGroupId))
             }
             
             if let visible = visible {
@@ -466,11 +466,7 @@ class Repository {
             }
             
             if let types = types {
-                var typesString = [String]()
-                for type in types {
-                    typesString.append(type.rawValue)
-                }
-                request = request.filter(typesString.contains(AccountDB.Columns.type))
+                request = request.filter(types.map(\.rawValue).contains(AccountDB.Columns.type))
             }
             
             return try request.fetchAll(db)

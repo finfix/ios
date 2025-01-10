@@ -48,6 +48,8 @@
 		B52F76582D2FFBDB00B6E617 /* TransactionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F76572D2FFBDB00B6E617 /* TransactionsViewModel.swift */; };
 		B52F76592D2FFBDB00B6E617 /* TransactionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52F76572D2FFBDB00B6E617 /* TransactionsViewModel.swift */; };
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
+		B537425F2D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */; };
+		B53742602D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */; };
 		B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54254842AF5218C008ECC33 /* TransactionFilterView.swift */; };
 		B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */; };
 		B54DA3AA2BBD81D9008A9FD1 /* StripTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */; };
@@ -315,6 +317,7 @@
 		B52F76512D2EF16D00B6E617 /* ChartListItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartListItemView.swift; sourceTree = "<group>"; };
 		B52F76572D2FFBDB00B6E617 /* TransactionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsViewModel.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFiltersRowView.swift; sourceTree = "<group>"; };
 		B54254842AF5218C008ECC33 /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
 		B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMonthPeriodFromDate.swift; sourceTree = "<group>"; };
 		B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripTime.swift; sourceTree = "<group>"; };
@@ -802,6 +805,7 @@
 				B593F9542AE1CCB000378E17 /* EditTransaction.swift */,
 				B51710092BB2E6BF00950EE0 /* EditTransactionViewModel.swift */,
 				B54254842AF5218C008ECC33 /* TransactionFilterView.swift */,
+				B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */,
 				B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */,
 				B54F3DAF2BD579FA00780460 /* TagsList.swift */,
 				B54F3DB12BD57A0700780460 /* TagsListViewModel.swift */,
@@ -1060,6 +1064,7 @@
 				B5DEFD3C2C07015A001D7E61 /* EditAccountViewModel.swift in Sources */,
 				B5DEFD3D2C07015A001D7E61 /* Settings.swift in Sources */,
 				B5DEFD3E2C07015A001D7E61 /* AccountCircleItem.swift in Sources */,
+				B53742602D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */,
 				B5DEFD3F2C07015A001D7E61 /* EditTransactionViewModel.swift in Sources */,
 				B5DEFD402C07015A001D7E61 /* QuickStatistic.swift in Sources */,
 				B5DEFD412C07015A001D7E61 /* ChartViewModel.swift in Sources */,
@@ -1196,6 +1201,7 @@
 				B51710082BB2D61000950EE0 /* EditAccountViewModel.swift in Sources */,
 				B5F595922B56D35F004D57A4 /* Settings.swift in Sources */,
 				B5B950532ADF24A900798F8C /* AccountCircleItem.swift in Sources */,
+				B537425F2D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */,
 				B517100A2BB2E6BF00950EE0 /* EditTransactionViewModel.swift in Sources */,
 				B5B068E62BAC6DEA00AEEC98 /* QuickStatistic.swift in Sources */,
 				B50DBAD92BCD8CF500A58B53 /* ChartViewModel.swift in Sources */,

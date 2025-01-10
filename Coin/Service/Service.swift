@@ -81,11 +81,12 @@ extension Service {
         var data: [Series] = []
         
         // Собираем все счета для дополнения идентификатора из базы
+        let currencies = try await repository.getCurrencies()
         let accountsMap = Account.convertToMap(
             Account.groupAccounts(
                 Account.convertFromDBModel(
                     try await repository.getAccounts(),
-                    currenciesMap: nil,
+                    currenciesMap: Currency.convertToMap(Currency.convertFromDBModel(currencies)),
                     accountGroupsMap: nil,
                     iconsMap: nil
                 ),

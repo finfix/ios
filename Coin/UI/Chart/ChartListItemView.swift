@@ -13,6 +13,7 @@ struct ChartListItemView: View {
     var chartViewGroupBy: ChartViewGroupBy
     @Binding var vm: ChartViewModel
     @Environment(PathSharedState.self) var path
+    @Binding var filters: TransactionFilters
     
     var series: Series
     
@@ -22,57 +23,61 @@ struct ChartListItemView: View {
         chartViewGroupBy: ChartViewGroupBy,
         vm: Binding<ChartViewModel>,
         series: Series,
-        currency: Currency
+        currency: Currency,
+        filters: Binding<TransactionFilters>
     ) {
         self.formatter = CurrencyFormatter(currency: currency, withUnits: false)
         self.chartViewGroupBy = chartViewGroupBy
         self._vm = vm
         self.series = series
+        self._filters = filters
     }
         
     var body: some View {
-//        Group {
-            if chartViewGroupBy == .byAccount, let account = series.account {
-                Button {
-                    path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(accounts: [account]), chartType: vm.chartType))
-                } label: {
+        if chartViewGroupBy == .byAccount, let account = series.account {
+            Button {
+                filters.accounts.append(account)
+                path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(accounts: [account]), chartType: vm.chartType))
+            } label: {
+                HStack {
                     HStack {
                         Text(account.name)
-                            .foregroundStyle(series.color)
-                            .frame(height: 30)
-                        Spacer()
+                        Text(account.currency.symbol)
                     }
-                }
-            } else if chartViewGroupBy == .byTag, let tag = series.tag {
-                Button {
-                    path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(tags: [tag]), chartType: vm.chartType))
-                } label: {
-                    HStack {
-                        Text(tag.name)
-                            .foregroundStyle(series.color)
-                            .frame(height: 30)
-                        Spacer()
-                    }
-                }
-            } else if let type = series.type {
-                Button {
-                    switch type {
-                    case .expense:
-                        path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(), chartType: .expenses))
-                    case .income:
-                        path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(), chartType: .earnings))
-                    }
-                } label: {
-                    HStack {
-                        Text(type.name)
-                            .foregroundStyle(series.color)
-                            .frame(height: 30)
-                        Spacer()
-                    }
+                    .foregroundStyle(series.color)
+                    .frame(height: 30)
+                    Spacer()
                 }
             }
-//        }
-//        .buttonStyle(.plain)
+        } else if chartViewGroupBy == .byTag, let tag = series.tag {
+            Button {
+                filters.tags.append(tag)
+                path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(tags: [tag]), chartType: vm.chartType))
+            } label: {
+                HStack {
+                    Text(tag.name)
+                        .foregroundStyle(series.color)
+                        .frame(height: 30)
+                    Spacer()
+                }
+            }
+        } else if let type = series.type {
+            Button {
+                switch type {
+                case .expense:
+                    path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(), chartType: .expenses))
+                case .income:
+                    path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(), chartType: .earnings))
+                }
+            } label: {
+                HStack {
+                    Text(type.name)
+                        .foregroundStyle(series.color)
+                        .frame(height: 30)
+                    Spacer()
+                }
+            }
+        }
         HStack {
             Spacer()
             if vm.aggregationMethod == .percent {

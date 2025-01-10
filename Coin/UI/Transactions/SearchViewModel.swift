@@ -22,13 +22,7 @@ class SearchViewModel {
     var tags: [Tag] = []
     
     @MainActor
-    func load(
-        searchText: String = ""
-    ) async throws {
-        
-        guard searchText != "" else {
-            return
-        }
+    func load(filters: TransactionFilters, searchText: String = "") async throws {
         
         self.accountGroups = []
         self.earnings = []
@@ -37,7 +31,8 @@ class SearchViewModel {
         self.tags = []
         
         tags = try await service.getTags(name: searchText)
-        let accounts = try await service.getAccounts(name: searchText)
+        var accounts = try await service.getAccounts(accountGroups: filters.accountGroups.isEmpty ? nil : filters.accountGroups, name: searchText)
+        accounts = Account.groupAccounts(accounts)
         for account in accounts {
             switch account.type {
             case .earnings:

@@ -29,7 +29,6 @@ class ChartViewModel {
     
     var chartType: ChartType
     var data: [Series] = []
-    var filters: TransactionFilters
     
     var lastSelectedDate: Date = Date.now.startOfMonth(inUTC: true)
     
@@ -76,17 +75,14 @@ class ChartViewModel {
     
     var aggregationMethod: AggregationMethod = .percent
     
-    init(
-        chartType: ChartType,
-        filters: TransactionFilters
-    ) {
+    init(chartType: ChartType) {
         self.chartType = chartType
-        self.filters = filters
     }
     
     @MainActor
     func load(
-        groupBy: ChartViewGroupBy
+        groupBy: ChartViewGroupBy,
+        filters: TransactionFilters
     ) async throws {
         
         var accountIDs: [UInt32] = []
@@ -97,12 +93,7 @@ class ChartViewModel {
             }
         }
         
-        var accountGroupIDs: [UInt32] = []
-        for accountGroup in filters.accountGroups {
-            accountGroupIDs.append(accountGroup.id)
-        }
-        
-        data = try await service.getStatisticByMonth(chartType: chartType, groupBy: groupBy, accountGroupIDs: accountGroupIDs, accountIDs: accountIDs)
+        data = try await service.getStatisticByMonth(chartType: chartType, groupBy: groupBy, accountGroupIDs: filters.accountGroups.map(\.id), accountIDs: accountIDs)
     }
 }
 

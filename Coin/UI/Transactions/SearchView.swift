@@ -15,54 +15,116 @@ struct SearchView: View {
     @Binding var searchText: String
     @Binding var filters: TransactionFilters
     @Binding var chartType: ChartType
+    @Binding var searchFocused: Bool
     
     let width: CGFloat = UIScreen.main.bounds.width
     let height: CGFloat = UIScreen.main.bounds.height
     
     var body: some View {
         List {
-            Section(header: Text("Доходы")) {
-                ForEach(vm.earnings) { account in
-                    Button(account.name) {
-                        filters.accounts.append(account)
-                        chartType = .earnings
-                        searchText = ""
-                    }
-                }
-            }
-            Section(header: Text("Счета")) {
-                ForEach(vm.regulars) { account in
-                    Button(account.name) {
-                        filters.accounts.append(account)
-                        chartType = .earningsAndExpenses
-                        searchText = ""
-                    }
-                }
-            }
-            Section(header: Text("Расходы")) {
-                ForEach(vm.expenses) { account in
-                    Button(account.name) {
-                        filters.accounts.append(account)
-                        chartType = .expenses
-                        searchText = ""
-                    }
-                }
-            }
             Section(header: Text("Группы счетов")) {
                 ForEach(vm.accountGroups) { accountGroup in
                     Button(accountGroup.name) {
                         filters.accountGroups.append(accountGroup)
                         chartType = .earningsAndExpenses
                         searchText = ""
+                        searchFocused = false
+                    }
+                }
+            }
+            Section(header: Text("Доходы")) {
+                ForEach(vm.earnings) { account in
+                    Button {
+                        filters.accounts.append(account)
+                        if filters.accountGroups.isEmpty {
+                            filters.accountGroups.append(account.accountGroup)
+                        }
+                        chartType = .earnings
+                        searchText = ""
+                        searchFocused = false
+                    } label: {
+                        HStack {
+                            if filters.accountGroups.count != 1 {
+                                Text(account.accountGroup.name)
+                                Text("•")
+                            }
+                            if let parentAccount = account.parentAccount.account {
+                                Text(parentAccount.name)
+                                Text("•")
+                            }
+                            Text(account.name)
+                        }
+                    }
+                }
+            }
+            Section(header: Text("Счета")) {
+                ForEach(vm.regulars) { account in
+                    Button {
+                        filters.accounts.append(account)
+                        if filters.accountGroups.isEmpty {
+                            filters.accountGroups.append(account.accountGroup)
+                        }
+                        chartType = .earningsAndExpenses
+                        searchText = ""
+                        searchFocused = false
+                    } label: {
+                        HStack {
+                            if filters.accountGroups.count != 1 {
+                                Text(account.accountGroup.name)
+                                Text("•")
+                            }
+                            if let parentAccount = account.parentAccount.account {
+                                Text(parentAccount.name)
+                                Text("•")
+                            }
+                            Text(account.name)
+                        }
+                    }
+                }
+            }
+            Section(header: Text("Расходы")) {
+                ForEach(vm.expenses) { account in
+                    Button {
+                        filters.accounts.append(account)
+                        if filters.accountGroups.isEmpty {
+                            filters.accountGroups.append(account.accountGroup)
+                        }
+                        chartType = .expenses
+                        searchText = ""
+                        searchFocused = false
+                    } label: {
+                        HStack {
+                            if filters.accountGroups.count != 1 {
+                                Text(account.accountGroup.name)
+                                Text("•")
+                            }
+                            if let parentAccount = account.parentAccount.account {
+                                Text(parentAccount.name)
+                                Text("•")
+                            }
+                            Text(account.name)
+                        }
                     }
                 }
             }
             Section(header: Text("Подкатегории")) {
                 ForEach(vm.tags) { tag in
-                    Button(tag.name) {
+                    Button {
                         filters.tags.append(tag)
+                        if filters.accountGroups.isEmpty {
+                            filters.accountGroups.append(tag.accountGroup)
+                        }
                         chartType = .earningsAndExpenses
                         searchText = ""
+                        searchFocused = false
+                    } label: {
+                        HStack {
+                            if filters.accountGroups.count != 1 {
+                                Text(tag.accountGroup.name)
+                                Text("•")
+                            }
+                            Text(tag.name)
+                        }
                     }
                 }
             }
@@ -70,12 +132,13 @@ struct SearchView: View {
                 Button("Искать транзакции по заметке по строке: \(searchText)") {
                     filters.searchText = searchText
                     searchText = ""
+                    searchFocused = false
                 }
             }
         }
         .task {
             do {
-                try await vm.load(searchText: searchText)
+                try await vm.load(filters: filters, searchText: searchText)
             } catch {
                 alert(error)
             }
@@ -83,7 +146,7 @@ struct SearchView: View {
         .onChange(of: searchText) { _, _ in
             Task {
                 do {
-                    try await vm.load(searchText: searchText)
+                    try await vm.load(filters: filters, searchText: searchText)
                 } catch {
                     alert(error)
                 }

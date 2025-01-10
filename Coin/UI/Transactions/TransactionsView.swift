@@ -27,7 +27,8 @@ struct TransactionsView: View {
     @State var chartType: ChartType
     @State var chartGroupBy: ChartViewGroupBy = .byAccount
     @State var vm: TransactionsViewModel = TransactionsViewModel()
-    
+    @State private var searchFocused: Bool = false
+
     var currency: Currency {
         if filters.accountGroups.count == 1 {
             return filters.accountGroups[0].currency
@@ -45,14 +46,15 @@ struct TransactionsView: View {
     }
 
     var body: some View {
-        ZStack {
+        VStack {
             // Если строка поиска пустая -> Показываем список транзакций
-            if searchText == "" {
+            if !searchFocused {
                 ScrollView {
+                    TransactionFiltersRowView(filters: $filters)
                     ChartView(
                         chartType: chartType,
                         chartViewGroupBy: $chartGroupBy,
-                        filters: filters,
+                        filters: $filters,
                         currency: currency
                     )
                     TransactionsList(filters: filters)
@@ -69,7 +71,7 @@ struct TransactionsView: View {
                     )
                 }
             } else { // Если в строку поиска уже что-то написали
-                SearchView(searchText: $searchText, filters: $filters, chartType: $chartType)
+                SearchView(searchText: $searchText, filters: $filters, chartType: $chartType, searchFocused: $searchFocused)
             }
         }
         .task {
@@ -79,7 +81,7 @@ struct TransactionsView: View {
                 
             }
         }
-        .searchable(text: $searchText)
+        .searchable(text: $searchText, isPresented: $searchFocused)
     }
 }
 
