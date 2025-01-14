@@ -179,8 +179,8 @@ extension Service {
             }
         }
         
-        var minDate: Date = .now
-        var maxDate: Date = .now
+        var minDate: Date = .distantFuture
+        var maxDate: Date = .distantPast
         
         // Проходимся по каждой статье и получаем дату самой первой и самой последней записи
         for data in data {

@@ -146,7 +146,7 @@ struct Graph: View {
                     }
                     .padding(.trailing, 25)
                     .padding(.bottom, 40)
-                    .opacity(0.5)
+                    .opacity(0.7)
                 }
             }
             Text(lastSelectedDate.formatted(.dateTime.year(.defaultDigits).month(.wide)))
