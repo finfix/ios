@@ -93,7 +93,14 @@ class ChartViewModel {
             }
         }
         
-        data = try await service.getStatisticByMonth(chartType: chartType, groupBy: groupBy, accountGroupIDs: filters.accountGroups.map(\.id), accountIDs: accountIDs)
+        data = try await service.getStatisticByMonth(
+            chartType: chartType,
+            groupBy: groupBy,
+            accountGroupIDs: filters.accountGroups.map(\.id),
+            accountIDs: accountIDs,
+            dateFrom: filters.dateFrom,
+            dateTo: filters.dateTo
+        )
     }
 }
 

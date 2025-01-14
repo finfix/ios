@@ -20,7 +20,7 @@ enum ChartViewGroupBy: CaseIterable {
 }
 
 enum ChartViewRoute: Hashable {
-    case transactionList(filters: TransactionFilters, chartType: ChartType)
+    case transactionView(filters: TransactionFilters, chartType: ChartType)
 }
 
 struct ChartView: View {

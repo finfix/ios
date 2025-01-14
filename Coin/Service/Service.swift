@@ -74,7 +74,9 @@ extension Service {
         chartType: ChartType,
         groupBy: ChartViewGroupBy,
         accountGroupIDs: [UInt32] = [],
-        accountIDs: [UInt32] = []
+        accountIDs: [UInt32] = [],
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil
     ) async throws -> [Series] {
         
         // Контейнер для информации для графика
@@ -100,7 +102,15 @@ extension Service {
         case .earningsAndExpenses:
             
             // Получаем все расходы по месяцам
-            var expenses = try await repository.getStatisticByMonth(chartType: chartType, groupBy: groupBy, transactionType: .consumption, accountGroupIDs: accountGroupIDs, accountIDs: accountIDs)
+            var expenses = try await repository.getStatisticByMonth(
+                chartType: chartType,
+                groupBy: groupBy,
+                transactionType: .consumption,
+                accountGroupIDs: accountGroupIDs,
+                accountIDs: accountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo
+            )
             
             //
             if !expenses.isEmpty {
@@ -110,7 +120,15 @@ extension Service {
             }
             
             // Получаем доходы по месяцам
-            var earnings = try await repository.getStatisticByMonth(chartType: chartType, groupBy: groupBy, transactionType: .income, accountGroupIDs: accountGroupIDs, accountIDs: accountIDs)
+            var earnings = try await repository.getStatisticByMonth(
+                chartType: chartType,
+                groupBy: groupBy,
+                transactionType: .income,
+                accountGroupIDs: accountGroupIDs,
+                accountIDs: accountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo
+            )
             
             //
             if !earnings.isEmpty {
@@ -123,13 +141,29 @@ extension Service {
         case .earnings:
             
             // Получаем статистику по доходным счетам/подкатегориям
-            data = try await repository.getStatisticByMonth(chartType: chartType, groupBy: groupBy, transactionType: .income, accountGroupIDs: accountGroupIDs, accountIDs: accountIDs)
+            data = try await repository.getStatisticByMonth(
+                chartType: chartType,
+                groupBy: groupBy,
+                transactionType: .income,
+                accountGroupIDs: accountGroupIDs,
+                accountIDs: accountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo
+            )
             
         // Если необходимо получить только данные по расходам
         case .expenses:
             
             // Получаем статистику по расходным счетам/подкатегориям
-            data = try await repository.getStatisticByMonth(chartType: chartType, groupBy: groupBy, transactionType: .consumption, accountGroupIDs: accountGroupIDs, accountIDs: accountIDs)
+            data = try await repository.getStatisticByMonth(
+                chartType: chartType,
+                groupBy: groupBy,
+                transactionType: .consumption,
+                accountGroupIDs: accountGroupIDs,
+                accountIDs: accountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo
+            )
         }
         
         if chartType != .earningsAndExpenses  {

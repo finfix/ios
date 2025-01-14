@@ -37,7 +37,7 @@ struct ChartListItemView: View {
         if chartViewGroupBy == .byAccount, let account = series.account {
             Button {
                 filters.accounts.append(account)
-                path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(accounts: [account]), chartType: vm.chartType))
+                path.path.append(ChartViewRoute.transactionView(filters: filters, chartType: vm.chartType))
             } label: {
                 HStack {
                     HStack {
@@ -52,7 +52,7 @@ struct ChartListItemView: View {
         } else if chartViewGroupBy == .byTag, let tag = series.tag {
             Button {
                 filters.tags.append(tag)
-                path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(tags: [tag]), chartType: vm.chartType))
+                path.path.append(ChartViewRoute.transactionView(filters: filters, chartType: vm.chartType))
             } label: {
                 HStack {
                     Text(tag.name)
@@ -65,9 +65,9 @@ struct ChartListItemView: View {
             Button {
                 switch type {
                 case .expense:
-                    path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(), chartType: .expenses))
+                    path.path.append(ChartViewRoute.transactionView(filters: filters, chartType: .expenses))
                 case .income:
-                    path.path.append(ChartViewRoute.transactionList(filters: TransactionFilters(), chartType: .earnings))
+                    path.path.append(ChartViewRoute.transactionView(filters: filters, chartType: .earnings))
                 }
             } label: {
                 HStack {

@@ -37,7 +37,7 @@ struct TransactionsTab: View {
                 }
                 .navigationDestination(for: ChartViewRoute.self) { screen in
                     switch screen {
-                    case .transactionList(let filters, let chartType):
+                    case .transactionView(let filters, let chartType):
                         TransactionsView(filters: filters, chartType: chartType)
                     }
                 }

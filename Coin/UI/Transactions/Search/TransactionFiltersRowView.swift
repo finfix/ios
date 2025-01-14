@@ -12,8 +12,8 @@ struct TransactionFiltersRowView: View {
     @Binding var filters: TransactionFilters
     
     var body: some View {
-        HStack {
-            ScrollView(.horizontal) {
+        ScrollView(.horizontal) {
+            HStack {
                 if !filters.accountGroups.isEmpty {
                     ForEach(Array(zip(filters.accountGroups.indices, filters.accountGroups)), id: \.0) { i, accountGroup in
                         Button {
@@ -33,6 +33,22 @@ struct TransactionFiltersRowView: View {
                         }
                         .buttonStyle(.plain)
                     }
+                }
+                if let dateFrom = filters.dateFrom {
+                    Button {
+                        filters.dateFrom = nil
+                    } label: {
+                        TransactionFiltersRowItem(text: "C \(dateFrom.formatted(date: .abbreviated, time: .omitted))", color: Color.blue)
+                    }
+                    .buttonStyle(.plain)
+                }
+                if let dateTo = filters.dateTo {
+                    Button {
+                        filters.dateTo = nil
+                    } label: {
+                        TransactionFiltersRowItem(text: "По \(dateTo.formatted(date: .abbreviated, time: .omitted))", color: Color.blue)
+                    }
+                    .buttonStyle(.plain)
                 }
 //                if !filters.tags.isEmpty {
 //                    ForEach(Array(zip(filters.tags.indices, filters.tags)), id: \.0) { i, tag in

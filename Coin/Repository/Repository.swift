@@ -543,7 +543,9 @@ class Repository {
         accountGroupIDs: [UInt32],
         accountParameterIgnore: Bool = false,
         transactionParameterIgnore: Bool = false,
-        accountIDs: [UInt32] = []
+        accountIDs: [UInt32] = [],
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil
     ) async throws -> [Series] {
         try await sqlite.read { db in
             var amountField = ""
@@ -593,6 +595,15 @@ class Repository {
                 }
                 requestParameters.append("ag.id in (\(questions.joined(separator: ", ")))")
             }
+            if let dateFrom {
+                requestParameters.append("t.dateTransaction >= ?")
+                _ = args.append(contentsOf: [dateFrom])
+            }
+            if let dateTo {
+                requestParameters.append("t.dateTransaction <= ?")
+                _ = args.append(contentsOf: [dateTo])
+            }
+            
             var req: String = ""
             
             switch chartType {

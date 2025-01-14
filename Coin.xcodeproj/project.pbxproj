@@ -460,10 +460,10 @@
 		B50DBAD52BCD8CCC00A58B53 /* Chart */ = {
 			isa = PBXGroup;
 			children = (
+				B5156A8E2D364FB100B7FA01 /* Graph */,
 				B50DBAD62BCD8CD900A58B53 /* ChartView.swift */,
-				B52F76512D2EF16D00B6E617 /* ChartListItemView.swift */,
 				B50DBAD82BCD8CF500A58B53 /* ChartViewModel.swift */,
-				B58CAB292BCFE6A200B472FA /* Graph.swift */,
+				B52F76512D2EF16D00B6E617 /* ChartListItemView.swift */,
 			);
 			path = Chart;
 			sourceTree = "<group>";
@@ -476,6 +476,72 @@
 				B51CE1F92BAC442F00682D48 /* Repository.swift */,
 			);
 			path = Repository;
+			sourceTree = "<group>";
+		};
+		B5156A8C2D364F8900B7FA01 /* List */ = {
+			isa = PBXGroup;
+			children = (
+				B5156A8D2D364F9700B7FA01 /* Row */,
+				B50DBAD32BCD2D2600A58B53 /* TransactionsList.swift */,
+				B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */,
+			);
+			path = List;
+			sourceTree = "<group>";
+		};
+		B5156A8D2D364F9700B7FA01 /* Row */ = {
+			isa = PBXGroup;
+			children = (
+				B5156A8F2D364FCF00B7FA01 /* Edit */,
+				B5B950542ADF258700798F8C /* TransactionRow.swift */,
+			);
+			path = Row;
+			sourceTree = "<group>";
+		};
+		B5156A8E2D364FB100B7FA01 /* Graph */ = {
+			isa = PBXGroup;
+			children = (
+				B58CAB292BCFE6A200B472FA /* Graph.swift */,
+			);
+			path = Graph;
+			sourceTree = "<group>";
+		};
+		B5156A8F2D364FCF00B7FA01 /* Edit */ = {
+			isa = PBXGroup;
+			children = (
+				B5156A912D364FFB00B7FA01 /* Tags */,
+				B593F9542AE1CCB000378E17 /* EditTransaction.swift */,
+				B51710092BB2E6BF00950EE0 /* EditTransactionViewModel.swift */,
+			);
+			path = Edit;
+			sourceTree = "<group>";
+		};
+		B5156A902D364FE600B7FA01 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				B52F764B2D2EC62B00B6E617 /* SearchView.swift */,
+				B52F764E2D2EC66E00B6E617 /* SearchViewModel.swift */,
+				B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		B5156A912D364FFB00B7FA01 /* Tags */ = {
+			isa = PBXGroup;
+			children = (
+				B5156A922D36500300B7FA01 /* Edit */,
+				B54F3DAF2BD579FA00780460 /* TagsList.swift */,
+				B54F3DB12BD57A0700780460 /* TagsListViewModel.swift */,
+			);
+			path = Tags;
+			sourceTree = "<group>";
+		};
+		B5156A922D36500300B7FA01 /* Edit */ = {
+			isa = PBXGroup;
+			children = (
+				B54F3DB32BD57D8900780460 /* EditTag.swift */,
+				B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */,
+			);
+			path = Edit;
 			sourceTree = "<group>";
 		};
 		B51CE1EC2BAC3E3900682D48 /* Model */ = {
@@ -730,7 +796,6 @@
 			children = (
 				B58133562C0CA9E8004EB2B6 /* DeveloperTools */,
 				B58EAE0D2BFD0F7B0054E359 /* AccountGroup */,
-				B50DBAD52BCD8CCC00A58B53 /* Chart */,
 				B5F9CC7028F01E1A0037A21A /* ContentView.swift */,
 				B5E89333290073D0002AC30C /* Login */,
 				B56361A22B04FBE60044CDD8 /* Navigation */,
@@ -795,22 +860,13 @@
 		B5FB6AA128F3D5EF00C2A2AC /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
-				B52F764B2D2EC62B00B6E617 /* SearchView.swift */,
-				B52F764E2D2EC66E00B6E617 /* SearchViewModel.swift */,
+				B5156A902D364FE600B7FA01 /* Search */,
+				B50DBAD52BCD8CCC00A58B53 /* Chart */,
+				B5156A8C2D364F8900B7FA01 /* List */,
 				B58CAB2B2BD02E0700B472FA /* TransactionsView.swift */,
 				B52F76572D2FFBDB00B6E617 /* TransactionsViewModel.swift */,
-				B50DBAD32BCD2D2600A58B53 /* TransactionsList.swift */,
-				B5D6DE252BB1DBA800A06D67 /* TransactionsListViewModel.swift */,
-				B5B950542ADF258700798F8C /* TransactionRow.swift */,
-				B593F9542AE1CCB000378E17 /* EditTransaction.swift */,
-				B51710092BB2E6BF00950EE0 /* EditTransactionViewModel.swift */,
 				B54254842AF5218C008ECC33 /* TransactionFilterView.swift */,
-				B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */,
 				B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */,
-				B54F3DAF2BD579FA00780460 /* TagsList.swift */,
-				B54F3DB12BD57A0700780460 /* TagsListViewModel.swift */,
-				B54F3DB32BD57D8900780460 /* EditTag.swift */,
-				B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
