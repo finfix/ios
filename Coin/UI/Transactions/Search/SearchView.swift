@@ -86,9 +86,6 @@ struct SearchView: View {
                     ForEach(vm.earnings) { account in
                         Button {
                             filters.accounts.append(account)
-                            if filters.accountGroups.isEmpty {
-                                filters.accountGroups.append(account.accountGroup)
-                            }
                             chartType = .earnings
                             searchText = ""
                             showFilters = false
@@ -116,9 +113,6 @@ struct SearchView: View {
                     ForEach(vm.regulars) { account in
                         Button {
                             filters.accounts.append(account)
-                            if filters.accountGroups.isEmpty {
-                                filters.accountGroups.append(account.accountGroup)
-                            }
                             chartType = .earningsAndExpenses
                             searchText = ""
                             showFilters = false
@@ -146,9 +140,6 @@ struct SearchView: View {
                     ForEach(vm.expenses) { account in
                         Button {
                             filters.accounts.append(account)
-                            if filters.accountGroups.isEmpty {
-                                filters.accountGroups.append(account.accountGroup)
-                            }
                             chartType = .expenses
                             searchText = ""
                             showFilters = false
@@ -176,9 +167,6 @@ struct SearchView: View {
                     ForEach(vm.tags) { tag in
                         Button {
                             filters.tags.append(tag)
-                            if filters.accountGroups.isEmpty {
-                                filters.accountGroups.append(tag.accountGroup)
-                            }
                             chartType = .earningsAndExpenses
                             searchText = ""
                             showFilters = false

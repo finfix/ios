@@ -56,7 +56,7 @@ extension Service {
     
     // MARK: Read
     func getTransactions(
-        limit: Int? = nil,
+        limit: Int = 100,
         offset: Int = 0,
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
@@ -64,7 +64,7 @@ extension Service {
         accountIDs: [UInt32] = [],
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
-        tagsIDs: [UInt32] = [],
+        tagIDs: [UInt32] = [],
         accountGroupIDs: [UInt32] = []
     ) async throws -> [Transaction] {
         
@@ -78,15 +78,16 @@ extension Service {
         let tagsMap = Tag.convertToMap(Tag.convertFromDBModel(try await repository.getTags(), accountGroupsMap: nil))
         return Transaction.convertFromDBModel(
             try await repository.getTransactions(
-                offset: offset,
                 limit: limit,
+                offset: offset,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 searchText: searchText,
                 accountIDs: accountIDs,
                 accountGroupIDs: accountGroupIDs,
                 transactionTypes: transactionTypes,
-                currencies: currencies
+                currencies: currencies,
+                tagIDs: tagIDs
             ),
             accountsMap: accountsMap,
             tagsToTransactions: tagsToTransactions,

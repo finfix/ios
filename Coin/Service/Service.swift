@@ -73,10 +73,12 @@ extension Service {
     func getStatisticByMonth(
         chartType: ChartType,
         groupBy: ChartViewGroupBy,
+        targetCurrency: Currency,
         accountGroupIDs: [UInt32] = [],
         accountIDs: [UInt32] = [],
         dateFrom: Date? = nil,
-        dateTo: Date? = nil
+        dateTo: Date? = nil,
+        tagIDs: [UInt32] = []
     ) async throws -> [Series] {
         
         // Контейнер для информации для графика
@@ -95,6 +97,12 @@ extension Service {
                 saveChildren: true
             )
         )
+        let tagsMap = Tag.convertToMap(
+            Tag.convertFromDBModel(
+                try await repository.getTags(),
+                accountGroupsMap: nil
+            )
+        )
         
 
         switch chartType {
@@ -107,9 +115,11 @@ extension Service {
                 groupBy: groupBy,
                 transactionType: .consumption,
                 accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
                 accountIDs: accountIDs,
                 dateFrom: dateFrom,
-                dateTo: dateTo
+                dateTo: dateTo,
+                tagIDs: tagIDs
             )
             
             //
@@ -125,9 +135,11 @@ extension Service {
                 groupBy: groupBy,
                 transactionType: .income,
                 accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
                 accountIDs: accountIDs,
                 dateFrom: dateFrom,
-                dateTo: dateTo
+                dateTo: dateTo,
+                tagIDs: tagIDs
             )
             
             //
@@ -146,9 +158,11 @@ extension Service {
                 groupBy: groupBy,
                 transactionType: .income,
                 accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
                 accountIDs: accountIDs,
                 dateFrom: dateFrom,
-                dateTo: dateTo
+                dateTo: dateTo,
+                tagIDs: tagIDs
             )
             
         // Если необходимо получить только данные по расходам
@@ -160,18 +174,30 @@ extension Service {
                 groupBy: groupBy,
                 transactionType: .consumption,
                 accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
                 accountIDs: accountIDs,
                 dateFrom: dateFrom,
-                dateTo: dateTo
+                dateTo: dateTo,
+                tagIDs: tagIDs
             )
         }
         
-        if chartType != .earningsAndExpenses  {
-            for (i, dataItem) in data.enumerated() {
-                if let objectID = dataItem.objectID {
-                    data[i].account = accountsMap[objectID]
+        if chartType == .earnings || chartType == .expenses {
+            switch groupBy {
+            case .byAccount:
+                for (i, dataItem) in data.enumerated() {
+                    if let objectID = dataItem.objectID {
+                        data[i].account = accountsMap[objectID]
+                    }
+                }
+            case .byTag:
+                for (i, dataItem) in data.enumerated() {
+                    if let objectID = dataItem.objectID {
+                        data[i].tag = tagsMap[objectID]
+                    }
                 }
             }
+            
             data = data.sorted(by: { $0.data.map{$0.value}.reduce(0){$0+$1} > $1.data.map{$0.value}.reduce(0){$0+$1} })
             for (i, _) in data.enumerated() {
                 data[i].serialNumber = UInt32(i)

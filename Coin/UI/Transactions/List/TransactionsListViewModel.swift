@@ -30,15 +30,6 @@ class TransactionsListViewModel {
             }
         }
         
-        var accountGroupIDs: [UInt32] = []
-        for accountGroup in filters.accountGroups {
-            accountGroupIDs.append(accountGroup.id)
-        }
-        
-        var tagIDs: [UInt32] = []
-        for tag in filters.tags {
-            tagIDs.append(tag.id)
-        }
         
         self.transactions = try await service.getTransactions(
             limit: 100,
@@ -49,8 +40,8 @@ class TransactionsListViewModel {
             accountIDs: accountIDs,
             transactionTypes: filters.transactionTypes,
             currencies: filters.currencies,
-            tagsIDs: tagIDs,
-            accountGroupIDs: accountGroupIDs
+            tagIDs: filters.tags.map(\.id),
+            accountGroupIDs: filters.accountGroups.map(\.id)
         )
                                 
         self.user = try await service.getUsers()[0]

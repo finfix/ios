@@ -72,27 +72,31 @@ struct ChartView: View {
             .frame(height: chartHeight)
             VStack {
                 HStack {
-                    Menu {
-                        Picker("", selection: $chartViewGroupBy) {
-                            ForEach(ChartViewGroupBy.allCases, id: \.self) { groupBy in
-                                Text(groupBy.name)
-                                    .tag(groupBy)
+                    if vm.chartType != .earningsAndExpenses {
+                        Menu {
+                            Picker("", selection: $chartViewGroupBy) {
+                                ForEach(ChartViewGroupBy.allCases, id: \.self) { groupBy in
+                                    Text(groupBy.name)
+                                        .tag(groupBy)
+                                }
                             }
+                        } label: {
+                            HStack {
+                                Text(chartViewGroupBy.name)
+                                Image(systemName: "chevron.up.chevron.down")
+                                Spacer()
+                            }
+                            .font(.caption)
+                            .foregroundColor(.blue)
                         }
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Text(chartViewGroupBy.name)
-                            Image(systemName: "chevron.up.chevron.down")
-                        }
-                        .font(.caption)
-                        .foregroundColor(.blue)
+                        .id(chartViewGroupBy)
+                        .frame(minWidth: 150)
+                    } else {
+                        Text("Тип")
+                            .font(.caption)
                     }
-                    .id(chartViewGroupBy)
-                    .frame(minWidth: 150)
                     
                     Spacer()
-                    
                     Menu {
                         Picker("", selection: $vm.aggregationMethod) {
                             ForEach(ChartViewModel.AggregationMethod.allCases.filter{
@@ -149,14 +153,14 @@ struct ChartView: View {
         }
         .task {
             do {
-                try await vm.load(groupBy: chartViewGroupBy, filters: filters)
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
             } catch {
                 alert(error)
             }
         }
         .onChange(of: vm.chartType) { _, _ in
             Task {
-                try await vm.load(groupBy: chartViewGroupBy, filters: filters)
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
             }
         }
     }

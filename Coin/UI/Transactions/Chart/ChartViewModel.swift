@@ -41,6 +41,8 @@ class ChartViewModel {
                 result[series.id] = data.filter{ $0.id == series.id }.first!.data.values.reduce(0) { $0 + $1 }
             case .average:
                 result[series.id] = data.filter{ $0.id == series.id }.first!.data.values.reduce(0) { $0 + $1 / Decimal(data.first!.data.count) }
+            case .average2:
+                result[series.id] = data.filter{ $0.id == series.id }.first!.data.values.reduce(0) { $0 + $1 / Decimal(data.first!.data.filter{ !$1.isZero }.count) }
             case .min:
                 result[series.id] = data.filter{ $0.id == series.id }.first!.data.values.min()
             case .max:
@@ -59,12 +61,13 @@ class ChartViewModel {
     }
     
     enum AggregationMethod: CaseIterable {
-        case total, average, percent, min, max, budget
+        case total, average, average2, percent, min, max, budget
         
         var name: String {
             switch self {
             case .total: "Всего"
             case .average: "Среднее"
+            case .average2: "Среднее*"
             case .percent: "Процент"
             case .min: "Миниммум"
             case .max: "Максимум"
@@ -82,7 +85,8 @@ class ChartViewModel {
     @MainActor
     func load(
         groupBy: ChartViewGroupBy,
-        filters: TransactionFilters
+        filters: TransactionFilters,
+        targetCurrency: Currency
     ) async throws {
         
         var accountIDs: [UInt32] = []
@@ -96,10 +100,12 @@ class ChartViewModel {
         data = try await service.getStatisticByMonth(
             chartType: chartType,
             groupBy: groupBy,
+            targetCurrency: targetCurrency,
             accountGroupIDs: filters.accountGroups.map(\.id),
             accountIDs: accountIDs,
             dateFrom: filters.dateFrom,
-            dateTo: filters.dateTo
+            dateTo: filters.dateTo,
+            tagIDs: filters.tags.map(\.id)
         )
     }
 }

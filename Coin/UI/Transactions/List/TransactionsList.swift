@@ -58,17 +58,6 @@ struct TransactionsList: View {
                         Divider()
                     }
                     .background(Color(.systemGray6))
-                    //                .onDelete {
-                    //                    for i in $0.makeIterator() {
-                    //                        Task {
-                    //                            do {
-                    //                                try await vm.deleteTransaction(vm.groupedTransactionByDate[date]![i])
-                    //                            } catch {
-                    //                                alert(error)
-                    //                            }
-                    //                        }
-                    //                    }
-                    //                }
                 }
             }
         }

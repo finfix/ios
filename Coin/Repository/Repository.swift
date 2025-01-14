@@ -485,8 +485,8 @@ class Repository {
     }
     
     func getTransactions(
+        limit: Int = 100,
         offset: Int = 0,
-        limit: Int? = nil,
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
@@ -498,46 +498,96 @@ class Repository {
     ) async throws -> [TransactionDB] {
         try await sqlite.read { db in
             
-            var request = TransactionDB
-                .order(TransactionDB.Columns.dateTransaction.desc, TransactionDB.Columns.id.desc)
-            
+            var joins: [String] = []
+            var filters: [String] = []
+            var args: StatementArguments = []
+                        
             if let dateFrom {
-                request = request.filter(TransactionDB.Columns.dateTransaction >= dateFrom)
+                filters.append("t.dateTransaction >= ?")
+                _ = args.append(contentsOf: [dateFrom])
             }
     
             if let dateTo {
-                request = request.filter(TransactionDB.Columns.dateTransaction <= dateTo)
+                filters.append("t.dateTransaction <= ?")
+                _ = args.append(contentsOf: [dateTo])
             }
             
             if searchText != "" {
-                request = request.filter(TransactionDB.Columns.note.like("%"+searchText+"%"))
+                filters.append("t.note LIKE ?")
+                _ = args.append(contentsOf: ["%"+searchText+"%"])
             }
                 
             if !accountIDs.isEmpty {
-                request = request.filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))
+                
+                var questions: [String] = []
+                for _ in accountIDs {
+                    questions.append("?")
+                }
+                
+                filters.append("t.accountFromId IN (\(questions.joined(separator: ","))) OR t.accountToId IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(accountIDs))
+                _ = args.append(contentsOf: StatementArguments(accountIDs))
             }
             
             if !accountGroupIDs.isEmpty {
-                request = request.filter(accountGroupIDs.contains(TransactionDB.Columns.accountGroupID))
+                
+                var questions: [String] = []
+                for _ in accountGroupIDs {
+                    questions.append("?")
+                }
+                
+                filters.append("t.accountGroupId IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(accountGroupIDs))
             }
             
-//            if !tagIDs.isEmpty {
-//                request = request.filter(tagIDs.contains())
-//            }
+            if !tagIDs.isEmpty {
+                
+                var questions: [String] = []
+                for _ in tagIDs {
+                    questions.append("?")
+                }
+                
+                joins.append("JOIN tagToTransactionDB tttd ON tttd.transactionId = t.id")
+                joins.append("JOIN tagDB tg ON tttd.tagId = tg.id")
+                
+                filters.append("tg.id IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(tagIDs))
+            }
             
             if !transactionTypes.isEmpty {
-                request = request.filter(transactionTypes.map(\.rawValue).contains(TransactionDB.Columns.type))
+                var questions: [String] = []
+                for _ in transactionTypes {
+                    questions.append("?")
+                }
+                
+                filters.append("t.type IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
             }
             
             if !currencies.isEmpty {
-                request = request
+                var questions: [String] = []
+                for _ in transactionTypes {
+                    questions.append("?")
+                }
+                
+                joins.append("JOIN accountDB a1 ON a1.id = t.accountFromId")
+                joins.append("JOIN accountDB a2 ON a2.id = t.accountToId")
+
+                filters.append("a1.currency IN (\(questions.joined(separator: ","))) OR a2.currency IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
+                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
             }
-            
-            if let limit {
-                request = request.limit(limit, offset: offset)
-            }
+                        
+            let sql = """
+                SELECT *
+                FROM transactionDB t
+                \(joins.joined(separator: "\n"))
+                \(filters.isEmpty ? "" : "WHERE \(filters.joined(separator: "\nAND "))")
+                ORDER BY t.dateTransaction DESC, t.id DESC
+                LIMIT \(limit) OFFSET \(offset)
+            """
                     
-            return try request.fetchAll(db)
+            return try TransactionDB.fetchAll(db, sql: sql, arguments: args)
         }
     }
     
@@ -546,51 +596,64 @@ class Repository {
         groupBy: ChartViewGroupBy,
         transactionType: TransactionType,
         accountGroupIDs: [UInt32],
+        targetCurrency: Currency,
         accountParameterIgnore: Bool = false,
         transactionParameterIgnore: Bool = false,
         accountIDs: [UInt32] = [],
         dateFrom: Date? = nil,
-        dateTo: Date? = nil
+        dateTo: Date? = nil,
+        tagIDs: [UInt32] = []
     ) async throws -> [Series] {
         try await sqlite.read { db in
-            var amountField = ""
-            var accountType = ""
-            var accountField = ""
-            switch transactionType {
-            case .consumption:
-                amountField = "amountTo"
-                accountField = "accountToId"
-                accountType = "expense"
-            case .income:
-                amountField = "amountFrom"
-                accountField = "accountFromId"
-                accountType = "earnings"
-            default:
-                return []
-            }
             
-            var requestParameters: [String] = [
+            var selects: [String] = [
+                "strftime('%Y-%m-01', t.dateTransaction) AS month",
+                "ROUND(SUM(t.\(transactionType == .consumption ? "amountTo" : "amountFrom") * ((SELECT rate FROM currencyDB WHERE code = '\(targetCurrency.code)') / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder"
+            ]
+            var joins: [String] = [
+                "JOIN accountDB a ON a.id = t.\(transactionType == .consumption ? "accountToId" : "accountFromId")"
+            ]
+            var filters: [String] = [
                 "a.type = ?"
             ]
             var args: StatementArguments = [
-                accountType
+                "\(transactionType == .consumption ? "expense" : "earnings")"
             ]
-            
+            var groups: [String] = [
+                "month"
+            ]
+                       
+            var tagJoined = false
+            if chartType == .expenses || chartType == .earnings {
+                switch groupBy {
+                case .byAccount:
+                    selects.append("a.id AS accountId")
+                    groups.append("accountId")
+                case .byTag:
+                    selects.append("tg.id as tagId")
+                    joins.append("JOIN tagToTransactionDB tttd ON tttd.transactionId = t.id")
+                    joins.append("JOIN tagDB tg ON tttd.tagId = tg.id")
+                    groups.append("tagId")
+                    tagJoined = true
+                }
+            }
+
+            // Опциональные фильтры
             if !accountParameterIgnore {
-                requestParameters.append("a.accountingInCharts = ?")
+                filters.append("a.accountingInCharts = ?")
                 _ = args.append(contentsOf: [true])
             }
             if !transactionParameterIgnore {
-                requestParameters.append("t.accountingInCharts = ?")
+                filters.append("t.accountingInCharts = ?")
                 _ = args.append(contentsOf: [true])
             }
             if !accountIDs.isEmpty {
                 var questions: [String] = []
-                for accountID in accountIDs {
+                for _ in accountIDs {
                     questions.append("?")
-                    _ = args.append(contentsOf: [accountID])
                 }
-                requestParameters.append("a.id in (\(questions.joined(separator: ", ")))")
+                filters.append("a.id in (\(questions.joined(separator: ", ")))")
+                _ = args.append(contentsOf: StatementArguments(accountIDs))
             }
             if !accountGroupIDs.isEmpty {
                 var questions: [String] = []
@@ -598,60 +661,42 @@ class Repository {
                     questions.append("?")
                     _ = args.append(contentsOf: [accountGroupID])
                 }
-                requestParameters.append("ag.id in (\(questions.joined(separator: ", ")))")
+                filters.append("t.accountGroupId in (\(questions.joined(separator: ", ")))")
             }
             if let dateFrom {
-                requestParameters.append("t.dateTransaction >= ?")
+                filters.append("t.dateTransaction >= ?")
                 _ = args.append(contentsOf: [dateFrom])
             }
             if let dateTo {
-                requestParameters.append("t.dateTransaction <= ?")
+                filters.append("t.dateTransaction <= ?")
                 _ = args.append(contentsOf: [dateTo])
             }
-            
-            var req: String = ""
-            
-            switch chartType {
-            case .earningsAndExpenses:
-                req = """
-                    SELECT
-                      strftime('%Y-%m-01', t.dateTransaction) AS "month",
-                      ROUND(SUM(t.\(amountField) * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
-                    FROM transactionDB t
-                    JOIN accountDB a ON a.id = t.\(accountField)
-                    JOIN accountGroupDB ag  ON a.accountGroupId = ag.id
-                    WHERE \(requestParameters.joined(separator: " AND "))
-                    GROUP BY "month"
-                """
-            case .expenses, .earnings:
-                var selectAccountStatement = ""
-                if accountIDs.isEmpty {
-                    selectAccountStatement = """
-                          CASE WHEN a.parentAccountId IS NULL
-                            THEN a.id
-                            ELSE a.parentAccountId
-                          END AS accountId,
-                    """
-                } else {
-                    selectAccountStatement = "a.id AS accountId,"
+            if !tagIDs.isEmpty {
+                var questions: [String] = []
+                for _ in tagIDs {
+                    questions.append("?")
                 }
-                req = """
-                    SELECT
-                      strftime('%Y-%m-01', t.dateTransaction) AS "month",
-                      \(selectAccountStatement)
-                      ROUND(SUM(t.\(amountField) * ((SELECT rate FROM currencyDB WHERE code = ag.currencyCode) / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder
-                    FROM transactionDB t
-                    JOIN accountDB a ON a.id = t.\(accountField)
-                    JOIN accountGroupDB ag  ON a.accountGroupId = ag.id
-                    WHERE \(requestParameters.joined(separator: " AND "))
-                    GROUP BY "month", "accountId"
-                """
+                if !tagJoined {
+                    joins.append("JOIN tagToTransactionDB tttd ON tttd.transactionId = t.id")
+                    joins.append("JOIN tagDB tg ON tttd.tagId = tg.id")
+                }
+                filters.append("tg.id in (\(questions.joined(separator: ", ")))")
+                _ = args.append(contentsOf: StatementArguments(tagIDs))
             }
-                
+                            
+            // Мапа ObjectID - Дата - Сумма
             var result: [UInt32: [Date: Decimal]] = [:]
-            let rows = try Row.fetchCursor(db, sql: req, arguments: args)
             
-            var series: [Series] = []
+            let sql = """
+                SELECT \(selects.joined(separator: ",\n"))
+                FROM transactionDB t
+                \(joins.joined(separator: "\n"))
+                WHERE \(filters.joined(separator: "\nAND "))
+                GROUP BY \(groups.joined(separator: ", "))
+            """
+            
+            let rows = try Row.fetchCursor(db, sql: sql, arguments: args)
+            
             while let row = try rows.next() {
                 switch chartType {
                 case .earningsAndExpenses:
@@ -660,25 +705,32 @@ class Repository {
                     }
                     result[0]?[row["month"]] = row["remainder"]
                 case .expenses, .earnings:
-                    let accountID: UInt32 = row["accountId"]
-                    if result[accountID] == nil {
-                        result[accountID] = [:]
+                    switch groupBy {
+                    case .byTag:
+                        let tagID: UInt32 = row["tagId"]
+                        if result[tagID] == nil {
+                            result[tagID] = [:]
+                        }
+                        result[tagID]?[row["month"]] = row["remainder"]
+                    case .byAccount:
+                        let accountID: UInt32 = row["accountId"]
+                        if result[accountID] == nil {
+                            result[accountID] = [:]
+                        }
+                        result[accountID]?[row["month"]] = row["remainder"]
                     }
-                    result[accountID]?[row["month"]] = row["remainder"]
                 }
             }
             
-            for (categoryName, monthData) in result {
-                series.append(Series(
+            return result.map { (categoryName: UInt32, monthData: [Date : Decimal]) in
+                Series(
                     account: nil,
                     tag: nil,
                     type: nil,
                     objectID: UInt32(categoryName),
                     data: monthData
-                ))
+                )
             }
-                            
-            return series
         }
     }
     
