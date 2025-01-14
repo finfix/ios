@@ -12,7 +12,7 @@ private let logger = Logger(subsystem: "Coin", category: "BudgetList")
 
 struct BudgetsList: View {
         
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     var accountGroup: AccountGroup
     @State private var vm = BudgetsListViewModel()
         

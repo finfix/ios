@@ -17,6 +17,8 @@ enum EditTransactionRoute: Hashable {
 struct Tags: View {
     
     var vm: EditTransactionViewModel
+    @Environment(\.dismiss) var dismiss
+    @Environment(AlertManager.self) private var alert
     @Environment(PathSharedState.self) var path
     
     var body: some View {
@@ -89,6 +91,25 @@ struct Tags: View {
             }
         }
         .buttonStyle(.plain)
+        .toolbar(content: {
+            ToolbarItem {
+                Button(role: .destructive) {
+                    Task {
+                        do {
+                            try await vm.deleteTransaction()
+                        } catch {
+                            alert(error)
+                            return
+                        }
+                        
+                        dismiss()
+                    }
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                }
+            }
+        })
     }
 }
 
@@ -283,11 +304,7 @@ struct EditTransaction: View {
                             dismiss()
                         }
                     } label: {
-                        if vm.shouldShowProgress {
-                            ProgressView()
-                        } else {
-                            Text("Сохранить")
-                        }
+                        Text("Сохранить")
                     }
                     .frame(maxWidth: .infinity)
                 }
@@ -376,7 +393,6 @@ struct EditTransaction: View {
                 alert(error)
             }
         }
-        .disabled(vm.shouldDisableUI)
     }
 }
 

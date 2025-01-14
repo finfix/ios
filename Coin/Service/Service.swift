@@ -72,46 +72,132 @@ extension Service {
     
     func getStatisticByMonth(
         chartType: ChartType,
-        accountGroupID: UInt32,
-        accountIDs: [UInt32] = []
+        groupBy: ChartViewGroupBy,
+        targetCurrency: Currency,
+        accountGroupIDs: [UInt32] = [],
+        accountIDs: [UInt32] = [],
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        tagIDs: [UInt32] = []
     ) async throws -> [Series] {
+        
+        // Контейнер для информации для графика
         var data: [Series] = []
+        
+        // Собираем все счета для дополнения идентификатора из базы
+        let currencies = try await repository.getCurrencies()
         let accountsMap = Account.convertToMap(
             Account.groupAccounts(
                 Account.convertFromDBModel(
                     try await repository.getAccounts(),
-                    currenciesMap: nil,
+                    currenciesMap: Currency.convertToMap(Currency.convertFromDBModel(currencies)),
                     accountGroupsMap: nil,
                     iconsMap: nil
                 ),
                 saveChildren: true
             )
         )
+        let tagsMap = Tag.convertToMap(
+            Tag.convertFromDBModel(
+                try await repository.getTags(),
+                accountGroupsMap: nil
+            )
+        )
         
+
         switch chartType {
+        // Если необходима разбивка по доходам/расходам
         case .earningsAndExpenses:
-            var expenses = try await repository.getStatisticByMonth(chartType: chartType, transactionType: .consumption, accountGroupID: accountGroupID, accountIDs: accountIDs)
+            
+            // Получаем все расходы по месяцам
+            var expenses = try await repository.getStatisticByMonth(
+                chartType: chartType,
+                groupBy: groupBy,
+                transactionType: .consumption,
+                accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
+                accountIDs: accountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                tagIDs: tagIDs
+            )
+            
+            //
             if !expenses.isEmpty {
-                expenses[0].type = "Расход"
+                expenses[0].type = .expense
                 expenses[0].color = .red
                 data.append(contentsOf: expenses)
             }
-            var earnings = try await repository.getStatisticByMonth(chartType: chartType, transactionType: .income, accountGroupID: accountGroupID, accountIDs: accountIDs)
+            
+            // Получаем доходы по месяцам
+            var earnings = try await repository.getStatisticByMonth(
+                chartType: chartType,
+                groupBy: groupBy,
+                transactionType: .income,
+                accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
+                accountIDs: accountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                tagIDs: tagIDs
+            )
+            
+            //
             if !earnings.isEmpty {
-                earnings[0].type = "Доход"
+                earnings[0].type = .income
                 earnings[0].color = .green
                 data.append(contentsOf: earnings)
             }
+            
+        // Если необходимо получить только данные по доходам
         case .earnings:
-            data = try await repository.getStatisticByMonth(chartType: chartType, transactionType: .income, accountGroupID: accountGroupID, accountIDs: accountIDs)
+            
+            // Получаем статистику по доходным счетам/подкатегориям
+            data = try await repository.getStatisticByMonth(
+                chartType: chartType,
+                groupBy: groupBy,
+                transactionType: .income,
+                accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
+                accountIDs: accountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                tagIDs: tagIDs
+            )
+            
+        // Если необходимо получить только данные по расходам
         case .expenses:
-            data = try await repository.getStatisticByMonth(chartType: chartType, transactionType: .consumption, accountGroupID: accountGroupID, accountIDs: accountIDs)
+            
+            // Получаем статистику по расходным счетам/подкатегориям
+            data = try await repository.getStatisticByMonth(
+                chartType: chartType,
+                groupBy: groupBy,
+                transactionType: .consumption,
+                accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
+                accountIDs: accountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                tagIDs: tagIDs
+            )
         }
         
-        if chartType != .earningsAndExpenses {
-            for (i, dataItem) in data.enumerated() {
-                data[i].account = accountsMap[UInt32(dataItem.type)!]!
+        if chartType == .earnings || chartType == .expenses {
+            switch groupBy {
+            case .byAccount:
+                for (i, dataItem) in data.enumerated() {
+                    if let objectID = dataItem.objectID {
+                        data[i].account = accountsMap[objectID]
+                    }
+                }
+            case .byTag:
+                for (i, dataItem) in data.enumerated() {
+                    if let objectID = dataItem.objectID {
+                        data[i].tag = tagsMap[objectID]
+                    }
+                }
             }
+            
             data = data.sorted(by: { $0.data.map{$0.value}.reduce(0){$0+$1} > $1.data.map{$0.value}.reduce(0){$0+$1} })
             for (i, _) in data.enumerated() {
                 data[i].serialNumber = UInt32(i)
@@ -119,8 +205,8 @@ extension Service {
             }
         }
         
-        var minDate: Date = .now
-        var maxDate: Date = .now
+        var minDate: Date = .distantFuture
+        var maxDate: Date = .distantPast
         
         // Проходимся по каждой статье и получаем дату самой первой и самой последней записи
         for data in data {

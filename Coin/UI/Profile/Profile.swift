@@ -16,7 +16,7 @@ enum ProfileViews: Hashable {
 
 struct Profile: View {
     
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     @State var vm = ProfileViewModel()
     
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup

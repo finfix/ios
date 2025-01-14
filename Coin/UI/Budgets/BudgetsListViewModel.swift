@@ -19,7 +19,7 @@ class BudgetsListViewModel {
     
     func load(accountGroup: AccountGroup) async throws {
         let tmpAccounts = try await service.getAccounts(
-            accountGroup: accountGroup,
+            accountGroups: [accountGroup],
             visible: true,
             types: [.expense]
         )

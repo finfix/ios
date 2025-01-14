@@ -26,12 +26,12 @@ struct Graph: View {
         chartType: ChartType,
         data: [Series],
         lastSelectedDate: Binding<Date>,
-        accountGroup: AccountGroup
+        currency: Currency
     ) {
         self.chartType = chartType
         self.data = data
         self._lastSelectedDate = lastSelectedDate
-        self.currencyFormatter = CurrencyFormatter(currency: accountGroup.currency, withUnits: true)
+        self.currencyFormatter = CurrencyFormatter(currency: currency, withUnits: true)
     }
     
     var maxSum: Double {
@@ -146,7 +146,7 @@ struct Graph: View {
                     }
                     .padding(.trailing, 25)
                     .padding(.bottom, 40)
-                    .opacity(0.5)
+                    .opacity(0.7)
                 }
             }
             Text(lastSelectedDate.formatted(.dateTime.year(.defaultDigits).month(.wide)))
@@ -179,14 +179,11 @@ struct ScaleButton: View {
 
 #Preview {
     ChartView(
-        selectedAccountGroup: AccountGroup(
-            id: 4,
-            currency:
-                Currency(
-                    symbol: "₽"
-                )
-        ),
-        filters: TransactionFilters()
+        chartViewGroupBy: .constant(ChartViewGroupBy.byAccount),
+        filters: .constant(TransactionFilters()),
+        currency: Currency(
+            symbol: "₽"
+        )
     )
         .environment(AlertManager(handle: {_ in }))
 }

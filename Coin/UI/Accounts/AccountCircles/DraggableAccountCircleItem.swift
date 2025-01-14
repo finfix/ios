@@ -58,7 +58,17 @@ struct DraggableAccountCircleItem: View {
                             if isAlreadyOpened {
                                 dismiss()
                             }
-                            path.append(AccountCircleItemRoute.accountTransactions(account))
+                            
+                            var chartType: ChartType = .earningsAndExpenses
+                            switch account.type {
+                            case .earnings:
+                                chartType = .earnings
+                            case .expense:
+                                chartType = .expenses
+                            default: break
+                            }
+                            
+                            path.append(AccountCircleItemRoute.accountTransactions(account, chartType))
                         }
                 )
                 .overlay {

@@ -30,7 +30,7 @@ struct ContentView: View {
         }
         .task {
             do {
-                let (serverVersion, serverBuild) = try await service.getVersion(.ios)
+                let (serverVersion, _) = try await service.getVersion(.ios)
                 let serverVersionParts = serverVersion.replacingOccurrences(of: "v", with: "").split(separator: ".")
                 
                 guard let localVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
