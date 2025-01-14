@@ -11,8 +11,8 @@ struct TransactionFilters: Equatable, Hashable {
     var searchText = ""
     var dateFrom: Date?
     var dateTo: Date?
-    var transactionType: TransactionType?
-    var currency: Currency?
+    var transactionTypes: [TransactionType] = []
+    var currencies: [Currency] = []
     var accounts: [Account] = []
     var tags: [Tag] = []
     var accountGroups: [AccountGroup] = []
@@ -21,13 +21,12 @@ struct TransactionFilters: Equatable, Hashable {
 struct TransactionsView: View {
     
     @Environment(PathSharedState.self) var path
-    @State var isFilterOpen = false
     @State var filters: TransactionFilters
     @State var searchText: String = ""
     @State var chartType: ChartType
     @State var chartGroupBy: ChartViewGroupBy = .byAccount
     @State var vm: TransactionsViewModel = TransactionsViewModel()
-    @State private var searchFocused: Bool = false
+    @State private var showFilters: Bool = false
 
     var currency: Currency {
         if filters.accountGroups.count == 1 {
@@ -48,7 +47,7 @@ struct TransactionsView: View {
     var body: some View {
         VStack {
             // Если строка поиска пустая -> Показываем список транзакций
-            if !searchFocused {
+            if !showFilters {
                 ScrollView {
                     TransactionFiltersRowView(filters: $filters)
                     ChartView(
@@ -59,19 +58,8 @@ struct TransactionsView: View {
                     )
                     TransactionsList(filters: filters)
                 }
-                .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
-                        // Фильтры
-                        Button { isFilterOpen.toggle() } label: { Label("Фильтры", systemImage: "line.3.horizontal.decrease.circle") }
-                    }
-                }
-                .sheet(isPresented: $isFilterOpen) {
-                    TransactionFilterView(
-                        filters: $filters
-                    )
-                }
             } else { // Если в строку поиска уже что-то написали
-                SearchView(searchText: $searchText, filters: $filters, chartType: $chartType, searchFocused: $searchFocused)
+                SearchView(searchText: $searchText, filters: $filters, chartType: $chartType, showFilters: $showFilters)
             }
         }
         .task {
@@ -81,7 +69,7 @@ struct TransactionsView: View {
                 
             }
         }
-        .searchable(text: $searchText, isPresented: $searchFocused)
+        .searchable(text: $searchText, isPresented: $showFilters)
     }
 }
 

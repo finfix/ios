@@ -50,7 +50,6 @@
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B537425F2D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */; };
 		B53742602D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */; };
-		B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54254842AF5218C008ECC33 /* TransactionFilterView.swift */; };
 		B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */; };
 		B54DA3AA2BBD81D9008A9FD1 /* StripTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */; };
 		B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DAF2BD579FA00780460 /* TagsList.swift */; };
@@ -58,7 +57,6 @@
 		B54F3DB42BD57D8900780460 /* EditTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB32BD57D8900780460 /* EditTag.swift */; };
 		B54F3DB62BD57DBB00780460 /* EditTagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */; };
 		B557AA0E290D959F00631421 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* NetworkManager.swift */; };
-		B55EF9DB2BE274D3003C8882 /* TransactionFilterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */; };
 		B55EF9DD2BE2CFF5003C8882 /* Hasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
 		B5610F0428FC9A420063AFEB /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* APIManager.swift */; };
@@ -184,7 +182,6 @@
 		B5DEFCF42C07015A001D7E61 /* TagsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DAF2BD579FA00780460 /* TagsList.swift */; };
 		B5DEFCF52C07015A001D7E61 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B068F02BAC70A100AEEC98 /* ProfileViewModel.swift */; };
 		B5DEFCF62C07015A001D7E61 /* TagToTransactionDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EAB2BD2DDC0004C9AC7 /* TagToTransactionDB.swift */; };
-		B5DEFCF72C07015A001D7E61 /* TransactionFilterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */; };
 		B5DEFCF82C07015A001D7E61 /* AccountDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51CE1EF2BAC3FB100682D48 /* AccountDB.swift */; };
 		B5DEFCF92C07015A001D7E61 /* EditAccountGroupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5192F942BFF4885004A8BFD /* EditAccountGroupViewModel.swift */; };
 		B5DEFCFA2C07015A001D7E61 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51CE1EA2BAC37A000682D48 /* Service.swift */; };
@@ -197,7 +194,6 @@
 		B5DEFD012C07015A001D7E61 /* TagAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA52BD2DA9B004C9AC7 /* TagAPI.swift */; };
 		B5DEFD022C07015A001D7E61 /* UserAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B504B7E42AE46EEB0078643A /* UserAPI.swift */; };
 		B5DEFD032C07015A001D7E61 /* TasksListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4C3F02BDF9B82007CCFC9 /* TasksListViewModel.swift */; };
-		B5DEFD042C07015A001D7E61 /* TransactionFilterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54254842AF5218C008ECC33 /* TransactionFilterView.swift */; };
 		B5DEFD052C07015A001D7E61 /* AccountGroupModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5192F972BFF4AE5004A8BFD /* AccountGroupModels.swift */; };
 		B5DEFD062C07015A001D7E61 /* AccountGroupSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2828FDD4C200AA33A9 /* AccountGroupSelector.swift */; };
 		B5DEFD072C07015A001D7E61 /* SnapCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8932F28FF090B002AC30C /* SnapCarousel.swift */; };
@@ -318,7 +314,6 @@
 		B52F76572D2FFBDB00B6E617 /* TransactionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsViewModel.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFiltersRowView.swift; sourceTree = "<group>"; };
-		B54254842AF5218C008ECC33 /* TransactionFilterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterView.swift; sourceTree = "<group>"; };
 		B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMonthPeriodFromDate.swift; sourceTree = "<group>"; };
 		B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripTime.swift; sourceTree = "<group>"; };
 		B54F3DAF2BD579FA00780460 /* TagsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsList.swift; sourceTree = "<group>"; };
@@ -326,7 +321,6 @@
 		B54F3DB32BD57D8900780460 /* EditTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTag.swift; sourceTree = "<group>"; };
 		B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTagViewModel.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
-		B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFilterViewModel.swift; sourceTree = "<group>"; };
 		B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hasher.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
@@ -865,8 +859,6 @@
 				B5156A8C2D364F8900B7FA01 /* List */,
 				B58CAB2B2BD02E0700B472FA /* TransactionsView.swift */,
 				B52F76572D2FFBDB00B6E617 /* TransactionsViewModel.swift */,
-				B54254842AF5218C008ECC33 /* TransactionFilterView.swift */,
-				B55EF9DA2BE274D3003C8882 /* TransactionFilterViewModel.swift */,
 			);
 			path = Transactions;
 			sourceTree = "<group>";
@@ -1031,7 +1023,6 @@
 				B5DEFCF42C07015A001D7E61 /* TagsList.swift in Sources */,
 				B5DEFCF52C07015A001D7E61 /* ProfileViewModel.swift in Sources */,
 				B5DEFCF62C07015A001D7E61 /* TagToTransactionDB.swift in Sources */,
-				B5DEFCF72C07015A001D7E61 /* TransactionFilterViewModel.swift in Sources */,
 				B58133672C0CAE0B004EB2B6 /* DeveloperToolsTab.swift in Sources */,
 				B58133632C0CADF9004EB2B6 /* AccountCirclesTab.swift in Sources */,
 				B5DEFCF82C07015A001D7E61 /* AccountDB.swift in Sources */,
@@ -1049,7 +1040,6 @@
 				B52F76592D2FFBDB00B6E617 /* TransactionsViewModel.swift in Sources */,
 				B5DEFD032C07015A001D7E61 /* TasksListViewModel.swift in Sources */,
 				B562CB532C71E1BA00AFB056 /* LoginViewModel.swift in Sources */,
-				B5DEFD042C07015A001D7E61 /* TransactionFilterView.swift in Sources */,
 				B5DEFD052C07015A001D7E61 /* AccountGroupModels.swift in Sources */,
 				B5DEFD062C07015A001D7E61 /* AccountGroupSelector.swift in Sources */,
 				B5DEFD072C07015A001D7E61 /* SnapCarousel.swift in Sources */,
@@ -1168,7 +1158,6 @@
 				B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */,
 				B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */,
 				B5744EAC2BD2DDC0004C9AC7 /* TagToTransactionDB.swift in Sources */,
-				B55EF9DB2BE274D3003C8882 /* TransactionFilterViewModel.swift in Sources */,
 				B51CE1F02BAC3FB100682D48 /* AccountDB.swift in Sources */,
 				B5192F952BFF4885004A8BFD /* EditAccountGroupViewModel.swift in Sources */,
 				B51CE1EB2BAC37A000682D48 /* Service.swift in Sources */,
@@ -1184,7 +1173,6 @@
 				B5F4C3F12BDF9B82007CCFC9 /* TasksListViewModel.swift in Sources */,
 				B58133662C0CAE0B004EB2B6 /* DeveloperToolsTab.swift in Sources */,
 				B52F76582D2FFBDB00B6E617 /* TransactionsViewModel.swift in Sources */,
-				B54254852AF5218C008ECC33 /* TransactionFilterView.swift in Sources */,
 				B562CB522C71E1BA00AFB056 /* LoginViewModel.swift in Sources */,
 				B5192F982BFF4AE5004A8BFD /* AccountGroupModels.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* AccountGroupSelector.swift in Sources */,

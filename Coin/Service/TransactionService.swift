@@ -62,8 +62,8 @@ extension Service {
         dateTo: Date? = nil,
         searchText: String = "",
         accountIDs: [UInt32] = [],
-        transactionType: TransactionType? = nil,
-        currency: Currency? = nil,
+        transactionTypes: [TransactionType] = [],
+        currencies: [Currency] = [],
         tagsIDs: [UInt32] = [],
         accountGroupIDs: [UInt32] = []
     ) async throws -> [Transaction] {
@@ -85,8 +85,8 @@ extension Service {
                 searchText: searchText,
                 accountIDs: accountIDs,
                 accountGroupIDs: accountGroupIDs,
-                transactionType: transactionType,
-                currency: currency
+                transactionTypes: transactionTypes,
+                currencies: currencies
             ),
             accountsMap: accountsMap,
             tagsToTransactions: tagsToTransactions,

@@ -21,6 +21,8 @@ class SearchViewModel {
     
     var tags: [Tag] = []
     
+    var currencies: [Currency] = []
+    
     @MainActor
     func load(filters: TransactionFilters, searchText: String = "") async throws {
         
@@ -29,6 +31,7 @@ class SearchViewModel {
         self.regulars = []
         self.expenses = []
         self.tags = []
+        self.currencies = []
         
         tags = try await service.getTags(name: searchText)
         var accounts = try await service.getAccounts(accountGroups: filters.accountGroups.isEmpty ? nil : filters.accountGroups, name: searchText)
@@ -44,8 +47,6 @@ class SearchViewModel {
             }
         }
         accountGroups = try await service.getAccountGroups(name: searchText)
-        print("Теги: \(tags.count)")
-        print("Счета: \(accounts.count)")
-        print("Группы счетов: \(accountGroups.count)")
+        currencies = try await service.getCurrencies(searchText: searchText)
     }
 }

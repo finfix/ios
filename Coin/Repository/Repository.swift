@@ -249,11 +249,16 @@ class Repository {
         }
     }
     
-    func getCurrencies() async throws -> [CurrencyDB] {
+    func getCurrencies(searchText: String = "") async throws -> [CurrencyDB] {
         try await sqlite.read { db in
-            return try CurrencyDB.fetchAll(db).sorted { i, j in
-                i.code < j.code
+            
+            var request = CurrencyDB.order(CurrencyDB.Columns.code)
+            
+            if !searchText.isEmpty {
+                request = request.filter(CurrencyDB.Columns.code.like("%"+searchText+"%") || CurrencyDB.Columns.name.like("%"+searchText+"%"))
             }
+
+            return try request.fetchAll(db)
         }
     }
     
@@ -487,8 +492,8 @@ class Repository {
         searchText: String = "",
         accountIDs: [UInt32] = [],
         accountGroupIDs: [UInt32] = [],
-        transactionType: TransactionType? = nil,
-        currency: Currency? = nil,
+        transactionTypes: [TransactionType] = [],
+        currencies: [Currency] = [],
         tagIDs: [UInt32] = []
     ) async throws -> [TransactionDB] {
         try await sqlite.read { db in
@@ -520,11 +525,11 @@ class Repository {
 //                request = request.filter(tagIDs.contains())
 //            }
             
-            if let transactionType {
-                request = request.filter(TransactionDB.Columns.type == transactionType.rawValue)
+            if !transactionTypes.isEmpty {
+                request = request.filter(transactionTypes.map(\.rawValue).contains(TransactionDB.Columns.type))
             }
             
-            if let currency {
+            if !currencies.isEmpty {
                 request = request
             }
             

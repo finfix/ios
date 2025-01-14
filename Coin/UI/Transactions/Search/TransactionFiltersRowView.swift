@@ -50,16 +50,44 @@ struct TransactionFiltersRowView: View {
                     }
                     .buttonStyle(.plain)
                 }
-//                if !filters.tags.isEmpty {
-//                    ForEach(Array(zip(filters.tags.indices, filters.tags)), id: \.0) { i, tag in
-//                        Button {
-//                            filters.tag.remove(at: i)
-//                        } label: {
-//                            TransactionFiltersRowItem(text: tag.name, color: Color.green)
-//                        }
-//                        .buttonStyle(.plain)
-//                    }
-//                }
+                if !filters.transactionTypes.isEmpty {
+                    ForEach(Array(zip(filters.transactionTypes.indices, filters.transactionTypes)), id: \.0) { i, transactionType in
+                        Button {
+                            filters.transactionTypes.remove(at: i)
+                        } label: {
+                            TransactionFiltersRowItem(text: transactionType.name, color: Color.red)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+                if !filters.currencies.isEmpty {
+                    ForEach(Array(zip(filters.currencies.indices, filters.currencies)), id: \.0) { i, currency in
+                        Button {
+                            filters.currencies.remove(at: i)
+                        } label: {
+                            TransactionFiltersRowItem(text: currency.name, color: Color.purple)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                if !filters.searchText.isEmpty {
+                    Button {
+                        filters.searchText = ""
+                    } label: {
+                        TransactionFiltersRowItem(text: "Заметка: \"\(filters.searchText)\"", color: Color.green)
+                    }
+                    .buttonStyle(.plain)
+                }
+                if !filters.tags.isEmpty {
+                    ForEach(Array(zip(filters.tags.indices, filters.tags)), id: \.0) { i, tag in
+                        Button {
+                            filters.tags.remove(at: i)
+                        } label: {
+                            TransactionFiltersRowItem(text: tag.name, color: Color.brown)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
         }
         .padding(.horizontal)

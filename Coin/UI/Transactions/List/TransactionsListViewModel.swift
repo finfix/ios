@@ -47,8 +47,8 @@ class TransactionsListViewModel {
             dateTo: filters.dateTo,
             searchText: filters.searchText,
             accountIDs: accountIDs,
-            transactionType: filters.transactionType,
-            currency: filters.currency,
+            transactionTypes: filters.transactionTypes,
+            currencies: filters.currencies,
             tagsIDs: tagIDs,
             accountGroupIDs: accountGroupIDs
         )
