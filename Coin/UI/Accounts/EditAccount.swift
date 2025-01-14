@@ -14,8 +14,6 @@ struct EditAccount: View {
 
     @State private var vm: EditAccountViewModel
     
-    @State var shouldDisableUI = false
-    @State var shouldShowProgress = false
     var selectedAccountGroup: AccountGroup
     
     var accounts: [Account] {
@@ -159,13 +157,6 @@ struct EditAccount: View {
             Section {
                 Button {
                     Task {
-                        shouldDisableUI = true
-                        shouldShowProgress = true
-                        defer {
-                            shouldDisableUI = false
-                            shouldShowProgress = false
-                        }
-                        
                         do {
                             switch vm.mode {
                             case .create:
@@ -181,11 +172,7 @@ struct EditAccount: View {
                         dismiss()
                     }
                 } label: {
-                    if shouldShowProgress {
-                        ProgressView()
-                    } else {
-                        Text("Сохранить")
-                    }
+                    Text("Сохранить")
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -218,13 +205,6 @@ struct EditAccount: View {
             ToolbarItem {
                 Button(role: .destructive) {
                     Task {
-                        shouldDisableUI = true
-                        shouldShowProgress = true
-                        defer {
-                            shouldDisableUI = false
-                            shouldShowProgress = false
-                        }
-                        
                         do {
                             try await vm.deleteAccount()
                         } catch {
@@ -235,17 +215,11 @@ struct EditAccount: View {
                         dismiss()
                     }
                 } label: {
-                    if shouldShowProgress {
-                        ProgressView()
-                    } else {
-                        Image(systemName: "trash")
-                            .foregroundColor(.red)
-                    }
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
                 }
-                .frame(maxWidth: .infinity)
             }
         })
-        .disabled(shouldDisableUI)
     }
 }
 

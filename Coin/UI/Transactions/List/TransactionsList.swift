@@ -20,6 +20,9 @@ struct TransactionsList: View {
     
     @Environment(PathSharedState.self) var path
     
+    @State private var offsets = [CGSize](repeating: CGSize.zero, count: 100)
+
+    
     let width: CGFloat = UIScreen.main.bounds.width
     let height: CGFloat = UIScreen.main.bounds.height
     

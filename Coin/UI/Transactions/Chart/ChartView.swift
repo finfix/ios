@@ -163,6 +163,16 @@ struct ChartView: View {
                 try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
             }
         }
+        .onChange(of: filters) { _, _ in
+            Task {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            }
+        }
+        .onChange(of: chartViewGroupBy) { _, _ in
+            Task {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            }
+        }
     }
 }
 

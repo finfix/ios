@@ -15,8 +15,6 @@ class EditTransactionViewModel {
     @Injected(\.service) private var service
     
     // View states
-    var shouldDisableUI = false
-    var shouldShowProgress = false
     var shouldShowPickerAccountFrom = false
     var shouldShowPickerAccountTo = false
     var shouldShowAdditionalSettings = false
@@ -63,16 +61,13 @@ class EditTransactionViewModel {
     }
     
     func save() async throws {
-        shouldDisableUI = true
-        shouldShowProgress = true
-        defer {
-            shouldDisableUI = false
-            shouldShowProgress = false
-        }
-        
         switch mode {
         case .create: try await service.createTransaction(currentTransaction)
         case .update: try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
         }
+    }
+    
+    func deleteTransaction() async throws {
+        try await service.deleteTransaction(currentTransaction)
     }
 }
