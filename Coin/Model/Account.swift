@@ -9,9 +9,9 @@ import Foundation
 import OSLog
 private let logger = Logger(subsystem: "Coin", category: "AccountModel")
 
-struct Account: Identifiable {
+struct Account: Identifiable, Hashable {
     
-    indirect enum Parent: ExpressibleByNilLiteral {
+    indirect enum Parent: ExpressibleByNilLiteral, Hashable {
         init(nilLiteral: ()) {
             self = .none
         }
@@ -150,17 +150,6 @@ struct Account: Identifiable {
     
     static func convertToMap(_ accounts: [Account]) -> [UInt32: Account] {
         return Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
-    }
-}
-
-extension Account: Hashable {
-    
-    static func == (lhs: Account, rhs: Account) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
     }
 }
 

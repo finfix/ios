@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Currency: Identifiable {
+struct Currency: Identifiable, Hashable {
     var code: String
     var name: String
     var rate: Decimal
@@ -44,15 +44,5 @@ struct Currency: Identifiable {
     
     static func convertToMap(_ currencies: [Currency]) -> [String: Currency] {
         return Dictionary(uniqueKeysWithValues: currencies.map{ ($0.code, $0) })
-    }
-}
-
-extension Currency: Hashable {
-    static func == (lhs: Currency, rhs: Currency) -> Bool {
-        return lhs.code == rhs.code
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(code)
     }
 }
