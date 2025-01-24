@@ -524,7 +524,7 @@ class Repository {
                     questions.append("?")
                 }
                 
-                filters.append("t.accountFromId IN (\(questions.joined(separator: ","))) OR t.accountToId IN (\(questions.joined(separator: ",")))")
+                filters.append("(t.accountFromId IN (\(questions.joined(separator: ","))) OR t.accountToId IN (\(questions.joined(separator: ","))))")
                 _ = args.append(contentsOf: StatementArguments(accountIDs))
                 _ = args.append(contentsOf: StatementArguments(accountIDs))
             }
@@ -573,7 +573,7 @@ class Repository {
                 joins.append("JOIN accountDB a1 ON a1.id = t.accountFromId")
                 joins.append("JOIN accountDB a2 ON a2.id = t.accountToId")
 
-                filters.append("a1.currency IN (\(questions.joined(separator: ","))) OR a2.currency IN (\(questions.joined(separator: ",")))")
+                filters.append("(a1.currency IN (\(questions.joined(separator: ","))) OR a2.currency IN (\(questions.joined(separator: ","))))")
                 _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
                 _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
             }
@@ -586,6 +586,9 @@ class Repository {
                 ORDER BY t.dateTransaction DESC, t.id DESC
                 LIMIT \(limit) OFFSET \(offset)
             """
+            
+            print(sql)
+            print(args)
                     
             return try TransactionDB.fetchAll(db, sql: sql, arguments: args)
         }

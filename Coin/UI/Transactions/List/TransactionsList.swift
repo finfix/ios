@@ -33,13 +33,13 @@ struct TransactionsList: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            ForEach(Array(zip(vm.transactions.indices, vm.transactions)), id: \.0) { i, transaction in
+        LazyVStack(spacing: 0) {
+            ForEach(vm.transactionItems) { item in
                 VStack(spacing: 0) {
                     Group {
-                        if i == 0 || vm.transactions[i-1].dateTransaction != vm.transactions[i].dateTransaction {
+                        if item.isNewSection {
                             HStack {
-                                Text(transaction.dateTransaction.formatted(date: .complete, time: .omitted).uppercased())
+                                Text(item.transaction.dateTransaction.formatted(date: .complete, time: .omitted).uppercased())
                                     .font(.headline)
                                     .foregroundStyle(.secondary)
                                     .padding(.top, 30)
@@ -51,8 +51,8 @@ struct TransactionsList: View {
                         }
                     }
                     VStack(spacing: 0) {
-                        NavigationLink(value: TransactionsListRoute.editTransaction(transaction)) {
-                            TransactionRow(transaction: transaction)
+                        NavigationLink(value: TransactionsListRoute.editTransaction(item.transaction)) {
+                            TransactionRow(transaction: item.transaction)
                                 .contentShape(Rectangle())
                         }
                         .padding(.horizontal)

@@ -8,12 +8,19 @@
 import Foundation
 import Factory
 
+struct TransactionItem: Identifiable {
+    let id: UInt32
+    let index: Int
+    let transaction: Transaction
+    let isNewSection: Bool
+}
+
 @Observable
 class TransactionsListViewModel {
     @ObservationIgnored
     @Injected(\.service) private var service
     
-    var transactions: [Transaction] = []
+    var transactionItems: [TransactionItem] = []
     
     var page = 0
     let pageSize = 10000
@@ -30,8 +37,7 @@ class TransactionsListViewModel {
             }
         }
         
-        
-        self.transactions = try await service.getTransactions(
+        let transactions = try await service.getTransactions(
             limit: 100,
             offset: 0,
             dateFrom: filters.dateFrom,
@@ -43,15 +49,19 @@ class TransactionsListViewModel {
             tagIDs: filters.tags.map(\.id),
             accountGroupIDs: filters.accountGroups.map(\.id)
         )
+        
+        self.transactionItems = transactions.enumerated().map({ index, transaction in
+            TransactionItem(id: transaction.id, index: index, transaction: transaction, isNewSection: transaction.dateTransaction == transactions[index].dateTransaction)
+        })
                                 
         self.user = try await service.getUsers()[0]
     }
         
     func deleteTransaction(_ transaction: Transaction) async throws {
-        guard let index = transactions.firstIndex(of: transaction) else {
+        guard let index = transactionItems.firstIndex(where: { $0.id == transaction.id }) else {
             throw ErrorModel(humanText: "Не смогли найти позицию транзакции №\(transaction.id) в массиве")
         }
-        _ = transactions.remove(at: index)
+        _ = transactionItems.remove(at: index)
         try await service.deleteTransaction(transaction)
     }
 }
