@@ -7,6 +7,7 @@
 
 import SwiftUI
 import OSLog
+import Factory
 
 private let logger = Logger(subsystem: "Coin", category: "AccountCirclesView")
 
@@ -17,17 +18,11 @@ case createTransaction(TransactionType, Account, Account)
 struct AccountCirclesView: View {
     
     @Environment(AlertManager.self) private var alert
-    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
-    @State var path = PathSharedState()
-    @StateObject var vm = AccountCirclesViewModel()
+    @Environment(AccountGroupSharedState.self) private var selectedAccountGroup
+    @State private var path = PathSharedState()
+    @State private var vm = AccountCirclesViewModel()
     
     let horizontalSpacing: CGFloat = 10
-    
-    var groupedAccounts: [Account] {
-        Account.groupAccounts(vm.accounts.filter {
-            $0.accountGroup == selectedAccountGroup.selectedAccountGroup
-        })
-    }
     
     var body: some View {
         NavigationStack(path: $path.path) {
@@ -36,8 +31,8 @@ struct AccountCirclesView: View {
                 VStack {
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
-                            ForEach(groupedAccounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.showingRemainder > 0) }) { account in
-                                DraggableAccountCircleItem(vm: vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
+                            ForEach(vm.accounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.showingRemainder > 0) }) { account in
+                                DraggableAccountCircleItem(vm: $vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
                             }
                             PlusNewAccount(accountType: .earnings)
                         }
@@ -47,8 +42,8 @@ struct AccountCirclesView: View {
                     
                     ScrollView(.horizontal) {
                         HStack(spacing: horizontalSpacing) {
-                            ForEach(groupedAccounts.filter { $0.type == .regular }) { account in
-                                DraggableAccountCircleItem(vm: vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
+                            ForEach(vm.accounts.filter { $0.type == .regular }) { account in
+                                DraggableAccountCircleItem(vm: $vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
                             }
                             PlusNewAccount(accountType: .regular)
                         }
@@ -58,8 +53,8 @@ struct AccountCirclesView: View {
                     
                     ScrollView(.horizontal) {
                         LazyHGrid(rows: [GridItem(.adaptive(minimum: 100))], alignment: .top, spacing: horizontalSpacing) {
-                            ForEach(groupedAccounts.filter { $0.type == .expense || ($0.type == .balancing && $0.showingRemainder < 0)}) { account in
-                                DraggableAccountCircleItem(vm: vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
+                            ForEach(vm.accounts.filter { $0.type == .expense }) { account in
+                                DraggableAccountCircleItem(vm: $vm, accountGroup: selectedAccountGroup.selectedAccountGroup, account: account, path: $path.path)
                             }
                             PlusNewAccount(accountType: .expense)
                         }
@@ -89,12 +84,19 @@ struct AccountCirclesView: View {
             .task {
                 vm.draggableLocation = nil
                 do {
-                    try await vm.load()
+                    try await vm.load(accountGroup: selectedAccountGroup.selectedAccountGroup)
                 } catch {
                     alert(error)
                 }
             }
             .onChange(of: selectedAccountGroup.selectedAccountGroup) { _, _ in
+                Task {
+                    do {
+                        try await vm.load(accountGroup: selectedAccountGroup.selectedAccountGroup)
+                    } catch {
+                        alert(error)
+                    }
+                }
                 vm.deleteStaticLocations()
             }
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
