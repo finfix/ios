@@ -51,7 +51,13 @@ class TransactionsListViewModel {
         )
         
         self.transactionItems = transactions.enumerated().map({ index, transaction in
-            TransactionItem(id: transaction.id, index: index, transaction: transaction, isNewSection: transaction.dateTransaction == transactions[index].dateTransaction)
+            
+            var isNewSection = true
+            if index > 0 {
+                isNewSection = transactions[index].dateTransaction != transactions[index - 1].dateTransaction
+            }
+            
+            return TransactionItem(id: transaction.id, index: index, transaction: transaction, isNewSection: isNewSection)
         })
                                 
         self.user = try await service.getUsers()[0]
