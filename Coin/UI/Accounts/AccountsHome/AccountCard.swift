@@ -9,7 +9,6 @@ import SwiftUI
 
 struct AccountCard: View {
     
-    var size: CGSize
     var account: Account
     
     var body: some View {
@@ -22,13 +21,13 @@ struct AccountCard: View {
             }
             Text(CurrencyFormatter().string(number: account.remainder, currency: account.currency))
         }
-        .frame(width: size.width, height: 150)
+        .frame(width: 300, height: 150)
         .background(Color("Gray"))
         .cornerRadius(17)
     }
 }
 
 #Preview {
-    AccountCard(size: CGSize(width: 30, height: 30), account: Account())
+    AccountCard(account: Account())
         .environment(AlertManager(handle: {_ in }))
 }
