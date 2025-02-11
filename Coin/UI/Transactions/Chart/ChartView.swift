@@ -180,7 +180,7 @@ struct ChartView: View {
     ChartView(
         chartType: .expenses,
         chartViewGroupBy: .constant(ChartViewGroupBy.byAccount),
-        filters: .constant(TransactionFilters()),
+        filters: .constant(TransactionFilters(accountGroups: [])),
         currency:
             Currency(
                 symbol: "₽"

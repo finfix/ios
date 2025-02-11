@@ -21,25 +21,19 @@ class TaskManager {
     let repository: Repository
     let apiManager: APIManager
     
-    func executeDBTasks() {
-        Task {
-            do {
-                let countTasks = try await repository.getCountTasks()
-                guard countTasks > 0 else {
-                    return
-                }
-                logger.log("Количество тасок: \(countTasks)")
-                for i in 0..<countTasks {
-                    let tasks = try await repository.getSyncTasks(limit: 1)
-                    guard !tasks.isEmpty else {
-                        logger.error("Количество тасок \(countTasks), но мы не смогли получить из базы данных \(i) таску")
-                        return
-                    }
-                    try await executeTask(tasks[0])
-                }
-            } catch {
-                logger.warning("\(error)")
+    func executeDBTasks() async throws {
+        let countTasks = try await repository.getCountTasks()
+        guard countTasks > 0 else {
+            return
+        }
+        logger.log("Количество тасок: \(countTasks)")
+        for i in 0..<countTasks {
+            let tasks = try await repository.getSyncTasks(limit: 1)
+            guard !tasks.isEmpty else {
+                logger.error("Количество тасок \(countTasks), но мы не смогли получить из базы данных \(i) таску")
+                return
             }
+            try await executeTask(tasks[0])
         }
     }
     
