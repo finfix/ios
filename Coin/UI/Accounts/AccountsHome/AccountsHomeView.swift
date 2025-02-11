@@ -12,7 +12,7 @@ struct AccountsHomeView: View {
     @State var vm = AccountHomeViewModel()
     @Environment(PathSharedState.self) var path
     @Environment(AccountGroupSharedState.self) var selectedAccountGroup
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     
     @State var chooseBlurIsOpened = false
     
@@ -23,23 +23,30 @@ struct AccountsHomeView: View {
     @State var showDebts = false
     @State var currentIndex = 0
     
+    @State private var activeCardIndex: Int?
+    
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            VStack(spacing: 30) {
-                QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                ScrollView {
-                    Text("Карты и счета")
-                    SnapCarouselView(spacing: 30, index: $currentIndex, items: filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
-                        GeometryReader { proxy in
-                            AccountCard(size: proxy.size, account: account)
+        VStack(spacing: 30) {
+            QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
+            ScrollView {
+                Text("Карты и счета")
+                ScrollView(.horizontal) {
+                    HStack {
+                        ForEach(filteredAccounts.filter { $0.visible && ($0.type == .regular)}) { account in
+                            AccountCard(account: account)
+                                .containerRelativeFrame(.horizontal)
                         }
                     }
-                    .frame(height: 150)
-                    
-                    AccountCategoryView(header: "Долги", accounts: filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
+                    .scrollTargetLayout()
                 }
+                .scrollTargetBehavior(.viewAligned)
+                .scrollClipDisabled()
+                .scrollIndicators(.never)
+                AccountCategoryView(header: "Долги", accounts: filteredAccounts.filter { ($0.type == .debt) && ($0.visible) } )
             }
             .blur(radius: chooseBlurIsOpened ? 5 : 0)
+        }
+        .overlay(alignment: .bottomTrailing) {
             CirclesCreateTransaction(chooseBlurIsOpened: $chooseBlurIsOpened)
         }
         .task {

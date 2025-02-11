@@ -55,6 +55,7 @@ struct TransactionRow: View {
                     Text(transaction.note)
                         .font(.footnote)
                         .lineLimit(2)
+                        .multilineTextAlignment(.trailing)
                 }
                 HStack {
                     ForEach(transaction.tags) { tag in
@@ -63,6 +64,11 @@ struct TransactionRow: View {
                     }
                 }
             }
+            .padding(.vertical, 10)
+            Image(systemName: "chevron.right")
+                .foregroundStyle(.secondary)
+                .font(.footnote)
+                .padding(.leading, 10)
         }
     }
 }

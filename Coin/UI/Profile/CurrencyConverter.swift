@@ -10,7 +10,7 @@ import SwiftUI
 struct CurrencyConverter: View {
     
     @State var vm = CurrencyRatesViewModel()
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     
     private enum Field: Hashable {
         case number1, number2

@@ -30,11 +30,13 @@ extension Service {
     
     // MARK: Read
     func getTags(
-        accountGroup: AccountGroup? = nil
+        accountGroup: AccountGroup? = nil,
+        name: String? = nil
     ) async throws -> [Tag] {
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await repository.getAccountGroups(), currenciesMap: nil))
         return Tag.convertFromDBModel(try await repository.getTags(
-            accountGroupID: accountGroup?.id
+            accountGroupID: accountGroup?.id,
+            name: name
         ), accountGroupsMap: accountGroupsMap)
     }
     

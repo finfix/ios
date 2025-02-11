@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DraggableAccountCircleItem: View {
     
-    @ObservedObject var vm: AccountCirclesViewModel
+    @Binding var vm: AccountCirclesViewModel
     let accountGroup: AccountGroup
     let account: Account
     @Binding var path: NavigationPath
@@ -58,7 +58,17 @@ struct DraggableAccountCircleItem: View {
                             if isAlreadyOpened {
                                 dismiss()
                             }
-                            path.append(AccountCircleItemRoute.accountTransactions(account))
+                            
+                            var chartType: ChartType = .earningsAndExpenses
+                            switch account.type {
+                            case .earnings:
+                                chartType = .earnings
+                            case .expense:
+                                chartType = .expenses
+                            default: break
+                            }
+                            
+                            path.append(AccountCircleItemRoute.accountTransactions(account, chartType))
                         }
                 )
                 .overlay {
@@ -79,7 +89,7 @@ struct DraggableAccountCircleItem: View {
                         HStack(spacing: 10) {
                             ForEach(account.childrenAccounts) { account in
                                 DraggableAccountCircleItem(
-                                    vm: vm,
+                                    vm: $vm,
                                     accountGroup: accountGroup,
                                     account: account,
                                     path: $path,
@@ -156,7 +166,7 @@ struct DraggableAccountCircleItem: View {
 
 #Preview {
     DraggableAccountCircleItem(
-        vm: AccountCirclesViewModel(),
+        vm: .constant(AccountCirclesViewModel()),
         accountGroup: AccountGroup(),
         account: Account(),
         path: .constant(NavigationPath()),

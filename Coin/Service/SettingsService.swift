@@ -10,8 +10,8 @@ import Foundation
 extension Service {
     
     // MARK: Read
-    func getCurrencies() async throws -> [Currency] {
-        return Currency.convertFromDBModel(try await repository.getCurrencies())
+    func getCurrencies(searchText: String = "") async throws -> [Currency] {
+        return Currency.convertFromDBModel(try await repository.getCurrencies(searchText: searchText))
     }
     
     func getIcons() async throws -> [Icon] {

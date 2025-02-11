@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AccountGroup: Identifiable, Equatable {
+struct AccountGroup: Identifiable, Hashable {
     var id: UInt32
     var name: String
     var serialNumber: UInt32
@@ -47,15 +47,5 @@ struct AccountGroup: Identifiable, Equatable {
     
     static func convertToMap(_ accountGroups: [AccountGroup]) -> [UInt32: AccountGroup] {
         return Dictionary(uniqueKeysWithValues: accountGroups.map{ ($0.id, $0) })
-    }
-}
-
-extension AccountGroup: Hashable {
-    static func == (lhs: AccountGroup, rhs: AccountGroup) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
     }
 }

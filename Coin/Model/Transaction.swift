@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Transaction: Identifiable {
+struct Transaction: Identifiable, Hashable {
     var id: UInt32
     var accountingInCharts: Bool
     var amountFrom: Decimal
@@ -101,16 +101,15 @@ extension Transaction {
     }
 }
 
-extension Transaction: Hashable {
-    static func == (lhs: Transaction, rhs: Transaction) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
 enum TransactionType: String, Codable, CaseIterable {
     case consumption, income, transfer, balancing
+    
+    var name: String {
+        switch self {
+        case .consumption: return "Расход"
+        case .income: return "Доход"
+        case .transfer: return "Перевод"
+        case .balancing: return "Балансировка"
+        }
+    }
 }

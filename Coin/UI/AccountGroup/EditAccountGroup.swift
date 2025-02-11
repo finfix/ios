@@ -14,7 +14,7 @@ struct EditAccountGroup: View {
     
     @Environment (\.dismiss) private var dismiss
     @State private var vm: EditAccountGroupViewModel
-    @Environment (AlertManager.self) private var alert
+    @Environment(AlertManager.self) private var alert
     
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false

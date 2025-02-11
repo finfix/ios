@@ -24,6 +24,7 @@ struct LoginView: View {
     @State private var vm = LoginViewModel()
     
     @AppStorage("isDeveloperMode") var isDevMode = false
+    @AppStorage("isLogin") var isLogin: Bool = false
     @FocusState var focusedField: Field?
     
     enum Field: Hashable {
@@ -90,6 +91,7 @@ struct LoginView: View {
                         Task {
                             do {
                                 try await vm.auth()
+                                isLogin = true
                             } catch {
                                 alert(error)
                             }

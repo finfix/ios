@@ -8,21 +8,24 @@
 import SwiftUI
 import Factory
 
-class AccountCirclesViewModel: ObservableObject {
+@Observable
+class AccountCirclesViewModel {
+    
     @ObservationIgnored
     @Injected(\.service) private var service
     
-    @Published var accounts: [Account] = []
+    var accounts: [Account] = []
         
-    func load() async throws {
-        accounts = try await service.getAccounts(visible: true)
+    @MainActor
+    func load(accountGroup: AccountGroup) async throws {
+        self.accounts = Account.groupAccounts(try await service.getAccounts(accountGroups: [accountGroup], visible: true))
     }
     
-    @Published var highlitedAccount: Account? = nil
+    var highlitedAccount: Account? = nil
     
-    @Published var draggableLocation: CGPoint? = nil
-    @Published var draggableAccount: Account? = nil
-    var staticLocations: [Account: CGPoint] = [:]
+    var draggableLocation: CGPoint? = nil
+    var draggableAccount: Account? = nil
+    @ObservationIgnored var staticLocations: [Account: CGPoint] = [:]
     
     let triggerZone: CGFloat = 50
     

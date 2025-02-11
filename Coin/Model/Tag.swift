@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Tag: Identifiable {
+struct Tag: Identifiable, Hashable {
     
     var id: UInt32
     var name: String
@@ -44,15 +44,5 @@ struct Tag: Identifiable {
     
     static func convertToMap(_ tags: [Tag]) -> [UInt32: Tag] {
         return Dictionary(uniqueKeysWithValues: tags.map{ ($0.id, $0) })
-    }
-}
-
-extension Tag: Hashable {
-    static func == (lhs: Tag, rhs: Tag) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
     }
 }

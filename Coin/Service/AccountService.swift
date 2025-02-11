@@ -24,7 +24,7 @@ extension Service {
         if account.remainder != 0 {
             // Получаем балансировочный счет группы счетов
             var balancingAccount = try await getAccounts(
-                accountGroup: account.accountGroup,
+                accountGroups: [account.accountGroup],
                 types: [.balancing],
                 currencyCode: account.currency.code,
                 isParent: false
@@ -35,7 +35,7 @@ extension Service {
                 
                 // Получаем родительский балансировочный счет группы счетов
                 let parentBalancingAccount = try await getAccounts(
-                    accountGroup: account.accountGroup,
+                    accountGroups: [account.accountGroup],
                     types: [.balancing],
                     isParent: true
                 ).first
@@ -114,24 +114,26 @@ extension Service {
     // MARK: Read
     func getAccounts(
         ids: [UInt32]? = nil,
-        accountGroup: AccountGroup? = nil,
+        accountGroups: [AccountGroup]? = nil,
         visible: Bool? = nil,
         accountingInHeader: Bool? = nil,
         types: [AccountType]? = nil,
         currencyCode: String? = nil,
-        isParent: Bool? = nil
+        isParent: Bool? = nil,
+        name: String? = nil
     ) async throws -> [Account] {
         let iconsMap = Icon.convertToMap(Icon.convertFromDBModel(try await repository.getIcons()))
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await repository.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await repository.getAccountGroups(), currenciesMap: currenciesMap))
         return Account.convertFromDBModel(try await repository.getAccounts(
             ids: ids,
-            accountGroupID: accountGroup?.id,
+            accountGroupIDs: accountGroups?.map(\.id),
             visible: visible,
             accountingInHeader: accountingInHeader,
             types: types,
             currencyCode: currencyCode,
-            isParent: isParent
+            isParent: isParent,
+            name: name
         ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap)
     }
     
@@ -159,7 +161,7 @@ extension Service {
         if oldAccount.remainder != newAccount.remainder {
             // Получаем балансировочный счет группы счетов
             var balancingAccount = try await getAccounts(
-                accountGroup: newAccount.accountGroup,
+                accountGroups: [newAccount.accountGroup],
                 types: [.balancing],
                 currencyCode: newAccount.currency.code,
                 isParent: false
@@ -170,7 +172,7 @@ extension Service {
                 
                 // Получаем родительский балансировочный счет группы счетов
                 let parentBalancingAccount = try await getAccounts(
-                    accountGroup: newAccount.accountGroup,
+                    accountGroups: [newAccount.accountGroup],
                     types: [.balancing],
                     isParent: true
                 ).first
