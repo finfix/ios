@@ -15,6 +15,9 @@ class ProfileViewModel {
     
     func sync() async throws {
         do {
+            guard try await service.getCountTasks() == 0 else {
+                throw ErrorModel(humanText: "Вам необходимо дождаться выполнения всех фоновых задач")
+            }
             try await service.sync()
         } catch {
             throw error
@@ -22,6 +25,9 @@ class ProfileViewModel {
     }
     
     func logout() async throws {
+        guard try await service.getCountTasks() == 0 else {
+            throw ErrorModel(humanText: "Вам необходимо дождаться выполнения всех фоновых задач")
+        }
         try await service.logout()
     }
 }

@@ -375,10 +375,11 @@ extension Service {
         }
     }
     
+    func getCountTasks() async throws -> UInt32 {
+        return try await repository.getCountTasks()
+    }
+    
     func sync() async throws {
-        guard try await repository.getCountTasks() == 0 else {
-            throw ErrorModel(humanText: "Вам необходимо дождаться выполнения всех фоновых задач")
-        }
         logger.info("Синхронизируем данные")
                 
         // Получаем данные текущего месяца для запроса
