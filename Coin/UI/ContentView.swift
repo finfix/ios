@@ -35,7 +35,6 @@ struct ContentView: View {
                         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                             Task {
                                 do {
-                                    print("Чекаем месяц")
                                     try await service.checkMonthChange()
                                 } catch {
                                     logger.warning("\(error)")
