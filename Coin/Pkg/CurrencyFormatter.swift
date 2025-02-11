@@ -35,8 +35,8 @@ class CurrencyFormatter: NumberFormatter {
     ) {
         super.init()
         self.numberStyle = .currency
-        if let digits = maximumFractionDigits {
-            self.maximumFractionDigits = digits
+        if let maximumFractionDigits {
+            self.maximumFractionDigits = maximumFractionDigits
             self.userMaximumFractionDigits = true
         }
         self.groupingSeparator = "."
@@ -49,15 +49,26 @@ class CurrencyFormatter: NumberFormatter {
         self.userSuffix = suffix
     }
     
-    func string(number: Decimal, currency: Currency? = nil, suffix: String? = nil, withUnits: Bool? = nil) -> String {
+    func string(
+        number: Decimal,
+        currency: Currency? = nil,
+        maximumFractionDigits: Int? = nil,
+        suffix: String? = nil,
+        withUnits: Bool? = nil
+    ) -> String {
         
-        if let currency = currency {
+        if let currency {
             self.currencyCode = currency.code
             self.currencySymbol = currency.symbol
         }
         self.userSuffix = suffix
         if let withUnits {
             self.withUnits = withUnits
+        }
+        
+        if let maximumFractionDigits {
+            self.maximumFractionDigits = maximumFractionDigits
+            self.userMaximumFractionDigits = true
         }
         
         var num = number

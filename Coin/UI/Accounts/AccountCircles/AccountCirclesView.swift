@@ -82,6 +82,7 @@ struct AccountCirclesView: View {
             }
             .coordinateSpace(name: "OuterV")
             .task {
+                vm.deleteStaticLocations()
                 vm.draggableLocation = nil
                 do {
                     try await vm.load(accountGroup: selectedAccountGroup.selectedAccountGroup)
@@ -90,6 +91,7 @@ struct AccountCirclesView: View {
                 }
             }
             .onChange(of: selectedAccountGroup.selectedAccountGroup) { _, _ in
+                vm.deleteStaticLocations()
                 Task {
                     do {
                         try await vm.load(accountGroup: selectedAccountGroup.selectedAccountGroup)
@@ -97,7 +99,6 @@ struct AccountCirclesView: View {
                         alert(error)
                     }
                 }
-                vm.deleteStaticLocations()
             }
             .navigationDestination(for: AccountCircleItemRoute.self) { screen in
                 switch screen {
