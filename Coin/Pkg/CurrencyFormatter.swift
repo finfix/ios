@@ -44,6 +44,8 @@ class CurrencyFormatter: NumberFormatter {
         if let currency = currency {
             self.currencyCode = currency.code
             self.currencySymbol = currency.symbol
+        } else {
+            self.currencySymbol = ""
         }
         self.withUnits = withUnits
         self.userSuffix = suffix
@@ -136,7 +138,9 @@ class CurrencyFormatter: NumberFormatter {
         if let userSuffix {
             suffix += userSuffix
         } else {
-            suffix += " " + self.currencySymbol
+            if currencySymbol != "" {
+                suffix += " " + currencySymbol
+            }
         }
                                          
         self.positiveSuffix = suffix

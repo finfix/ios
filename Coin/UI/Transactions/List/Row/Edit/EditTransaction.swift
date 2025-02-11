@@ -211,11 +211,14 @@ struct EditTransaction: View {
                         }
                     }
                     .overlay(alignment: .trailing) {
-                        PasteButton(payloadType: String.self) { strings in
-                            vm.amountFromString = strings[0]
+                        HStack {
+                            Text(vm.currentTransaction.accountFrom.currency.symbol)
+                            PasteButton(payloadType: String.self) { strings in
+                                vm.amountFromString = strings[0]
+                            }
+                            .labelStyle(.iconOnly)
+                            .tint(Color(UIColor.systemGray6))
                         }
-                        .labelStyle(.iconOnly)
-                        .tint(Color(UIColor.systemGray6))
                     }
 
                 }
@@ -227,11 +230,14 @@ struct EditTransaction: View {
                         focusedField = .note
                     }
                     .overlay(alignment: .trailing) {
-                        PasteButton(payloadType: String.self) { strings in
-                            vm.amountToString = strings[0]
+                        HStack {
+                            Text(vm.currentTransaction.accountTo.currency.symbol)
+                            PasteButton(payloadType: String.self) { strings in
+                                vm.amountToString = strings[0]
+                            }
+                            .labelStyle(.iconOnly)
+                            .tint(Color(UIColor.systemGray6))
                         }
-                        .labelStyle(.iconOnly)
-                        .tint(Color(UIColor.systemGray6))
                     }
                 }
             } footer: {

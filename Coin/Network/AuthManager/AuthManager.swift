@@ -22,7 +22,6 @@ class AuthManager {
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("apiBasePath") private var apiBasePath: String = ""
     @AppStorage("accessToken") private var accessToken: String?
-    @AppStorage("isLogin") private var isLogin: Bool = false
     
     func getAccessToken() async throws -> String {
         
@@ -88,7 +87,6 @@ class AuthManager {
     }
     
     public func logout() {
-        isLogin = false
         accessToken = nil
         refreshToken = nil
     }
@@ -97,7 +95,6 @@ class AuthManager {
         accessToken: String,
         refreshToken: String
     ) {
-        isLogin = true
         self.accessToken = accessToken
         self.refreshToken = refreshToken
     }

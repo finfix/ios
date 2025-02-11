@@ -95,10 +95,13 @@ struct AccountCircleItemCircle: View {
                         Circle()
                             .fill(.clear)
                             .strokeBorder(.black, lineWidth: 2)
-                            .frame(width: 56)
+                            .frame(height: 60)
+                        Circle()
+                            .frame(height: 54)
+                    } else {
+                        Circle()
+                            .frame(height: 60)
                     }
-                    Circle()
-                        .frame(width: 50)
                 }
             }
             .overlay{

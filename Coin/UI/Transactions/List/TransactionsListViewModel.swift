@@ -38,7 +38,7 @@ class TransactionsListViewModel {
         }
         
         let transactions = try await service.getTransactions(
-            limit: 100,
+            limit: 1000,
             offset: 0,
             dateFrom: filters.dateFrom,
             dateTo: filters.dateTo,

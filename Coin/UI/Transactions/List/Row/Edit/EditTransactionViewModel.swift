@@ -61,7 +61,7 @@ class EditTransactionViewModel {
             currentTransaction.amountFrom = newValueAmountFrom
             
             // Делаем текстовое значение правильно форматированным числом
-            amountFromString = currentTransaction.amountFrom.currencyString(formatter: formatter, currency: currentTransaction.accountFrom.currency)
+            amountFromString = currentTransaction.amountFrom.currencyString(formatter: formatter)
                         
             // Получаем новое значение для amountTo
             let suggestAmount = convert(
@@ -72,7 +72,6 @@ class EditTransactionViewModel {
             
             suggestAmountToString = suggestAmount > 0 ? suggestAmount.currencyString(
                 formatter: formatter,
-                currency: currentTransaction.accountTo.currency,
                 maximumFractionDigits: 2
             ) : nil
         }
@@ -97,7 +96,7 @@ class EditTransactionViewModel {
             currentTransaction.amountTo = newValueAmountTo
             
             // Делаем текстовое значение правильно форматированным числом
-            amountToString = currentTransaction.amountTo.currencyString(formatter: formatter, currency: currentTransaction.accountTo.currency)
+            amountToString = currentTransaction.amountTo.currencyString(formatter: formatter)
                         
             // Получаем новое значение для amountFrom
             let suggestAmount =
@@ -109,7 +108,6 @@ class EditTransactionViewModel {
             
             suggestAmountFromString = suggestAmount > 0 ? suggestAmount.currencyString(
                 formatter: formatter,
-                currency: currentTransaction.accountTo.currency,
                 maximumFractionDigits: 2
             ) : nil
         }
@@ -135,8 +133,8 @@ class EditTransactionViewModel {
         
         if currentTransaction.amountFrom != 0 && currentTransaction.amountTo != 0 {
             let formatter = CurrencyFormatter(withUnits: false)
-            amountFromString = currentTransaction.amountFrom.currencyString(formatter: formatter, currency: currentTransaction.accountFrom.currency)
-            amountToString = currentTransaction.amountTo.currencyString(formatter: formatter, currency: currentTransaction.accountTo.currency)
+            amountFromString = currentTransaction.amountFrom.currencyString(formatter: formatter)
+            amountToString = currentTransaction.amountTo.currencyString(formatter: formatter)
         }
     }
             
