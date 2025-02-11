@@ -180,7 +180,7 @@ struct ScaleButton: View {
 #Preview {
     ChartView(
         chartViewGroupBy: .constant(ChartViewGroupBy.byAccount),
-        filters: .constant(TransactionFilters()),
+        filters: .constant(TransactionFilters(accountGroups: [])),
         currency: Currency(
             symbol: "₽"
         )

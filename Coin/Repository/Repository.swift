@@ -771,6 +771,9 @@ class Repository {
                 GROUP BY \(groups.joined(separator: ", "))
             """
             
+            print(sql)
+            print(args)
+            
             let rows = try Row.fetchCursor(db, sql: sql, arguments: args)
             
             while let row = try rows.next() {

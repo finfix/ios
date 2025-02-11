@@ -86,7 +86,7 @@ struct TransactionsList: View {
 
 #Preview {
     TransactionsList(
-        filters: TransactionFilters()
+        filters: TransactionFilters(accountGroups: [])
     )
     .environment(AlertManager(handle: {_ in }))
 }

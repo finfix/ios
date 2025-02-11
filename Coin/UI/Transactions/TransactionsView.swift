@@ -15,7 +15,7 @@ struct TransactionFilters: Equatable, Hashable {
     var currencies: [Currency] = []
     var accounts: [Account] = []
     var tags: [Tag] = []
-    var accountGroups: [AccountGroup] = []
+    var accountGroups: [AccountGroup]
 }
 
 struct TransactionsView: View {
@@ -74,7 +74,9 @@ struct TransactionsView: View {
 }
 
 #Preview {
-    TransactionsView(filters: TransactionFilters())
+    TransactionsView(filters: TransactionFilters(
+        accountGroups: []
+    ))
     .environment(AlertManager(handle: {_ in }))
 }
 
