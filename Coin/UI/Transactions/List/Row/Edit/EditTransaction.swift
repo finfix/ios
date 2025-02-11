@@ -198,9 +198,8 @@ struct EditTransaction: View {
             Section {
                 if vm.currentTransaction.type != .balancing {
                     TextField(
-                        vm.intercurrency ? "Сумма списания" : "Сумма",
-                        value: $vm.amountFrom,
-                        formatter: NumberFormatters.textField
+                        vm.suggestAmountFromString ?? (vm.intercurrency ? "Сумма списания" : "Сумма"),
+                        text: $vm.amountFromString
                     )
                     .keyboardType(.decimalPad)
                     .focused($focusedField, equals: .amountFromSelector)
@@ -212,42 +211,53 @@ struct EditTransaction: View {
                         }
                     }
                     .overlay(alignment: .trailing) {
-                        Text(vm.currentTransaction.accountFrom.currency.symbol)
+                        HStack {
+                            Text(vm.currentTransaction.accountFrom.currency.symbol)
+                            PasteButton(payloadType: String.self) { strings in
+                                vm.amountFromString = strings[0]
+                            }
+                            .labelStyle(.iconOnly)
+                            .tint(Color(UIColor.systemGray6))
+                        }
                     }
 
                 }
                 if vm.intercurrency || vm.currentTransaction.type == .balancing {
-                    TextField(
-                        "Сумма начисления",
-                        value: $vm.amountTo,
-                        formatter: NumberFormatters.textField
-                    )
+                    TextField(vm.suggestAmountToString ?? "Сумма начисления", text: $vm.amountToString)
                     .keyboardType(.decimalPad)
                     .focused($focusedField, equals: .amountToSelector)
                     .onSubmit {
                         focusedField = .note
                     }
                     .overlay(alignment: .trailing) {
-                        Text(vm.currentTransaction.accountTo.currency.symbol)
+                        HStack {
+                            Text(vm.currentTransaction.accountTo.currency.symbol)
+                            PasteButton(payloadType: String.self) { strings in
+                                vm.amountToString = strings[0]
+                            }
+                            .labelStyle(.iconOnly)
+                            .tint(Color(UIColor.systemGray6))
+                        }
                     }
                 }
             } footer: {
-                VStack {
-                    HStack {
-                        if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency {
-                            Text("В валюте группы счетов: " + CurrencyFormatter().string(
-                                number: vm.currentTransaction.amountFrom * (vm.accountGroup.currency.rate / vm.currentTransaction.accountFrom.currency.rate),
-                                currency: vm.accountGroup.currency,
-                                withUnits: false
-                            ))
-                        }
-                        Spacer()
+                VStack(alignment: .leading) {
+                    if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency {
+                        Text("В валюте группы счетов: " + convert(
+                                amountFrom: vm.currentTransaction.amountFrom,
+                                currencyRateFrom: vm.currentTransaction.accountFrom.currency.rate,
+                                currencyRateTo: vm.accountGroup.currency.rate
+                            )
+                            .currencyString(
+                                formatter: CurrencyFormatter(
+                                    currency: vm.accountGroup.currency,
+                                    withUnits: false
+                                )
+                            )
+                        )
                     }
-                    HStack {
-                        if vm.intercurrency && vm.currentTransaction.type != .balancing {
-                            Rate(vm.currentTransaction)
-                        }
-                        Spacer()
+                    if let showRateString = vm.showRateString {
+                        Text("Курс: \(showRateString)")
                     }
                 }
             }
@@ -332,7 +342,8 @@ struct EditTransaction: View {
                         ) {
                             
                             // Присваиваем сумме списания весь баланс счета списания
-                            vm.amountFrom = vm.currentTransaction.accountFrom.remainder.doubleValue
+                            vm.currentTransaction.amountFrom = vm.currentTransaction.accountFrom.remainder
+                            vm.amountFromString = vm.currentTransaction.accountFrom.remainder.description
                             
                             // Если транзакция между счетами в разной валюте
                             if vm.intercurrency {
@@ -402,34 +413,6 @@ struct EditTransaction: View {
         accountGroup: AccountGroup(id: 4)
     )
     .environment(AlertManager(handle: {_ in }))
-}
-
-private struct Rate: View {
-    
-    private var rate: Decimal
-    private var symbols: String
-    
-    init(_ transaction: Transaction) {
-        guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {
-            rate = 0
-            symbols = "\(transaction.accountFrom.currency.symbol)/\(transaction.accountTo.currency.symbol)"
-            return
-        }
-        
-        if transaction.amountFrom > transaction.amountTo {
-            rate = transaction.amountFrom / transaction.amountTo
-            symbols = "\(transaction.accountFrom.currency.symbol)/\(transaction.accountTo.currency.symbol)"
-        } else {
-            rate = transaction.amountTo / transaction.amountFrom
-            symbols = "\(transaction.accountTo.currency.symbol)/\(transaction.accountFrom.currency.symbol)"
-        }
-    }
-    
-    private var currencyFormatter = CurrencyFormatter()
-    
-    var body: some View {
-        Text("Курс: \(currencyFormatter.string(number: rate, suffix: symbols))")
-    }
 }
 
 enum Position {
