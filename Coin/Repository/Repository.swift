@@ -157,9 +157,16 @@ class Repository {
     
     func updateBalance(id: UInt32, newBalance: Decimal) async throws {
         try await sqlite.write { db in
-            _ = try AccountDB
-                .filter(AccountDB.Columns.id == id)
-                .updateAll(db, AccountDB.Columns.remainder.set(to: newBalance))
+            
+            let sql = """
+                UPDATE accountDB
+                SET remainder = CASE
+                                 WHEN type = 'earnings' THEN ? * -1
+                                 ELSE ?
+                              END
+                WHERE id = ?;
+            """
+            _ = try db.execute(sql: sql, arguments: [newBalance, newBalance, id])
         }
     }
     
@@ -364,45 +371,111 @@ class Repository {
         }
     }
     
-    func getBalanceForAccount(
-        _ account: Account,
+    func getBalances(
+        accountIDs: [UInt32] = [],
         dateFrom: Date? = nil,
-        dateTo: Date? = nil
-    ) async throws -> Decimal? {
+        dateTo: Date? = nil,
+        accountTypes: [AccountType] = [],
+        accountGroupIDs: [UInt32] = []
+    ) async throws -> [UInt32: Decimal] {
         try await sqlite.read { db in
             
+            if accountIDs.isEmpty && accountTypes.isEmpty && accountGroupIDs.isEmpty {
+                return [:]
+            }
+            
             var dateFilter = ""
-            var args: StatementArguments = ["id": account.id]
+            var filters: [String] = []
+            var joins: [String] = []
+            var args: StatementArguments = []
+            var accountsJoined = false
             
             if let dateFrom = dateFrom {
-                dateFilter += "AND dateTransaction >= :dateFrom"
-                _ = args.append(contentsOf: ["dateFrom": dateFrom])
+                dateFilter += "AND dateTransaction >= ?"
+                _ = args.append(contentsOf: [dateFrom])
             }
             
             if let dateTo = dateTo {
-                dateFilter += "\nAND dateTransaction < :dateTo"
-                _ = args.append(contentsOf: ["dateTo": dateTo])
+                dateFilter += "\nAND dateTransaction < ?"
+                _ = args.append(contentsOf: [dateTo])
+            }
+            
+            if let dateFrom = dateFrom {
+                _ = args.append(contentsOf: [dateFrom])
+            }
+            
+            if let dateTo = dateTo {
+                _ = args.append(contentsOf: [dateTo])
+            }
+            
+            if !accountTypes.isEmpty {
+                var qs: [String] = []
+                for _ in accountTypes {
+                    qs.append("?")
+                }
+                joins.append("JOIN accountDB a ON a.Id = t.accountId")
+                accountsJoined = true
+                filters.append("a.type in (\(qs.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(accountTypes.map(\.rawValue)))
+            }
+            
+            if !accountIDs.isEmpty {
+                var qs: [String] = []
+                for _ in accountIDs {
+                    qs.append("?")
+                }
+                if !accountsJoined {
+                    joins.append("JOIN accountDB a ON a.id = t.accountId")
+                }
+                filters.append("a.id in (\(qs.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(accountIDs))
+            }
+            
+            if !accountGroupIDs.isEmpty {
+                var qs: [String] = []
+                for _ in accountIDs {
+                    qs.append("?")
+                }
+                if !accountsJoined {
+                    joins.append("JOIN accountDB a ON a.id = t.accountId")
+                }
+                filters.append("a.accountGroupId in (\(qs.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(accountGroupIDs))
             }
             
             let req = """
-                SELECT
-                  (
-                    SELECT COALESCE(SUM(amountTo),0)
-                    FROM transactionDB
-                    WHERE accountToId = :id
-                    \(dateFilter)
-                  ) - (
-                    SELECT COALESCE(SUM(amountFrom),0)
-                    FROM transactionDB
-                    WHERE accountFromId = :id
-                    \(dateFilter)
-                  ) AS remainder
+                SELECT 
+                    accountId,
+                    (
+                        SELECT COALESCE(SUM(amountTo), 0)
+                        FROM transactionDB
+                        WHERE accountToId = t.accountId
+                        \(dateFilter)
+                    ) - (
+                        SELECT COALESCE(SUM(amountFrom), 0)
+                        FROM transactionDB
+                        WHERE accountFromId = t.accountId
+                        \(dateFilter)
+                    ) AS remainder
+                FROM (
+                    SELECT DISTINCT accountToId AS accountId FROM transactionDB
+                    UNION
+                    SELECT DISTINCT accountFromId AS accountId FROM transactionDB
+                ) AS t
+                \(joins.joined(separator: "\n"))
+                \(!filters.isEmpty ? "WHERE \(filters.joined(separator: "\nAND"))" : "")
                 """
             
-            if let row = try Row.fetchOne(db, sql: req, arguments: args) {
-                return row["remainder"]
+            var accountBalances: [UInt32: Decimal] = [:]
+            
+            print(req)
+            print(args)
+            let rows = try Row.fetchCursor(db, sql: req, arguments: args)
+            while let row = try rows.next() {
+                accountBalances[row["accountId"]] = row["remainder"]
             }
-            return nil
+            
+            return accountBalances
         }
     }
     

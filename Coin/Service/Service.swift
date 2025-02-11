@@ -15,6 +15,9 @@ private let logger = Logger(subsystem: "Coin", category: "Service")
 @Observable
 class Service {
     
+    @ObservationIgnored @AppStorage("lastCheckedMonth") private var lastCheckedMonth: Int?
+    @ObservationIgnored @AppStorage("lastCheckedYear") private var lastCheckedYear: Int?
+    
     // MARK: Init
     init(
         repository: Repository,
@@ -35,6 +38,24 @@ class Service {
 }
 
 extension Service {
+    
+    func checkMonthChange() async throws {
+        let currentDate = Date()
+        let calendar = Calendar.current
+        let currentMonth = calendar.component(.month, from: currentDate)
+        let currentYear = calendar.component(.year, from: currentDate)
+        
+        // Сохраняем последний месяц для отслеживания изменений
+        
+        if currentMonth != lastCheckedMonth || currentYear != lastCheckedYear {
+            
+            // Обновляем сохраненные значения
+            lastCheckedMonth = currentMonth
+            lastCheckedYear = currentYear
+            
+            try await recalculateAccountBalances(accountTypes: [.balancing, .earnings, .expense])
+        }
+    }
     
     func deleteAllData() async throws {
         try await repository.deleteAllData()

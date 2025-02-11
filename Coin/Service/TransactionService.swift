@@ -31,7 +31,7 @@ extension Service {
         
         let id = try await repository.createTransaction(transaction)
         transaction.id = id
-        try await recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
+        try await recalculateAccountBalances(accounts: [transaction.accountFrom, transaction.accountTo])
         try await repository.linkTagsToTransaction(transaction.tags, transaction: transaction)
 
         taskManager.createTask(
@@ -121,7 +121,7 @@ extension Service {
         try validateTransaction(transaction)
         
         try await repository.updateTransaction(newTransaction)
-        try await recalculateAccountBalance([oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
+        try await recalculateAccountBalances(accounts: [oldTransaction.accountFrom, oldTransaction.accountTo, newTransaction.accountFrom, newTransaction.accountTo])
         
         let (tagsToDelete, tagsToInsert) = joinExclusive(oldTransaction.tags, newTransaction.tags)
         if !tagsToDelete.isEmpty {
@@ -150,7 +150,7 @@ extension Service {
     // MARK: Delete
     func deleteTransaction(_ transaction: Transaction) async throws {
         try await self.repository.deleteTransaction(transaction)
-        try await self.recalculateAccountBalance([transaction.accountFrom, transaction.accountTo])
+        try await self.recalculateAccountBalances(accounts: [transaction.accountFrom, transaction.accountTo])
         taskManager.createTask(
             actionName: .deleteTransaction,
             localObjectID: transaction.id,

@@ -7,6 +7,9 @@
 
 import SwiftUI
 import Factory
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "ContentView")
 
 struct ContentView: View {
     
@@ -21,7 +24,23 @@ struct ContentView: View {
                 AppTabView()
                     .task {
                         Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { _ in
-                            service.taskManager.executeDBTasks()
+                            Task {
+                                do {
+                                    try await service.taskManager.executeDBTasks()
+                                } catch {
+                                    logger.warning("\(error)")
+                                }
+                            }
+                        }
+                        Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+                            Task {
+                                do {
+                                    print("Чекаем месяц")
+                                    try await service.checkMonthChange()
+                                } catch {
+                                    logger.warning("\(error)")
+                                }
+                            }
                         }
                     }
             } else {
