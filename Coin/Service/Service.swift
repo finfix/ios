@@ -398,10 +398,12 @@ extension Service {
         var (icons, currencies, user, accountGroups, accounts, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _tags, _tagsToTransactions, _transactions)
         
         // Загружаем и сохраняем локально иконки
-        for icon in icons {
+        for (i, icon) in icons.enumerated() {
             let iconData = try await apiManager.GetIcon(url: "https://bonavii.com/"+icon.url)
-            let url = URL.documentsDirectory.appending(path: String(icon.url))
-            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
+            let url = String(icon.url.replacingOccurrences(of: "/", with: "_"))
+            let localURL = URL.documentsDirectory.appending(path: url)
+            icons[i].url = url
+            try iconData.write(to: localURL, options: [.atomic, .completeFileProtection])
         }
         
         // Удаляем все данные в базе данных
