@@ -20,8 +20,18 @@ class TaskManager {
     
     let repository: Repository
     let apiManager: APIManager
+    var syncInProgress = false
     
     func executeDBTasks() async throws {
+        
+        if syncInProgress {
+            logger.error("Синхронизация в процессе, ждем ответа от сервера")
+            return
+        }
+        
+        syncInProgress = true
+        defer { syncInProgress = false }
+        
         let countTasks = try await repository.getCountTasks()
         guard countTasks > 0 else {
             return
