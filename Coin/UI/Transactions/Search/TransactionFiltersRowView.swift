@@ -123,6 +123,6 @@ struct TransactionFiltersRowItem: View {
 
 #Preview {
     TransactionFiltersRowView(
-        filters: .constant(TransactionFilters())
+        filters: .constant(TransactionFilters(accountGroups: []))
     )
 }

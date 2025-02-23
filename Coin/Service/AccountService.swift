@@ -82,7 +82,7 @@ extension Service {
                 accountGroupID: account.accountGroup.id
             ))
             
-            try await recalculateAccountBalance([balancingAccount!])
+            try await recalculateAccountBalances(accounts: [balancingAccount!])
         }
         
         taskManager.createTask(
@@ -219,7 +219,7 @@ extension Service {
                 accountGroupID: newAccount.accountGroup.id
             ))
             
-            try await recalculateAccountBalance([balancingAccount!])
+            try await recalculateAccountBalances(accounts: [balancingAccount!])
         }
         
         // Если изменился порядковый номер счета
@@ -317,26 +317,35 @@ extension Service {
         )
     }
     
-    // MARK: Other
-    func recalculateAccountBalance(_ accounts: [Account]) async throws {
-        for account in accounts {
-            var balance: Decimal?
-            switch account.type {
-            case .regular, .debt:
-                balance = try await repository.getBalanceForAccount(account)
-            case .expense, .earnings, .balancing:
-                let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-                let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
-                let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
-                balance = try await repository.getBalanceForAccount(account, dateFrom: dateFrom, dateTo: dateTo)
-            }
-            guard var balance = balance else {
-                throw ErrorModel(humanText: "Не смогли посчитать баланс счета \(account.id)")
-            }
-            if account.type == .earnings || account.type == .balancing {
-                balance *= -1
-            }
-            try await repository.updateBalance(id: account.id, newBalance: balance.round(factor: 7))
+    func recalculateAccountBalances(
+        accounts: [Account] = [],
+        accountGroups: [AccountGroup] = [],
+        accountTypes: [AccountType] = []
+    ) async throws {
+        var balances: [UInt32: Decimal] = [:]
+                
+        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
+        let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+        
+        let expensesAndEarningsBalances = try await repository.getBalances(
+            accountIDs: accounts.filter { $0.type == .expense || $0.type == .earnings || $0.type == .balancing }.map(\.id),
+            dateFrom: dateFrom,
+            dateTo: dateTo,
+            accountTypes: accountTypes.filter { $0 == .expense || $0 == .earnings || $0 == .balancing },
+            accountGroupIDs: accountGroups.map(\.id)
+        )
+        balances = balances.merging(expensesAndEarningsBalances) { (current, _) in current }
+
+        let regularAndDebtBalances = try await repository.getBalances(
+            accountIDs: accounts.filter { $0.type == .regular || $0.type == .debt }.map(\.id),
+            accountTypes: accountTypes.filter { $0 == .regular || $0 == .debt },
+            accountGroupIDs: accountGroups.map(\.id)
+        )
+        balances = balances.merging(regularAndDebtBalances) { (current, _) in current }
+        
+        for (accountID, balance) in balances {
+            try await repository.updateBalance(id: accountID, newBalance: balance.round(factor: 7))
         }
     }
     

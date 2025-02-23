@@ -71,13 +71,11 @@ struct Profile: View {
                     Task {
                         do {
                             try await vm.logout()
+                            isLogin = false
                         } catch {
                             alert(error)
                         }
                     }
-                    isLogin = false
-                    accessToken = nil
-                    refreshToken = nil
                 }
             }
             .frame(maxWidth: .infinity)

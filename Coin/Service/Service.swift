@@ -15,6 +15,9 @@ private let logger = Logger(subsystem: "Coin", category: "Service")
 @Observable
 class Service {
     
+    @ObservationIgnored @AppStorage("lastCheckedMonth") private var lastCheckedMonth: Int?
+    @ObservationIgnored @AppStorage("lastCheckedYear") private var lastCheckedYear: Int?
+    
     // MARK: Init
     init(
         repository: Repository,
@@ -35,6 +38,24 @@ class Service {
 }
 
 extension Service {
+    
+    func checkMonthChange() async throws {
+        let currentDate = Date()
+        let calendar = Calendar.current
+        let currentMonth = calendar.component(.month, from: currentDate)
+        let currentYear = calendar.component(.year, from: currentDate)
+        
+        // Сохраняем последний месяц для отслеживания изменений
+        
+        if currentMonth != lastCheckedMonth || currentYear != lastCheckedYear {
+            
+            // Обновляем сохраненные значения
+            lastCheckedMonth = currentMonth
+            lastCheckedYear = currentYear
+            
+            try await recalculateAccountBalances(accountTypes: [.balancing, .earnings, .expense])
+        }
+    }
     
     func deleteAllData() async throws {
         try await repository.deleteAllData()
@@ -354,10 +375,11 @@ extension Service {
         }
     }
     
+    func getCountTasks() async throws -> UInt32 {
+        return try await repository.getCountTasks()
+    }
+    
     func sync() async throws {
-        guard try await repository.getCountTasks() == 0 else {
-            throw ErrorModel(humanText: "Вам необходимо дождаться выполнения всех фоновых задач")
-        }
         logger.info("Синхронизируем данные")
                 
         // Получаем данные текущего месяца для запроса
@@ -376,10 +398,12 @@ extension Service {
         var (icons, currencies, user, accountGroups, accounts, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _tags, _tagsToTransactions, _transactions)
         
         // Загружаем и сохраняем локально иконки
-        for icon in icons {
+        for (i, icon) in icons.enumerated() {
             let iconData = try await apiManager.GetIcon(url: "https://bonavii.com/"+icon.url)
-            let url = URL.documentsDirectory.appending(path: String(icon.url))
-            try iconData.write(to: url, options: [.atomic, .completeFileProtection])
+            let url = String(icon.url.replacingOccurrences(of: "/", with: "_"))
+            let localURL = URL.documentsDirectory.appending(path: url)
+            icons[i].url = url
+            try iconData.write(to: localURL, options: [.atomic, .completeFileProtection])
         }
         
         // Удаляем все данные в базе данных

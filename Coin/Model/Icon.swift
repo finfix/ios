@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Icon: Identifiable {
+struct Icon: Identifiable, Hashable, Equatable {
     var id: UInt32
     var name: String
     var url: String
@@ -41,15 +41,5 @@ struct Icon: Identifiable {
     
     static func convertToMap(_ icons: [Icon]) -> [UInt32: Icon] {
         return Dictionary(uniqueKeysWithValues: icons.map{ ($0.id, $0) })
-    }
-}
-
-extension Icon: Hashable {
-    static func == (lhs: Icon, rhs: Icon) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
     }
 }

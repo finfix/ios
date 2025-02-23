@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Factory
 
 struct EditAccount: View {
     
@@ -113,24 +114,7 @@ struct EditAccount: View {
                         }
                     }
                 }
-                Picker(selection: $vm.currentAccount.icon) {
-                    ForEach(vm.icons) { icon in
-                        HStack {
-                            Text(icon.name)
-                            AsyncImage(url: URL.documentsDirectory.appending(path: String(icon.url))) { image in
-                                image.image?
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .frame(width: 20)
-                            }
-                        }
-                        .tag(icon)
-                    }
-                } label: {
-                    Text("Иконка")
-                }
-                .pickerStyle(.wheel)
-
+                NavigationLink("Иконка", destination: IconPicker(selectedIcon: $vm.currentAccount.icon))
             }
             Section {
                 if vm.mode == .update {
@@ -261,4 +245,46 @@ struct EditAccount: View {
         isHiddenView: false
     )
     .environment(AlertManager(handle: {_ in }))
+}
+
+struct IconPicker: View {
+    
+    @Injected(\.service) private var service
+    
+    @State var icons: [Icon] = []
+    @Environment(\.dismiss) var dismiss
+
+    @Binding var selectedIcon: Icon
+    
+    var body: some View {
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 20) {
+                ForEach(icons) { icon in
+                    Button {
+                        selectedIcon = icon
+                        dismiss()
+                    } label: {
+                        Circle()
+                            .fill(.orange)
+                            .frame(height: 60)
+                            .overlay{
+                                AsyncImage(url: URL.documentsDirectory.appending(path: icon.url)) { image in
+                                    image.image?
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 30)
+                                }
+                            }
+                    }
+                }
+            }
+        }
+        .task {
+            do {
+                self.icons = try await service.getIcons()
+            } catch {
+                
+            }
+        }
+    }
 }
