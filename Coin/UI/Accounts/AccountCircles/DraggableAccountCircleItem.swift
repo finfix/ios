@@ -35,7 +35,7 @@ struct DraggableAccountCircleItem: View {
                             }
                         }
                 )
-                .gesture(
+                .simultaneousGesture(
                     LongPressGesture(minimumDuration: 1)
                         .onEnded { state in
                             path.append(AccountCircleItemRoute.editAccount(account))
