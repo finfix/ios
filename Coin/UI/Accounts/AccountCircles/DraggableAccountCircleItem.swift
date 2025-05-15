@@ -35,7 +35,7 @@ struct DraggableAccountCircleItem: View {
                             }
                         }
                 )
-                .gesture(
+                .simultaneousGesture(
                     LongPressGesture(minimumDuration: 1)
                         .onEnded { state in
                             path.append(AccountCircleItemRoute.editAccount(account))
@@ -78,7 +78,8 @@ struct DraggableAccountCircleItem: View {
                                 x: proxy.frame(in: .named("OuterV")).midX,
                                 y: proxy.frame(in: .named("OuterV")).midY
                             ),
-                            for: account
+                            for: account,
+                            in: accountGroup
                         )
                         return Color.clear
                     }

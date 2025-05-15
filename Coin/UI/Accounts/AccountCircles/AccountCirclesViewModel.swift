@@ -29,7 +29,8 @@ class AccountCirclesViewModel {
     
     let triggerZone: CGFloat = 50
     
-    func initializateStaticLocations(location: CGPoint, for account: Account) {
+    func initializateStaticLocations(location: CGPoint, for account: Account, in accountGroup: AccountGroup) {
+        guard account.accountGroup.id == accountGroup.id else { return }
         self.staticLocations[account] = location
     }
     

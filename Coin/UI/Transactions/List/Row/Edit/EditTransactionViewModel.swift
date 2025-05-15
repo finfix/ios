@@ -32,6 +32,10 @@ class EditTransactionViewModel {
         let amountFrom = !currentTransaction.amountFrom.isZero ? currentTransaction.amountFrom : Decimal(string: cleanInput(suggestAmountFromString ?? "0")) ?? .zero
         let amountTo = !currentTransaction.amountTo.isZero ? currentTransaction.amountTo : Decimal(string: cleanInput(suggestAmountToString ?? "0")) ?? .zero
         
+        if amountFrom.isZero || amountTo.isZero {
+            return nil
+        }
+        
         if amountFrom > amountTo {
             let rate = amountFrom / amountTo
             let symbols = "\(currentTransaction.accountFrom.currency.symbol)/\(currentTransaction.accountTo.currency.symbol)"
