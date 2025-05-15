@@ -2,3 +2,10 @@
 Icon?
 Coin.xcworkspace/xcuserdata
 Coin.xcodeproj/xcuserdata
+
+# Cursor Editor files
+.cursor
+.cursor/
+cursor.json
+.cursor-lockfile
+.cursorrules

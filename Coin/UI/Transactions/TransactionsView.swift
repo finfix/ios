@@ -21,12 +21,17 @@ struct TransactionFilters: Equatable, Hashable {
 struct TransactionsView: View {
     
     @Environment(PathSharedState.self) var path
+    @Environment(AccountGroupSharedState.self) private var selectedAccountGroup
     @State var filters: TransactionFilters
     @State var searchText: String = ""
     @State var chartType: ChartType
     @State var chartGroupBy: ChartViewGroupBy = .byAccount
     @State var vm: TransactionsViewModel = TransactionsViewModel()
     @State private var showFilters: Bool = false
+
+    var hasActiveFilters: Bool {
+        filters != TransactionFilters(accountGroups: [selectedAccountGroup.selectedAccountGroup])
+    }
 
     var currency: Currency {
         if filters.accountGroups.count == 1 {
@@ -70,6 +75,13 @@ struct TransactionsView: View {
             }
         }
         .searchable(text: $searchText, isPresented: $showFilters)
+        .toolbar {
+            if hasActiveFilters {
+                Button("Сбросить фильтры") {
+                    filters = TransactionFilters(accountGroups: [selectedAccountGroup.selectedAccountGroup])
+                }
+            }
+        }
     }
 }
 
