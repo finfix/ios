@@ -28,6 +28,7 @@ struct TransactionsView: View {
     @State var chartGroupBy: ChartViewGroupBy = .byAccount
     @State var vm: TransactionsViewModel = TransactionsViewModel()
     @State private var showFilters: Bool = false
+    @State private var areFiltersLocked: Bool = false
 
     var hasActiveFilters: Bool {
         filters != TransactionFilters(accountGroups: [selectedAccountGroup.selectedAccountGroup])
@@ -64,7 +65,13 @@ struct TransactionsView: View {
                     TransactionsList(filters: filters)
                 }
             } else { // Если в строку поиска уже что-то написали
-                SearchView(searchText: $searchText, filters: $filters, chartType: $chartType, showFilters: $showFilters)
+                SearchView(
+                    searchText: $searchText,
+                    filters: $filters,
+                    chartType: $chartType,
+                    showFilters: $showFilters,
+                    areFiltersLocked: $areFiltersLocked
+                )
             }
         }
         .task {
@@ -74,14 +81,12 @@ struct TransactionsView: View {
                 
             }
         }
-        .searchable(text: $searchText, isPresented: $showFilters)
-        .toolbar {
-            if hasActiveFilters {
-                Button("Сбросить фильтры") {
-                    filters = TransactionFilters(accountGroups: [selectedAccountGroup.selectedAccountGroup])
-                }
+        .onChange(of: selectedAccountGroup.selectedAccountGroup) { oldValue, newValue in
+            if !areFiltersLocked {
+                filters.accountGroups = [newValue]
             }
         }
+        .searchable(text: $searchText, isPresented: $showFilters)
     }
 }
 

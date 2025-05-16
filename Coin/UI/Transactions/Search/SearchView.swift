@@ -18,12 +18,39 @@ struct SearchView: View {
     @Binding var filters: TransactionFilters
     @Binding var chartType: ChartType
     @Binding var showFilters: Bool
+    @Binding var areFiltersLocked: Bool
     
     let width: CGFloat = UIScreen.main.bounds.width
     let height: CGFloat = UIScreen.main.bounds.height
     
     var body: some View {
         List {
+            Section(header: Text("Управление фильтрами")) {
+                Button {
+                    areFiltersLocked.toggle()
+                } label: {
+                    HStack {
+                        Text(areFiltersLocked ? "Разблокировать фильтры" : "Зафиксировать фильтры")
+                        Spacer()
+                        Image(systemName: areFiltersLocked ? "lock.fill" : "lock.open.fill")
+                            .foregroundStyle(areFiltersLocked ? .blue : .secondary)
+                    }
+                }
+                
+                Button {
+                    // Сбрасываем все фильтры, кроме текущей группы счетов
+                    let currentAccountGroups = filters.accountGroups
+                    filters = TransactionFilters(accountGroups: currentAccountGroups)
+                } label: {
+                    HStack {
+                        Text("Сбросить фильтры")
+                        Spacer()
+                        Image(systemName: "arrow.counterclockwise")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
             Section(header: Text("Дата")) {
                 ExpandableDatePicker(buttonName: "C", isCalendarShowing: $shouldShowDateFrom, date: $filters.dateFrom)
                 ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $filters.dateTo)
