@@ -183,6 +183,14 @@ struct AccountCirclesView: View {
                     }
                     .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
                     .scrollIndicators(.hidden)
+                    .gesture(
+                        LongPressGesture(minimumDuration: 2)
+                            .onEnded { _ in
+                                withAnimation {
+                                    vm.isEditMode.toggle()
+                                }
+                            }
+                    )
                     
                     if let draggableLocation = vm.draggableLocation {
                         Circle()

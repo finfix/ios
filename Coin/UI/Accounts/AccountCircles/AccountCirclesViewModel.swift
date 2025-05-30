@@ -15,6 +15,7 @@ class AccountCirclesViewModel {
     @Injected(\.service) private var service
     
     var accounts: [Account] = []
+    var isEditMode: Bool = false
         
     @MainActor
     func load(accountGroup: AccountGroup) async throws {

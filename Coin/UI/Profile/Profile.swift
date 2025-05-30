@@ -29,8 +29,6 @@ struct Profile: View {
     @State var shouldShowProgress = false
     
     var body: some View {
-        QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-
         Form {
             Section {
                 NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)

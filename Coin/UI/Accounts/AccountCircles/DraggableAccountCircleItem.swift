@@ -68,6 +68,10 @@ struct DraggableAccountCircleItem: View {
                     .gesture(
                         DragGesture(coordinateSpace: .global)
                             .onChanged { state in
+                                if vm.isEditMode {
+                                    // TODO: Handle drag in edit mode
+                                    return
+                                }
                                 guard account.type != .balancing && account.type != .expense else { return }
                                 vm.updateDraggableLocation(
                                     location: state.location,
@@ -75,6 +79,10 @@ struct DraggableAccountCircleItem: View {
                                 )
                             }
                             .onEnded { state in
+                                if vm.isEditMode {
+                                    // TODO: Handle drag end in edit mode
+                                    return
+                                }
                                 confirmDraggableDrop(for: account)
                                 if isAlreadyOpened {
                                     dismiss()
@@ -84,6 +92,10 @@ struct DraggableAccountCircleItem: View {
                     .simultaneousGesture(
                         LongPressGesture(minimumDuration: 1)
                             .onEnded { state in
+                                if vm.isEditMode {
+                                    // TODO: Handle delete in edit mode
+                                    return
+                                }
                                 path.append(AccountCircleItemRoute.editAccount(account))
                                 if isAlreadyOpened {
                                     dismiss()
@@ -93,6 +105,7 @@ struct DraggableAccountCircleItem: View {
                     .gesture(
                         TapGesture(count: 2)
                             .onEnded {
+                                if vm.isEditMode { return }
                                 if !account.childrenAccounts.isEmpty {
                                     isChildrenOpen = true
                                 }
@@ -101,6 +114,7 @@ struct DraggableAccountCircleItem: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
+                                if vm.isEditMode { return }
                                 if isAlreadyOpened {
                                     dismiss()
                                 }
@@ -119,6 +133,20 @@ struct DraggableAccountCircleItem: View {
                     )
             }
             .opacity(vm.isHighligted(for: account) ? 0.6 : 1)
+            .modifier(ShakeEffect(animatableData: vm.isEditMode ? 1 : 0))
+            .overlay(alignment: .topTrailing) {
+                if vm.isEditMode {
+                    Button {
+                        // TODO: Handle delete
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.red)
+                            .background(.white)
+                            .clipShape(Circle())
+                    }
+                    .offset(x: 10, y: -10)
+                }
+            }
             AccountCircleItemFooter(account: account)
         }
         .frame(width: 80)
@@ -196,6 +224,14 @@ struct DraggableAccountCircleItem: View {
             self.vm.draggableLocation = nil
             self.vm.draggableAccount = nil
         }
+    }
+}
+
+struct ShakeEffect: GeometryEffect {
+    var animatableData: CGFloat
+    
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(CGAffineTransform(translationX: sin(animatableData * .pi * 2) * 5, y: 0))
     }
 }
 
