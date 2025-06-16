@@ -467,6 +467,18 @@ private struct Pickers: View {
             Button {
                 withAnimation {
                     isPickerShowing.toggle()
+                    if isPickerShowing && account.id != 0 {
+                        // Если у выбранного счета есть родитель
+                        if let parentId = account.parentAccountID,
+                           let foundParent = accountsToShow.first(where: { $0.id == parentId }) {
+                            parentAccount = foundParent
+                            openSecondPicker = true
+                        } else if account.isParent {
+                            // Если выбранный счет сам родитель
+                            parentAccount = account
+                            openSecondPicker = true
+                        }
+                    }
                 }
             } label: {
                 Text(buttonName)
@@ -523,5 +535,18 @@ private struct Pickers: View {
             }
         }
         .buttonStyle(.plain)
+        .task {
+            if account.id != 0 {
+                // При первой загрузке тоже проверяем родительский счет
+                if let parentId = account.parentAccountID,
+                   let foundParent = accountsToShow.first(where: { $0.id == parentId }) {
+                    parentAccount = foundParent
+                    openSecondPicker = true
+                } else if account.isParent {
+                    parentAccount = account
+                    openSecondPicker = true
+                }
+            }
+        }
     }
 }

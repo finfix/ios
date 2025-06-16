@@ -21,12 +21,18 @@ struct TransactionFilters: Equatable, Hashable {
 struct TransactionsView: View {
     
     @Environment(PathSharedState.self) var path
+    @Environment(AccountGroupSharedState.self) private var selectedAccountGroup
     @State var filters: TransactionFilters
     @State var searchText: String = ""
     @State var chartType: ChartType
     @State var chartGroupBy: ChartViewGroupBy = .byAccount
     @State var vm: TransactionsViewModel = TransactionsViewModel()
     @State private var showFilters: Bool = false
+    @State private var areFiltersLocked: Bool = false
+
+    var hasActiveFilters: Bool {
+        filters != TransactionFilters(accountGroups: [selectedAccountGroup.selectedAccountGroup])
+    }
 
     var currency: Currency {
         if filters.accountGroups.count == 1 {
@@ -59,7 +65,13 @@ struct TransactionsView: View {
                     TransactionsList(filters: filters)
                 }
             } else { // Если в строку поиска уже что-то написали
-                SearchView(searchText: $searchText, filters: $filters, chartType: $chartType, showFilters: $showFilters)
+                SearchView(
+                    searchText: $searchText,
+                    filters: $filters,
+                    chartType: $chartType,
+                    showFilters: $showFilters,
+                    areFiltersLocked: $areFiltersLocked
+                )
             }
         }
         .task {
@@ -67,6 +79,11 @@ struct TransactionsView: View {
                 try await vm.load()
             } catch {
                 
+            }
+        }
+        .onChange(of: selectedAccountGroup.selectedAccountGroup) { oldValue, newValue in
+            if !areFiltersLocked {
+                filters.accountGroups = [newValue]
             }
         }
         .searchable(text: $searchText, isPresented: $showFilters)

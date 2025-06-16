@@ -161,6 +161,21 @@ struct EditAccount: View {
                 .frame(maxWidth: .infinity)
             }
             if vm.currentAccount.id != 0 {
+                Section {
+                    NavigationLink {
+                        TransactionsView(
+                            filters: TransactionFilters(
+                                accounts: [vm.currentAccount],
+                                accountGroups: [selectedAccountGroup]
+                            ),
+                            chartType: vm.currentAccount.type == .earnings ? .earnings : 
+                                      vm.currentAccount.type == .expense ? .expenses : .earningsAndExpenses
+                        )
+                    } label: {
+                        Label("Просмотреть все транзакции", systemImage: "list.bullet")
+                    }
+                }
+                
                 Section(footer:
                     VStack(alignment: .leading) {
                         Text("ID: \(vm.currentAccount.id)")
