@@ -33,6 +33,10 @@ struct DraggableAccountCircleItem: View {
     @Environment(\.dismiss) var dismiss
     var isAlreadyOpened: Bool = false
     
+    @State private var animate = false
+    @State private var time: CGFloat = CGFloat.random(in: 0...2 * .pi)
+    @State private var phase: CGFloat = CGFloat.random(in: 0...2 * .pi)
+    
     var body: some View {
         
         VStack {
@@ -61,6 +65,7 @@ struct DraggableAccountCircleItem: View {
                         }
                     }
                     .allowsHitTesting(false)
+                    .modifier(ShakeEffect(animatableData: vm.isEditMode ? 1 : 0))
                 
                 Circle()
                     .frame(width: 30, height: 30)
@@ -133,7 +138,6 @@ struct DraggableAccountCircleItem: View {
                     )
             }
             .opacity(vm.isHighligted(for: account) ? 0.6 : 1)
-            .modifier(ShakeEffect(animatableData: vm.isEditMode ? 1 : 0))
             .overlay(alignment: .topTrailing) {
                 if vm.isEditMode {
                     Button {
@@ -150,6 +154,17 @@ struct DraggableAccountCircleItem: View {
             AccountCircleItemFooter(account: account)
         }
         .frame(width: 80)
+        .rotationEffect(Angle(degrees: animate ? 1 : -1))
+        .offset(x: sin(time + phase) * 5, y: cos(time + phase) * 5)
+        .animation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true), value: animate)
+        .onAppear {
+            animate = true
+        }
+        .onChange(of: animate) { _ in
+            withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
+                time += 0.1
+            }
+        }
         .opacity(account.accountingInHeader ? 1 : 0.5)
         .popover(isPresented: $isChildrenOpen) {
             ScrollView(.horizontal) {

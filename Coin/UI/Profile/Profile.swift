@@ -28,7 +28,31 @@ struct Profile: View {
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     
+    @State private var animate = false
+    @State private var time: CGFloat = 0
+
+    
     var body: some View {
+        VStack {
+            Text("Name")
+            Image(systemName: "app.fill")
+                .resizable()
+                .frame(width: 60, height: 60)
+
+            Text("900 ₽")
+        }
+                   .rotationEffect(Angle(degrees: animate ? 2 : -2))
+                   .offset(x: sin(time) * 10, y: cos(time) * 10)  // Колебания по осям X и Y
+                   .animation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true), value: animate)
+                   .onAppear {
+                       animate = true
+                   }
+                   .onChange(of: animate) { _ in
+                       // Увеличиваем время для динамических изменений
+                       withAnimation(Animation.linear(duration: 0.1).repeatForever(autoreverses: true)) {
+                           time += 0.1
+                       }
+                   }
         Form {
             Section {
                 NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
