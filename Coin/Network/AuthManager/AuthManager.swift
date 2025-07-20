@@ -27,7 +27,6 @@ class AuthManager {
         
         // Проверяем наличие access токена
         guard var accessToken else {
-            logout()
             throw ErrorModel(humanText: "Пользователь не авторизован")
         }
          

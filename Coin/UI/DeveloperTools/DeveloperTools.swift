@@ -16,6 +16,8 @@ struct DeveloperTools: View {
     @State private var vm = DeveloperToolsViewModel()
     
     @AppStorage("apiBasePath") private var apiBasePath = defaultApiBasePath
+    @AppStorage("accessToken") private var accessToken: String = ""
+    @AppStorage("refreshToken") private var refreshToken: String = ""
     @Environment(AlertManager.self) var alert
     
     @State var shouldDisableUI = false
@@ -73,6 +75,10 @@ struct DeveloperTools: View {
                 .frame(maxWidth: .infinity)
                 Section {
                     NavigationLink("Показать все задачи", value: DeveloperToolsRoute.tasksList)
+                }
+                Section {
+                    TextField("Access token", text: $accessToken)
+                    TextField("Refresh token", text: $refreshToken)
                 }
                 .frame(maxWidth: .infinity)
                 .alert(isPresented: $shouldShowAlert) {
