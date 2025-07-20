@@ -55,7 +55,7 @@ struct DeveloperTools: View {
                             do {
                                 differences = try await vm.compareLocalAndServerData()
                             } catch {
-                                alert(error)
+                                alert.error(error)
                             }
                             shouldShowAlert = true
                         }

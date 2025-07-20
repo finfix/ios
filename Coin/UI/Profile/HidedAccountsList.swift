@@ -49,7 +49,7 @@ struct HidedAccountsList: View {
                     do {
                         try await vm.load()
                     } catch {
-                        alert(error)
+                        alert.error(error)
                     }
                 }
             }
@@ -58,7 +58,7 @@ struct HidedAccountsList: View {
             do {
                 try await vm.load()
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
     }

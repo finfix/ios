@@ -34,7 +34,7 @@ struct TasksList: View {
                 do {
                     try await vm.load()
                 } catch {
-                    alert(error)
+                    alert.error(error)
                     return
                 }
             }
@@ -46,7 +46,7 @@ struct TasksList: View {
                         do {
                             try await vm.deleteAllTasks()
                         } catch {
-                            alert(error)
+                            alert.error(error)
                             return
                         }
                         dismiss()
@@ -62,7 +62,7 @@ struct TasksList: View {
             do {
                 try await vm.load()
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
     }

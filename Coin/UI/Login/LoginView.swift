@@ -71,7 +71,7 @@ struct LoginView: View {
                                 do {
                                     try await vm.auth()
                                 } catch {
-                                    alert(error)
+                                    alert.error(error)
                                 }
                             }
                         }
@@ -93,7 +93,7 @@ struct LoginView: View {
                                 try await vm.auth()
                                 isLogin = true
                             } catch {
-                                alert(error)
+                                alert.error(error)
                             }
                         }
                     } label: {

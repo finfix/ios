@@ -67,7 +67,7 @@ struct CurrencyConverter: View {
                 currency1 = vm.currencies.first(where: { $0.code == "USD" }) ?? Currency()
                 currency2 = vm.user.defaultCurrency
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
     }

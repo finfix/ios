@@ -56,9 +56,13 @@ extension Container {
                 let taskManager = TaskManager(repository: repository, apiManager: apiManager)
                 return Service(repository: repository, apiManager: apiManager, taskManager: taskManager, authManager: authManager)
             } catch {
-                fatalError("Произошла ошибка при инициализации зависимостей \(error)")
+                fatalError("Произошла ошибка при инициализации зависимости Service \(error)")
             }
         }.singleton
+    }
+    
+    var alertManager: Factory<AlertManager> {
+        return Factory(self) { return AlertManager() }.singleton
     }
 }
 
@@ -110,9 +114,14 @@ struct AlertModel: Identifiable {
 
 @Observable
 class AlertManager {
+    
+    init() {
+        self.handle = { _ in }
+    }
+    
     let handle: (AlertModel) -> Void
     
-    func callAsFunction(
+    func error(
         _ error: Error,
         title: String = "Произошла ошибка",
         buttonText: String = "OK",
@@ -124,7 +133,7 @@ class AlertManager {
         handle(AlertModel(title: title, message: error.localizedDescription, buttonText: buttonText, callback: callback))
     }
     
-    func callAsFunction(
+    func warn(
         title: String,
         message: String,
         buttonText: String = "OK",

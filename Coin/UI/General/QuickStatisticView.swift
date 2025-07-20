@@ -73,7 +73,7 @@ struct QuickStatisticView: View {
             do {
                 try await vm.load()
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .font(.caption2)

@@ -217,7 +217,7 @@ struct SearchView: View {
             do {
                 try await vm.load(filters: filters, searchText: searchText)
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .onChange(of: searchText) { _, _ in
@@ -225,7 +225,7 @@ struct SearchView: View {
                 do {
                     try await vm.load(filters: filters, searchText: searchText)
                 } catch {
-                    alert(error)
+                    alert.error(error)
                 }
             }
         }

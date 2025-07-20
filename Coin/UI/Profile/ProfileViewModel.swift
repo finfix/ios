@@ -12,6 +12,8 @@ import Factory
 class ProfileViewModel {
     @ObservationIgnored
     @Injected(\.service) private var service
+    @ObservationIgnored
+    @Injected(\.alertManager) var alert
     
     func sync() async throws {
         do {
@@ -26,8 +28,17 @@ class ProfileViewModel {
     
     func logout() async throws {
         guard try await service.getCountTasks() == 0 else {
-            throw ErrorModel(humanText: "Вам необходимо дождаться выполнения всех фоновых задач")
+            var isNeedLogout = false
+            alert.warn(
+                title: "Вы уверены?",
+                message: "У вас есть фоновые задачи. Если вы выйдете, они не смогут быть синхронизированы с сервером") {
+                isNeedLogout = true
+            }
+            
+            if isNeedLogout {
+                try await service.logout()
+            }
+            return
         }
-        try await service.logout()
     }
 }

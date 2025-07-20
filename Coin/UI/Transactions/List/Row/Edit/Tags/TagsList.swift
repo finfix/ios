@@ -38,7 +38,7 @@ struct TagsList: View {
                         do {
                             try await vm.deleteTag(vm.tags[i])
                         } catch {
-                            alert(error)
+                            alert.error(error)
                         }
                     }
                 }
@@ -55,7 +55,7 @@ struct TagsList: View {
             do {
                 try await vm.load()
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
     }

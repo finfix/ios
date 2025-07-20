@@ -29,7 +29,7 @@ struct BudgetsList: View {
             do {
                 try await vm.load(accountGroup: accountGroup)
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .onChange(of: accountGroup) { _, newValue in
@@ -37,7 +37,7 @@ struct BudgetsList: View {
                 do {
                     try await vm.load(accountGroup: newValue)
                 } catch {
-                    alert(error)
+                    alert.error(error)
                 }
             }
         }

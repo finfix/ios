@@ -149,7 +149,7 @@ struct EditAccount: View {
                                 try await vm.updateAccount()
                             }
                         } catch {
-                            alert(error)
+                            alert.error(error)
                             return
                         }
                         
@@ -197,7 +197,7 @@ struct EditAccount: View {
                     vm.currentAccount.currency = vm.currencies.first(where: { $0 == selectedAccountGroup.currency }) ?? Currency()
                 }
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .toolbar(content: {
@@ -207,7 +207,7 @@ struct EditAccount: View {
                         do {
                             try await vm.deleteAccount()
                         } catch {
-                            alert(error)
+                            alert.error(error)
                             return
                         }
                         

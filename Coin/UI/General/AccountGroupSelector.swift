@@ -66,7 +66,7 @@ struct AccountGroupSelector: View {
                     self.selectedAccountGroup.selectedAccountGroup = vm.accountGroups.first ?? AccountGroup()
                 }
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .onChange(of: selectedAccountGroup.selectedAccountGroup) { _, newValue in
