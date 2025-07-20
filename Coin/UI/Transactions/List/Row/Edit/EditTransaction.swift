@@ -98,7 +98,7 @@ struct Tags: View {
                         do {
                             try await vm.deleteTransaction()
                         } catch {
-                            alert(error)
+                            alert.error(error)
                             return
                         }
                         
@@ -292,7 +292,7 @@ struct EditTransaction: View {
                             do {
                                 try await vm.save()
                             } catch {
-                                alert(error)
+                                alert.error(error)
                                 return
                             }
                             
@@ -307,7 +307,7 @@ struct EditTransaction: View {
                             do {
                                 try await vm.save()
                             } catch {
-                                alert(error)
+                                alert.error(error)
                                 return
                             }
                             
@@ -401,7 +401,7 @@ struct EditTransaction: View {
             do {
                 try await vm.load()
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
     }

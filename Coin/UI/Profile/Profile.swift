@@ -51,7 +51,7 @@ struct Profile: View {
                         do {
                             try await vm.sync()
                         } catch {
-                            alert(error)
+                            alert.error(error)
                             return
                         }
                         
@@ -75,7 +75,7 @@ struct Profile: View {
                             try await vm.logout()
                             isLogin = false
                         } catch {
-                            alert(error)
+                            alert.error(error)
                         }
                     }
                 }

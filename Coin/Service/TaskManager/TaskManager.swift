@@ -25,7 +25,7 @@ class TaskManager {
     func executeDBTasks() async throws {
         
         if syncInProgress {
-            logger.error("Синхронизация в процессе, ждем ответа от сервера")
+            logger.warning("Синхронизация в процессе, ждем ответа от сервера")
             return
         }
         

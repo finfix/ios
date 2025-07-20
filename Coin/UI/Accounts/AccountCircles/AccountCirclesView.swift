@@ -212,7 +212,7 @@ struct AccountCirclesView: View {
                     try await vm.load(accountGroup: selectedAccountGroup.selectedAccountGroup)
                     try await quickStatisticVM.load()
                 } catch {
-                    alert(error)
+                    alert.error(error)
                 }
             }
             .onChange(of: selectedAccountGroup.selectedAccountGroup) { _, _ in
@@ -222,7 +222,7 @@ struct AccountCirclesView: View {
                         try await vm.load(accountGroup: selectedAccountGroup.selectedAccountGroup)
                         try await quickStatisticVM.load()
                     } catch {
-                        alert(error)
+                        alert.error(error)
                     }
                 }
             }

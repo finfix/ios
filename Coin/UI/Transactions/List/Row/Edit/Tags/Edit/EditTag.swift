@@ -57,7 +57,7 @@ struct EditTag: View {
                             case .update: try await vm.updateTag()
                             }
                         } catch {
-                            alert(error)
+                            alert.error(error)
                             return
                         }
                         
@@ -85,7 +85,7 @@ struct EditTag: View {
             do {
                 try await vm.load()
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .disabled(shouldDisableUI)

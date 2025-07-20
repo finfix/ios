@@ -68,7 +68,7 @@ struct TransactionsList: View {
             do {
                 try await vm.load(filters: filters)
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .onChange(of: filters) { _, _ in
@@ -76,7 +76,7 @@ struct TransactionsList: View {
                 do {
                     try await vm.load(filters: filters)
                 } catch {
-                    alert(error)
+                    alert.error(error)
                 }
             }
         }

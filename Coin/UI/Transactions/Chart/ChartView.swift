@@ -155,7 +155,7 @@ struct ChartView: View {
             do {
                 try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .onChange(of: vm.chartType) { _, _ in

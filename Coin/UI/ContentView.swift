@@ -54,7 +54,7 @@ struct ContentView: View {
                 
                 // Получаем версию приложения
                 guard let localVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
-                    alert(ErrorModel(humanText: "Не смогли получить версию приложения"))
+                    alert.error(ErrorModel(humanText: "Не смогли получить версию приложения"))
                     return
                 }
                 
@@ -62,7 +62,7 @@ struct ContentView: View {
                 if try !isLocalVersionHigherOrEqual(localVersion: localVersion, targetVersion: serverVersion) {
                     
                     // Показываем алерт
-                    alert(
+                    alert.warn(
                         title: "Необходимо обновиться",
                         message: "Вышло новое обновление",
                         buttonText: "Обновиться",
@@ -72,7 +72,7 @@ struct ContentView: View {
                     )
                 }
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
     }

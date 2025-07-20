@@ -63,7 +63,7 @@ struct EditAccountGroup: View {
                             case .update: try await vm.updateAccountGroup()
                             }
                         } catch {
-                            alert(error)
+                            alert.error(error)
                             return
                         }
                         
@@ -94,7 +94,7 @@ struct EditAccountGroup: View {
                         do {
                             try await vm.deleteAccountGroup()
                         } catch {
-                            alert(error)
+                            alert.error(error)
                             return
                         }
                         
@@ -115,7 +115,7 @@ struct EditAccountGroup: View {
             do {
                 try await vm.load()
             } catch {
-                alert(error)
+                alert.error(error)
             }
         }
         .disabled(shouldDisableUI)
