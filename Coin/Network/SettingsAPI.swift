@@ -6,37 +6,77 @@
 //
 
 import Foundation
-
-private let settingsBasePath = "/settings"
+import SwiftProtobuf
+import ProtoDefinitions
+import GRPCCore
+import GRPCProtobuf
+import GRPCNIOTransportHTTP2
 
 extension APIManager {
     
     func GetCurrencies() async throws -> [GetCurrenciesRes] {
-        let data = try await networkManager.request(
-            url: apiBasePath + settingsBasePath + "/currencies",
-            method: .get
-        )
         
-        return try networkManager.decode(data, model: [GetCurrenciesRes].self)
+        let accessToken = try await self.networkManager.authManager.getAccessToken()
+        
+        let request = Settings_GetCurrenciesRequest.with {
+            $0.accessToken = accessToken
+        }
+        
+        let response = try await settingsClient.getCurrencies(request)
+        
+        guard !response.hasError else {
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+        }
+        
+        return response.currencies.map { currency in
+            GetCurrenciesRes(
+                isoCode: currency.isoCode,
+                rate: Decimal(currency.rate),
+                name: currency.name,
+                symbol: currency.symbol
+            )
+        }
     }
     
     func GetVersion(_ name: String) async throws -> GetVersionRes {
-        let data = try await networkManager.request(
-            url: apiBasePath + settingsBasePath + "/version/\(name)",
-            method: .get,
-            withAuthorization: false
-        )
         
-        return try networkManager.decode(data, model: GetVersionRes.self)
+        let request = Settings_GetVersionRequest.with {
+            $0.applicationType = .ios
+        }
+        
+        let response = try await settingsClient.getVersion(request)
+        
+        guard !response.hasError else {
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+        }
+        
+        return GetVersionRes(
+            version: response.version.version,
+            build: response.version.build
+        )
     }
     
     func GetIcons() async throws -> [GetIconsRes] {
-        let data = try await networkManager.request(
-            url: apiBasePath + settingsBasePath + "/icons",
-            method: .get
-        )
         
-        return try networkManager.decode(data, model: [GetIconsRes].self)
+        let accessToken = try await self.networkManager.authManager.getAccessToken()
+        
+        let request = Settings_GetIconsRequest.with {
+            $0.accessToken = accessToken
+        }
+        
+        let response = try await settingsClient.getIcons(request)
+        
+        guard !response.hasError else {
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+        }
+        
+        return try response.icons.map { icon in
+            GetIconsRes(
+                id: try icon.id.toUUID(),
+                url: icon.url,
+                name: icon.name
+            )
+        }
     }
     
     func GetIcon(url: String) async throws -> Data {

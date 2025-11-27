@@ -89,7 +89,7 @@ class ChartViewModel {
         targetCurrency: Currency
     ) async throws {
         
-        var accountIDs: [UInt32] = []
+        var accountIDs: [UUID] = []
         for account in filters.accounts {
             accountIDs.append(account.id)
             for childAccount in account.childrenAccounts {
@@ -126,7 +126,7 @@ struct Series: Identifiable, Hashable {
     var account: Account?
     var tag: Tag?
     var type: SeriesType?
-    var objectID: UInt32?
+    var objectID: UUID?
     var serialNumber: UInt32 = 0
     var color: Color = .white
     var data: [Date: Decimal]

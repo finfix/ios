@@ -220,6 +220,210 @@ extension SQLite {
             }
         }
         
+        migrator.registerMigration("move to uuid") { db in
+            
+            try db.drop(table: "idMappingDB")
+            try db.drop(table: "syncTaskValueDB")
+            try db.drop(table: "syncTaskDB")
+            try db.drop(table: "iconDB")
+            try db.drop(table: "userDB")
+            try db.drop(table: "tagToTransactionDB")
+            try db.drop(table: "tagDB")
+            try db.drop(table: "transactionDB")
+            try db.drop(table: "accountDB")
+            try db.drop(table: "accountGroupDB")
+            try db.drop(table: "currencyDB")
+        }
+        
+        migrator.registerMigration("recreateAll") { db in
+            try db.create(table: "currencyDB") { table in
+                
+                table.primaryKey("code", .text)
+                
+                table.column("name", .text)
+                    .notNull()
+                table.column("rate", .text)
+                    .notNull()
+                table.column("symbol", .text)
+                    .notNull()
+            }
+            
+            try db.create(table: "userDB") { table in
+                
+                
+                table.primaryKey("id", .text)
+                table.column("name", .text)
+                    .notNull()
+                table.column("email", .text)
+                    .notNull()
+                
+                table.column("notificationToken", .text)
+                    .notNull()
+                
+                table.belongsTo("defaultCurrency", inTable: "currencyDB")
+                    .notNull()
+                
+                
+            }
+            
+            try db.create(table: "accountGroupDB") { table in
+                
+                
+                table.primaryKey("id", .text)
+                table.column("name", .text)
+                    .notNull()
+                table.column("serialNumber", .integer)
+                    .notNull()
+                
+                table.belongsTo("currency", inTable: "currencyDB")
+                    .notNull()
+                
+                table.column("datetimeCreate", .datetime)
+                    .notNull()
+            }
+            
+            try db.create(table: "iconDB") { table in
+                
+                
+                table.primaryKey("id", .text)
+                table.column("url", .text)
+                    .notNull()
+                table.column("name", .text)
+                    .notNull()
+            }
+            
+            try db.create(table: "accountDB") { table in
+                
+                
+                table.primaryKey("id", .text)
+                table.column("accountingInHeader", .boolean)
+                    .notNull()
+                table.column("accountingInCharts", .boolean)
+                    .notNull()
+                table.column("name", .text)
+                    .notNull()
+                table.column("remainder", .text)
+                    .notNull()
+                table.column("type", .text)
+                    .notNull()
+                table.column("visible", .boolean)
+                    .notNull()
+                table.column("serialNumber", .integer)
+                    .notNull()
+                table.column("isParent", .boolean)
+                    .notNull()
+                table.column("budgetAmount", .text)
+                    .notNull()
+                table.column("budgetFixedSum", .text)
+                    .notNull()
+                table.column("budgetDaysOffset", .integer)
+                    .notNull()
+                table.column("budgetGradualFilling", .boolean)
+                    .notNull()
+                table.column("datetimeCreate", .datetime)
+                    .notNull()
+                
+                table.belongsTo("icon", inTable: "iconDB")
+                    .notNull()
+                table.belongsTo("parentAccount", inTable: "accountDB")
+                table.belongsTo("accountGroup", inTable: "accountGroupDB")
+                    .notNull()
+                table.belongsTo("currency", inTable: "currencyDB")
+                    .notNull()
+            }
+            
+            try db.create(table: "transactionDB") { table in
+                
+                
+                table.primaryKey("id", .text)
+                table.column("accountingInCharts", .boolean)
+                    .notNull()
+                table.column("amountFrom", .text)
+                    .notNull()
+                table.column("amountTo", .text)
+                    .notNull()
+                table.column("dateTransaction", .date)
+                    .notNull()
+                table.column("isExecuted", .boolean)
+                    .notNull()
+                table.column("note", .text)
+                    .notNull()
+                table.column("datetimeCreate", .datetime)
+                    .notNull()
+                table.column("type", .text)
+                    .notNull()
+                table.column("accountGroupId")
+                    .notNull()
+                
+                table.belongsTo("accountFrom", inTable: "accountDB")
+                    .notNull()
+                table.belongsTo("accountTo", inTable: "accountDB")
+                    .notNull()
+                table.belongsTo("accountGroupId", inTable: "accountGroupDB")
+                    .notNull()
+
+            }
+            
+            try db.create(table: "tagDB") { table in
+                
+                
+                table.primaryKey("id", .text)
+                table.column("name", .text)
+                    .notNull()
+                table.column("datetimeCreate", .date)
+                    .notNull()
+                
+                table.belongsTo("accountGroup", inTable: "accountGroupDB")
+                    .notNull()
+            }
+            
+            try db.create(table: "tagToTransactionDB") { table in
+                
+                table.belongsTo("tag", inTable: "tagDB")
+                table.belongsTo("transaction", inTable: "transactionDB")
+                
+                table.primaryKey(["tagId", "transactionId"])
+            }
+            
+            try db.create(table: "syncTaskDB") { table in
+                
+                table.primaryKey("id", .text)
+                
+                table.column("localID", .integer)
+                    .notNull()
+                table.column("actionName", .text)
+                    .notNull()
+                table.column("tryCount", .integer)
+                    .notNull()
+                table.column("enabled", .boolean)
+                    .notNull()
+                table.column("error", .text)
+            }
+            
+            try db.create(table: "syncTaskValueDB") { table in
+                
+                table.primaryKey("id", .text)
+                                
+                table.column("objectType", .text)
+                table.column("name", .text)
+                    .notNull()
+                table.column("value", .text)
+                
+                table.belongsTo("syncTask", inTable: "syncTaskDB", onDelete: .cascade)
+
+            }
+            
+            try db.create(table: "idMappingDB") { table in
+                table.column("localID", .integer)
+                    .notNull()
+                table.column("serverID", .integer)
+                table.column("modelType", .text)
+                    .notNull()
+                
+                table.primaryKey(["localID", "serverID", "modelType"])
+            }
+        }
+        
         return migrator
     }
 }

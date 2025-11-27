@@ -22,7 +22,6 @@ extension Service {
         
         taskManager.createTask(
             actionName: .updateUser,
-            localObjectID: newUser.id,
             reqModel: UpdateUserReq(
                 name: newUser.name != oldUser.name ? newUser.name : nil,
                 email: newUser.email != oldUser.email ? newUser.email : nil,

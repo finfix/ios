@@ -10,15 +10,15 @@ import GRDB
 
 struct TagDB {
     
-    var id: UInt32?
+    var id: UUID?
     var name: String
-    var accountGroupID: UInt32
+    var accountGroupID: UUID
     var datetimeCreate: Date
     
     init(
-        id: UInt32?,
+        id: UUID?,
         name: String,
-        accountGroupID: UInt32,
+        accountGroupID: UUID,
         datetimeCreate: Date
     ) {
         self.id = id
@@ -30,7 +30,7 @@ struct TagDB {
     // Инициализатор из бизнес модели
     init(_ model: Tag) {
         self.id = model.id
-        if self.id == 0 {
+        if self.id == nil {
             self.id = nil
         }
         self.name = model.name
@@ -54,15 +54,15 @@ struct TagDB {
         return iconsDB
     }
     
-    static func compareTwoArrays(_ serverModels: [TagDB], _ localModels: [TagDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
+    static func compareTwoArrays(_ serverModels: [TagDB], _ localModels: [TagDB]) -> [UUID: [String: (server: Any, local: Any)]] {
         let serverModels = serverModels.sorted { $0.id! < $1.id! }
         let localModels = localModels.sorted { $0.id! < $1.id! }
         
-        var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
+        var differences: [UUID: [String: (server: Any, local: Any)]] = [:]
         
         guard serverModels.count == localModels.count else {
             var difference: [String: (server: Any, local: Any)] = ["count": (server: serverModels.count, local: localModels.count)]
-            differences[0] = difference
+            differences[UUID(uuid: UUID_NULL)] = difference
             return differences
         }
         

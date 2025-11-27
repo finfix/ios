@@ -10,12 +10,12 @@ import GRDB
 
 struct IconDB {
     
-    var id: UInt32?
+    var id: UUID?
     var name: String
     var url: String
     
     init(
-        id: UInt32,
+        id: UUID,
         name: String,
         url: String
     ) {
@@ -39,15 +39,15 @@ struct IconDB {
         return iconsDB
     }
     
-    static func compareTwoArrays(_ serverModels: [IconDB], _ localModels: [IconDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
+    static func compareTwoArrays(_ serverModels: [IconDB], _ localModels: [IconDB]) -> [UUID: [String: (server: Any, local: Any)]] {
         let serverModels = serverModels.sorted { $0.id! < $1.id! }
         let localModels = localModels.sorted { $0.id! < $1.id! }
         
-        var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
+        var differences: [UUID: [String: (server: Any, local: Any)]] = [:]
         
         guard serverModels.count == localModels.count else {
             var difference: [String: (server: Any, local: Any)] = ["count": (server: serverModels.count, local: localModels.count)]
-            differences[0] = difference
+            differences[UUID(uuid: UUID_NULL)] = difference
             return differences
         }
         

@@ -19,7 +19,6 @@ class Repository {
     func importIcons(_ icons: [IconDB]) async throws {
         try await sqlite.write { db in
             for icon in icons {
-                try IDMappingDB(localID: icon.id!, serverID: icon.id, modelType: .icon).insert(db)
                 try icon.insert(db)
             }
         }
@@ -35,7 +34,6 @@ class Repository {
     
     func importUser(_ user: UserDB) async throws {
         try await sqlite.write { db in
-            try IDMappingDB(localID: user.id!, serverID: user.id, modelType: .user).insert(db)
             try user.insert(db)
         }
     }
@@ -43,7 +41,6 @@ class Repository {
     func importAccountGroups(_ accountGroups: [AccountGroupDB]) async throws {
         try await sqlite.write { db in
             for accountGroup in accountGroups {
-                try IDMappingDB(localID: accountGroup.id!, serverID: accountGroup.id, modelType: .accountGroup).insert(db)
                 try accountGroup.insert(db)
             }
         }
@@ -52,7 +49,6 @@ class Repository {
     func importAccounts(_ accounts: [AccountDB]) async throws {
         try await sqlite.write { db in
             for account in accounts {
-                try IDMappingDB(localID: account.id!, serverID: account.id, modelType: .account).insert(db)
                 try account.insert(db)
             }
         }
@@ -61,7 +57,6 @@ class Repository {
     func importTags(_ tags: [TagDB]) async throws {
         try await sqlite.write { db in
             for tag in tags {
-                try IDMappingDB(localID: tag.id!, serverID: tag.id, modelType: .tag).insert(db)
                 try tag.insert(db)
             }
         }
@@ -78,7 +73,6 @@ class Repository {
     func importTransactions(_ transactions: [TransactionDB]) async throws {
         try await sqlite.write { db in
             for transaction in transactions {
-                try IDMappingDB(localID: transaction.id!, serverID: transaction.id, modelType: .transaction).insert(db)
                 try transaction.insert(db)
             }
         }
@@ -94,8 +88,6 @@ class Repository {
             _ = try UserDB.deleteAll(db)
             _ = try CurrencyDB.deleteAll(db)
             _ = try IconDB.deleteAll(db)
-            _ = try IDMappingDB.deleteAll(db)
-            _ = try SyncTaskValueDB.deleteAll(db)
             _ = try SyncTaskDB.deleteAll(db)
         }
     }
@@ -112,22 +104,16 @@ class Repository {
         }
     }
     
-    func createAccount(_ account: Account) async throws -> UInt32 {
+    func createAccount(_ account: Account) async throws {
         try await sqlite.write { db in
-            _ = try AccountDB(account).insert(db)
-            let id = UInt32(db.lastInsertedRowID)
-            try IDMappingDB(localID: id, serverID: nil, modelType: .account)
-                .insert(db)
-            return id
+            try AccountDB(account).insert(db)
         }
     }
     
     func createAccountAndReturn(_ account: Account) async throws -> Account {
         try await sqlite.write { db in
             let account = try AccountDB(account).insertAndFetch(db)
-            try IDMappingDB(localID: account!.id!, serverID: nil, modelType: .account)
-                .insert(db)
-            return Account(account!, currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil)
+            return Account(account, currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil)
         }
     }
     
@@ -155,7 +141,7 @@ class Repository {
         }
     }
     
-    func updateBalance(id: UInt32, newBalance: Decimal) async throws {
+    func updateBalance(id: UUID, newBalance: Decimal) async throws {
         try await sqlite.write { db in
             
             let sql = """
@@ -170,13 +156,9 @@ class Repository {
         }
     }
     
-    func createTransaction(_ transaction: Transaction) async throws -> UInt32 {
+    func createTransaction(_ transaction: Transaction) async throws {
         try await sqlite.write { db in
-            _ = try TransactionDB(transaction).insert(db)
-            let id = UInt32(db.lastInsertedRowID)
-            try IDMappingDB(localID: id, serverID: nil, modelType: .transaction)
-                .insert(db)
-            return id
+            try TransactionDB(transaction).insert(db)
         }
     }
     
@@ -195,13 +177,9 @@ class Repository {
         }
     }
     
-    func createTag(_ tag: Tag) async throws -> UInt32 {
+    func createTag(_ tag: Tag) async throws {
         try await sqlite.write { db in
-            _ = try TagDB(tag).insert(db)
-            let id = UInt32(db.lastInsertedRowID)
-            try IDMappingDB(localID: id, serverID: nil, modelType: .tag)
-                .insert(db)
-            return id
+            try TagDB(tag).insert(db)
         }
     }
     
@@ -239,13 +217,9 @@ class Repository {
         }
     }
     
-    func createAccountGroup(_ accountGroup: AccountGroup) async throws -> UInt32 {
+    func createAccountGroup(_ accountGroup: AccountGroup) async throws {
         try await sqlite.write { db in
-            _ = try AccountGroupDB(accountGroup).insert(db)
-            let id = UInt32(db.lastInsertedRowID)
-            try IDMappingDB(localID: id, serverID: nil, modelType: .accountGroup)
-                .insert(db)
-            return id
+            try AccountGroupDB(accountGroup).insert(db)
         }
     }
 
@@ -282,7 +256,7 @@ class Repository {
     }
     
     func deleteTasks(
-        ids: [UInt32]? = nil
+        ids: [UUID]? = nil
     ) async throws {
         try await sqlite.write { db in
                                     
@@ -296,7 +270,7 @@ class Repository {
     }
     
     func getSyncTasks(
-        ids: [UInt32]? = nil,
+        ids: [UUID]? = nil,
         limit: UInt32? = nil
     ) async throws -> [SyncTask] {
         try await sqlite.read { db in
@@ -315,7 +289,7 @@ class Repository {
             
             let syncTaskDBs = try request.fetchAll(db)
             
-            var syncTasksIDs: [UInt32] = []
+            var syncTasksIDs: [UUID] = []
             for syncTaskDB in syncTaskDBs {
                 syncTasksIDs.append(syncTaskDB.id!)
             }
@@ -324,29 +298,8 @@ class Repository {
             for _ in 0..<syncTaskDBs.count {
                 questionsArr.append("?")
             }
-                        
-            let syncTasksValuesDB = try SyncTaskValueDB
-                .fetchAll(db, sql: """
-                SELECT
-                  tv.id,
-                  tv.syncTaskId,
-                  tv.objectType,
-                  tv.name,
-                  CASE WHEN tv.objectType IS NULL
-                    THEN tv.value
-                    ELSE m.serverID
-                  END AS value
-                FROM syncTaskValueDB tv
-                LEFT JOIN idMappingDB m ON m.localID = tv.value
-                  AND m.modelType = tv.objectType
-                JOIN syncTaskDB t ON t.id = tv.syncTaskId
-                WHERE t.id in (\(questionsArr.joined(separator: ", ")))
-            """, arguments: StatementArguments(syncTasksIDs))
                                     
-            return SyncTask.convertFromDBModel(
-                syncTaskDBs,
-                syncTaskValuesMap: SyncTaskValue.groupByTaskID(SyncTaskValue.convertFromDBModel(syncTasksValuesDB))
-            )
+            return try SyncTask.convertFromDBModel(syncTaskDBs)
         }
     }
     
@@ -372,12 +325,12 @@ class Repository {
     }
     
     func getBalances(
-        accountIDs: [UInt32] = [],
+        accountIDs: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         accountTypes: [AccountType] = [],
-        accountGroupIDs: [UInt32] = []
-    ) async throws -> [UInt32: Decimal] {
+        accountGroupIDs: [UUID] = []
+    ) async throws -> [UUID: Decimal] {
         try await sqlite.read { db in
             
             if accountIDs.isEmpty && accountTypes.isEmpty && accountGroupIDs.isEmpty {
@@ -466,7 +419,7 @@ class Repository {
                 \(!filters.isEmpty ? "WHERE \(filters.joined(separator: "\nAND"))" : "")
                 """
             
-            var accountBalances: [UInt32: Decimal] = [:]
+            var accountBalances: [UUID: Decimal] = [:]
             
             print(req)
             print(args)
@@ -480,7 +433,7 @@ class Repository {
     }
     
     func getTags(
-        accountGroupID: UInt32? = nil,
+        accountGroupID: UUID? = nil,
         name: String? = nil
     ) async throws -> [TagDB] {
         try await sqlite.read { db in
@@ -502,8 +455,8 @@ class Repository {
     }
     
     func getAccounts(
-        ids: [UInt32]? = nil,
-        accountGroupIDs: [UInt32]? = nil,
+        ids: [UUID]? = nil,
+        accountGroupIDs: [UUID]? = nil,
         visible: Bool? = nil,
         accountingInHeader: Bool? = nil,
         types: [AccountType]? = nil,
@@ -551,23 +504,17 @@ class Repository {
         }
     }
     
-    func getIDsMapping() async throws -> [IDMappingDB] {
-        try await sqlite.read { db in
-            return try IDMappingDB.fetchAll(db)
-        }
-    }
-    
     func getTransactions(
         limit: Int = 100,
         offset: Int = 0,
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
-        accountIDs: [UInt32] = [],
-        accountGroupIDs: [UInt32] = [],
+        accountIDs: [UUID] = [],
+        accountGroupIDs: [UUID] = [],
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
-        tagIDs: [UInt32] = []
+        tagIDs: [UUID] = []
     ) async throws -> [TransactionDB] {
         try await sqlite.read { db in
             
@@ -671,14 +618,14 @@ class Repository {
         chartType: ChartType,
         groupBy: ChartViewGroupBy,
         transactionType: TransactionType,
-        accountGroupIDs: [UInt32],
+        accountGroupIDs: [UUID],
         targetCurrency: Currency,
         accountParameterIgnore: Bool = false,
         transactionParameterIgnore: Bool = false,
-        accountIDs: [UInt32] = [],
+        accountIDs: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
-        tagIDs: [UInt32] = []
+        tagIDs: [UUID] = []
     ) async throws -> [Series] {
         try await sqlite.read { db in
             
@@ -761,7 +708,7 @@ class Repository {
             }
                             
             // Мапа ObjectID - Дата - Сумма
-            var result: [UInt32: [Date: Decimal]] = [:]
+            var result: [UUID: [Date: Decimal]] = [:]
             
             let sql = """
                 SELECT \(selects.joined(separator: ",\n"))
@@ -779,20 +726,20 @@ class Repository {
             while let row = try rows.next() {
                 switch chartType {
                 case .earningsAndExpenses:
-                    if result[0] == nil {
-                        result[0] = [:]
+                    if result[UUID(uuid: UUID_NULL)] == nil {
+                        result[UUID(uuid: UUID_NULL)] = [:]
                     }
-                    result[0]?[row["month"]] = row["remainder"]
+                    result[UUID(uuid: UUID_NULL)]?[row["month"]] = row["remainder"]
                 case .expenses, .earnings:
                     switch groupBy {
                     case .byTag:
-                        let tagID: UInt32 = row["tagId"]
+                        let tagID: UUID = row["tagId"]
                         if result[tagID] == nil {
                             result[tagID] = [:]
                         }
                         result[tagID]?[row["month"]] = row["remainder"]
                     case .byAccount:
-                        let accountID: UInt32 = row["accountId"]
+                        let accountID: UUID = row["accountId"]
                         if result[accountID] == nil {
                             result[accountID] = [:]
                         }
@@ -801,12 +748,12 @@ class Repository {
                 }
             }
             
-            return result.map { (categoryName: UInt32, monthData: [Date : Decimal]) in
+            return result.map { (categoryName: UUID, monthData: [Date : Decimal]) in
                 Series(
                     account: nil,
                     tag: nil,
                     type: nil,
-                    objectID: UInt32(categoryName),
+                    objectID: categoryName,
                     data: monthData
                 )
             }
@@ -815,30 +762,13 @@ class Repository {
     
     func createTask(_ task: SyncTask) async throws {
         try await sqlite.write { db in
-            _ = try SyncTaskDB(task).insert(db)
-            let taskID = db.lastInsertedRowID
-            for var field in task.fields {
-                field.syncTaskID = UInt32(taskID)
-                _ = try SyncTaskValueDB(field).insert(db)
-            }
+            try SyncTaskDB(task).insert(db)
         }
     }
     
     func updateTask(_ task: SyncTask) async throws {
         try await sqlite.write { db in
             _ = try SyncTaskDB(task).update(db)
-        }
-    }
-    
-    func updateServerID(
-        localID: UInt32,
-        modelType: ModelType,
-        serverID: UInt32
-    ) async throws {
-        try await sqlite.write { db in
-            _ = try IDMappingDB
-                .filter(IDMappingDB.Columns.localID == localID && IDMappingDB.Columns.modelType == modelType.rawValue)
-                .updateAll(db, IDMappingDB.Columns.serverID.set(to: serverID))
         }
     }
 }

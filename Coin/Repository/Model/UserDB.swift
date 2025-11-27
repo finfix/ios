@@ -10,7 +10,7 @@ import GRDB
 
 struct UserDB {
     
-    var id: UInt32?
+    var id: UUID?
     var name: String
     var email: String
     var defaultCurrencyCode: String
@@ -28,7 +28,7 @@ struct UserDB {
     // Инициализатор из бизнес модели
     init(_ model: User) {
         self.id = model.id
-        if self.id == 0 {
+        if self.id == nil {
             self.id = nil
         }
         self.name = model.name
@@ -37,15 +37,15 @@ struct UserDB {
         self.notificationToken = model.notificationToken
     }
     
-    static func compareTwoArrays(_ serverModels: [UserDB], _ localModels: [UserDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
+    static func compareTwoArrays(_ serverModels: [UserDB], _ localModels: [UserDB]) -> [UUID: [String: (server: Any, local: Any)]] {
         let serverModels = serverModels.sorted { $0.id! < $1.id! }
         let localModels = localModels.sorted { $0.id! < $1.id! }
         
-        var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
+        var differences: [UUID: [String: (server: Any, local: Any)]] = [:]
         
         guard serverModels.count == localModels.count else {
             var difference: [String: (server: Any, local: Any)] = ["count": (server: serverModels.count, local: localModels.count)]
-            differences[0] = difference
+            differences[UUID(uuid: UUID_NULL)] = difference
             return differences
         }
         

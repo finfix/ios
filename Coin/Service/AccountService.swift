@@ -16,10 +16,8 @@ extension Service {
         account.remainder = account.remainder.round(factor: 6)
         
         try validateAccount(account)
-        
-        var addictionalMapping: [String: UInt32] = [:]
-        
-        account.id = try await repository.createAccount(account)
+                
+        try await repository.createAccount(account)
         
         if account.remainder != 0 {
             // Получаем балансировочный счет группы счетов
@@ -48,7 +46,7 @@ extension Service {
                 balancingAccount = try await repository.createAccountAndReturn(Account(
                     accountingInHeader: true,
                     accountingInCharts: true,
-                    icon: Icon(id: 1),
+                    icon: Icon(id: UUID(uuid: UUID_NULL)),
                     name: "Балансировочный",
                     remainder: 0,
                     type: .balancing,
@@ -65,29 +63,13 @@ extension Service {
                     currency: account.currency,
                     childrenAccounts: []
                 ))
-                addictionalMapping["balancingAccountID"] = balancingAccount?.id
             }
-            
-            addictionalMapping["balancingTransactionID"] = try await repository.createTransaction(Transaction(
-                accountingInCharts: true,
-                amountFrom: account.remainder,
-                amountTo: account.remainder,
-                dateTransaction: Date.now.stripTime(),
-                isExecuted: true,
-                note: "",
-                type: .balancing,
-                datetimeCreate: Date.now,
-                accountFrom: balancingAccount!,
-                accountTo: account,
-                accountGroupID: account.accountGroup.id
-            ))
-            
+                        
             try await recalculateAccountBalances(accounts: [balancingAccount!])
         }
         
         taskManager.createTask(
             actionName: .createAccount,
-            localObjectID: account.id,
             reqModel: CreateAccountReq(
                 accountGroupID: account.accountGroup.id,
                 accountingInHeader: account.accountingInHeader,
@@ -106,14 +88,13 @@ extension Service {
                 isParent: account.isParent,
                 parentAccountID: account.parentAccountID,
                 datetimeCreate: account.datetimeCreate
-            ),
-            addictionalMapping: addictionalMapping
+            )
         )
     }
     
     // MARK: Read
     func getAccounts(
-        ids: [UInt32]? = nil,
+        ids: [UUID]? = nil,
         accountGroups: [AccountGroup]? = nil,
         visible: Bool? = nil,
         accountingInHeader: Bool? = nil,
@@ -144,19 +125,17 @@ extension Service {
         newAccount.remainder = newAccount.remainder.round(factor: 6)
         
         // Получаем корректное значение parentAccountID для сервера
-        var parentAccountIDToReq: UInt32? = nil
+        var parentAccountIDToReq: UUID? = nil
         if oldAccount.parentAccountID != newAccount.parentAccountID {
             if newAccount.parentAccountID == nil {
-                parentAccountIDToReq = 0
+                parentAccountIDToReq = UUID(uuid: UUID_NULL)
             } else {
                 parentAccountIDToReq = newAccount.parentAccountID
             }
         }
         
         try validateAccount(newAccount)
-        
-        var addictionalMapping: [String: UInt32] = [:]
-        
+                
         // Если изменился баланс счета
         if oldAccount.remainder != newAccount.remainder {
             // Получаем балансировочный счет группы счетов
@@ -185,7 +164,7 @@ extension Service {
                 balancingAccount = try await repository.createAccountAndReturn(Account(
                     accountingInHeader: true,
                     accountingInCharts: true,
-                    icon: Icon(id: 1),
+                    icon: Icon(id: UUID(uuid: UUID_NULL)),
                     name: "Балансировочный",
                     remainder: 0,
                     type: .balancing,
@@ -202,23 +181,8 @@ extension Service {
                     currency: newAccount.currency,
                     childrenAccounts: []
                 ))
-                addictionalMapping["balancingAccountID"] = balancingAccount?.id
             }
-            
-            addictionalMapping["balancingTransactionID"] = try await repository.createTransaction(Transaction(
-                accountingInCharts: true,
-                amountFrom: newAccount.remainder-oldAccount.remainder,
-                amountTo: newAccount.remainder-oldAccount.remainder,
-                dateTransaction: Date.now.stripTime(),
-                isExecuted: true,
-                note: "",
-                type: .balancing,
-                datetimeCreate: Date.now,
-                accountFrom: balancingAccount!,
-                accountTo: newAccount,
-                accountGroupID: newAccount.accountGroup.id
-            ))
-            
+                        
             try await recalculateAccountBalances(accounts: [balancingAccount!])
         }
         
@@ -274,7 +238,6 @@ extension Service {
         
         taskManager.createTask(
             actionName: .updateAccount,
-            localObjectID: newAccount.id,
             reqModel: UpdateAccountReq(
                 id: newAccount.id,
                 accountingInHeader: oldAccount.accountingInHeader != newAccount.accountingInHeader ? newAccount.accountingInHeader : nil,
@@ -291,8 +254,7 @@ extension Service {
                     fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
                     daysOffset: oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ? newAccount.budgetDaysOffset : nil,
                     gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
-            ),
-            addictionalMapping: addictionalMapping
+            )
         )
     }
     
@@ -312,7 +274,6 @@ extension Service {
         
         taskManager.createTask(
             actionName: .deleteAccount,
-            localObjectID: account.id,
             reqModel: DeleteAccountReq(id: account.id)
         )
     }
@@ -322,7 +283,7 @@ extension Service {
         accountGroups: [AccountGroup] = [],
         accountTypes: [AccountType] = []
     ) async throws {
-        var balances: [UInt32: Decimal] = [:]
+        var balances: [UUID: Decimal] = [:]
                 
         let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
         let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))

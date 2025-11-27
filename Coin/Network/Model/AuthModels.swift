@@ -66,7 +66,7 @@ func getApplicationInformation() throws -> ApplicationInformation {
 }
 
 struct AuthRes: Decodable {
-    var id: Int
+    var id: UUID
     var token: Token
 }
 

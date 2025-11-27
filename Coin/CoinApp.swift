@@ -8,8 +8,51 @@
 import SwiftUI
 import OSLog
 import Factory
+import ProtoDefinitions
+import SwiftProtobuf
+import GRPCCore
+import GRPCNIOTransportHTTP2
+import GRPCProtobuf
 
 private let logger = Logger(subsystem: "Coin", category: "Main")
+
+@main
+struct MyApp: App {
+        
+    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
+        
+    @AppStorage("isDarkMode") var isDarkMode = defaultIsDarkMode
+    
+    @AppStorage("isErrorShowing") var isErrorShowing = false
+    @AppStorage("errorTitle") var errorText: String = ""
+    @AppStorage("errorDescription") var errorDescription: String = ""
+    
+    @State var alert: AlertModel?
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .preferredColorScheme(isDarkMode ? .dark : .light)
+                .alert(item: $alert) { alert in
+                    Alert(title:
+                            Text(alert.title),
+                          message:
+                            Text(alert.message),
+                          dismissButton:
+                            .cancel(
+                                Text(alert.buttonText),
+                                action: {
+                                    alert.callback()
+                                }
+                            )
+                    )
+                }
+                .environment(AlertManager(handle: {
+                    alertModel in self.alert = alertModel
+                }))
+        }
+    }
+}
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
@@ -46,9 +89,45 @@ extension Container {
     var service: Factory<Service> {
         Factory(self) {
             do {
-                let authManager = AuthManager()
+//                #if DEBUG
+//                #endif
+                
+                // 1. Создаём транспорт с NIO
+                let transport = try HTTP2ClientTransport.Posix(
+                    target: .ipv4(address: "127.0.0.1", port: 8090),
+                    transportSecurity: .plaintext
+                )
+                
+                // ⚠️ transport нужно запустить (в фоне)
+                Task.detached {
+                    try await transport.connect()
+                }
+                
+                // 2. Создаём GRPCClient с транспортом
+                let grpcClient = GRPCClient(transport: transport)
+                
+                // 3. Создаём клиенты для всех эндпоинтов
+                let transactionClient = Transaction_TransactionEndpoint.Client(wrapping: grpcClient)
+                let accountClient = Account_AccountEndpoint.Client(wrapping: grpcClient)
+                let accountGroupClient = AccountGroup_AccountGroupEndpoint.Client(wrapping: grpcClient)
+                let authClient = Auth_AuthEndpoint.Client(wrapping: grpcClient)
+                let settingsClient = Settings_SettingsEndpoint.Client(wrapping: grpcClient)
+                let tagClient = Tag_TagEndpoint.Client(wrapping: grpcClient)
+                let userClient = User_UserEndpoint.Client(wrapping: grpcClient)
+                
+                // 4. Создаём менеджеры с gRPC клиентами
+                let authManager = AuthManager(authClient: authClient)
                 let networkManager = NetworkManager(authManager: authManager)
-                let apiManager = APIManager(networkManager: networkManager)
+                let apiManager = APIManager(
+                    networkManager: networkManager,
+                    authClient: authClient,
+                    transactionClient: transactionClient,
+                    accountClient: accountClient,
+                    accountGroupClient: accountGroupClient,
+                    userClient: userClient,
+                    tagClient: tagClient,
+                    settingsClient: settingsClient
+                )
                 
                 let sqlite = try SQLite()
                 let repository = Repository(sqlite: sqlite)
@@ -63,44 +142,6 @@ extension Container {
     
     var alertManager: Factory<AlertManager> {
         return Factory(self) { return AlertManager() }.singleton
-    }
-}
-
-@main
-struct MyApp: App {
-    
-    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
-        
-    @AppStorage("isDarkMode") var isDarkMode = defaultIsDarkMode
-    
-    @AppStorage("isErrorShowing") var isErrorShowing = false
-    @AppStorage("errorTitle") var errorText: String = ""
-    @AppStorage("errorDescription") var errorDescription: String = ""
-    
-    @State var alert: AlertModel?
-    
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .preferredColorScheme(isDarkMode ? .dark : .light)
-                .alert(item: $alert) { alert in
-                    Alert(title:
-                            Text(alert.title),
-                          message:
-                            Text(alert.message),
-                          dismissButton:
-                            .cancel(
-                                Text(alert.buttonText),
-                                action: {
-                                    alert.callback()
-                                }
-                            )
-                    )
-                }
-                .environment(AlertManager(handle: {
-                    alertModel in self.alert = alertModel
-                }))
-        }
     }
 }
 

@@ -15,12 +15,10 @@ extension Service {
         
         try validateAccountGroup(accountGroup)
         
-        let id = try await  repository.createAccountGroup(accountGroup)
-        accountGroup.id = id
+        try await  repository.createAccountGroup(accountGroup)
         
         taskManager.createTask(
             actionName: .createAccountGroup,
-            localObjectID: id,
             reqModel: CreateAccountGroupReq(
                 name: accountGroup.name,
                 currency: accountGroup.currency.code,
@@ -48,7 +46,6 @@ extension Service {
         
         taskManager.createTask(
             actionName: .updateAccountGroup,
-            localObjectID: newAccountGroup.id,
             reqModel: UpdateAccountGroupReq(
                 id: newAccountGroup.id,
                 name: newAccountGroup.name != oldAccountGroup.name ? newAccountGroup.name : nil,
@@ -63,7 +60,6 @@ extension Service {
         
         taskManager.createTask(
             actionName: .deleteAccountGroup,
-            localObjectID: accountGroup.id,
             reqModel: DeleteAccountGroupReq(id: accountGroup.id)
         )
     }

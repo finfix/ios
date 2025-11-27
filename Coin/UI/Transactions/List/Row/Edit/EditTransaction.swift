@@ -170,7 +170,7 @@ struct EditTransaction: View {
                         transactionType: vm.currentTransaction.type
                     )
                     .onChange(of: vm.currentTransaction.accountFrom) { _, newValue in
-                        guard newValue.id != 0 else { return }
+                        guard newValue.id != UUID(uuid: UUID_NULL) else { return }
                         withAnimation {
                             vm.shouldShowPickerAccountFrom = false
                             vm.shouldShowPickerAccountTo = true
@@ -186,7 +186,7 @@ struct EditTransaction: View {
                         excludeAccount: vm.currentTransaction.accountFrom
                     )
                     .onChange(of: vm.currentTransaction.accountTo) { _, newValue in
-                        guard newValue.id != 0 else { return }
+                        guard newValue.id != UUID(uuid: UUID_NULL) else { return }
                         withAnimation {
                             vm.shouldShowPickerAccountTo = false
                             focusedField = .amountFromSelector
@@ -392,7 +392,7 @@ struct EditTransaction: View {
         }
         .task {
             if vm.mode == .create {
-                if vm.currentTransaction.accountFrom.id == 0 {
+                if vm.currentTransaction.accountFrom.id == UUID(uuid: UUID_NULL) {
                     vm.shouldShowPickerAccountFrom = true
                 } else {
                     focusedField = .amountFromSelector
@@ -410,7 +410,7 @@ struct EditTransaction: View {
 #Preview {
     EditTransaction(
         transactionType: .consumption,
-        accountGroup: AccountGroup(id: 4)
+        accountGroup: AccountGroup(id: UUID())
     )
     .environment(AlertManager(handle: {_ in }))
 }
@@ -420,7 +420,7 @@ enum Position {
 }
 
 func getAccountsForShowingInCreate(accounts: [Account], position: Position, transactionType: TransactionType, excludedAccount: Account?) -> [Account] {
-    var subfiltered = accounts.filter { $0.visible && $0.id != excludedAccount?.id ?? 0 }
+    var subfiltered = accounts.filter { $0.visible && $0.id != excludedAccount?.id ?? UUID(uuid: UUID_NULL) }
     
     switch transactionType {
     case .consumption:
@@ -467,7 +467,7 @@ private struct Pickers: View {
             Button {
                 withAnimation {
                     isPickerShowing.toggle()
-                    if isPickerShowing && account.id != 0 {
+                    if isPickerShowing && account.id != UUID(uuid: UUID_NULL) {
                         // Если у выбранного счета есть родитель
                         if let parentId = account.parentAccountID,
                            let foundParent = accountsToShow.first(where: { $0.id == parentId }) {
@@ -536,7 +536,7 @@ private struct Pickers: View {
         }
         .buttonStyle(.plain)
         .task {
-            if account.id != 0 {
+            if account.id != UUID(uuid: UUID_NULL) {
                 // При первой загрузке тоже проверяем родительский счет
                 if let parentId = account.parentAccountID,
                    let foundParent = accountsToShow.first(where: { $0.id == parentId }) {

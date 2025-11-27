@@ -8,104 +8,65 @@
 import Foundation
 
 struct GetTagsRes: Decodable {
-    let id: UInt32
+    let id: UUID
     let name: String
-    let accountGroupID: UInt32
+    let accountGroupID: UUID
     let datetimeCreate: Date
 }
 
 struct GetTagsToTransactionsRes: Decodable {
-    let tagID: UInt32
-    let transactionID: UInt32
+    let tagID: UUID
+    let transactionID: UUID
 }
 
-struct GetCreateTagReq: Encodable {
-    let accountGroupID: UInt32
+struct GetCreateTagReq: Codable {
+    let accountGroupID: UUID
     let name: UInt32
 }
 
-struct LinkTagToTransactionReq: Encodable {
-    let tagID: UInt32
-    let transactionID: UInt32
+struct LinkTagToTransactionReq: Codable {
+    let tagID: UUID
+    let transactionID: UUID
 }
 
-struct UpdateTagReq: Encodable, FieldExtractable {
-    let id: UInt32
+struct UpdateTagReq: Codable {
+    let id: UUID
     let name: String?
     
     init(
-        id: UInt32,
+        id: UUID,
         name: String?
     ) {
         self.id = id
         self.name = name
     }
-    
-    init(_ map: [String: String]) {
-        self.id = UInt32(map["id"]!)!
-        self.name = map["name"]
-    }
-    
-    func convertToFields() -> [SyncTaskValue] {
-        var fields: [SyncTaskValue] = []
-        fields.append(SyncTaskValue(objectType: .tag, name: "id", value: String(id)))
-        if let name = self.name {
-            fields.append(SyncTaskValue(name: "name", value: name))
-        }
-
-        return fields
-    }
 }
 
-struct DeleteTagReq: FieldExtractable {
+struct DeleteTagReq: Codable {
     
-    let id: UInt32
+    let id: UUID
     
-    init(id: UInt32) {
+    init(id: UUID) {
         self.id = id
     }
-    
-    init(_ map: [String: String]) {
-        self.id = UInt32(map["id"]!)!
-    }
-    
-    func convertToFields() -> [SyncTaskValue] {
-        var fields: [SyncTaskValue] = []
-        fields.append(SyncTaskValue(objectType: .tag, name: "id", value: String(self.id)))
-        return fields
-    }
 }
 
-struct CreateTagReq: Encodable, FieldExtractable {
+struct CreateTagReq: Codable {
     let name: String
-    let accountGroupID: UInt32
+    let accountGroupID: UUID
     let datetimeCreate: Date
     
     init(
         name: String,
-        accountGroupID: UInt32,
+        accountGroupID: UUID,
         datetimeCreate: Date
     ) {
         self.name = name
         self.accountGroupID = accountGroupID
         self.datetimeCreate = datetimeCreate
     }
-    
-    init(_ map: [String: String]) {
-        self.name = map["name"]!
-        self.accountGroupID = UInt32(map["accountGroupID"]!)!
-        self.datetimeCreate = DateFormatters.fullTime.date(from: map["datetimeCreate"]!)!
-    }
-    
-    func convertToFields() -> [SyncTaskValue] {
-        var fields: [SyncTaskValue] = []
-        fields.append(SyncTaskValue(objectType: .accountGroup, name: "accountGroupID", value: String(self.accountGroupID)))
-        fields.append(SyncTaskValue(name: "name", value: String(self.name)))
-        fields.append(SyncTaskValue(name: "datetimeCreate", value: DateFormatters.fullTime.string(from: self.datetimeCreate)))
-        return fields
-    }
 }
 
 struct CreateTagRes: Decodable {
-    let id: UInt32
+    let id: UUID
 }

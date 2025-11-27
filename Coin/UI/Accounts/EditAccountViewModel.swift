@@ -75,7 +75,7 @@ class EditAccountViewModel {
         if currentAccount.currency.code == "" {
             currentAccount.currency = currencies.first(where: { accountGroup.currency.code == $0.code }) ?? currencies.first ?? Currency()
         }
-        if currentAccount.icon.id == 0 {
+        if currentAccount.icon.id == UUID(uuid: UUID_NULL) {
             if let icon = icons.first {
                 currentAccount.icon = icon
             }
