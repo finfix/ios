@@ -22,8 +22,8 @@ extension APIManager {
             $0.accessToken = accessToken
             $0.accountID = req.accountID.dataOrEmpty
             $0.accountGroupIds = []
-            $0.dateFrom = Google_Protobuf_Timestamp(req.dateFrom)
-            $0.dateTo = Google_Protobuf_Timestamp(req.dateTo)
+            $0.dateFrom = Google_Protobuf_Timestamp(localFilter: req.dateFrom)
+            $0.dateTo = Google_Protobuf_Timestamp(localFilter: req.dateTo)
             if let type = req.type {
                 guard let transactionType = TransactionType(rawValue: type) else {
                     throw ErrorModel(humanText: "Неизвестный тип транзакции: \(type)")
@@ -38,7 +38,9 @@ extension APIManager {
             }
         }
         
-        let response = try await transactionClient.getTransactions(request)
+        let response = try await grpcCall("GetTransactions", request: request) {
+            try await transactionClient.getTransactions($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -86,7 +88,9 @@ extension APIManager {
             $0.accountGroupID = req.accountGroupID.data
         }
         
-        let response = try await transactionClient.createTransaction(request)
+        let response = try await grpcCall("CreateTransaction", request: request) {
+            try await transactionClient.createTransaction($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -126,7 +130,9 @@ extension APIManager {
             }
         }
         
-        let response = try await transactionClient.updateTransaction(request)
+        let response = try await grpcCall("UpdateTransaction", request: request) {
+            try await transactionClient.updateTransaction($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -142,7 +148,9 @@ extension APIManager {
             $0.id = req.id.data
         }
         
-        let response = try await transactionClient.deleteTransaction(request)
+        let response = try await grpcCall("DeleteTransaction", request: request) {
+            try await transactionClient.deleteTransaction($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)

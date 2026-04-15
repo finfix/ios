@@ -41,6 +41,7 @@ struct GetAccountBudgetRes: Decodable {
 }
 
 struct CreateAccountReq: Codable {
+    var id: UUID
     var accountGroupID: UUID
     var accountingInHeader: Bool
     var accountingInCharts: Bool
@@ -55,6 +56,7 @@ struct CreateAccountReq: Codable {
     var datetimeCreate: Date
     
     init(
+        id: UUID,
         accountGroupID: UUID,
         accountingInHeader: Bool,
         accountingInCharts: Bool,
@@ -68,6 +70,7 @@ struct CreateAccountReq: Codable {
         parentAccountID: UUID? = nil,
         datetimeCreate: Date
     ) {
+        self.id = id
         self.accountGroupID = accountGroupID
         self.accountingInHeader = accountingInHeader
         self.accountingInCharts = accountingInCharts

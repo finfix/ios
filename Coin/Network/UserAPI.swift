@@ -22,7 +22,9 @@ extension APIManager {
             $0.accessToken = accessToken
         }
         
-        let response = try await userClient.getUser(request)
+        let response = try await grpcCall("GetUser", request: request) {
+            try await userClient.getUser($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -62,7 +64,9 @@ extension APIManager {
             }
         }
         
-        let response = try await userClient.updateUser(request)
+        let response = try await grpcCall("UpdateUser", request: request) {
+            try await userClient.updateUser($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)

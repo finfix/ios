@@ -71,6 +71,7 @@ extension Service {
         taskManager.createTask(
             actionName: .createAccount,
             reqModel: CreateAccountReq(
+                id: account.id,
                 accountGroupID: account.accountGroup.id,
                 accountingInHeader: account.accountingInHeader,
                 accountingInCharts: account.accountingInCharts,

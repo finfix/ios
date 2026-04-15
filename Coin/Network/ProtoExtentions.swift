@@ -53,15 +53,24 @@ extension Data {
 // MARK: - Timestamp Extensions
 
 extension Google_Protobuf_Timestamp {
-    
+
     init(_ date: Date) {
         self.init()
         self.seconds = Int64(date.timeIntervalSince1970)
         self.nanos = Int32((date.timeIntervalSince1970.truncatingRemainder(dividingBy: 1)) * 1_000_000_000)
     }
-    
+
     func toDate() -> Date {
         return Date(timeIntervalSince1970: TimeInterval(self.seconds) + TimeInterval(self.nanos) / 1_000_000_000)
+    }
+
+    // Используется только для дат-фильтров: сдвигает дату на offset таймзоны устройства,
+    // чтобы сервер получал локальную дату (без учёта UTC-смещения).
+    init(localFilter date: Date) {
+        self.init()
+        let offset = Int64(TimeZone.current.secondsFromGMT(for: date))
+        self.seconds = Int64(date.timeIntervalSince1970) + offset
+        self.nanos = 0
     }
 }
 

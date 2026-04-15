@@ -23,7 +23,9 @@ extension APIManager {
             $0.accessToken = accessToken
         }
         
-        let response = try await accountGroupClient.getAccountGroups(request)
+        let response = try await grpcCall("GetAccountGroups", request: request) {
+            try await accountGroupClient.getAccountGroups($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -51,7 +53,9 @@ extension APIManager {
             $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)
         }
         
-        let response = try await accountGroupClient.createAccountGroup(request)
+        let response = try await grpcCall("CreateAccountGroup", request: request) {
+            try await accountGroupClient.createAccountGroup($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -73,7 +77,9 @@ extension APIManager {
             }
         }
         
-        let response = try await accountGroupClient.updateAccountGroup(request)
+        let response = try await grpcCall("UpdateAccountGroup", request: request) {
+            try await accountGroupClient.updateAccountGroup($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -89,7 +95,9 @@ extension APIManager {
             $0.id = req.id.data
         }
         
-        let response = try await accountGroupClient.deleteAccountGroup(request)
+        let response = try await grpcCall("DeleteAccountGroup", request: request) {
+            try await accountGroupClient.deleteAccountGroup($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)

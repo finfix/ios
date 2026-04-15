@@ -21,7 +21,6 @@ class NetworkManager {
     
     let authManager: AuthManager
     
-    @AppStorage("apiBasePath") var apiBasePath = defaultApiBasePath
     @AppStorage("isLogin") var isLogin: Bool = false
     
     enum Method: String {

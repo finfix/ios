@@ -19,7 +19,7 @@ private let logger = Logger(subsystem: "Coin", category: "API")
 
 class AuthManager {
     
-    private let authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>
+    private var authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>
     
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("accessToken") private var accessToken: String?
@@ -114,5 +114,9 @@ class AuthManager {
     ) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken
+    }
+
+    func reconnect(authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>) {
+        self.authClient = authClient
     }
 }

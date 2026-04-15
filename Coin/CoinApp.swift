@@ -92,9 +92,11 @@ extension Container {
 //                #if DEBUG
 //                #endif
                 
-                // 1. Создаём транспорт с NIO
+                // 1. Создаём транспорт с NIO (адрес берётся из UserDefaults, иначе дефолтный)
+                let grpcHost = UserDefaults.standard.string(forKey: "grpcHost") ?? defaultGrpcHost
+                let grpcPort = UserDefaults.standard.integer(forKey: "grpcPort")
                 let transport = try HTTP2ClientTransport.Posix(
-                    target: .ipv4(address: "127.0.0.1", port: 8090),
+                    target: .ipv4(address: grpcHost, port: grpcPort != 0 ? grpcPort : defaultGrpcPort),
                     transportSecurity: .plaintext
                 )
                 

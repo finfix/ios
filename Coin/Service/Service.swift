@@ -57,6 +57,10 @@ extension Service {
         }
     }
     
+    func reconnectGRPC(host: String, port: Int) throws {
+        try apiManager.reconnect(host: host, port: port)
+    }
+
     func deleteAllData() async throws {
         try await repository.deleteAllData()
     }

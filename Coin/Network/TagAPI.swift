@@ -22,7 +22,9 @@ extension APIManager {
             $0.accessToken = accessToken
         }
         
-        let response = try await tagClient.getTags(request)
+        let response = try await grpcCall("GetTags", request: request) {
+            try await tagClient.getTags($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -46,7 +48,9 @@ extension APIManager {
             $0.accessToken = accessToken
         }
         
-        let response = try await tagClient.getTagsToTransactions(request)
+        let response = try await grpcCall("GetTagsToTransactions", request: request) {
+            try await tagClient.getTagsToTransactions($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -71,7 +75,9 @@ extension APIManager {
             $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)
         }
         
-        let response = try await tagClient.createTag(request)
+        let response = try await grpcCall("CreateTag", request: request) {
+            try await tagClient.createTag($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -90,7 +96,9 @@ extension APIManager {
             }
         }
         
-        let response = try await tagClient.updateTag(request)
+        let response = try await grpcCall("UpdateTag", request: request) {
+            try await tagClient.updateTag($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -106,7 +114,9 @@ extension APIManager {
             $0.id = req.id.data
         }
         
-        let response = try await tagClient.deleteTag(request)
+        let response = try await grpcCall("DeleteTag", request: request) {
+            try await tagClient.deleteTag($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -123,7 +133,9 @@ extension APIManager {
 //            $0.transactionID = req.transactionID.data
 //        }
 //        
-//        let response = try await tagClient.linkTagToTransaction(request)
+//        let response = try await grpcCall("LinkTagToTransaction", request: request) {
+//            try await tagClient.linkTagToTransaction($0)
+//        }
 //        
 //        guard !response.hasError else {
 //            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)

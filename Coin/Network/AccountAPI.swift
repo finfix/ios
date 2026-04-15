@@ -21,17 +21,14 @@ extension APIManager {
         
         let request = try Account_GetAccountsRequest.with {
             $0.accessToken = accessToken
-//            if let accountGroupID = req.accountGroupID {
-//                $0.accountGroupID = accountGroupID.data
-//            }
             if let accountingInHeader = req.accountingInHeader {
                 $0.accountingInHeader = accountingInHeader
             }
             if let dateFrom = req.dateFrom {
-                $0.dateFrom = Google_Protobuf_Timestamp(dateFrom)
+                $0.dateFrom = Google_Protobuf_Timestamp(localFilter: dateFrom)
             }
             if let dateTo = req.dateTo {
-                $0.dateTo = Google_Protobuf_Timestamp(dateTo)
+                $0.dateTo = Google_Protobuf_Timestamp(localFilter: dateTo)
             }
             if let type = req.type {
                 guard let accountType = AccountType(rawValue: type) else {
@@ -41,7 +38,9 @@ extension APIManager {
             }
         }
         
-        let response = try await accountClient.getAccounts(request)
+        let response = try await grpcCall("GetAccounts", request: request) {
+            try await accountClient.getAccounts($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -79,6 +78,7 @@ extension APIManager {
         
         let request = try Account_CreateAccountRequest.with {
             $0.accessToken = accessToken
+            $0.id = req.id.data
             $0.accountGroupID = req.accountGroupID.data
             $0.accountingInHeader = req.accountingInHeader
             $0.accountingInCharts = req.accountingInCharts
@@ -105,7 +105,9 @@ extension APIManager {
             $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)
         }
         
-        let response = try await accountClient.createAccount(request)
+        let response = try await grpcCall("CreateAccount", request: request) {
+            try await accountClient.createAccount($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -162,7 +164,9 @@ extension APIManager {
             }
         }
         
-        let response = try await accountClient.updateAccount(request)
+        let response = try await grpcCall("UpdateAccount", request: request) {
+            try await accountClient.updateAccount($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -178,7 +182,9 @@ extension APIManager {
             $0.id = req.id.data
         }
         
-        let response = try await accountClient.deleteAccount(request)
+        let response = try await grpcCall("DeleteAccount", request: request) {
+            try await accountClient.deleteAccount($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)

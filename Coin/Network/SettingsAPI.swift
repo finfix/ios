@@ -22,7 +22,9 @@ extension APIManager {
             $0.accessToken = accessToken
         }
         
-        let response = try await settingsClient.getCurrencies(request)
+        let response = try await grpcCall("GetCurrencies", request: request) {
+            try await settingsClient.getCurrencies($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -44,7 +46,9 @@ extension APIManager {
             $0.applicationType = .ios
         }
         
-        let response = try await settingsClient.getVersion(request)
+        let response = try await grpcCall("GetVersion", request: request) {
+            try await settingsClient.getVersion($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
@@ -64,7 +68,9 @@ extension APIManager {
             $0.accessToken = accessToken
         }
         
-        let response = try await settingsClient.getIcons(request)
+        let response = try await grpcCall("GetIcons", request: request) {
+            try await settingsClient.getIcons($0)
+        }
         
         guard !response.hasError else {
             throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
