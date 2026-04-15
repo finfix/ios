@@ -9,14 +9,15 @@ import Foundation
 import GRDB
 
 struct SyncTaskDB {
-    
+
     var id: UUID?
     var actionName: ActionName
     var error: String?
     var tryCount: UInt32
     var enabled: Bool
     var fieldsJson: Data
-    
+    var datetimeCreate: Date
+
     // Инициализатор из бизнес модели
     init(_ model: SyncTask) {
         self.id = model.id
@@ -28,6 +29,7 @@ struct SyncTaskDB {
         self.tryCount = model.tryCount
         self.enabled = model.enabled
         self.fieldsJson = model.fieldsJSON
+        self.datetimeCreate = model.datetimeCreate
     }
 }
 
@@ -40,5 +42,6 @@ extension SyncTaskDB: Codable, FetchableRecord, PersistableRecord {
         static let error = Column(CodingKeys.error)
         static let enabled = Column(CodingKeys.enabled)
         static let fieldsJson = Column(CodingKeys.fieldsJson)
+        static let datetimeCreate = Column(CodingKeys.datetimeCreate)
     }
 }

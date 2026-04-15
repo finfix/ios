@@ -383,9 +383,9 @@ extension SQLite {
             }
             
             try db.create(table: "syncTaskDB") { table in
-                
+
                 table.primaryKey("id", .blob)
-                
+
                 table.column("actionName", .integer)
                     .notNull()
                 table.column("tryCount", .integer)
@@ -397,7 +397,15 @@ extension SQLite {
                     .notNull()
             }
         }
-        
+
+        migrator.registerMigration("addDatetimeCreateInSyncTask") { db in
+            try db.alter(table: "syncTaskDB") { table in
+                table.add(column: "datetimeCreate", .datetime)
+                    .defaults(to: Date.distantPast)
+                    .notNull()
+            }
+        }
+
         return migrator
     }
 }

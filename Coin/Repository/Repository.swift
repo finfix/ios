@@ -276,7 +276,7 @@ class Repository {
         try await sqlite.read { db in
             
             var request = SyncTaskDB
-                .order(SyncTaskDB.Columns.id)
+                .order(SyncTaskDB.Columns.datetimeCreate)
                 .filter(SyncTaskDB.Columns.enabled)
             
             if let limit {
