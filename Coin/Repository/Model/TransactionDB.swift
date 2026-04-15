@@ -42,9 +42,6 @@ struct TransactionDB {
     // Инициализатор из бизнес модели
     init(_ model: Transaction) {
         self.id = model.id
-        if self.id == nil {
-            self.id = nil
-        }
         self.accountingInCharts = model.accountingInCharts
         self.amountFrom = model.amountFrom
         self.amountTo = model.amountTo

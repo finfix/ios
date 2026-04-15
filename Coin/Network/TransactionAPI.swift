@@ -68,6 +68,7 @@ extension APIManager {
         
         let request = try Transaction_CreateTransactionRequest.with {
             $0.accessToken = accessToken
+            $0.id = req.id.data
             $0.accountFromID = req.accountFromID.data
             $0.accountToID = req.accountToID.data
             $0.amountFrom = req.amountFrom.doubleValue

@@ -8,6 +8,7 @@
 import Foundation
 
 struct CreateTransactionReq: Codable {
+    var id: UUID
     var accountFromID: UUID
     var accountToID: UUID
     var amountFrom: Decimal
@@ -22,6 +23,7 @@ struct CreateTransactionReq: Codable {
     var accountGroupID: UUID
     
     init(
+        id: UUID,
         accountFromID: UUID,
         accountToID: UUID,
         amountFrom: Decimal,
@@ -35,6 +37,7 @@ struct CreateTransactionReq: Codable {
         accountingInCharts: Bool,
         accountGroupID: UUID
     ) {
+        self.id = id
         self.accountFromID = accountFromID
         self.accountToID = accountToID
         self.amountFrom = amountFrom

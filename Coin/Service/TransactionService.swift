@@ -36,6 +36,7 @@ extension Service {
         taskManager.createTask(
             actionName: .createTransaction,
             reqModel: CreateTransactionReq(
+                id: transaction.id,
                 accountFromID: transaction.accountFrom.id,
                 accountToID: transaction.accountTo.id,
                 amountFrom: transaction.amountFrom,

@@ -104,7 +104,6 @@ struct AccountDB {
         self.remainder = model.remainder
         self.type = model.type
         self.visible = model.visible
-        self.parentAccountId = model.parentAccountID
         self.serialNumber = model.serialNumber
         self.isParent = model.isParent
         self.budgetAmount = model.budgetAmount

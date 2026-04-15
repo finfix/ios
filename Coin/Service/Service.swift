@@ -371,6 +371,7 @@ extension Service {
         var (icons, currencies, user, accountGroups, accounts, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _tags, _tagsToTransactions, _transactions)
         
         // Загружаем и сохраняем локально иконки
+        logger.info("Скачиваем иконки")
         for (i, icon) in icons.enumerated() {
             let iconData = try await apiManager.GetIcon(url: "https://bonavii.com/"+icon.url)
             let url = String(icon.url.replacingOccurrences(of: "/", with: "_"))
@@ -380,10 +381,11 @@ extension Service {
         }
         
         // Удаляем все данные в базе данных
+        logger.info("Удаляем все данные")
         try await repository.deleteAllData()
                 
         // Сохраняем данные в базу данных
-        logger.info("Сохраняем иконки")
+        logger.info("Сохраняем данные по иконкам")
         try await repository.importIcons(IconDB.convertFromApiModel(icons))
         logger.info("Сохраняем валюты")
         try await repository.importCurrencies(CurrencyDB.convertFromApiModel(currencies))
