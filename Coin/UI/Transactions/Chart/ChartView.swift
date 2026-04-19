@@ -8,6 +8,17 @@
 import SwiftUI
 import Charts
 
+enum ChartDisplayType: CaseIterable {
+    case linear, ring
+    
+    var name: String {
+        switch self {
+        case .linear: "Линейный"
+        case .ring: "Кольцевой"
+        }
+    }
+}
+
 enum ChartViewGroupBy: CaseIterable {
     case byTag, byAccount
     
@@ -28,6 +39,7 @@ struct ChartView: View {
     @Environment(AlertManager.self) private var alert
     @Binding var chartViewGroupBy: ChartViewGroupBy
     @State private var vm: ChartViewModel
+    @State private var chartDisplayType: ChartDisplayType = .linear
     @Environment(PathSharedState.self) var path
     @Environment(\.calendar) var calendar
     @Binding var filters: TransactionFilters
@@ -59,14 +71,31 @@ struct ChartView: View {
                         .tag(type)
                 }
             }
+            if vm.chartType != .earningsAndExpenses {
+                Picker("Вид графика", selection: $chartDisplayType) {
+                    ForEach(ChartDisplayType.allCases, id: \.self) { type in
+                        Text(type.name).tag(type)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+            }
             Group {
                 if !vm.data.isEmpty {
-                    Graph(
-                        chartType: vm.chartType,
-                        data: vm.data,
-                        lastSelectedDate: $vm.lastSelectedDate,
-                        currency: currency
-                    )
+                    if chartDisplayType == .ring && vm.chartType != .earningsAndExpenses {
+                        RingGraph(
+                            data: vm.data,
+                            lastSelectedDate: $vm.lastSelectedDate,
+                            currency: currency
+                        )
+                    } else {
+                        Graph(
+                            chartType: vm.chartType,
+                            data: vm.data,
+                            lastSelectedDate: $vm.lastSelectedDate,
+                            currency: currency
+                        )
+                    }
                 } else {
                     Text("Нет данных для отображения")
                 }
@@ -160,7 +189,10 @@ struct ChartView: View {
                 alert.error(error)
             }
         }
-        .onChange(of: vm.chartType) { _, _ in
+        .onChange(of: vm.chartType) { _, newType in
+            if newType == .earningsAndExpenses {
+                chartDisplayType = .linear
+            }
             Task {
                 try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
             }
