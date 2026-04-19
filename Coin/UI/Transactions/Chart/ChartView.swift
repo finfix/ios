@@ -79,6 +79,7 @@ struct ChartView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
+                .padding(.bottom, 2)
             }
             Group {
                 if !vm.data.isEmpty {
@@ -103,7 +104,7 @@ struct ChartView: View {
             .frame(height: chartHeight)
             VStack {
                 HStack {
-                    if vm.chartType != .earningsAndExpenses {
+                    if vm.chartType == .earnings || vm.chartType == .expenses {
                         Menu {
                             Picker("", selection: $chartViewGroupBy) {
                                 ForEach(ChartViewGroupBy.allCases, id: \.self) { groupBy in
@@ -122,6 +123,9 @@ struct ChartView: View {
                         }
                         .id(chartViewGroupBy)
                         .frame(minWidth: 150)
+                    } else if vm.chartType == .balance {
+                        Text("Счёт")
+                            .font(.caption)
                     } else {
                         Text("Тип")
                             .font(.caption)
@@ -172,7 +176,7 @@ struct ChartView: View {
                 .font(.callout)
                 if vm.chartType != .earningsAndExpenses {
                     HStack {
-                        Text("Всего:")
+                        Text(vm.chartType == .balance ? "Итого:" : "Всего:")
                         Spacer()
                         Text(formatter.string(number: vm.totalBySelectedDate))
                     }
@@ -190,7 +194,7 @@ struct ChartView: View {
             }
         }
         .onChange(of: vm.chartType) { _, newType in
-            if newType == .earningsAndExpenses {
+            if newType == .earningsAndExpenses || newType == .balance {
                 chartDisplayType = .linear
             }
             Task {

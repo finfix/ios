@@ -206,6 +206,72 @@ extension Service {
                 dateTo: dateTo,
                 tagIDs: tagIDs
             )
+            
+        // Текущий баланс счетов в каждый период
+        case .balance:
+            
+            let currentMonth = Date.now.startOfMonth(inUTC: true)
+            
+            // Загружаем группы счетов для корректной фильтрации
+            let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(currencies))
+            let accountGroupsMap = AccountGroup.convertToMap(
+                AccountGroup.convertFromDBModel(
+                    try await repository.getAccountGroups(),
+                    currenciesMap: currenciesMap
+                )
+            )
+            
+            // Получаем счета типа regular и debt, участвующие в графиках
+            let balanceAccounts = Account.groupAccounts(
+                Account.convertFromDBModel(
+                    try await repository.getAccounts(),
+                    currenciesMap: currenciesMap,
+                    accountGroupsMap: accountGroupsMap,
+                    iconsMap: nil
+                ),
+                saveChildren: true
+            ).filter { account in
+                guard (account.type == .regular || account.type == .debt) && account.accountingInCharts else { return false }
+                let groupMatch = accountGroupIDs.isEmpty || accountGroupIDs.contains(account.accountGroup.id)
+                let accountMatch = accountIDs.isEmpty || accountIDs.contains(account.id)
+                return groupMatch && accountMatch
+            }
+            
+            // Получаем помесячные чистые потоки для каждого счёта
+            let netFlows = try await repository.getMonthlyNetFlowByAccount(
+                targetCurrency: targetCurrency,
+                accountGroupIDs: accountGroupIDs,
+                accountIDs: balanceAccounts.map(\.id)
+            )
+            
+            for account in balanceAccounts {
+                let accountFlows = netFlows[account.id] ?? [:]
+                var seriesData: [Date: Decimal] = [:]
+                
+                // Конвертируем текущий баланс в целевую валюту
+                let currencyRate = targetCurrency.rate / account.currency.rate
+                var balance = account.remainder * currencyRate
+                seriesData[currentMonth] = balance.round(factor: 0)
+                
+                // Восстанавливаем исторический баланс, идя назад от текущего месяца
+                if let earliestMonth = accountFlows.keys.min() {
+                    var cursor = currentMonth
+                    while cursor >= earliestMonth {
+                        balance -= accountFlows[cursor] ?? 0
+                        cursor = cursor.adding(.month, value: -1)
+                        seriesData[cursor] = balance.round(factor: 0)
+                    }
+                }
+                
+                data.append(Series(account: account, objectID: account.id, data: seriesData))
+            }
+            
+            // Сортируем по текущему балансу и назначаем цвета
+            data = data.sorted { ($0.data[currentMonth] ?? 0) > ($1.data[currentMonth] ?? 0) }
+            for (i, _) in data.enumerated() {
+                data[i].serialNumber = UInt32(i)
+                data[i].color = defaultColors[i % defaultColors.count]
+            }
         }
         
         if chartType == .earnings || chartType == .expenses {

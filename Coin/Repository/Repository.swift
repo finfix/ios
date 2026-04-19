@@ -745,6 +745,8 @@ class Repository {
                         }
                         result[accountID]?[row["month"]] = row["remainder"]
                     }
+                case .balance:
+                    break // Баланс обрабатывается отдельно через getMonthlyNetFlowByAccount
                 }
             }
             
@@ -757,6 +759,81 @@ class Repository {
                     data: monthData
                 )
             }
+        }
+    }
+    
+    // Возвращает помесячный чистый поток для счетов типа regular/debt
+    // Положительное значение = деньги поступили, отрицательное = ушли
+    func getMonthlyNetFlowByAccount(
+        targetCurrency: Currency,
+        accountGroupIDs: [UUID] = [],
+        accountIDs: [UUID] = []
+    ) async throws -> [UUID: [Date: Decimal]] {
+        try await sqlite.read { db in
+            var result: [UUID: [Date: Decimal]] = [:]
+            
+            // Строим фильтры общие для обоих запросов
+            func buildFiltersAndArgs(accountIDField: String) -> ([String], StatementArguments) {
+                var filters: [String] = [
+                    "a.type IN ('regular', 'debt')",
+                    "a.accountingInCharts = 1",
+                    "t.accountingInCharts = 1"
+                ]
+                var args: StatementArguments = []
+                if !accountIDs.isEmpty {
+                    let q = accountIDs.map { _ in "?" }.joined(separator: ", ")
+                    filters.append("a.id IN (\(q))")
+                    _ = args.append(contentsOf: StatementArguments(accountIDs))
+                }
+                if !accountGroupIDs.isEmpty {
+                    let q = accountGroupIDs.map { _ in "?" }.joined(separator: ", ")
+                    filters.append("t.accountGroupId IN (\(q))")
+                    _ = args.append(contentsOf: StatementArguments(accountGroupIDs))
+                }
+                return (filters, args)
+            }
+            
+            // Деньги, поступающие на счёт (accountToId)
+            let (inFilters, inArgs) = buildFiltersAndArgs(accountIDField: "accountToId")
+            let inSQL = """
+                SELECT strftime('%Y-%m-01', t.dateTransaction) AS month,
+                    a.id AS accountId,
+                    ROUND(SUM(t.amountTo * ((SELECT rate FROM currencyDB WHERE code = '\(targetCurrency.code)') / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS amount
+                FROM transactionDB t
+                JOIN accountDB a ON a.id = t.accountToId
+                WHERE \(inFilters.joined(separator: " AND "))
+                GROUP BY month, accountId
+            """
+            let inRows = try Row.fetchCursor(db, sql: inSQL, arguments: inArgs)
+            while let row = try inRows.next() {
+                let accountID: UUID = row["accountId"]
+                let month: Date = row["month"]
+                let amount: Decimal = row["amount"]
+                if result[accountID] == nil { result[accountID] = [:] }
+                result[accountID]![month, default: 0] += amount
+            }
+            
+            // Деньги, уходящие со счёта (accountFromId)
+            let (outFilters, outArgs) = buildFiltersAndArgs(accountIDField: "accountFromId")
+            let outSQL = """
+                SELECT strftime('%Y-%m-01', t.dateTransaction) AS month,
+                    a.id AS accountId,
+                    ROUND(SUM(t.amountFrom * ((SELECT rate FROM currencyDB WHERE code = '\(targetCurrency.code)') / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS amount
+                FROM transactionDB t
+                JOIN accountDB a ON a.id = t.accountFromId
+                WHERE \(outFilters.joined(separator: " AND "))
+                GROUP BY month, accountId
+            """
+            let outRows = try Row.fetchCursor(db, sql: outSQL, arguments: outArgs)
+            while let row = try outRows.next() {
+                let accountID: UUID = row["accountId"]
+                let month: Date = row["month"]
+                let amount: Decimal = row["amount"]
+                if result[accountID] == nil { result[accountID] = [:] }
+                result[accountID]![month, default: 0] -= amount
+            }
+            
+            return result
         }
     }
     

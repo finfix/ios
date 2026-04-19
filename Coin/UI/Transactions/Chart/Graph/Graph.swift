@@ -38,7 +38,7 @@ struct Graph: View {
         var maxValue: Double = 0
         
         switch chartType {
-        case .earnings, .expenses:
+        case .earnings, .expenses, .balance:
             let maxDate: Date = xPosition + TimeInterval((visibleRange + 1) * oneMonthRange)
             var currentDate: Date = (xPosition - TimeInterval(oneMonthRange)).startOfMonth(inUTC: true)
             
@@ -76,19 +76,19 @@ struct Graph: View {
                 Chart {
                     ForEach(Array(data.reversed().enumerated()), id: \.element) { (i, series) in
                         ForEach(series.data.sorted(by: >), id: \.key) { month, amount in
-                            if chartType != .earningsAndExpenses {
+                            if chartType == .earningsAndExpenses {
+                                LineMark(
+                                    x: .value("Период", month, unit: .month),
+                                    y: .value("Сумма", amount)
+                                )
+                                .lineStyle(.init(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                            } else {
                                 AreaMark(
                                     x: .value("Период", month, unit: .month),
                                     y: .value("Сумма", amount),
                                     stacking: .standard
                                 )
                                 .opacity(0.8)
-                            } else {
-                                LineMark(
-                                    x: .value("Период", month, unit: .month),
-                                    y: .value("Сумма", amount)
-                                )
-                                .lineStyle(.init(lineWidth: 3, lineCap: .round, lineJoin: .round))
                             }
                         }
                         .foregroundStyle(by: .value("Категория", i))

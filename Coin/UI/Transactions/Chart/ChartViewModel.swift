@@ -10,13 +10,14 @@ import SwiftUI
 import Factory
 
 enum ChartType: CaseIterable {
-    case earningsAndExpenses, earnings, expenses
+    case earningsAndExpenses, earnings, expenses, balance
     
     var name: String {
         switch self {
         case .earningsAndExpenses: return "Доходы и расходы"
         case .earnings: return "Доходы"
         case .expenses: return "Расходы"
+        case .balance: return "В наличии"
         }
     }
 }

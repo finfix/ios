@@ -34,9 +34,14 @@ struct ChartListItemView: View {
     }
         
     var body: some View {
-        if chartViewGroupBy == .byAccount, let account = series.account {
+        if (chartViewGroupBy == .byAccount || vm.chartType == .balance), let account = series.account {
             Button {
-                if account.isParent && !account.childrenAccounts.isEmpty {
+                if vm.chartType == .balance {
+                    // Для баланса открываем список транзакций по счёту
+                    var accountFilters = filters
+                    accountFilters.accounts = [account]
+                    path.path.append(ChartViewRoute.transactionView(filters: accountFilters, chartType: .earningsAndExpenses))
+                } else if account.isParent && !account.childrenAccounts.isEmpty {
                     // Открываем drill-down график по дочерним счетам родителя
                     var drillDownFilters = filters
                     drillDownFilters.accounts = account.childrenAccounts
