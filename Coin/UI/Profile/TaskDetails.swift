@@ -10,7 +10,7 @@ import SwiftUI
 struct TaskDetails: View {
         
     @State private var vm: TasksDetailsViewModel
-    @Environment (\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss
     
     init(task: SyncTask) {
         self.vm = TasksDetailsViewModel(task: task)
@@ -33,19 +33,8 @@ struct TaskDetails: View {
                 Spacer()
                 Text("\(vm.task.tryCount)")
             }
-            HStack {
-                Text("Локальный идентификатор объекта:")
-                Spacer()
-                Text("\(vm.task.localID)")
-            }
             Section(header: Text("Параметры")) {
-                ForEach(vm.task.fields) { field in
-                    HStack {
-                        Text(field.name)
-                        Spacer()
-                        Text(field.value ?? "NULL")
-                    }
-                }
+                Text(String(data: vm.task.fieldsJSON, encoding: .utf8) ?? "NULL")
             }
             Section(header: Text("Ошибка")) {
                 HStack {

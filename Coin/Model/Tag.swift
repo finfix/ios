@@ -9,13 +9,13 @@ import Foundation
 
 struct Tag: Identifiable, Hashable {
     
-    var id: UInt32
+    var id: UUID
     var name: String
     var accountGroup: AccountGroup
     var datetimeCreate: Date
     
     init(
-        id: UInt32 = 0,
+        id: UUID = UUID(),
         name: String = "",
         accountGroup: AccountGroup = AccountGroup(),
         datetimeCreate: Date = Date()
@@ -27,14 +27,14 @@ struct Tag: Identifiable, Hashable {
     }
     
     // Инициализатор из модели базы данных
-    init(_ dbModel: TagDB, accountGroupsMap: [UInt32: AccountGroup]?) {
+    init(_ dbModel: TagDB, accountGroupsMap: [UUID: AccountGroup]?) {
         self.id = dbModel.id!
         self.name = dbModel.name
         self.datetimeCreate = dbModel.datetimeCreate
         self.accountGroup = accountGroupsMap?[dbModel.accountGroupID] ?? AccountGroup()
     }
     
-    static func convertFromDBModel(_ tagsDB: [TagDB], accountGroupsMap: [UInt32: AccountGroup]?) -> [Tag] {
+    static func convertFromDBModel(_ tagsDB: [TagDB], accountGroupsMap: [UUID: AccountGroup]?) -> [Tag] {
         var tags: [Tag] = []
         for tagDB in tagsDB {
             tags.append(Tag(tagDB, accountGroupsMap: accountGroupsMap))
@@ -42,7 +42,7 @@ struct Tag: Identifiable, Hashable {
         return tags
     }
     
-    static func convertToMap(_ tags: [Tag]) -> [UInt32: Tag] {
+    static func convertToMap(_ tags: [Tag]) -> [UUID: Tag] {
         return Dictionary(uniqueKeysWithValues: tags.map{ ($0.id, $0) })
     }
 }

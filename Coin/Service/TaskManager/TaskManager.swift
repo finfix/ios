@@ -47,25 +47,18 @@ class TaskManager {
         }
     }
     
-    func createTask<T: FieldExtractable>(
+    func createTask<T: Encodable>(
         actionName: ActionName,
-        localObjectID: UInt32,
-        reqModel: T,
-        addictionalMapping: [String: UInt32] = [:]
+        reqModel: T
     ) {
         Task {
-            var fields = reqModel.convertToFields()
-            for (name, localID) in addictionalMapping {
-                fields.append(SyncTaskValue(
-                    name: name,
-                    value: String(localID)
-                ))
-            }
+            
+            let fieldsJSON = try JSONEncoder().encode(reqModel)
+            
             try await repository.createTask(SyncTask(
-                localID: localObjectID,
                 actionName: actionName,
                 tryCount: 0,
-                fields: fields,
+                fieldsJSON: fieldsJSON,
                 enabled: true
             ))
         }
@@ -73,84 +66,61 @@ class TaskManager {
     
     private func executeTask(_ task: SyncTask) async throws {
         
-        var fields: [String: String] = [:]
-        for field in task.fields {
-            fields[field.name] = field.value
-        }
+        let decoder = JSONDecoder()
         
         do {
             switch task.actionName {
             case .createTransaction:
-                let id = try await apiManager.CreateTransaction(req: CreateTransactionReq(fields))
-                try await repository.updateServerID(localID: task.localID, modelType: .transaction, serverID: id)
+                let req = try decoder.decode(CreateTransactionReq.self, from: task.fieldsJSON)
+                try await apiManager.CreateTransaction(req: req)
                 
             case .updateTransaction:
-                try await apiManager.UpdateTransaction(req: UpdateTransactionReq(fields))
+                let req = try decoder.decode(UpdateTransactionReq.self, from: task.fieldsJSON)
+                try await apiManager.UpdateTransaction(req: req)
 
             case .deleteTransaction:
-                try await apiManager.DeleteTransaction(req: DeleteTransactionReq(fields))
+                let req = try decoder.decode(DeleteTransactionReq.self, from: task.fieldsJSON)
+                try await apiManager.DeleteTransaction(req: req)
                 
             case .createAccount:
-                let model = try await apiManager.CreateAccount(req: CreateAccountReq(fields))
-                try await repository.updateServerID(localID: task.localID, modelType: .account, serverID: model.id)
-                if let localBalancingTransactionID = fields["balancingTransactionID"] {
-                    if let serverBalancingTransactionID = model.balancingTransactionID {
-                        try await repository.updateServerID(localID: UInt32(localBalancingTransactionID)!, modelType: .transaction, serverID: serverBalancingTransactionID)
-                    } else {
-                        logger.error("С сервера не пришел идентификатор транзакции балансировки для счета ID: \(fields["id"] ?? "")")
-                    }
-                }
-                if let localBalancingAccountID = fields["balancingAccountID"] {
-                    if let serverBalancingAccountID = model.balancingAccountID {
-                        try await repository.updateServerID(localID: UInt32(localBalancingAccountID)!, modelType: .account, serverID: serverBalancingAccountID)
-                    } else {
-                        logger.error("С сервера не пришел идентификатор нового балансировочного счета")
-                    }
-                }
-
+                let req = try decoder.decode(CreateAccountReq.self, from: task.fieldsJSON)
+                try await apiManager.CreateAccount(req: req)
                 
             case .updateAccount:
-                let model = try await apiManager.UpdateAccount(req: UpdateAccountReq(fields))
-                if let localBalancingTransactionID = fields["balancingTransactionID"] {
-                    if let serverBalancingTransactionID = model.balancingTransactionID {
-                        try await repository.updateServerID(localID: UInt32(localBalancingTransactionID)!, modelType: .transaction, serverID: serverBalancingTransactionID)
-                    } else {
-                        logger.error("С сервера не пришел идентификатор транзакции балансировки для счета ID: \(fields["id"] ?? "")")
-                    }
-                }
-                if let localBalancingAccountID = fields["balancingAccountID"] {
-                    if let serverBalancingAccountID = model.balancingAccountID {
-                        try await repository.updateServerID(localID: UInt32(localBalancingAccountID)!, modelType: .account, serverID: serverBalancingAccountID)
-                    } else {
-                        logger.error("С сервера не пришел идентификатор нового балансировочного счета")
-                    }
-                }
+                let req = try decoder.decode(UpdateAccountReq.self, from: task.fieldsJSON)
+                try await apiManager.UpdateAccount(req: req)
 
             case .deleteAccount:
-                try await apiManager.DeleteAccount(req: DeleteAccountReq(fields))
+                let req = try decoder.decode(DeleteAccountReq.self, from: task.fieldsJSON)
+                try await apiManager.DeleteAccount(req: req)
                 
             case .createTag:
-                let id = try await apiManager.CreateTag(req: CreateTagReq(fields))
-                try await repository.updateServerID(localID: task.localID, modelType: .tag, serverID: id)
+                let req = try decoder.decode(CreateTagReq.self, from: task.fieldsJSON)
+                try await apiManager.CreateTag(req: req)
                 
             case .updateTag:
-                try await apiManager.UpdateTag(req: UpdateTagReq(fields))
+                let req = try decoder.decode(UpdateTagReq.self, from: task.fieldsJSON)
+                try await apiManager.UpdateTag(req: req)
 
             case .deleteTag:
-                try await apiManager.DeleteTag(req: DeleteTagReq(fields))
+                let req = try decoder.decode(DeleteTagReq.self, from: task.fieldsJSON)
+                try await apiManager.DeleteTag(req: req)
                 
             case .createAccountGroup:
-                let model = try await apiManager.CreateAccountGroup(req: CreateAccountGroupReq(fields))
-                try await repository.updateServerID(localID: task.localID, modelType: .accountGroup, serverID: model.id)
+                let req = try decoder.decode(CreateAccountGroupReq.self, from: task.fieldsJSON)
+                try await apiManager.CreateAccountGroup(req: req)
                 
             case .updateAccountGroup:
-                try await apiManager.UpdateAccountGroup(req: UpdateAccountGroupReq(fields))
+                let req = try decoder.decode(UpdateAccountGroupReq.self, from: task.fieldsJSON)
+                try await apiManager.UpdateAccountGroup(req: req)
                 
             case .deleteAccountGroup:
-                try await apiManager.DeleteAccountGroup(req: DeleteAccountGroupReq(fields))
+                let req = try decoder.decode(DeleteAccountGroupReq.self, from: task.fieldsJSON)
+                try await apiManager.DeleteAccountGroup(req: req)
                 
             case .updateUser:
-                try await apiManager.UpdateUser(req: UpdateUserReq(fields))
+                let req = try decoder.decode(UpdateUserReq.self, from: task.fieldsJSON)
+                try await apiManager.UpdateUser(req: req)
             }
         } catch {
             logger.warning("\(error)")
@@ -169,13 +139,13 @@ class TaskManager {
     }
     
     func getSyncTasks(
-        ids: [UInt32]? = nil
+        ids: [UUID]? = nil
     ) async throws -> [SyncTask] {
         return try await repository.getSyncTasks(ids: ids)
     }
     
     func deleteTasks(
-        ids: [UInt32]? = nil
+        ids: [UUID]? = nil
     ) async throws {
         return try await repository.deleteTasks(ids: ids)
     }
@@ -191,8 +161,4 @@ enum ActionName: String, Codable {
     case createTag, updateTag, deleteTag
     case createAccountGroup, updateAccountGroup, deleteAccountGroup
     case updateUser
-}
-
-protocol FieldExtractable {
-    func convertToFields() -> [SyncTaskValue]
 }

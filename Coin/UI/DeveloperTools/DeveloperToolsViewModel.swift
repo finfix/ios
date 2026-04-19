@@ -16,4 +16,8 @@ class DeveloperToolsViewModel {
     func compareLocalAndServerData() async throws -> String? {
         return try await service.compareLocalAndServerData()
     }
+    
+    func reconnectGRPC(host: String, port: Int) throws {
+        try service.reconnectGRPC(host: host, port: port)
+    }
 }

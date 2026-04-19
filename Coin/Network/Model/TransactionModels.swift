@@ -7,34 +7,37 @@
 
 import Foundation
 
-struct CreateTransactionReq: Encodable, FieldExtractable {
-    var accountFromID: UInt32
-    var accountToID: UInt32
+struct CreateTransactionReq: Codable {
+    var id: UUID
+    var accountFromID: UUID
+    var accountToID: UUID
     var amountFrom: Decimal
     var amountTo: Decimal
     var dateTransaction: Date
     var note: String
     var type: String
     var isExecuted: Bool
-    var tagIDs: [UInt32]
+    var tagIDs: [UUID]
     var datetimeCreate: Date
     var accountingInCharts: Bool
-    var accountGroupID: UInt32
+    var accountGroupID: UUID
     
     init(
-        accountFromID: UInt32,
-        accountToID: UInt32,
+        id: UUID,
+        accountFromID: UUID,
+        accountToID: UUID,
         amountFrom: Decimal,
         amountTo: Decimal,
         dateTransaction: Date,
         note: String,
         type: String,
         isExecuted: Bool,
-        tagIDs: [UInt32],
+        tagIDs: [UUID],
         datetimeCreate: Date,
         accountingInCharts: Bool,
-        accountGroupID: UInt32
+        accountGroupID: UUID
     ) {
+        self.id = id
         self.accountFromID = accountFromID
         self.accountToID = accountToID
         self.amountFrom = amountFrom
@@ -48,108 +51,33 @@ struct CreateTransactionReq: Encodable, FieldExtractable {
         self.accountingInCharts = accountingInCharts
         self.accountGroupID = accountGroupID
     }
-    
-    enum CodingKeys: String, CodingKey {
-        case accountFromID
-        case accountToID
-        case amountFrom
-        case amountTo
-        case dateTransaction
-        case note
-        case type
-        case isExecuted
-        case tagIDs
-        case datetimeCreate
-        case accountingInCharts
-        case accountGroupID
-    }
-    
-    func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        
-        try container.encode(accountFromID, forKey: .accountFromID)
-        try container.encode(accountToID, forKey: .accountToID)
-        try container.encode(amountFrom, forKey: .amountFrom)
-        try container.encode(amountTo, forKey: .amountTo)
-        try container.encode(DateFormatters.onlyDate.string(from: dateTransaction), forKey: .dateTransaction)
-        try container.encode(note, forKey: .note)
-        try container.encode(type, forKey: .type)
-        try container.encode(isExecuted, forKey: .isExecuted)
-        try container.encode(tagIDs, forKey: .tagIDs)
-        try container.encode(DateFormatters.fullTime.string(from: datetimeCreate), forKey: .datetimeCreate)
-        try container.encode(accountingInCharts, forKey: .accountingInCharts)
-        try container.encode(accountGroupID, forKey: .accountGroupID)
-    }
-    
-    init(_ map: [String: String]) {
-        self.accountFromID = UInt32(map["accountFromID"]!)!
-        self.accountToID = UInt32(map["accountToID"]!)!
-        self.amountFrom = Decimal(string: map["amountFrom"]!)!
-        self.amountTo = Decimal(string: map["amountTo"]!)!
-        self.dateTransaction = DateFormatters.onlyDate.date(from: map["dateTransaction"]!)!
-        self.note = map["note"]!
-        self.type = map["type"]!
-        self.isExecuted = Bool(map["isExecuted"]!)!
-        self.tagIDs = []
-        var i = 1
-        while true {
-            if let tag = map["tag\(i)"] {
-                self.tagIDs.append(UInt32(tag)!)
-            } else {
-                break
-            }
-            i += 1
-        }
-        self.datetimeCreate = DateFormatters.fullTime.date(from: map["datetimeCreate"]!)!
-        self.accountingInCharts = Bool(map["accountingInCharts"]!)!
-        self.accountGroupID = UInt32(map["accountGroupID"]!)!
-    }
-    
-    func convertToFields() -> [SyncTaskValue] {
-        var fields: [SyncTaskValue] = []
-        fields.append(SyncTaskValue(objectType: .account, name: "accountFromID", value: String(self.accountFromID)))
-        fields.append(SyncTaskValue(objectType: .account, name: "accountToID", value: String(self.accountToID)))
-        fields.append(SyncTaskValue(name: "amountFrom", value: self.amountFrom.stringValue))
-        fields.append(SyncTaskValue(name: "amountTo", value: self.amountTo.stringValue))
-        fields.append(SyncTaskValue(name: "dateTransaction", value: DateFormatters.onlyDate.string(from: self.dateTransaction)))
-        fields.append(SyncTaskValue(name: "note", value: String(self.note)))
-        fields.append(SyncTaskValue(name: "type", value: String(self.type)))
-        fields.append(SyncTaskValue(name: "isExecuted", value: String(self.isExecuted)))
-        for (i, tagID) in self.tagIDs.enumerated() {
-            fields.append(SyncTaskValue(objectType: .tag, name: "tag\(i)", value: String(tagID)))
-        }
-        fields.append(SyncTaskValue(name: "datetimeCreate", value: DateFormatters.fullTime.string(from: self.datetimeCreate)))
-        fields.append(SyncTaskValue(name: "accountingInCharts", value: String(self.accountingInCharts)))
-        fields.append(SyncTaskValue(name: "accountGroupID", value: String(self.accountGroupID)))
-        return fields
-    }
 }
 
 struct CreateTransactionRes: Decodable {
-    var id: UInt32
+    var id: UUID
 }
 
-struct UpdateTransactionReq: Encodable, FieldExtractable {
-    var accountFromID: UInt32?
-    var accountToID: UInt32?
+struct UpdateTransactionReq: Codable {
+    var accountFromID: UUID?
+    var accountToID: UUID?
     var amountFrom: Decimal?
     var amountTo: Decimal?
     var dateTransaction: Date?
     var note: String?
-    var tagIDs: [UInt32]?
+    var tagIDs: [UUID]?
     var accountingInCharts: Bool?
-    var id: UInt32
+    var id: UUID
     
     init(
-        accountFromID: UInt32? = nil,
-        accountToID: UInt32? = nil,
+        accountFromID: UUID? = nil,
+        accountToID: UUID? = nil,
         amountFrom: Decimal? = nil,
         amountTo: Decimal? = nil,
         dateTransaction: Date? = nil,
         note: String? = nil,
-        tagIDs: [UInt32]? = nil,
+        tagIDs: [UUID]? = nil,
         accountingInCharts: Bool? = nil,
-        id: UInt32
+        id: UUID
     ) {
         self.accountFromID = accountFromID
         self.accountToID = accountToID
@@ -161,108 +89,19 @@ struct UpdateTransactionReq: Encodable, FieldExtractable {
         self.accountingInCharts = accountingInCharts
         self.id = id
     }
-    
-    enum CodingKeys: String, CodingKey {
-        case accountFromID
-        case accountToID
-        case amountFrom
-        case amountTo
-        case dateTransaction
-        case note
-        case tagIDs
-        case accountingInCharts
-        case id
-    }
-    
-    func encode(to encoder: any Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        
-        try container.encode(accountFromID, forKey: .accountFromID)
-        try container.encode(accountToID, forKey: .accountToID)
-        try container.encode(amountFrom, forKey: .amountFrom)
-        try container.encode(amountTo, forKey: .amountTo)
-        if let dateTransaction = dateTransaction {
-            try container.encode(DateFormatters.onlyDate.string(from: dateTransaction), forKey: .dateTransaction)
-        }
-        try container.encode(tagIDs, forKey: .tagIDs)
-        try container.encode(note, forKey: .note)
-        try container.encode(accountingInCharts, forKey: .accountingInCharts)
-        try container.encode(id, forKey: .id)
-    }
-    
-    init(_ map: [String: String]) {
-        self.accountFromID = UInt32(map["accountFromID"] ?? "")
-        self.accountToID = UInt32(map["accountToID"] ?? "")
-        self.amountFrom = Decimal(string: map["amountFrom"] ?? "")
-        self.amountTo = Decimal(string: map["amountTo"] ?? "")
-        self.dateTransaction = DateFormatters.onlyDate.date(from: map["dateTransaction"] ?? "")
-        self.note = map["note"]
-        self.accountingInCharts = Bool(map["accountingInCharts"] ?? "")
-        var i = 0
-        if map["deleteAllTags"] != nil {
-            self.tagIDs = []
-        }
-        while true {
-            if let tag = map["tag\(i)"] {
-                if self.tagIDs == nil {
-                    self.tagIDs = []
-                }
-                self.tagIDs!.append(UInt32(tag)!)
-            } else {
-                break
-            }
-            i += 1
-        }
-        self.id = UInt32(map["id"]!)!
-    }
-    
-    func convertToFields() -> [SyncTaskValue] {
-        var fields: [SyncTaskValue] = []
-        fields.append(SyncTaskValue(objectType: .transaction, name: "id", value: String(id)))
-        if let accountFromID = self.accountFromID {
-            fields.append(SyncTaskValue(objectType: .account, name: "accountFromID", value: String(accountFromID)))
-        }
-        if let accountToID = self.accountToID {
-            fields.append(SyncTaskValue(objectType: .account, name: "accountToID", value: String(accountToID)))
-        }
-        if let amountFrom = self.amountFrom {
-            fields.append(SyncTaskValue(name: "amountFrom", value: amountFrom.stringValue))
-        }
-        if let amountTo = self.amountTo {
-            fields.append(SyncTaskValue(name: "amountTo", value: amountTo.stringValue))
-        }
-        if let dateTransaction = self.dateTransaction {
-            fields.append(SyncTaskValue(name: "dateTransaction", value: DateFormatters.onlyDate.string(from: dateTransaction)))
-        }
-        if let note = self.note {
-            fields.append(SyncTaskValue(name: "note", value: String(note)))
-        }
-        if let accountingInCharts = self.accountingInCharts {
-            fields.append(SyncTaskValue(name: "accountingInCharts", value: String(accountingInCharts)))
-        }
-        if let tagIDs = self.tagIDs {
-            for (i, tagID) in tagIDs.enumerated() {
-                fields.append(SyncTaskValue(objectType: .tag, name: "tag\(i)", value: String(tagID)))
-            }
-            if tagIDs.isEmpty {
-                fields.append(SyncTaskValue(name: "deleteAllTags", value: "true"))
-            }
-        }
-        return fields
-    }
 }
 
-struct GetTransactionReq: Encodable {
-    var accountID: UInt32?
-    var dateFrom: Date?
-    var dateTo: Date?
+struct GetTransactionReq: Codable {
+    var accountID: UUID?
+    var dateFrom: Date
+    var dateTo: Date
     var type: String?
     var offset: UInt32?
     var limit: UInt8?
 }
 
 struct GetTransactionsRes: Decodable {
-    var id: UInt32
+    var id: UUID
     var accountingInCharts: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
@@ -270,10 +109,10 @@ struct GetTransactionsRes: Decodable {
     var isExecuted: Bool
     var note: String
     var type: TransactionType
-    var accountFromID: UInt32
-    var accountToID: UInt32
+    var accountFromID: UUID
+    var accountToID: UUID
     var datetimeCreate: Date
-    var accountGroupID: UInt32
+    var accountGroupID: UUID
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -288,28 +127,6 @@ struct GetTransactionsRes: Decodable {
         case accountToID
         case datetimeCreate
         case accountGroupID
-    }
-    
-    init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        self.id = try container.decode(UInt32.self, forKey: .id)
-        self.accountingInCharts = try container.decode(Bool.self, forKey: .accountingInCharts)
-        self.amountFrom = try container.decode(Decimal.self, forKey: .amountFrom)
-        self.amountTo = try container.decode(Decimal.self, forKey: .amountTo)
-        self.isExecuted = try container.decode(Bool.self, forKey: .isExecuted)
-        self.note = try container.decode(String.self, forKey: .note)
-        self.type = try container.decode(TransactionType.self, forKey: .type)
-        self.accountFromID = try container.decode(UInt32.self, forKey: .accountFromID)
-        self.accountToID = try container.decode(UInt32.self, forKey: .accountToID)
-        self.datetimeCreate = try container.decode(Date.self, forKey: .datetimeCreate)
-        let dateTransactionString = try container.decode(String.self, forKey: .dateTransaction)
-        if let dateTransaction = DateFormatters.onlyDate.date(from: dateTransactionString) {
-            self.dateTransaction = dateTransaction
-        } else {
-            throw ErrorModel(humanText: "Не смогли распарсить dateTransaction")
-        }
-        self.accountGroupID = try container.decode(UInt32.self, forKey: .accountGroupID)
     }
 }
 
@@ -327,20 +144,10 @@ enum DateFormatters {
     }()
 }
 
-struct DeleteTransactionReq: Encodable, FieldExtractable {
-    var id: UInt32
+struct DeleteTransactionReq: Codable {
+    var id: UUID
     
-    init(id: UInt32) {
+    init(id: UUID) {
         self.id = id
-    }
-    
-    init(_ map: [String: String]) {
-        self.id = UInt32(map["id"]!)!
-    }
-    
-    func convertToFields() -> [SyncTaskValue] {
-        var fields: [SyncTaskValue] = []
-        fields.append(SyncTaskValue(objectType: .transaction, name: "id", value: String(self.id)))
-        return fields
     }
 }

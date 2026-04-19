@@ -20,7 +20,7 @@ struct GetVersionRes: Decodable {
 }
 
 struct GetIconsRes: Decodable {
-    var id: UInt32
+    var id: UUID
     var url: String
     var name: String
 }

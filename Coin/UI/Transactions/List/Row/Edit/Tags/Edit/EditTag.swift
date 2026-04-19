@@ -12,7 +12,7 @@ private let logger = Logger(subsystem: "Coin", category: "EditTag")
 
 struct EditTag: View {
     
-    @Environment (\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss
     @State private var vm: EditTagViewModel
     @Environment(AlertManager.self) private var alert
     
@@ -72,7 +72,7 @@ struct EditTag: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            if vm.currentTag.id != 0 {
+            if vm.currentTag.id != UUID(uuid: UUID_NULL) {
                 Section(footer:
                     VStack(alignment: .leading) {
                         Text("ID: \(vm.currentTag.id)")

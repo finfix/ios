@@ -7,46 +7,100 @@
 
 import Foundation
 import SwiftUI
-import OSLog
-
-private let logger = Logger(subsystem: "Coin", category: "AccountGroupAPI")
-
-private let accountGroupBasePath = "/accountGroup"
+import ProtoDefinitions
+import GRPCCore
+import GRPCProtobuf
+import GRPCNIOTransportHTTP2
+import SwiftProtobuf
 
 extension APIManager {
     
     func GetAccountGroups() async throws -> [GetAccountGroupsRes] {
-        let data = try await networkManager.request(
-            url: apiBasePath + accountGroupBasePath,
-            method: .get
-        )
         
-        return try networkManager.decode(data, model: [GetAccountGroupsRes].self)
+        let accessToken = try await self.networkManager.authManager.getAccessToken()
+        
+        let request = AccountGroup_GetAccountGroupsRequest.with {
+            $0.accessToken = accessToken
+        }
+        
+        let response = try await grpcCall("GetAccountGroups", request: request) {
+            try await accountGroupClient.getAccountGroups($0)
+        }
+        
+        guard !response.hasError else {
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+        }
+        
+        return try response.accountGroups.map { accountGroup in
+            GetAccountGroupsRes(
+                id: try accountGroup.id.toUUID(),
+                name: accountGroup.name,
+                currency: accountGroup.currency,
+                serialNumber: accountGroup.serialNumber,
+                datetimeCreate: accountGroup.datetimeCreate.toDate()
+            )
+        }
     }
     
-    func CreateAccountGroup(req: CreateAccountGroupReq) async throws -> CreateAccountGroupRes {
-        let data = try await networkManager.request(
-            url: apiBasePath + accountGroupBasePath,
-            method: .post,
-            body: req
-        )
+    func CreateAccountGroup(req: CreateAccountGroupReq) async throws {
         
-        return try networkManager.decode(data, model: CreateAccountGroupRes.self)
+        let accessToken = try await self.networkManager.authManager.getAccessToken()
+        
+        let request = AccountGroup_CreateAccountGroupRequest.with {
+            $0.accessToken = accessToken
+            $0.name = req.name
+            $0.currency = req.currency
+            $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)
+        }
+        
+        let response = try await grpcCall("CreateAccountGroup", request: request) {
+            try await accountGroupClient.createAccountGroup($0)
+        }
+        
+        guard !response.hasError else {
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+        }
     }
     
     func UpdateAccountGroup(req: UpdateAccountGroupReq) async throws {
-        _ = try await networkManager.request(
-            url: apiBasePath + accountGroupBasePath,
-            method: .patch,
-            body: req
-        )
+        
+        let accessToken = try await self.networkManager.authManager.getAccessToken()
+        
+        let request = AccountGroup_UpdateAccountGroupRequest.with {
+            $0.accessToken = accessToken
+            $0.id = req.id.data
+            if let name = req.name {
+                $0.name = name
+            }
+            if let currency = req.currency {
+                $0.currency = currency
+            }
+        }
+        
+        let response = try await grpcCall("UpdateAccountGroup", request: request) {
+            try await accountGroupClient.updateAccountGroup($0)
+        }
+        
+        guard !response.hasError else {
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+        }
     }
     
     func DeleteAccountGroup(req: DeleteAccountGroupReq) async throws {
-        _ = try await networkManager.request(
-            url: apiBasePath + accountGroupBasePath,
-            method: .delete,
-            query: ["id": String(req.id)]
-        )
+        
+        let accessToken = try await self.networkManager.authManager.getAccessToken()
+        
+        let request = AccountGroup_DeleteAccountGroupRequest.with {
+            $0.accessToken = accessToken
+            $0.id = req.id.data
+        }
+        
+        let response = try await grpcCall("DeleteAccountGroup", request: request) {
+            try await accountGroupClient.deleteAccountGroup($0)
+        }
+        
+        guard !response.hasError else {
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+        }
     }
 }

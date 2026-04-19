@@ -9,7 +9,7 @@ import Foundation
 import Factory
 
 struct TransactionItem: Identifiable {
-    let id: UInt32
+    let id: UUID
     let index: Int
     let transaction: Transaction
     let isNewSection: Bool
@@ -29,7 +29,7 @@ class TransactionsListViewModel {
     @MainActor
     func load(filters: TransactionFilters) async throws {
         
-        var accountIDs: [UInt32] = []
+        var accountIDs: [UUID] = []
         for account in filters.accounts {
             accountIDs.append(account.id)
             for childAccount in account.childrenAccounts {

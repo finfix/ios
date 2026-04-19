@@ -22,22 +22,21 @@ extension Service {
         
         transaction.dateTransaction = transaction.dateTransaction.stripTime()
         transaction.datetimeCreate = Date.now
-        var tagIDs: [UInt32] = []
+        var tagIDs: [UUID] = []
         for tag in transaction.tags {
             tagIDs.append(tag.id)
         }
         
         try validateTransaction(transaction)
         
-        let id = try await repository.createTransaction(transaction)
-        transaction.id = id
+        try await repository.createTransaction(transaction)
         try await recalculateAccountBalances(accounts: [transaction.accountFrom, transaction.accountTo])
         try await repository.linkTagsToTransaction(transaction.tags, transaction: transaction)
 
         taskManager.createTask(
             actionName: .createTransaction,
-            localObjectID: id,
             reqModel: CreateTransactionReq(
+                id: transaction.id,
                 accountFromID: transaction.accountFrom.id,
                 accountToID: transaction.accountTo.id,
                 amountFrom: transaction.amountFrom,
@@ -61,11 +60,11 @@ extension Service {
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
-        accountIDs: [UInt32] = [],
+        accountIDs: [UUID] = [],
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
-        tagIDs: [UInt32] = [],
-        accountGroupIDs: [UInt32] = []
+        tagIDs: [UUID] = [],
+        accountGroupIDs: [UUID] = []
     ) async throws -> [Transaction] {
         
         let dateFrom: Date? = dateFrom?.stripTime()
@@ -106,12 +105,12 @@ extension Service {
             newTransaction.amountTo = newTransaction.amountFrom
         }
         
-        var oldTransactionTagIDs: [UInt32] = []
+        var oldTransactionTagIDs: [UUID] = []
         for tag in oldTransaction.tags {
             oldTransactionTagIDs.append(tag.id)
         }
         
-        var newTransactionTagIDs: [UInt32] = []
+        var newTransactionTagIDs: [UUID] = []
         for tag in newTransaction.tags {
             newTransactionTagIDs.append(tag.id)
         }
@@ -133,7 +132,6 @@ extension Service {
         
         taskManager.createTask(
             actionName: .updateTransaction,
-            localObjectID: newTransaction.id,
             reqModel: UpdateTransactionReq(
             accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
             accountToID: newTransaction.accountTo.id != oldTransaction.accountTo.id ? newTransaction.accountTo.id : nil,
@@ -153,11 +151,10 @@ extension Service {
         try await self.recalculateAccountBalances(accounts: [transaction.accountFrom, transaction.accountTo])
         taskManager.createTask(
             actionName: .deleteTransaction,
-            localObjectID: transaction.id,
             reqModel: DeleteTransactionReq(id: transaction.id)
         )
     }
-    
+        
     // MARK: Other
     private func validateTransaction(_ transaction: Transaction) throws {
         guard transaction.amountFrom != 0 && transaction.amountTo != 0 else {

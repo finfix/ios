@@ -10,12 +10,12 @@ import GRDB
 
 struct TagToTransactionDB {
     
-    var transactionId: UInt32
-    var tagId: UInt32
+    var transactionId: UUID
+    var tagId: UUID
     
     init(
-        transactionID: UInt32,
-        tagID: UInt32
+        transactionID: UUID,
+        tagID: UUID
     ) {
         self.transactionId = transactionID
         self.tagId = tagID
@@ -35,15 +35,15 @@ struct TagToTransactionDB {
         return iconsDB
     }
     
-    static func compareTwoArrays(_ serverModels: [TagToTransactionDB], _ localModels: [TagToTransactionDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
+    static func compareTwoArrays(_ serverModels: [TagToTransactionDB], _ localModels: [TagToTransactionDB]) -> [UUID: [String: (server: Any, local: Any)]] {
         let serverModels = serverModels.sorted { ($0.transactionId, $0.tagId) < ($1.transactionId, $1.tagId) }
         let localModels = localModels.sorted { ($0.transactionId, $0.tagId) < ($1.transactionId, $1.tagId) }
         
-        var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
+        var differences: [UUID: [String: (server: Any, local: Any)]] = [:]
         
         guard serverModels.count == localModels.count else {
             var difference: [String: (server: Any, local: Any)] = ["count": (server: serverModels.count, local: localModels.count)]
-            differences[0] = difference
+            differences[UUID(uuid: UUID_NULL)] = difference
             return differences
         }
         
@@ -56,7 +56,7 @@ struct TagToTransactionDB {
                 difference["tagId"] = (server: serverModel.tagId, local: localModels[i].tagId)
             }
             if !difference.isEmpty {
-                differences[UInt32(i)] = difference
+                differences[UUID()] = difference
             }
         }
         return differences

@@ -27,7 +27,7 @@ struct ErrorModel: LocalizedError, Decodable {
     }
     
     struct UserInfo: Decodable {
-        let userID: UInt32?
+        let userID: UUID?
         let taskID: String?
         let deviceID: String?
     }

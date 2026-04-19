@@ -8,14 +8,14 @@
 import Foundation
 
 struct Icon: Identifiable, Hashable, Equatable {
-    var id: UInt32
+    var id: UUID
     var name: String
     var url: String
     
     private let basePath = "https://bonavii.com/"
     
     init(
-        id: UInt32 = 0,
+        id: UUID = UUID(),
         name: String = "",
         url: String = ""
     ) {
@@ -39,7 +39,7 @@ struct Icon: Identifiable, Hashable, Equatable {
         return icons
     }
     
-    static func convertToMap(_ icons: [Icon]) -> [UInt32: Icon] {
+    static func convertToMap(_ icons: [Icon]) -> [UUID: Icon] {
         return Dictionary(uniqueKeysWithValues: icons.map{ ($0.id, $0) })
     }
 }

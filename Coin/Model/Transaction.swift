@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import ProtoDefinitions
 
 struct Transaction: Identifiable, Hashable {
-    var id: UInt32
+    var id: UUID
     var accountingInCharts: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
@@ -20,10 +21,10 @@ struct Transaction: Identifiable, Hashable {
     var accountFrom: Account
     var accountTo: Account
     var tags: [Tag]
-    var accountGroupID: UInt32
+    var accountGroupID: UUID
     
     init(
-        id: UInt32 = 0,
+        id: UUID = UUID(),
         accountingInCharts: Bool = true,
         amountFrom: Decimal = 0,
         amountTo: Decimal = 0,
@@ -35,7 +36,7 @@ struct Transaction: Identifiable, Hashable {
         accountFrom: Account = Account(),
         accountTo: Account = Account(),
         tags: [Tag] = [],
-        accountGroupID: UInt32 = 0
+        accountGroupID: UUID = UUID()
     ) {
         self.accountingInCharts = accountingInCharts
         self.amountFrom = amountFrom
@@ -57,9 +58,9 @@ struct Transaction: Identifiable, Hashable {
 extension Transaction {
     init(
         _ dbModel: TransactionDB,
-        accountsMap: [UInt32: Account]?,
+        accountsMap: [UUID: Account]?,
         tagsToTransactions: [TagToTransactionDB],
-        tagsMap: [UInt32: Tag]?
+        tagsMap: [UUID: Tag]?
     ) {
         self.accountingInCharts = dbModel.accountingInCharts
         self.amountFrom = dbModel.amountFrom
@@ -84,9 +85,9 @@ extension Transaction {
     
     static func convertFromDBModel(
         _ transactionsDB: [TransactionDB],
-        accountsMap: [UInt32: Account]?,
+        accountsMap: [UUID: Account]?,
         tagsToTransactions: [TagToTransactionDB],
-        tagsMap: [UInt32: Tag]?
+        tagsMap: [UUID: Tag]?
     ) -> [Transaction] {
         var transactions: [Transaction] = []
         for transactionDB in transactionsDB {

@@ -10,7 +10,7 @@ import GRDB
 
 struct TransactionDB {
     
-    var id: UInt32?
+    var id: UUID?
     var accountingInCharts: Bool
     var amountFrom: Decimal
     var amountTo: Decimal
@@ -19,9 +19,9 @@ struct TransactionDB {
     var note: String
     var type: TransactionType
     var datetimeCreate: Date
-    var accountFromId: UInt32
-    var accountToId: UInt32
-    var accountGroupId: UInt32
+    var accountFromId: UUID
+    var accountToId: UUID
+    var accountGroupId: UUID
     
     // Инициализатор из сетевой модели
     init(_ res: GetTransactionsRes) {
@@ -42,9 +42,6 @@ struct TransactionDB {
     // Инициализатор из бизнес модели
     init(_ model: Transaction) {
         self.id = model.id
-        if self.id == 0 {
-            self.id = nil
-        }
         self.accountingInCharts = model.accountingInCharts
         self.amountFrom = model.amountFrom
         self.amountTo = model.amountTo
@@ -66,15 +63,15 @@ struct TransactionDB {
         return transactionsDB
     }
     
-    static func compareTwoArrays(_ serverModels: [TransactionDB], _ localModels: [TransactionDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
+    static func compareTwoArrays(_ serverModels: [TransactionDB], _ localModels: [TransactionDB]) -> [UUID: [String: (server: Any, local: Any)]] {
         let serverModels = serverModels.sorted { $0.id! < $1.id! }
         let localModels = localModels.sorted { $0.id! < $1.id! }
         
-        var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
+        var differences: [UUID: [String: (server: Any, local: Any)]] = [:]
         
         guard serverModels.count == localModels.count else {
             var difference: [String: (server: Any, local: Any)] = ["count": (server: serverModels.count, local: localModels.count)]
-            differences[0] = difference
+            differences[UUID(uuid: UUID_NULL)] = difference
             return differences
         }
         

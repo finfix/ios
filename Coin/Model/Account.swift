@@ -27,7 +27,7 @@ struct Account: Identifiable, Hashable {
         }
     }
     
-    var id: UInt32
+    var id: UUID
     var accountingInHeader: Bool
     var accountingInCharts: Bool
     var icon: Icon
@@ -45,7 +45,7 @@ struct Account: Identifiable, Hashable {
     var budgetGradualFilling: Bool
     var datetimeCreate: Date
     
-    var parentAccountID: UInt32?
+    var parentAccountID: UUID?
     var parentAccount: Parent
     
     var accountGroup: AccountGroup
@@ -54,7 +54,7 @@ struct Account: Identifiable, Hashable {
     var childrenAccounts: [Account]
     
     init(
-        id: UInt32 = 0,
+        id: UUID = UUID(),
         accountingInHeader: Bool = true,
         accountingInCharts: Bool = true,
         icon: Icon = Icon(),
@@ -71,7 +71,7 @@ struct Account: Identifiable, Hashable {
         budgetDaysOffset: Int8 = 0,
         budgetGradualFilling: Bool = false,
         datetimeCreate: Date = Date.now,
-        parentAccountID: UInt32? = nil,
+        parentAccountID: UUID? = nil,
         parentAccount: Account.Parent = nil,
         accountGroup: AccountGroup = AccountGroup(),
         currency: Currency = Currency(),
@@ -105,8 +105,8 @@ struct Account: Identifiable, Hashable {
     init(
          _ dbModel: AccountDB,
          currenciesMap: [String: Currency]?,
-         accountGroupsMap: [UInt32: AccountGroup]?,
-         iconsMap: [UInt32: Icon]?
+         accountGroupsMap: [UUID: AccountGroup]?,
+         iconsMap: [UUID: Icon]?
     ) {
         self.id = dbModel.id!
         self.accountingInHeader = dbModel.accountingInHeader
@@ -138,8 +138,8 @@ struct Account: Identifiable, Hashable {
     static func convertFromDBModel(
         _ accountsDB: [AccountDB],
         currenciesMap: [String: Currency]?,
-        accountGroupsMap: [UInt32: AccountGroup]?,
-        iconsMap: [UInt32: Icon]?
+        accountGroupsMap: [UUID: AccountGroup]?,
+        iconsMap: [UUID: Icon]?
     ) -> [Account] {
         var accounts: [Account] = []
         for accountDB in accountsDB {
@@ -148,7 +148,7 @@ struct Account: Identifiable, Hashable {
         return accounts
     }
     
-    static func convertToMap(_ accounts: [Account]) -> [UInt32: Account] {
+    static func convertToMap(_ accounts: [Account]) -> [UUID: Account] {
         return Dictionary(uniqueKeysWithValues: accounts.map{ ($0.id, $0) })
     }
 }

@@ -8,14 +8,14 @@
 import Foundation
 
 struct AccountGroup: Identifiable, Hashable {
-    var id: UInt32
+    var id: UUID
     var name: String
     var serialNumber: UInt32
     var currency: Currency
     var datetimeCreate: Date
     
     init(
-        id: UInt32 = 0,
+        id: UUID = UUID(),
         name: String = "",
         serialNumber: UInt32 = 0,
         currency: Currency = Currency(),
@@ -45,7 +45,7 @@ struct AccountGroup: Identifiable, Hashable {
         return accountGroups
     }
     
-    static func convertToMap(_ accountGroups: [AccountGroup]) -> [UInt32: AccountGroup] {
+    static func convertToMap(_ accountGroups: [AccountGroup]) -> [UUID: AccountGroup] {
         return Dictionary(uniqueKeysWithValues: accountGroups.map{ ($0.id, $0) })
     }
 }

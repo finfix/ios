@@ -8,14 +8,14 @@
 import Foundation
 
 struct User {
-    var id: UInt32
+    var id: UUID
     var name: String
     var email: String
     var defaultCurrency: Currency
     var notificationToken: String?
     
     init(
-        id: UInt32 = 0,
+        id: UUID = UUID(),
         name: String = "",
         email: String = "",
         defaultCurrency: Currency = Currency(),

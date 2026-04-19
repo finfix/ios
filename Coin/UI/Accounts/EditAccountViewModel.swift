@@ -72,10 +72,9 @@ class EditAccountViewModel {
             visible = true
         }
         accounts = try await service.getAccounts(visible: visible, types: [currentAccount.type])
-        if currentAccount.currency.code == "" {
+        if mode == .create {
             currentAccount.currency = currencies.first(where: { accountGroup.currency.code == $0.code }) ?? currencies.first ?? Currency()
-        }
-        if currentAccount.icon.id == 0 {
+
             if let icon = icons.first {
                 currentAccount.icon = icon
             }

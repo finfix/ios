@@ -57,6 +57,10 @@ extension Service {
         }
     }
     
+    func reconnectGRPC(host: String, port: Int) throws {
+        try apiManager.reconnect(host: host, port: port)
+    }
+
     func deleteAllData() async throws {
         try await repository.deleteAllData()
     }
@@ -95,11 +99,11 @@ extension Service {
         chartType: ChartType,
         groupBy: ChartViewGroupBy,
         targetCurrency: Currency,
-        accountGroupIDs: [UInt32] = [],
-        accountIDs: [UInt32] = [],
+        accountGroupIDs: [UUID] = [],
+        accountIDs: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
-        tagIDs: [UInt32] = []
+        tagIDs: [UUID] = []
     ) async throws -> [Series] {
         
         // Контейнер для информации для графика
@@ -285,7 +289,7 @@ extension Service {
         async let serverAccounts = AccountDB.convertFromApiModel(try await apiManager.GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo)))
         async let serverTags = TagDB.convertFromApiModel(try await apiManager.GetTags())
         async let serverTagsToTransactions = TagToTransactionDB.convertFromApiModel(try await apiManager.GetTagsToTransaction())
-        async let serverTransactions = TransactionDB.convertFromApiModel(try await apiManager.GetTransactions(req: GetTransactionReq()))
+        async let serverTransactions = TransactionDB.convertFromApiModel(try await apiManager.GetTransactions(req: GetTransactionReq(dateFrom: Date.distantPast, dateTo: Date.distantFuture)))
         
         var localIcons = try await repository.getIcons()
         var localCurrencies = try await repository.getCurrencies()
@@ -295,39 +299,7 @@ extension Service {
         var localTags = try await repository.getTags()
         var localTagsToTransactions = try await repository.getTagsToTransactions()
         var localTransactions = try await repository.getTransactions()
-        
-        let idsMapping = try await repository.getIDsMapping()
-        
-        let iconIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .icon)
-        for (i, localIcon) in localIcons.enumerated() {
-            localIcons[i].id = iconIDsMapping[localIcon.id!]
-        }
-        let userIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .user)
-        for (i, localUser) in localUsers.enumerated() {
-            localUsers[i].id = userIDsMapping[localUser.id!]
-        }
-        let accountGroupIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .accountGroup)
-        for (i, localAccountGroup) in localAccountGroups.enumerated() {
-            localAccountGroups[i].id = accountGroupIDsMapping[localAccountGroup.id!]
-        }
-        let accountIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .account)
-        for (i, localAccount) in localAccounts.enumerated() {
-            localAccounts[i].id = accountIDsMapping[localAccount.id!]
-            localAccounts[i].accountGroupId = accountGroupIDsMapping[localAccount.accountGroupId]!
-            localAccounts[i].iconID = iconIDsMapping[localAccount.iconID]!
-        }
-        let tagIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .tag)
-        for (i, localTag) in localTags.enumerated() {
-            localTags[i].id = tagIDsMapping[localTag.id!]
-            localTags[i].accountGroupID = accountGroupIDsMapping[localTag.accountGroupID]!
-        }
-        let transactionIDsMapping = IDMappingDB.getMapForModelType(mapping: idsMapping, modelType: .transaction)
-        for (i, localTransaction) in localTransactions.enumerated() {
-            localTransactions[i].id = transactionIDsMapping[localTransaction.id!]
-            localTransactions[i].accountFromId = accountIDsMapping[localTransaction.accountFromId]!
-            localTransactions[i].accountToId = accountIDsMapping[localTransaction.accountToId]!
-        }
-        
+                        
         let iconsDifferences = IconDB.compareTwoArrays(try await serverIcons, localIcons)
         if !iconsDifferences.isEmpty {
             differences += "Icons: \(iconsDifferences)"
@@ -393,11 +365,17 @@ extension Service {
         async let _accounts = try await apiManager.GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
         async let _tags = try await apiManager.GetTags()
         async let _tagsToTransactions = try await apiManager.GetTagsToTransaction()
-        async let _transactions = try await apiManager.GetTransactions(req: GetTransactionReq())
+        async let _transactions = try await apiManager.GetTransactions(
+            req: GetTransactionReq(
+                dateFrom: Date.distantPast,
+                dateTo: Date.distantFuture
+            )
+        )
 
         var (icons, currencies, user, accountGroups, accounts, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _tags, _tagsToTransactions, _transactions)
         
         // Загружаем и сохраняем локально иконки
+        logger.info("Скачиваем иконки")
         for (i, icon) in icons.enumerated() {
             let iconData = try await apiManager.GetIcon(url: "https://bonavii.com/"+icon.url)
             let url = String(icon.url.replacingOccurrences(of: "/", with: "_"))
@@ -407,10 +385,11 @@ extension Service {
         }
         
         // Удаляем все данные в базе данных
+        logger.info("Удаляем все данные")
         try await repository.deleteAllData()
                 
         // Сохраняем данные в базу данных
-        logger.info("Сохраняем иконки")
+        logger.info("Сохраняем данные по иконкам")
         try await repository.importIcons(IconDB.convertFromApiModel(icons))
         logger.info("Сохраняем валюты")
         try await repository.importCurrencies(CurrencyDB.convertFromApiModel(currencies))

@@ -78,7 +78,7 @@ struct EditAccountGroup: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            if vm.currentAccountGroup.id != 0 {
+            if vm.currentAccountGroup.id != UUID(uuid: UUID_NULL) {
                 Section(footer:
                     VStack(alignment: .leading) {
                         Text("ID: \(vm.currentAccountGroup.id)")

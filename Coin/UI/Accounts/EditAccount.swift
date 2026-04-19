@@ -129,10 +129,10 @@ struct EditAccount: View {
                     Section {
                         Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
                             Text("Не выбрано")
-                                .tag(nil as UInt32?)
+                                .tag(nil as UUID?)
                             ForEach(accounts.filter{ $0.isParent }) { account in
                                 Text(account.name)
-                                    .tag(account.id as UInt32?)
+                                    .tag(account.id as UUID?)
                             }
                         }
                     }
@@ -160,7 +160,7 @@ struct EditAccount: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            if vm.currentAccount.id != 0 {
+            if vm.currentAccount.id != UUID(uuid: UUID_NULL) {
                 Section {
                     NavigationLink {
                         TransactionsView(
@@ -241,7 +241,7 @@ struct EditAccount: View {
         Account(
             accountingInHeader: true,
             accountingInCharts: true,
-            icon: Icon(id: 1),
+            icon: Icon(id: UUID()),
             name: "Тестовый счет",
             type: .expense,
             visible: true,
@@ -253,7 +253,7 @@ struct EditAccount: View {
             budgetDaysOffset: 5,
             budgetGradualFilling: true,
             datetimeCreate: Date.now,
-            accountGroup: AccountGroup(id: 4),
+            accountGroup: AccountGroup(id: UUID()),
             currency: Currency(symbol: "$")
         ),
         selectedAccountGroup: AccountGroup(),

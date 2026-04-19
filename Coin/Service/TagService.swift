@@ -15,11 +15,10 @@ extension Service {
         
         tag.datetimeCreate = Date.now
                 
-        let id = try await repository.createTag(tag)
+        try await repository.createTag(tag)
         
         taskManager.createTask(
             actionName: .createTag,
-            localObjectID: id,
             reqModel: CreateTagReq(
                 name: tag.name,
                 accountGroupID: tag.accountGroup.id,
@@ -52,7 +51,6 @@ extension Service {
         
         taskManager.createTask(
             actionName: .updateTag,
-            localObjectID: newTag.id,
             reqModel: UpdateTagReq(
                 id: newTag.id,
                 name: newTag.name != oldTag.name ? newTag.name : nil
@@ -65,7 +63,6 @@ extension Service {
         try await self.repository.deleteTag(tag)
         taskManager.createTask(
             actionName: .deleteTag,
-            localObjectID: tag.id,
             reqModel: DeleteTagReq(id: tag.id)
         )
     }

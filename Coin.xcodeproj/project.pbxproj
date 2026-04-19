@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -50,6 +50,8 @@
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B537425F2D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */; };
 		B53742602D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */; };
+		B54A2E4F2ED881460099196B /* ProtoExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54A2E4E2ED8813F0099196B /* ProtoExtentions.swift */; };
+		B54A2E502ED881460099196B /* ProtoExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54A2E4E2ED8813F0099196B /* ProtoExtentions.swift */; };
 		B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */; };
 		B54DA3AA2BBD81D9008A9FD1 /* StripTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */; };
 		B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DAF2BD579FA00780460 /* TagsList.swift */; };
@@ -90,8 +92,9 @@
 		B562CB562C71E2FF00AFB056 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB542C71E2FF00AFB056 /* AuthService.swift */; };
 		B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
 		B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56361A32B04FC000044CDD8 /* AppTabView.swift */; };
-		B56FB60F2BEA268300CBFB1E /* IDMappingDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */; };
 		B56FB6112BEA343A00CBFB1E /* SyncTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56FB6102BEA343A00CBFB1E /* SyncTask.swift */; };
+		B56FD04E2EB91C0A0085A211 /* ProtoDefinitions in Frameworks */ = {isa = PBXBuildFile; productRef = B5A1B1A12EBA000000000002 /* ProtoDefinitions */; };
+		B56FD04F2EB91C0A0085A211 /* ProtoDefinitions in Frameworks */ = {isa = PBXBuildFile; productRef = B5A1B1A12EBA000000000001 /* ProtoDefinitions */; };
 		B5744E982BD29180004C9AC7 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */; };
 		B5744E9B2BD29267004C9AC7 /* SettingsAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */; };
 		B5744E9D2BD29276004C9AC7 /* SettingsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */; };
@@ -126,6 +129,8 @@
 		B593F9552AE1CCB000378E17 /* EditTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = B593F9542AE1CCB000378E17 /* EditTransaction.swift */; };
 		B596508A2BED547C009C6E52 /* TaskDetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59650892BED547C009C6E52 /* TaskDetailsViewModel.swift */; };
 		B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B596E6092A278CC1007D7E6D /* AccountModels.swift */; };
+		B59C8E992ECCBE6A00569E34 /* Atlantis in Frameworks */ = {isa = PBXBuildFile; productRef = B59C8E982ECCBE6A00569E34 /* Atlantis */; };
+		B59C8E9B2ECCBE7700569E34 /* Atlantis in Frameworks */ = {isa = PBXBuildFile; productRef = B59C8E9A2ECCBE7700569E34 /* Atlantis */; };
 		B59F0F2128FDC7C000AA33A9 /* AccountCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2028FDC7C000AA33A9 /* AccountCategoryView.swift */; };
 		B59F0F2628FDD30F00AA33A9 /* AccountCirclesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2528FDD30F00AA33A9 /* AccountCirclesView.swift */; };
 		B59F0F2928FDD4C200AA33A9 /* AccountGroupSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2828FDD4C200AA33A9 /* AccountGroupSelector.swift */; };
@@ -224,7 +229,6 @@
 		B5DEFD212C07015A001D7E61 /* CurrencyConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E6C1932AF2AF9500097067 /* CurrencyConverter.swift */; };
 		B5DEFD222C07015A001D7E61 /* AppTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56361A32B04FC000044CDD8 /* AppTabView.swift */; };
 		B5DEFD232C07015A001D7E61 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E89331290073C5002AC30C /* LoginView.swift */; };
-		B5DEFD242C07015A001D7E61 /* IDMappingDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */; };
 		B5DEFD252C07015A001D7E61 /* Icon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA02BD2A4BA004C9AC7 /* Icon.swift */; };
 		B5DEFD262C07015A001D7E61 /* ErrorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B12906A64000875037 /* ErrorModel.swift */; };
 		B5DEFD272C07015A001D7E61 /* AccountPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51CE1F72BAC431700682D48 /* AccountPermissions.swift */; };
@@ -314,6 +318,7 @@
 		B52F76572D2FFBDB00B6E617 /* TransactionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsViewModel.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFiltersRowView.swift; sourceTree = "<group>"; };
+		B54A2E4E2ED8813F0099196B /* ProtoExtentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtoExtentions.swift; sourceTree = "<group>"; };
 		B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMonthPeriodFromDate.swift; sourceTree = "<group>"; };
 		B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripTime.swift; sourceTree = "<group>"; };
 		B54F3DAF2BD579FA00780460 /* TagsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsList.swift; sourceTree = "<group>"; };
@@ -339,7 +344,6 @@
 		B562CB542C71E2FF00AFB056 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BudgetsList.swift; sourceTree = "<group>"; };
 		B56361A32B04FC000044CDD8 /* AppTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTabView.swift; sourceTree = "<group>"; };
-		B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IDMappingDB.swift; sourceTree = "<group>"; };
 		B56FB6102BEA343A00CBFB1E /* SyncTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTask.swift; sourceTree = "<group>"; };
 		B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
 		B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAPI.swift; sourceTree = "<group>"; };
@@ -424,7 +428,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B56FD04F2EB91C0A0085A211 /* ProtoDefinitions in Frameworks */,
 				B562CB352C71D57700AFB056 /* Factory in Frameworks */,
+				B59C8E992ECCBE6A00569E34 /* Atlantis in Frameworks */,
 				B581336F2C0CF43F004EB2B6 /* DeviceKit in Frameworks */,
 				B52DE5EC2C7080C200A4656E /* GRDB in Frameworks */,
 			);
@@ -434,7 +440,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B56FD04E2EB91C0A0085A211 /* ProtoDefinitions in Frameworks */,
 				B562CB372C71D57D00AFB056 /* Factory in Frameworks */,
+				B59C8E9B2ECCBE7700569E34 /* Atlantis in Frameworks */,
 				B581336D2C0CF439004EB2B6 /* DeviceKit in Frameworks */,
 				B52DE5EA2C70807F00A4656E /* GRDB in Frameworks */,
 			);
@@ -550,7 +558,6 @@
 				B5744EA92BD2DD7A004C9AC7 /* TagDB.swift */,
 				B5744EAB2BD2DDC0004C9AC7 /* TagToTransactionDB.swift */,
 				B5F4C3EC2BDF6DCD007CCFC9 /* SyncTaskDB.swift */,
-				B56FB60E2BEA268300CBFB1E /* IDMappingDB.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -599,6 +606,7 @@
 		B5610F0228FC9A270063AFEB /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				B54A2E4E2ED8813F0099196B /* ProtoExtentions.swift */,
 				B562CB262C71C20C00AFB056 /* NetworkManager */,
 				B562CB252C71C1F200AFB056 /* AuthManager */,
 				B59D458928FE537700773D46 /* Model */,
@@ -894,6 +902,8 @@
 				B581336E2C0CF43F004EB2B6 /* DeviceKit */,
 				B52DE5EB2C7080C200A4656E /* GRDB */,
 				B562CB342C71D57700AFB056 /* Factory */,
+				B5A1B1A12EBA000000000001 /* ProtoDefinitions */,
+				B59C8E982ECCBE6A00569E34 /* Atlantis */,
 			);
 			productName = Coin;
 			productReference = B5DEFD4F2C07015A001D7E61 /* CoinDev.app */;
@@ -916,6 +926,8 @@
 				B581336C2C0CF439004EB2B6 /* DeviceKit */,
 				B52DE5E92C70807F00A4656E /* GRDB */,
 				B562CB362C71D57D00AFB056 /* Factory */,
+				B5A1B1A12EBA000000000002 /* ProtoDefinitions */,
+				B59C8E9A2ECCBE7700569E34 /* Atlantis */,
 			);
 			productName = Coin;
 			productReference = B5F9CC5F28F01CA80037A21A /* Coin.app */;
@@ -948,6 +960,9 @@
 				B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */,
 				B52DE5E82C70807F00A4656E /* XCRemoteSwiftPackageReference "GRDB" */,
 				B562CB332C71D3D400AFB056 /* XCRemoteSwiftPackageReference "Factory" */,
+				B5CB07DD2EB8D53F00785E8B /* XCRemoteSwiftPackageReference "swift-protobuf" */,
+				B56FD04B2EB919120085A211 /* XCLocalSwiftPackageReference "../swift-client-grpc" */,
+				B54DF67F2ECCBC040002F9DC /* XCRemoteSwiftPackageReference "Atlantis" */,
 			);
 			productRefGroup = B5F9CC6028F01CA80037A21A /* Products */;
 			projectDirPath = "";
@@ -1042,6 +1057,7 @@
 				B562CB532C71E1BA00AFB056 /* LoginViewModel.swift in Sources */,
 				B5DEFD052C07015A001D7E61 /* AccountGroupModels.swift in Sources */,
 				B5DEFD062C07015A001D7E61 /* AccountGroupSelector.swift in Sources */,
+				B54A2E4F2ED881460099196B /* ProtoExtentions.swift in Sources */,
 				B5DEFD072C07015A001D7E61 /* SnapCarousel.swift in Sources */,
 				B5DEFD082C07015A001D7E61 /* TransactionsList.swift in Sources */,
 				B5DEFD0A2C07015A001D7E61 /* TransactionModels.swift in Sources */,
@@ -1079,7 +1095,6 @@
 				B5DEFD212C07015A001D7E61 /* CurrencyConverter.swift in Sources */,
 				B5DEFD222C07015A001D7E61 /* AppTabView.swift in Sources */,
 				B5DEFD232C07015A001D7E61 /* LoginView.swift in Sources */,
-				B5DEFD242C07015A001D7E61 /* IDMappingDB.swift in Sources */,
 				B5DEFD252C07015A001D7E61 /* Icon.swift in Sources */,
 				B5DEFD262C07015A001D7E61 /* ErrorModel.swift in Sources */,
 				B562CB502C71DE4500AFB056 /* SettingsService.swift in Sources */,
@@ -1177,6 +1192,7 @@
 				B5192F982BFF4AE5004A8BFD /* AccountGroupModels.swift in Sources */,
 				B59F0F2928FDD4C200AA33A9 /* AccountGroupSelector.swift in Sources */,
 				B5E8933028FF090B002AC30C /* SnapCarousel.swift in Sources */,
+				B54A2E502ED881460099196B /* ProtoExtentions.swift in Sources */,
 				B50DBAD42BCD2D2600A58B53 /* TransactionsList.swift in Sources */,
 				B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */,
 				B5B950452ADF16FF00798F8C /* Line.swift in Sources */,
@@ -1211,7 +1227,6 @@
 				B56361A42B04FC000044CDD8 /* AppTabView.swift in Sources */,
 				B5E89332290073C5002AC30C /* LoginView.swift in Sources */,
 				B562CB442C71DC3E00AFB056 /* UserService.swift in Sources */,
-				B56FB60F2BEA268300CBFB1E /* IDMappingDB.swift in Sources */,
 				B5744EA12BD2A4BA004C9AC7 /* Icon.swift in Sources */,
 				B5D143B22906A64000875037 /* ErrorModel.swift in Sources */,
 				B51CE1F82BAC431700682D48 /* AccountPermissions.swift in Sources */,
@@ -1285,7 +1300,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1325,7 +1340,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1484,7 +1499,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1524,7 +1539,7 @@
 				INFOPLIST_KEY_UIRequiresFullScreen = NO;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1572,13 +1587,28 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		B56FD04B2EB919120085A211 /* XCLocalSwiftPackageReference "../swift-client-grpc" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../swift-client-grpc";
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		B52DE5E82C70807F00A4656E /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = exactVersion;
+				version = 7.8.0;
+			};
+		};
+		B54DF67F2ECCBC040002F9DC /* XCRemoteSwiftPackageReference "Atlantis" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ProxymanApp/Atlantis.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.31.0;
 			};
 		};
 		B562CB332C71D3D400AFB056 /* XCRemoteSwiftPackageReference "Factory" */ = {
@@ -1586,7 +1616,7 @@
 			repositoryURL = "https://github.com/hmlongco/Factory";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.3.2;
+				minimumVersion = 2.5.3;
 			};
 		};
 		B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
@@ -1594,7 +1624,15 @@
 			repositoryURL = "https://github.com/devicekit/DeviceKit";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.4.0;
+				minimumVersion = 5.7.0;
+			};
+		};
+		B5CB07DD2EB8D53F00785E8B /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.33.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1629,6 +1667,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B581336A2C0CF2BA004EB2B6 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
+		};
+		B59C8E982ECCBE6A00569E34 /* Atlantis */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B54DF67F2ECCBC040002F9DC /* XCRemoteSwiftPackageReference "Atlantis" */;
+			productName = Atlantis;
+		};
+		B59C8E9A2ECCBE7700569E34 /* Atlantis */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B54DF67F2ECCBC040002F9DC /* XCRemoteSwiftPackageReference "Atlantis" */;
+			productName = Atlantis;
+		};
+		B5A1B1A12EBA000000000001 /* ProtoDefinitions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B56FD04B2EB919120085A211 /* XCLocalSwiftPackageReference "../swift-client-grpc" */;
+			productName = ProtoDefinitions;
+		};
+		B5A1B1A12EBA000000000002 /* ProtoDefinitions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B56FD04B2EB919120085A211 /* XCLocalSwiftPackageReference "../swift-client-grpc" */;
+			productName = ProtoDefinitions;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

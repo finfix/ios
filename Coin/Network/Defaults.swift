@@ -9,4 +9,5 @@ import Foundation
 
 let defaultIsDarkMode = true
 let defaultIsDevMode = false
-let defaultApiBasePath = "https://api.bonavii.com"
+let defaultGrpcHost = "127.0.0.1"
+let defaultGrpcPort = 8090

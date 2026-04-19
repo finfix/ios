@@ -13,22 +13,14 @@ private let logger = Logger(subsystem: "Coin", category: "API")
 
 class NetworkManager {
     
-    static let shared = makeShared()
-    
-    static func makeShared() -> NetworkManager {
-        return NetworkManager(authManager: .shared)
-    }
-    
     init(
         authManager: AuthManager
     ) {
         self.authManager = authManager
     }
     
-//    private let decoder: JSONDecoder
-    private let authManager: AuthManager
+    let authManager: AuthManager
     
-    @AppStorage("apiBasePath") var apiBasePath = defaultApiBasePath
     @AppStorage("isLogin") var isLogin: Bool = false
     
     enum Method: String {

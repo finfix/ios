@@ -15,7 +15,8 @@ struct DeveloperTools: View {
     
     @State private var vm = DeveloperToolsViewModel()
     
-    @AppStorage("apiBasePath") private var apiBasePath = defaultApiBasePath
+    @AppStorage("grpcHost") private var grpcHost = defaultGrpcHost
+    @AppStorage("grpcPort") private var grpcPort = defaultGrpcPort
     @AppStorage("accessToken") private var accessToken: String = ""
     @AppStorage("refreshToken") private var refreshToken: String = ""
     @Environment(AlertManager.self) var alert
@@ -23,28 +24,56 @@ struct DeveloperTools: View {
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     @State var shouldShowAlert = false
-    
     @State var differences: String? = nil
     
-    var isProdAPI: Bool {
-        apiBasePath == defaultApiBasePath
+    var isDefaultGRPC: Bool {
+        grpcHost == defaultGrpcHost && grpcPort == defaultGrpcPort
     }
-
-    
     
     var body: some View {
         Form {
             Group {
-                Section {
-                    Text(isProdAPI ? "Продакшн окружение" : "Тестовое окружение")
-                        .foregroundColor(isProdAPI ? .red : .yellow)
+                // MARK: gRPC
+                Section(header: Text("gRPC сервер")) {
+                    Text(isDefaultGRPC ? "Локальный сервер" : "Нестандартный адрес")
+                        .foregroundColor(isDefaultGRPC ? .secondary : .yellow)
                     HStack {
-                        TextField("", text: $apiBasePath)
+                        Text("Host")
+                            .foregroundColor(.secondary)
+                        TextField(defaultGrpcHost, text: $grpcHost)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
-                        Button { apiBasePath = defaultApiBasePath } label: { Text("По умолчанию") }
+                            .multilineTextAlignment(.trailing)
+                    }
+                    HStack {
+                        Text("Port")
+                            .foregroundColor(.secondary)
+                        TextField(String(defaultGrpcPort), value: $grpcPort, format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    HStack {
+                        Button {
+                            grpcHost = defaultGrpcHost
+                            grpcPort = defaultGrpcPort
+                        } label: {
+                            Text("По умолчанию")
+                        }
+                        Spacer()
+                        Button {
+                            do {
+                                try vm.reconnectGRPC(host: grpcHost, port: grpcPort)
+                            } catch {
+                                alert.error(error)
+                            }
+                        } label: {
+                            Text("Переподключить")
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
                 }
+                
+                // MARK: Данные
                 Section {
                     Button {
                         Task {

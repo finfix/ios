@@ -10,19 +10,19 @@ import GRDB
 
 struct AccountDB {
     
-    var id: UInt32?
+    var id: UUID?
     var accountingInHeader: Bool
     var accountingInCharts: Bool
-    var iconID: UInt32
+    var iconID: UUID
     var name: String
     var remainder: Decimal
     var type: AccountType
     var visible: Bool
-    var parentAccountId: UInt32?
+    var parentAccountId: UUID?
     var serialNumber: UInt32
     var isParent: Bool
     var currencyCode: String
-    var accountGroupId: UInt32
+    var accountGroupId: UUID
     var budgetAmount: Decimal
     var budgetFixedSum: Decimal
     var budgetDaysOffset: Int8
@@ -30,19 +30,19 @@ struct AccountDB {
     var datetimeCreate: Date
     
     init(
-        id: UInt32,
+        id: UUID,
         accountingInHeader: Bool,
         accountingInCharts: Bool,
-        iconID: UInt32,
+        iconID: UUID,
         name: String,
         remainder: Decimal,
         type: AccountType,
         visible: Bool,
-        parentAccountId: UInt32?,
+        parentAccountId: UUID?,
         serialNumber: UInt32,
         isParent: Bool,
         currencyCode: String,
-        accountGroupId: UInt32,
+        accountGroupId: UUID,
         budgetAmount: Decimal,
         budgetFixedSum: Decimal,
         budgetDaysOffset: Int8,
@@ -94,7 +94,7 @@ struct AccountDB {
     // Инициализатор из бизнес модели
     init(_ model: Account) {
         self.id = model.id
-        if self.id == 0 {
+        if self.id == nil {
             self.id = nil
         }
         self.accountingInHeader = model.accountingInHeader
@@ -104,7 +104,6 @@ struct AccountDB {
         self.remainder = model.remainder
         self.type = model.type
         self.visible = model.visible
-        self.parentAccountId = model.parentAccountID
         self.serialNumber = model.serialNumber
         self.isParent = model.isParent
         self.budgetAmount = model.budgetAmount
@@ -126,15 +125,15 @@ struct AccountDB {
         return accountsDB
     }
     
-    static func compareTwoArrays(_ serverModels: [AccountDB], _ localModels: [AccountDB]) -> [UInt32: [String: (server: Any, local: Any)]] {
+    static func compareTwoArrays(_ serverModels: [AccountDB], _ localModels: [AccountDB]) -> [UUID: [String: (server: Any, local: Any)]] {
         let serverModels = serverModels.sorted { $0.id! < $1.id! }
         let localModels = localModels.sorted { $0.id! < $1.id! }
         
-        var differences: [UInt32: [String: (server: Any, local: Any)]] = [:]
+        var differences: [UUID: [String: (server: Any, local: Any)]] = [:]
         
         guard serverModels.count == localModels.count else {
             var difference: [String: (server: Any, local: Any)] = ["count": (server: serverModels.count, local: localModels.count)]
-            differences[0] = difference
+            differences[UUID(uuid: UUID_NULL)] = difference
             return differences
         }
         

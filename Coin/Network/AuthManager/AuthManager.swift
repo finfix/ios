@@ -8,20 +8,25 @@
 import Foundation
 import SwiftUI
 import OSLog
+import ProtoDefinitions
+import GRPCCore
+import GRPCProtobuf
+import GRPCNIOTransportHTTP2
+import DeviceKit
+
 
 private let logger = Logger(subsystem: "Coin", category: "API")
 
 class AuthManager {
     
-    static let shared = makeShared()
-    
-    static func makeShared() -> AuthManager {
-        AuthManager()
-    }
+    private var authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>
     
     @AppStorage("refreshToken") private var refreshToken: String?
-    @AppStorage("apiBasePath") private var apiBasePath: String = ""
     @AppStorage("accessToken") private var accessToken: String?
+    
+    init(authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>) {
+        self.authClient = authClient
+    }
     
     func getAccessToken() async throws -> String {
         
@@ -56,33 +61,46 @@ class AuthManager {
     }
 
     private func refreshAccessToken() async throws -> String {
-
-        do {
-            
-            guard let refreshToken else { throw ErrorModel(humanText: "Refresh токен не заполнен")}
-            
-            let data = try await NetworkManager.shared.request(
-                url: NetworkManager.shared.apiBasePath + "/auth/refreshTokens",
-                method: .post,
-                headers: [
-                    "Authorization": accessToken ?? "",
-                    "DeviceID": UIDevice.current.identifierForVendor!.uuidString
-                ],
-                withAuthorization: false,
-                body: RefreshTokensReq(
-                    token: refreshToken,
-                    application: try getApplicationInformation(),
-                    device: getDeviceInformation()
-                )
-            )
-            let token = try NetworkManager.shared.decode(data, model: Token.self)
-            
-            self.accessToken = token.accessToken
-            self.refreshToken = token.refreshToken
-            return token.accessToken
-        } catch {
-            throw error
+        
+        guard let refreshToken else {
+            throw ErrorModel(humanText: "Refresh токен не заполнен")
         }
+        
+        // Формируем protobuf запрос
+        let appInfo = try getApplicationInformation()
+        let deviceInfo = getDeviceInformation()
+        
+        let request = Auth_RefreshTokensRequest.with {
+            $0.token = refreshToken
+            $0.application = Auth_ApplicationInformation.with {
+                $0.bundleID = appInfo.bundleID
+                $0.version = appInfo.version
+                $0.build = appInfo.build
+            }
+            $0.device = Auth_DeviceInformation.with {
+                $0.nameOs = .ios
+                $0.versionOs = deviceInfo.versionOS
+                $0.deviceName = deviceInfo.deviceName
+                $0.modelName = deviceInfo.modelName
+                $0.ipAddress = ""
+            }
+        }
+        
+        // Делаем gRPC вызов
+        let response = try await authClient.refreshTokens(
+            request
+        )
+        
+        // Обрабатываем ответ
+        if response.hasError {
+            throw ErrorModel(humanText: response.error.message)
+        }
+                
+        // Сохраняем токены
+        self.accessToken = response.accessToken
+        self.refreshToken = response.refreshToken
+        
+        return response.accessToken
     }
     
     public func logout() {
@@ -96,5 +114,9 @@ class AuthManager {
     ) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken
+    }
+
+    func reconnect(authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>) {
+        self.authClient = authClient
     }
 }
