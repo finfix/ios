@@ -53,7 +53,7 @@ class APIManager {
         logger.info("Переподключение gRPC → \(host, privacy: .public):\(port, privacy: .public)")
         
         let transport = try HTTP2ClientTransport.Posix(
-            target: .ipv4(address: host, port: port),
+            target: .dns(host: host, port: port),
             transportSecurity: .plaintext
         )
         Task.detached { try await transport.connect() }
