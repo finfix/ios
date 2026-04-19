@@ -265,6 +265,8 @@ struct AccountCirclesView: View {
                 switch screen {
                 case .transactionView(let filters, let chartType):
                     TransactionsView(filters: filters, chartType: chartType)
+                case .chartDrillDown(let filters, let chartType):
+                    TransactionsView(filters: filters, chartType: chartType)
                 }
             }
             .navigationDestination(for: DraggableAccountRoute.self) { screen in

@@ -97,7 +97,7 @@ extension Container {
                 let grpcPort = UserDefaults.standard.integer(forKey: "grpcPort")
                 let transport = try HTTP2ClientTransport.Posix(
                     target: .dns(host: grpcHost, port: grpcPort != 0 ? grpcPort : defaultGrpcPort),
-                    transportSecurity: .tls  // ← было .plaintext
+                    transportSecurity: .tls
                 )
                 
                 // ⚠️ transport нужно запустить (в фоне)

@@ -21,6 +21,7 @@ enum ChartViewGroupBy: CaseIterable {
 
 enum ChartViewRoute: Hashable {
     case transactionView(filters: TransactionFilters, chartType: ChartType)
+    case chartDrillDown(filters: TransactionFilters, chartType: ChartType)
 }
 
 struct ChartView: View {
@@ -36,11 +37,12 @@ struct ChartView: View {
         chartType: ChartType = .earningsAndExpenses,
         chartViewGroupBy: Binding<ChartViewGroupBy>,
         filters: Binding<TransactionFilters>,
-        currency: Currency
+        currency: Currency,
+        aggregateIntoParents: Bool = true
     ) {
         self.formatter = CurrencyFormatter(currency: currency, withUnits: false)
         self._chartViewGroupBy = chartViewGroupBy
-        vm = ChartViewModel(chartType: chartType)
+        vm = ChartViewModel(chartType: chartType, aggregateIntoParents: aggregateIntoParents)
         self.currency = currency
         self._filters = filters
     }

@@ -36,8 +36,15 @@ struct ChartListItemView: View {
     var body: some View {
         if chartViewGroupBy == .byAccount, let account = series.account {
             Button {
-                filters.accounts.append(account)
-                path.path.append(ChartViewRoute.transactionView(filters: filters, chartType: vm.chartType))
+                if account.isParent && !account.childrenAccounts.isEmpty {
+                    // Открываем drill-down график по дочерним счетам родителя
+                    var drillDownFilters = filters
+                    drillDownFilters.accounts = account.childrenAccounts
+                    path.path.append(ChartViewRoute.chartDrillDown(filters: drillDownFilters, chartType: vm.chartType))
+                } else {
+                    filters.accounts.append(account)
+                    path.path.append(ChartViewRoute.transactionView(filters: filters, chartType: vm.chartType))
+                }
             } label: {
                 HStack {
                     HStack {

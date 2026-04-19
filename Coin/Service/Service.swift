@@ -103,7 +103,8 @@ extension Service {
         accountIDs: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
-        tagIDs: [UUID] = []
+        tagIDs: [UUID] = [],
+        aggregateIntoParents: Bool = true
     ) async throws -> [Series] {
         
         // Контейнер для информации для графика
@@ -213,6 +214,40 @@ extension Service {
                 for (i, dataItem) in data.enumerated() {
                     if let objectID = dataItem.objectID {
                         data[i].account = accountsMap[objectID]
+                    }
+                }
+                
+                if aggregateIntoParents {
+                    // Первый проход: находим уже существующие родительские серии
+                    var parentSeriesIndexMap: [UUID: Int] = [:]
+                    for (i, series) in data.enumerated() {
+                        if let account = series.account, account.isParent {
+                            parentSeriesIndexMap[account.id] = i
+                        }
+                    }
+                    
+                    // Второй проход: агрегируем дочерние серии в родительские
+                    var childIndicesToRemove: [Int] = []
+                    for (i, series) in data.enumerated() {
+                        guard let account = series.account, let parentID = account.parentAccountID else { continue }
+                        
+                        if let parentIndex = parentSeriesIndexMap[parentID] {
+                            // Родительская серия уже есть — суммируем данные дочернего счёта
+                            for (date, value) in series.data {
+                                data[parentIndex].data[date, default: 0] += value
+                            }
+                        } else if let parentAccount = accountsMap[parentID] {
+                            // Родительской серии нет (нет собственных транзакций) — создаём её
+                            let parentSeries = Series(account: parentAccount, objectID: parentID, data: series.data)
+                            data.append(parentSeries)
+                            parentSeriesIndexMap[parentID] = data.count - 1
+                        }
+                        childIndicesToRemove.append(i)
+                    }
+                    
+                    // Удаляем дочерние серии в обратном порядке, чтобы не сбить индексы
+                    for index in childIndicesToRemove.sorted(by: >) {
+                        data.remove(at: index)
                     }
                 }
             case .byTag:

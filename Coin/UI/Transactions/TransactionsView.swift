@@ -29,6 +29,7 @@ struct TransactionsView: View {
     @State var vm: TransactionsViewModel = TransactionsViewModel()
     @State private var showFilters: Bool = false
     @State private var areFiltersLocked: Bool = false
+    let aggregateIntoParents: Bool
 
     var hasActiveFilters: Bool {
         filters != TransactionFilters(accountGroups: [selectedAccountGroup.selectedAccountGroup])
@@ -44,10 +45,12 @@ struct TransactionsView: View {
     
     init(
         filters: TransactionFilters,
-        chartType: ChartType = .earningsAndExpenses
+        chartType: ChartType = .earningsAndExpenses,
+        aggregateIntoParents: Bool = true
     ) {
         self.filters = filters
         self.chartType = chartType
+        self.aggregateIntoParents = aggregateIntoParents
     }
 
     var body: some View {
@@ -60,7 +63,8 @@ struct TransactionsView: View {
                         chartType: chartType,
                         chartViewGroupBy: $chartGroupBy,
                         filters: $filters,
-                        currency: currency
+                        currency: currency,
+                        aggregateIntoParents: aggregateIntoParents
                     )
                     TransactionsList(filters: filters)
                 }

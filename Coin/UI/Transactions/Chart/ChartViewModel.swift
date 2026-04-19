@@ -77,9 +77,11 @@ class ChartViewModel {
     }
     
     var aggregationMethod: AggregationMethod = .percent
+    var aggregateIntoParents: Bool = true
     
-    init(chartType: ChartType) {
+    init(chartType: ChartType, aggregateIntoParents: Bool = true) {
         self.chartType = chartType
+        self.aggregateIntoParents = aggregateIntoParents
     }
     
     @MainActor
@@ -105,7 +107,8 @@ class ChartViewModel {
             accountIDs: accountIDs,
             dateFrom: filters.dateFrom,
             dateTo: filters.dateTo,
-            tagIDs: filters.tags.map(\.id)
+            tagIDs: filters.tags.map(\.id),
+            aggregateIntoParents: aggregateIntoParents && groupBy == .byAccount
         )
     }
 }
