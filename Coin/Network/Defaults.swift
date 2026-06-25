@@ -9,5 +9,9 @@ import Foundation
 
 let defaultIsDarkMode = true
 let defaultIsDevMode = false
-let defaultGrpcHost = "127.0.0.1"
-let defaultGrpcPort = 8090
+#if DEV
+let defaultGrpcHost = "grpc.dev.bonavii.com"
+#else
+let defaultGrpcHost = "grpc.bonavii.com"
+#endif
+let defaultGrpcPort = 443

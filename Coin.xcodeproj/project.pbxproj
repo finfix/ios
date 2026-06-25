@@ -50,6 +50,8 @@
 		B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */; };
 		B537425F2D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */; };
 		B53742602D314C540097A8D9 /* TransactionFiltersRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */; };
+		B5492EDE2FB307D9003C0F3A /* LotSystem.md in Resources */ = {isa = PBXBuildFile; fileRef = B5492EDD2FB307D2003C0F3A /* LotSystem.md */; };
+		B5492EDF2FB307D9003C0F3A /* LotSystem.md in Resources */ = {isa = PBXBuildFile; fileRef = B5492EDD2FB307D2003C0F3A /* LotSystem.md */; };
 		B54A2E4F2ED881460099196B /* ProtoExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54A2E4E2ED8813F0099196B /* ProtoExtentions.swift */; };
 		B54A2E502ED881460099196B /* ProtoExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54A2E4E2ED8813F0099196B /* ProtoExtentions.swift */; };
 		B54DA3A82BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */; };
@@ -318,6 +320,7 @@
 		B52F76572D2FFBDB00B6E617 /* TransactionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionsViewModel.swift; sourceTree = "<group>"; };
 		B531E6DD2AE30C3B00996520 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		B537425E2D314C540097A8D9 /* TransactionFiltersRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionFiltersRowView.swift; sourceTree = "<group>"; };
+		B5492EDD2FB307D2003C0F3A /* LotSystem.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = LotSystem.md; sourceTree = "<group>"; };
 		B54A2E4E2ED8813F0099196B /* ProtoExtentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtoExtentions.swift; sourceTree = "<group>"; };
 		B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMonthPeriodFromDate.swift; sourceTree = "<group>"; };
 		B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripTime.swift; sourceTree = "<group>"; };
@@ -813,6 +816,7 @@
 		B5F9CC5628F01CA80037A21A = {
 			isa = PBXGroup;
 			children = (
+				B5492EDD2FB307D2003C0F3A /* LotSystem.md */,
 				B58705752900956D004C77DD /* README.md */,
 				B5F9CC6128F01CA80037A21A /* Coin */,
 				B5F9CC6028F01CA80037A21A /* Products */,
@@ -982,6 +986,7 @@
 				B5DEFD482C07015A001D7E61 /* README.md in Resources */,
 				B5DEFD492C07015A001D7E61 /* Preview Assets.xcassets in Resources */,
 				B5DEFD4A2C07015A001D7E61 /* Launch Screen.storyboard in Resources */,
+				B5492EDF2FB307D9003C0F3A /* LotSystem.md in Resources */,
 				B5DEFD4B2C07015A001D7E61 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -993,6 +998,7 @@
 				B58705762900956D004C77DD /* README.md in Resources */,
 				B5F9CC6A28F01CA90037A21A /* Preview Assets.xcassets in Resources */,
 				B531E6DE2AE30C3B00996520 /* Launch Screen.storyboard in Resources */,
+				B5492EDE2FB307D9003C0F3A /* LotSystem.md in Resources */,
 				B5F9CC6728F01CA90037A21A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

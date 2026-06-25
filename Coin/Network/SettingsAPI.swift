@@ -79,17 +79,9 @@ extension APIManager {
         return try response.icons.map { icon in
             GetIconsRes(
                 id: try icon.id.toUUID(),
-                url: icon.url,
-                name: icon.name
+                name: icon.name,
+                image: icon.image
             )
         }
-    }
-    
-    func GetIcon(url: String) async throws -> Data {
-        return try await networkManager.request(
-            url: url,
-            method: .get,
-            withAuthorization: false
-        )
     }
 }

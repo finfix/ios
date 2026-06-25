@@ -46,17 +46,22 @@ class APIManager {
     var userClient: User_UserEndpoint.Client<HTTP2ClientTransport.Posix>
     var tagClient: Tag_TagEndpoint.Client<HTTP2ClientTransport.Posix>
     var settingsClient: Settings_SettingsEndpoint.Client<HTTP2ClientTransport.Posix>
-    
+
+    private var transportTask: Task<Void, Error>?
+
     // MARK: - Переподключение gRPC
-    
+
     func reconnect(host: String, port: Int) throws {
         logger.info("Переподключение gRPC → \(host, privacy: .public):\(port, privacy: .public)")
-        
+
+        // Останавливаем старый транспорт перед созданием нового
+        transportTask?.cancel()
+
         let transport = try HTTP2ClientTransport.Posix(
             target: .dns(host: host, port: port),
-            transportSecurity: .plaintext
+            transportSecurity: .tls
         )
-        Task.detached { try await transport.connect() }
+        transportTask = Task.detached { try await transport.connect() }
         
         let grpcClient = GRPCClient(transport: transport)
         

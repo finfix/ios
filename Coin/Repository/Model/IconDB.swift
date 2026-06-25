@@ -28,7 +28,7 @@ struct IconDB {
     init(_ res: GetIconsRes) {
         self.id = res.id
         self.name = res.name
-        self.url = res.url
+        self.url = ""
     }
     
     static func convertFromApiModel(_ icons: [GetIconsRes]) -> [IconDB] {

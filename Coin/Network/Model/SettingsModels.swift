@@ -19,8 +19,8 @@ struct GetVersionRes: Decodable {
     var build: String
 }
 
-struct GetIconsRes: Decodable {
+struct GetIconsRes {
     var id: UUID
-    var url: String
     var name: String
+    var image: Data
 }
