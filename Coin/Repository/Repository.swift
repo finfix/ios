@@ -617,6 +617,7 @@ class Repository {
     func getStatisticByMonth(
         chartType: ChartType,
         groupBy: ChartViewGroupBy,
+        period: ChartPeriod = .month,
         transactionType: TransactionType,
         accountGroupIDs: [UUID],
         targetCurrency: Currency,
@@ -630,7 +631,7 @@ class Repository {
         try await sqlite.read { db in
             
             var selects: [String] = [
-                "strftime('%Y-%m-01', t.dateTransaction) AS month",
+                "\(period.sqlStartOf("t.dateTransaction")) AS month",
                 "ROUND(SUM(t.\(transactionType == .consumption ? "amountTo" : "amountFrom") * ((SELECT rate FROM currencyDB WHERE code = '\(targetCurrency.code)') / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS remainder"
             ]
             var joins: [String] = [
@@ -762,9 +763,10 @@ class Repository {
         }
     }
     
-    // Возвращает помесячный чистый поток для счетов типа regular/debt
+    // Возвращает чистый поток по периодам для счетов типа regular/debt
     // Положительное значение = деньги поступили, отрицательное = ушли
     func getMonthlyNetFlowByAccount(
+        period: ChartPeriod = .month,
         targetCurrency: Currency,
         accountGroupIDs: [UUID] = [],
         accountIDs: [UUID] = []
@@ -793,10 +795,12 @@ class Repository {
                 return (filters, args)
             }
             
+            let periodExpr = period.sqlStartOf("t.dateTransaction")
+            
             // Деньги, поступающие на счёт (accountToId)
             let (inFilters, inArgs) = buildFiltersAndArgs(accountIDField: "accountToId")
             let inSQL = """
-                SELECT strftime('%Y-%m-01', t.dateTransaction) AS month,
+                SELECT \(periodExpr) AS month,
                     a.id AS accountId,
                     ROUND(SUM(t.amountTo * ((SELECT rate FROM currencyDB WHERE code = '\(targetCurrency.code)') / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS amount
                 FROM transactionDB t
@@ -816,7 +820,7 @@ class Repository {
             // Деньги, уходящие со счёта (accountFromId)
             let (outFilters, outArgs) = buildFiltersAndArgs(accountIDField: "accountFromId")
             let outSQL = """
-                SELECT strftime('%Y-%m-01', t.dateTransaction) AS month,
+                SELECT \(periodExpr) AS month,
                     a.id AS accountId,
                     ROUND(SUM(t.amountFrom * ((SELECT rate FROM currencyDB WHERE code = '\(targetCurrency.code)') / (SELECT rate FROM currencyDB WHERE code = a.currencyCode)))) AS amount
                 FROM transactionDB t

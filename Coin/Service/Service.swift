@@ -98,6 +98,7 @@ extension Service {
     func getStatisticByMonth(
         chartType: ChartType,
         groupBy: ChartViewGroupBy,
+        period: ChartPeriod = .month,
         targetCurrency: Currency,
         accountGroupIDs: [UUID] = [],
         accountIDs: [UUID] = [],
@@ -135,10 +136,11 @@ extension Service {
         // Если необходима разбивка по доходам/расходам
         case .earningsAndExpenses:
             
-            // Получаем все расходы по месяцам
+            // Получаем все расходы по периодам
             var expenses = try await repository.getStatisticByMonth(
                 chartType: chartType,
                 groupBy: groupBy,
+                period: period,
                 transactionType: .consumption,
                 accountGroupIDs: accountGroupIDs,
                 targetCurrency: targetCurrency,
@@ -155,10 +157,11 @@ extension Service {
                 data.append(contentsOf: expenses)
             }
             
-            // Получаем доходы по месяцам
+            // Получаем доходы по периодам
             var earnings = try await repository.getStatisticByMonth(
                 chartType: chartType,
                 groupBy: groupBy,
+                period: period,
                 transactionType: .income,
                 accountGroupIDs: accountGroupIDs,
                 targetCurrency: targetCurrency,
@@ -182,6 +185,7 @@ extension Service {
             data = try await repository.getStatisticByMonth(
                 chartType: chartType,
                 groupBy: groupBy,
+                period: period,
                 transactionType: .income,
                 accountGroupIDs: accountGroupIDs,
                 targetCurrency: targetCurrency,
@@ -198,6 +202,7 @@ extension Service {
             data = try await repository.getStatisticByMonth(
                 chartType: chartType,
                 groupBy: groupBy,
+                period: period,
                 transactionType: .consumption,
                 accountGroupIDs: accountGroupIDs,
                 targetCurrency: targetCurrency,
@@ -210,7 +215,7 @@ extension Service {
         // Текущий баланс счетов в каждый период
         case .balance:
             
-            let currentMonth = Date.now.startOfMonth(inUTC: true)
+            let currentPeriod = Date.now.startOfPeriod(period)
             
             // Загружаем группы счетов для корректной фильтрации
             let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(currencies))
@@ -237,8 +242,9 @@ extension Service {
                 return groupMatch && accountMatch
             }
             
-            // Получаем помесячные чистые потоки для каждого счёта
+            // Получаем чистые потоки по периодам для каждого счёта
             let netFlows = try await repository.getMonthlyNetFlowByAccount(
+                period: period,
                 targetCurrency: targetCurrency,
                 accountGroupIDs: accountGroupIDs,
                 accountIDs: balanceAccounts.map(\.id)
@@ -251,14 +257,14 @@ extension Service {
                 // Конвертируем текущий баланс в целевую валюту
                 let currencyRate = targetCurrency.rate / account.currency.rate
                 var balance = account.remainder * currencyRate
-                seriesData[currentMonth] = balance.round(factor: 0)
+                seriesData[currentPeriod] = balance.round(factor: 0)
                 
-                // Восстанавливаем исторический баланс, идя назад от текущего месяца
-                if let earliestMonth = accountFlows.keys.min() {
-                    var cursor = currentMonth
-                    while cursor >= earliestMonth {
+                // Восстанавливаем исторический баланс, идя назад от текущего периода
+                if let earliestPeriod = accountFlows.keys.min() {
+                    var cursor = currentPeriod
+                    while cursor >= earliestPeriod {
                         balance -= accountFlows[cursor] ?? 0
-                        cursor = cursor.adding(.month, value: -1)
+                        cursor = cursor.adding(period.calendarComponent, value: -1)
                         seriesData[cursor] = balance.round(factor: 0)
                     }
                 }
@@ -267,7 +273,7 @@ extension Service {
             }
             
             // Сортируем по текущему балансу и назначаем цвета
-            data = data.sorted { ($0.data[currentMonth] ?? 0) > ($1.data[currentMonth] ?? 0) }
+            data = data.sorted { ($0.data[currentPeriod] ?? 0) > ($1.data[currentPeriod] ?? 0) }
             for (i, _) in data.enumerated() {
                 data[i].serialNumber = UInt32(i)
                 data[i].color = defaultColors[i % defaultColors.count]
@@ -348,21 +354,25 @@ extension Service {
             }
         }
         
+        // UTC-календарь — даты из SQL всегда в UTC-полночь
+        var utcCalendar = Calendar.current
+        utcCalendar.timeZone = TimeZone(abbreviation: "UTC")!
+        
         // Проходимся по каждой статье
         for (i, series) in data.enumerated() {
             
-            // Обозначаем самую раннюю дату, которая должна быть у каждой статьи
-            var lastDate: Date = minDate
+            // Начинаем с начала периода, чтобы даты точно совпадали с ключами из БД
+            var lastDate: Date = minDate.startOfPeriod(period)
             
-            // Проходимся по датам, отсортированным в порядке увеличения
+            // Проходимся по датам в порядке увеличения, заполняя пропуски нулями
             while true {
                 
                 if series.data[lastDate] == nil {
                     data[i].data[lastDate] = 0
                 }
                                 
-                // Обновляем последнюю проверенную дату
-                lastDate = lastDate.adding(.month, value: 1)
+                // Добавляем один период через UTC-календарь
+                lastDate = lastDate.adding(period.calendarComponent, value: 1, using: utcCalendar)
                 if lastDate > maxDate {
                     break
                 }
@@ -473,25 +483,28 @@ extension Service {
             )
         )
 
-        var (icons, currencies, user, accountGroups, accounts, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _tags, _tagsToTransactions, _transactions)
-        
-        // Загружаем и сохраняем локально иконки
-        logger.info("Скачиваем иконки")
-        for (i, icon) in icons.enumerated() {
-            let iconData = try await apiManager.GetIcon(url: "https://bonavii.com/"+icon.url)
-            let url = String(icon.url.replacingOccurrences(of: "/", with: "_"))
-            let localURL = URL.documentsDirectory.appending(path: url)
-            icons[i].url = url
-            try iconData.write(to: localURL, options: [.atomic, .completeFileProtection])
+        let (icons, currencies, user, accountGroups, accounts, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _tags, _tagsToTransactions, _transactions)
+
+        // Сохраняем иконки из gRPC ответа в локальные файлы
+        logger.info("Сохраняем иконки из gRPC")
+        var iconsDB: [IconDB] = []
+        for icon in icons {
+            guard !icon.name.isEmpty else {
+                logger.warning("Пропускаем иконку \(icon.id) — пустое имя файла")
+                continue
+            }
+            let localURL = URL.documentsDirectory.appending(path: icon.name)
+            try icon.image.write(to: localURL, options: [.atomic, .completeFileProtection])
+            iconsDB.append(IconDB(id: icon.id, name: icon.name, url: icon.name))
         }
-        
+
         // Удаляем все данные в базе данных
         logger.info("Удаляем все данные")
         try await repository.deleteAllData()
-                
+
         // Сохраняем данные в базу данных
         logger.info("Сохраняем данные по иконкам")
-        try await repository.importIcons(IconDB.convertFromApiModel(icons))
+        try await repository.importIcons(iconsDB)
         logger.info("Сохраняем валюты")
         try await repository.importCurrencies(CurrencyDB.convertFromApiModel(currencies))
         logger.info("Сохраняем пользователя")

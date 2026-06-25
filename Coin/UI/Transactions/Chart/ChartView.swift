@@ -81,21 +81,41 @@ struct ChartView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 2)
             }
+            Menu {
+                Picker("", selection: $vm.period) {
+                    ForEach(ChartPeriod.allCases, id: \.self) { p in
+                        Text(p.name).tag(p)
+                    }
+                }
+            } label: {
+                HStack {
+                    Spacer()
+                    Text(vm.period.name)
+                    Image(systemName: "chevron.up.chevron.down")
+                }
+                .font(.caption)
+                .foregroundColor(.blue)
+                .padding(.horizontal)
+                .padding(.bottom, 2)
+            }
             Group {
                 if !vm.data.isEmpty {
                     if chartDisplayType == .ring && vm.chartType != .earningsAndExpenses {
                         RingGraph(
                             data: vm.data,
+                            period: vm.period,
                             lastSelectedDate: $vm.lastSelectedDate,
                             currency: currency
                         )
                     } else {
                         Graph(
                             chartType: vm.chartType,
+                            period: vm.period,
                             data: vm.data,
                             lastSelectedDate: $vm.lastSelectedDate,
                             currency: currency
                         )
+                        .id(vm.period)
                     }
                 } else {
                     Text("Нет данных для отображения")
@@ -207,6 +227,13 @@ struct ChartView: View {
             }
         }
         .onChange(of: chartViewGroupBy) { _, _ in
+            Task {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            }
+        }
+        .onChange(of: vm.period) { _, newPeriod in
+            vm.lastSelectedDate = Date.now.startOfPeriod(newPeriod)
+            vm.data = []
             Task {
                 try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
             }

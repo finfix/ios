@@ -13,25 +13,33 @@ let defaultColors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple, .b
 struct Graph: View {
     
     var chartType: ChartType
+    var period: ChartPeriod
     let data: [Series]
     @Environment(\.calendar) var calendar
     @State private var rawSelectedDate: Date?
     @Binding var lastSelectedDate: Date
-    let oneMonthRange = 60 * 60 * 24 * 30
-    @State var visibleRange = 6
-    @State var xPosition = Date.now.addingTimeInterval(TimeInterval(-1 * 60 * 60 * 24 * 30 * 6))
+    @State var visibleRange: Int
+    @State var xPosition: Date
     let currencyFormatter: CurrencyFormatter
+    
+    private var unitRange: Int { period.secondsPerUnit }
     
     init(
         chartType: ChartType,
+        period: ChartPeriod = .month,
         data: [Series],
         lastSelectedDate: Binding<Date>,
         currency: Currency
     ) {
         self.chartType = chartType
+        self.period = period
         self.data = data
         self._lastSelectedDate = lastSelectedDate
         self.currencyFormatter = CurrencyFormatter(currency: currency, withUnits: true)
+        self._visibleRange = State(initialValue: period.defaultVisibleRange)
+        self._xPosition = State(initialValue: Date.now.addingTimeInterval(
+            TimeInterval(-1 * period.secondsPerUnit * period.defaultVisibleRange)
+        ))
     }
     
     var maxSum: Double {
@@ -39,8 +47,8 @@ struct Graph: View {
         
         switch chartType {
         case .earnings, .expenses, .balance:
-            let maxDate: Date = xPosition + TimeInterval((visibleRange + 1) * oneMonthRange)
-            var currentDate: Date = (xPosition - TimeInterval(oneMonthRange)).startOfMonth(inUTC: true)
+            let maxDate: Date = xPosition + TimeInterval((visibleRange + 1) * unitRange)
+            var currentDate: Date = (xPosition - TimeInterval(unitRange)).startOfPeriod(period)
             
             while true {
                 if currentDate > maxDate {
@@ -50,11 +58,11 @@ struct Graph: View {
                 if maxValue < sumOfSeriesOnDate {
                     maxValue = sumOfSeriesOnDate
                 }
-                currentDate = currentDate.adding(.month, value: 1)
+                currentDate = currentDate.adding(period.calendarComponent, value: 1)
             }
             
         case .earningsAndExpenses:
-            let dateRange = xPosition-TimeInterval(oneMonthRange)...xPosition + TimeInterval((visibleRange+1)*oneMonthRange)
+            let dateRange = xPosition-TimeInterval(unitRange)...xPosition + TimeInterval((visibleRange+1)*unitRange)
             
             for series in data {
                 if let value = series.data.filter({ dateRange.contains($0.key) }).values.max() {
@@ -78,13 +86,13 @@ struct Graph: View {
                         ForEach(series.data.sorted(by: >), id: \.key) { month, amount in
                             if chartType == .earningsAndExpenses {
                                 LineMark(
-                                    x: .value("Период", month, unit: .month),
+                                    x: .value("Период", month, unit: period.calendarComponent),
                                     y: .value("Сумма", amount)
                                 )
                                 .lineStyle(.init(lineWidth: 3, lineCap: .round, lineJoin: .round))
                             } else {
                                 AreaMark(
-                                    x: .value("Период", month, unit: .month),
+                                    x: .value("Период", month, unit: period.calendarComponent),
                                     y: .value("Сумма", amount),
                                     stacking: .standard
                                 )
@@ -92,11 +100,11 @@ struct Graph: View {
                             }
                         }
                         .foregroundStyle(by: .value("Категория", i))
-                        .interpolationMethod(.catmullRom) // TODO: что-то с ним придумать
+                        .interpolationMethod(period == .day || period == .week ? .linear : .linear)
                     }
                     
                     RuleMark(
-                        x: .value("Selected", lastSelectedDate, unit: .month)
+                        x: .value("Selected", lastSelectedDate, unit: period.calendarComponent)
                     )
                     .foregroundStyle(Color.gray.opacity(0.3))
                     .offset(yStart: -10)
@@ -106,15 +114,38 @@ struct Graph: View {
                 .chartForegroundStyleScale { data.reversed()[$0].color }
                 .chartScrollableAxes(.horizontal)
                 .chartScrollPosition(x: $xPosition)
-                .chartXVisibleDomain(length: visibleRange*oneMonthRange)
+                .chartXVisibleDomain(length: visibleRange * unitRange)
                 .chartYScale(domain: 0...maxSum)
                 .chartXSelection(value: $rawSelectedDate)
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: visibleRange < 24 ? .month : .year)) { _ in
-                        AxisTick()
-                        AxisValueLabel(format: visibleRange < 24 ?
-                            .dateTime.month(visibleRange < 12 ? .abbreviated : .narrow) :
-                                .dateTime.year(), centered: true)
+                    switch period {
+                    case .day:
+                        AxisMarks(values: .stride(by: .day, count: max(1, visibleRange / 7))) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.month(.abbreviated).day(), centered: true)
+                        }
+                    case .week:
+                        AxisMarks(values: .stride(by: .weekOfYear)) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.month(.abbreviated).day(), centered: true)
+                        }
+                    case .month:
+                        AxisMarks(values: .stride(by: visibleRange < 24 ? .month : .year)) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: visibleRange < 24 ?
+                                .dateTime.month(visibleRange < 12 ? .abbreviated : .narrow) :
+                                    .dateTime.year(), centered: true)
+                        }
+                    case .quarter:
+                        AxisMarks(values: .stride(by: .quarter)) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.year().month(.abbreviated), centered: true)
+                        }
+                    case .year:
+                        AxisMarks(values: .stride(by: .year)) { _ in
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.year(), centered: true)
+                        }
                     }
                 }
                 .chartYAxis {
@@ -149,13 +180,13 @@ struct Graph: View {
                     .opacity(0.7)
                 }
             }
-            Text(lastSelectedDate.formatted(.dateTime.year(.defaultDigits).month(.wide)))
+            Text(period.selectedDateLabel(for: lastSelectedDate))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .onChange(of: rawSelectedDate) { _, newValue in
             if let newValue {
-                lastSelectedDate = newValue.startOfMonth(inUTC: true)
+                lastSelectedDate = newValue.startOfPeriod(period)
             }
         }
     }
@@ -164,11 +195,13 @@ struct Graph: View {
 struct RingGraph: View {
     
     let data: [Series]
+    let period: ChartPeriod
     @Binding var lastSelectedDate: Date
     let currencyFormatter: CurrencyFormatter
     
-    init(data: [Series], lastSelectedDate: Binding<Date>, currency: Currency) {
+    init(data: [Series], period: ChartPeriod = .month, lastSelectedDate: Binding<Date>, currency: Currency) {
         self.data = data
+        self.period = period
         self._lastSelectedDate = lastSelectedDate
         self.currencyFormatter = CurrencyFormatter(currency: currency, withUnits: true)
     }
@@ -217,7 +250,7 @@ struct RingGraph: View {
                     .bold()
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
-                Text(lastSelectedDate.formatted(.dateTime.year(.defaultDigits).month(.wide)))
+                Text(period.selectedDateLabel(for: lastSelectedDate))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -230,13 +263,13 @@ struct RingGraph: View {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         if value.translation.width < 0 {
                             // Свайп влево — следующий период
-                            let nextDate = lastSelectedDate.adding(.month, value: 1)
+                            let nextDate = lastSelectedDate.adding(period.calendarComponent, value: 1)
                             if nextDate <= maxDate {
                                 lastSelectedDate = nextDate
                             }
                         } else {
                             // Свайп вправо — предыдущий период
-                            let prevDate = lastSelectedDate.adding(.month, value: -1)
+                            let prevDate = lastSelectedDate.adding(period.calendarComponent, value: -1)
                             if prevDate >= minDate {
                                 lastSelectedDate = prevDate
                             }
