@@ -15,25 +15,28 @@ class AccountCirclesViewModel {
     @Injected(\.service) private var service
     
     var accounts: [Account] = []
-        
+    var currentAccountGroup: AccountGroup? = nil
+
     @MainActor
     func load(accountGroup: AccountGroup) async throws {
+        self.currentAccountGroup = accountGroup
         self.accounts = Account.groupAccounts(try await service.getAccounts(accountGroups: [accountGroup], visible: true))
     }
-    
+
     var highlitedAccount: Account? = nil
-    
+
     var draggableLocation: CGPoint? = nil
     var draggableAccount: Account? = nil
     @ObservationIgnored var staticLocations: [Account: CGPoint] = [:]
-    
+
     let triggerZone: CGFloat = 50
-    
+
     func initializateStaticLocations(location: CGPoint, for account: Account, in accountGroup: AccountGroup) {
-        guard account.accountGroup.id == accountGroup.id else { return }
+        // Отклоняем регистрацию, если группа устарела
+        guard accountGroup.id == currentAccountGroup?.id else { return }
         self.staticLocations[account] = location
     }
-    
+
     func deleteStaticLocations() {
         self.staticLocations = [Account: CGPoint]()
     }

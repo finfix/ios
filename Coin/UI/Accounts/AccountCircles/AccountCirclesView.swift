@@ -215,7 +215,8 @@ struct AccountCirclesView: View {
                     alert.error(error)
                 }
             }
-            .onChange(of: selectedAccountGroup.selectedAccountGroup) { _, _ in
+            .onChange(of: selectedAccountGroup.selectedAccountGroup) { _, newValue in
+                vm.currentAccountGroup = newValue
                 vm.deleteStaticLocations()
                 Task {
                     do {
