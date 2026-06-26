@@ -118,11 +118,12 @@ struct EditAccount: View {
             }
             Section {
                 if vm.mode == .update {
-                    Picker("Счет, перед которым стоит этот счет", selection: $vm.currentAccount.serialNumber) {
-                        ForEach(vm.currentAccount.parentAccountID == nil ? Account.groupAccounts(accounts) : accounts.filter{ $0.parentAccountID == vm.currentAccount.parentAccountID! }) { account in
-                            Text(vm.currentAccount.parentAccountID == nil ? account.name : "\(account.name) \(account.currency.symbol)")
-                                .tag(account.serialNumber == 0 ? 0 : account.serialNumber - 1)
-                        }
+                    let accountsToReorder: [Account] = vm.currentAccount.parentAccountID == nil
+                        ? Account.groupAccounts(accounts)
+                        : accounts.filter { $0.parentAccountID == vm.currentAccount.parentAccountID! }
+                            .sorted { $0.serialNumber < $1.serialNumber }
+                    NavigationLink("Изменить порядок счетов") {
+                        ReorderAccountsView(accounts: accountsToReorder)
                     }
                 }
                 if vm.permissions.changeParentAccountID {

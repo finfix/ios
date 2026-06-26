@@ -259,6 +259,23 @@ extension Service {
         )
     }
     
+    // MARK: Reorder
+    func reorderAccounts(_ accounts: [Account]) async throws {
+        // Берём текущие порядковые номера и переназначаем их в новом порядке
+        let sortedSerialNumbers = accounts.map(\.serialNumber).sorted()
+        for (index, account) in accounts.enumerated() {
+            let newSerialNumber = sortedSerialNumbers[index]
+            guard account.serialNumber != newSerialNumber else { continue }
+            var updated = account
+            updated.serialNumber = newSerialNumber
+            try await repository.updateAccount(updated)
+            taskManager.createTask(
+                actionName: .updateAccount,
+                reqModel: UpdateAccountReq(id: updated.id, serialNumber: newSerialNumber, budget: UpdateBudgetReq())
+            )
+        }
+    }
+
     // MARK: Delete
     func deleteAccount(_ account: Account) async throws {
         
