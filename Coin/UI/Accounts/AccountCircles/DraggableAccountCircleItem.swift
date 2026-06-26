@@ -163,22 +163,23 @@ struct DraggableAccountCircleItem: View {
                 
                 // Получаем счет списания
                 var accountFrom: Account? = draggableAccount
-                
+
                 // Если счет родительский
                 if draggableAccount.isParent {
-                    
-                    // Получаем первый дочерний счет (считаем его счетом по умолчанию)
+
+                    // Получаем первый дочерний счет (первый по serial_number считается preferred)
                     accountFrom = draggableAccount.childrenAccounts.first
                 }
-                
+
                 // Получаем счет пополнения
                 var accountTo: Account? = staticAccount
-                
+
                 // Если счет родительский
                 if staticAccount.isParent {
-                    
-                    //Получаем первый дочерний счет (считаем его счетом по умолчанию)
-                    accountTo = staticAccount.childrenAccounts.first
+
+                    // Получаем первый дочерний счет с валютой счета списания, иначе просто первый
+                    accountTo = staticAccount.childrenAccounts.first(where: { $0.currency == accountFrom?.currency })
+                        ?? staticAccount.childrenAccounts.first
                 }
                 
                 // Если оба счета есть, независимо от предыдущей логики

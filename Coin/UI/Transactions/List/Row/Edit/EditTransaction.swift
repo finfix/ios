@@ -173,7 +173,22 @@ struct EditTransaction: View {
                         guard newValue.id != UUID(uuid: UUID_NULL) else { return }
                         withAnimation {
                             vm.shouldShowPickerAccountFrom = false
-                            vm.shouldShowPickerAccountTo = true
+                            // Авто-выбор счёта пополнения с той же валютой
+                            if vm.currentTransaction.accountTo.id == UUID(uuid: UUID_NULL) {
+                                let candidates = getAccountsForShowingInCreate(
+                                    accounts: vm.accounts,
+                                    position: .down,
+                                    transactionType: vm.currentTransaction.type,
+                                    excludedAccount: newValue
+                                )
+                                if let match = candidates.first(where: { !$0.isParent && $0.currency == newValue.currency }) {
+                                    vm.currentTransaction.accountTo = match
+                                } else {
+                                    vm.shouldShowPickerAccountTo = true
+                                }
+                            } else {
+                                vm.shouldShowPickerAccountTo = true
+                            }
                         }
                     }
                     Pickers(
@@ -183,7 +198,8 @@ struct EditTransaction: View {
                         accounts: vm.accounts,
                         position: .down,
                         transactionType: vm.currentTransaction.type,
-                        excludeAccount: vm.currentTransaction.accountFrom
+                        excludeAccount: vm.currentTransaction.accountFrom,
+                        preferredCurrency: vm.currentTransaction.accountFrom.id != UUID(uuid: UUID_NULL) ? vm.currentTransaction.accountFrom.currency : nil
                     )
                     .onChange(of: vm.currentTransaction.accountTo) { _, newValue in
                         guard newValue.id != UUID(uuid: UUID_NULL) else { return }
@@ -480,9 +496,9 @@ enum Position {
     case up, down
 }
 
-func getAccountsForShowingInCreate(accounts: [Account], position: Position, transactionType: TransactionType, excludedAccount: Account?) -> [Account] {
+func getAccountsForShowingInCreate(accounts: [Account], position: Position, transactionType: TransactionType, excludedAccount: Account?, preferredCurrency: Currency? = nil) -> [Account] {
     var subfiltered = accounts.filter { $0.visible && $0.id != excludedAccount?.id ?? UUID(uuid: UUID_NULL) }
-    
+
     switch transactionType {
     case .consumption:
         switch position {
@@ -503,12 +519,27 @@ func getAccountsForShowingInCreate(accounts: [Account], position: Position, tran
     default:
         subfiltered = []
     }
-    return Account.groupAccounts(subfiltered.sorted(by: { $1.serialNumber > $0.serialNumber }))
+    var grouped = Account.groupAccounts(subfiltered.sorted(by: { $1.serialNumber > $0.serialNumber }))
+    if let currency = preferredCurrency {
+        // Сортируем дочерние счета внутри каждого родителя: совпадающая валюта — первой
+        for i in grouped.indices {
+            grouped[i].childrenAccounts = grouped[i].childrenAccounts.sorted { a, _ in
+                a.currency == currency
+            }
+        }
+        // Сортируем родительские/одиночные счета: совпадающая валюта или дети с совпадающей валютой — первыми
+        grouped = grouped.sorted { a, _ in
+            if a.currency == currency { return true }
+            if a.childrenAccounts.contains(where: { $0.currency == currency }) { return true }
+            return false
+        }
+    }
+    return grouped
 }
 
 private struct Pickers: View {
-    
-    
+
+
     @Binding var isPickerShowing: Bool
     var buttonName: String
     @State var parentAccount = Account()
@@ -517,10 +548,11 @@ private struct Pickers: View {
     var position: Position
     var transactionType: TransactionType
     var excludeAccount: Account?
+    var preferredCurrency: Currency? = nil
     @State var openSecondPicker: Bool = false
-    
+
     var accountsToShow: [Account] {
-        getAccountsForShowingInCreate(accounts: accounts, position: position, transactionType: transactionType, excludedAccount: excludeAccount)
+        getAccountsForShowingInCreate(accounts: accounts, position: position, transactionType: transactionType, excludedAccount: excludeAccount, preferredCurrency: preferredCurrency)
     }
     
     var body: some View {
