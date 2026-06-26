@@ -173,7 +173,16 @@ class AlertManager {
         line: Int = #line
     ) {
         logger.error("\(file):\(line)\n\(error)")
-        handle(AlertModel(title: title, message: error.localizedDescription, buttonText: buttonText, callback: callback))
+        var message = error.localizedDescription
+        let isDevMode = UserDefaults.standard.bool(forKey: "isDeveloperMode")
+        if isDevMode {
+            if let errorModel = error as? ErrorModel, !errorModel.error.isEmpty {
+                message += "\n\n" + errorModel.error
+            } else if !(error is ErrorModel) {
+                message += "\n\n" + "\(error)"
+            }
+        }
+        handle(AlertModel(title: title, message: message, buttonText: buttonText, callback: callback))
     }
     
     func warn(

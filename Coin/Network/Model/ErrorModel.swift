@@ -16,15 +16,7 @@ struct ErrorModel: LocalizedError, Decodable {
     var systemInfo: SystemInfo?
     var parameters: [String: String]?
     
-    var errorDescription: String? {
-        var description = self.humanText
-#if DEV
-        if self.error != "" {
-            description += "\n\n" + self.error
-        }
-#endif
-        return description
-    }
+    var errorDescription: String? { humanText }
     
     struct UserInfo: Decodable {
         let userID: UUID?

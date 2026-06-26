@@ -75,7 +75,7 @@ extension Service {
         let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await repository.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: nil))
         let tagsToTransactions = try await repository.getTagsToTransactions()
         let tagsMap = Tag.convertToMap(Tag.convertFromDBModel(try await repository.getTags(), accountGroupsMap: nil))
-        return Transaction.convertFromDBModel(
+        var transactions = Transaction.convertFromDBModel(
             try await repository.getTransactions(
                 limit: limit,
                 offset: offset,
@@ -92,6 +92,37 @@ extension Service {
             tagsToTransactions: tagsToTransactions,
             tagsMap: tagsMap
         )
+
+        // Вычисляем балансы accountFrom и accountTo после каждой транзакции.
+        // Идём от новейших к старейшим, отматывая текущий баланс назад.
+        let sorted = transactions.sorted {
+            if $0.dateTransaction != $1.dateTransaction { return $0.dateTransaction > $1.dateTransaction }
+            return $0.datetimeCreate > $1.datetimeCreate
+        }
+        var runningBalances: [UUID: Decimal] = accountsMap.mapValues { $0.remainder }
+        var balanceFromMap: [UUID: Decimal] = [:]
+        var balanceToMap: [UUID: Decimal] = [:]
+        for transaction in sorted {
+            let fromId = transaction.accountFrom.id
+            let toId = transaction.accountTo.id
+            balanceFromMap[transaction.id] = runningBalances[fromId] ?? 0
+            balanceToMap[transaction.id] = runningBalances[toId] ?? 0
+            // Отматываем effect транзакции назад для обоих счетов
+            switch transaction.type {
+            case .income:
+                runningBalances[fromId] = (runningBalances[fromId] ?? 0) - transaction.amountFrom
+                runningBalances[toId] = (runningBalances[toId] ?? 0) - transaction.amountTo
+            case .consumption, .transfer, .balancing:
+                runningBalances[fromId] = (runningBalances[fromId] ?? 0) + transaction.amountFrom
+                runningBalances[toId] = (runningBalances[toId] ?? 0) - transaction.amountTo
+            }
+        }
+        for i in transactions.indices {
+            transactions[i].balanceAfterFrom = balanceFromMap[transactions[i].id] ?? 0
+            transactions[i].balanceAfterTo = balanceToMap[transactions[i].id] ?? 0
+        }
+
+        return transactions
     }
     
     // MARK: Update

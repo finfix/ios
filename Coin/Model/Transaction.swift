@@ -22,7 +22,26 @@ struct Transaction: Identifiable, Hashable {
     var accountTo: Account
     var tags: [Tag]
     var accountGroupID: UUID
-    
+    /// Баланс счёта accountFrom после выполнения транзакции
+    var balanceAfterFrom: Decimal
+    /// Баланс счёта accountTo после выполнения транзакции
+    var balanceAfterTo: Decimal
+
+    /// Баланс счёта accountFrom до выполнения транзакции
+    var balanceBeforeFrom: Decimal {
+        switch type {
+        case .income:
+            return balanceAfterFrom - amountFrom
+        case .consumption, .transfer, .balancing:
+            return balanceAfterFrom + amountFrom
+        }
+    }
+
+    /// Баланс счёта accountTo до выполнения транзакции
+    var balanceBeforeTo: Decimal {
+        balanceAfterTo - amountTo
+    }
+
     init(
         id: UUID = UUID(),
         accountingInCharts: Bool = true,
@@ -36,7 +55,9 @@ struct Transaction: Identifiable, Hashable {
         accountFrom: Account = Account(),
         accountTo: Account = Account(),
         tags: [Tag] = [],
-        accountGroupID: UUID = UUID()
+        accountGroupID: UUID = UUID(),
+        balanceAfterFrom: Decimal = 0,
+        balanceAfterTo: Decimal = 0
     ) {
         self.accountingInCharts = accountingInCharts
         self.amountFrom = amountFrom
@@ -51,6 +72,8 @@ struct Transaction: Identifiable, Hashable {
         self.accountTo = accountTo
         self.tags = tags
         self.accountGroupID = accountGroupID
+        self.balanceAfterFrom = balanceAfterFrom
+        self.balanceAfterTo = balanceAfterTo
     }
 }
 
@@ -74,6 +97,8 @@ extension Transaction {
         self.accountFrom = accountsMap?[dbModel.accountFromId] ?? Account()
         self.accountTo = accountsMap?[dbModel.accountToId] ?? Account()
         self.accountGroupID = dbModel.accountGroupId
+        self.balanceAfterFrom = 0
+        self.balanceAfterTo = 0
         var tags: [Tag] = []
         if let tagsMap = tagsMap {
             for tagToTransaction in tagsToTransactions.filter({ $0.transactionId == dbModel.id }) {

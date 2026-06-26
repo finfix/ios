@@ -261,6 +261,39 @@ struct EditTransaction: View {
                     }
                 }
             }
+            if vm.mode == .create, vm.predictedAfterFrom != nil || vm.predictedAfterTo != nil {
+                Section("Прогноз баланса") {
+                    if let after = vm.predictedAfterFrom {
+                        HStack {
+                            Text(vm.currentTransaction.accountFrom.name)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(CurrencyFormatter().string(number: vm.currentTransaction.accountFrom.remainder, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                            Image(systemName: "arrow.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(CurrencyFormatter().string(number: after, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                .bold()
+                                .foregroundStyle(after < 0 ? .red : .primary)
+                        }
+                    }
+                    if let after = vm.predictedAfterTo {
+                        HStack {
+                            Text(vm.currentTransaction.accountTo.name)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            if vm.currentTransaction.type != .balancing {
+                                Text(CurrencyFormatter().string(number: vm.currentTransaction.accountTo.remainder, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                Image(systemName: "arrow.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Text(CurrencyFormatter().string(number: after, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                .bold()
+                        }
+                    }
+                }
+            }
             Section {
                 TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
                     .focused($focusedField, equals: .note)
@@ -300,6 +333,34 @@ struct EditTransaction: View {
                         }
                     }
             }
+            if vm.mode == .update && vm.currentTransaction.balanceAfterFrom != 0 {
+                Section("Баланс счетов") {
+                    if vm.currentTransaction.type != .balancing {
+                        HStack {
+                            Text(vm.currentTransaction.accountFrom.name)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceBeforeFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                            Image(systemName: "arrow.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceAfterFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                .bold()
+                        }
+                    }
+                    HStack {
+                        Text(vm.currentTransaction.accountTo.name)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceBeforeTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceAfterTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                            .bold()
+                    }
+                }
+            }
             if vm.mode == .update {
                 Section {
                     Button {
@@ -310,7 +371,7 @@ struct EditTransaction: View {
                                 alert.error(error)
                                 return
                             }
-                            
+
                             dismiss()
                         }
                     } label: {

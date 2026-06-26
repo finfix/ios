@@ -123,6 +123,52 @@ class EditTransactionViewModel {
     var intercurrency: Bool {
         currentTransaction.accountFrom.currency != currentTransaction.accountTo.currency
     }
+
+    /// Эффективная сумма списания (введённая или подсказанная)
+    private var effectiveAmountFrom: Decimal {
+        currentTransaction.amountFrom > 0
+            ? currentTransaction.amountFrom
+            : (Decimal(string: cleanInput(suggestAmountFromString ?? "0")) ?? 0)
+    }
+
+    /// Эффективная сумма зачисления (введённая или подсказанная)
+    private var effectiveAmountTo: Decimal {
+        currentTransaction.amountTo > 0
+            ? currentTransaction.amountTo
+            : (Decimal(string: cleanInput(suggestAmountToString ?? "0")) ?? 0)
+    }
+
+    /// Прогнозируемый баланс счёта списания после транзакции
+    var predictedAfterFrom: Decimal? {
+        guard currentTransaction.accountFrom.id != UUID(uuid: UUID_NULL) else { return nil }
+        let amount = effectiveAmountFrom
+        guard amount > 0 else { return nil }
+        switch currentTransaction.type {
+        case .consumption, .transfer:
+            return currentTransaction.accountFrom.remainder - amount
+        case .income, .balancing:
+            return nil
+        }
+    }
+
+    /// Прогнозируемый баланс счёта зачисления после транзакции
+    var predictedAfterTo: Decimal? {
+        guard currentTransaction.accountTo.id != UUID(uuid: UUID_NULL) else { return nil }
+        switch currentTransaction.type {
+        case .consumption:
+            let amount = effectiveAmountFrom
+            guard amount > 0 else { return nil }
+            return currentTransaction.accountTo.remainder + amount
+        case .income, .transfer:
+            let amount = effectiveAmountTo
+            guard amount > 0 else { return nil }
+            return currentTransaction.accountTo.remainder + amount
+        case .balancing:
+            let amount = effectiveAmountTo
+            guard amount > 0 else { return nil }
+            return amount
+        }
+    }
     
     init(
         currentTransaction: Transaction,

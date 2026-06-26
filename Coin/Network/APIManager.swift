@@ -87,13 +87,27 @@ class APIManager {
         perform: (Req) async throws -> Res
     ) async throws -> Res {
         logger.debug("→ \(method, privacy: .public)\n\(request.textFormatString(), privacy: .public)")
-        do {
-            let response = try await perform(request)
-            logger.debug("← \(method, privacy: .public)\n\(response.textFormatString(), privacy: .public)")
-            return response
-        } catch {
-            logger.error("✗ \(method, privacy: .public): \(String(describing: error), privacy: .public)")
-            throw error
+
+        // Если канал ещё не готов после старта транспорта — повторяем попытки
+        var lastError: Error?
+        for attempt in 0..<5 {
+            if attempt > 0 {
+                try await Task.sleep(for: .milliseconds(500))
+            }
+            do {
+                let response = try await perform(request)
+                logger.debug("← \(method, privacy: .public)\n\(response.textFormatString(), privacy: .public)")
+                return response
+            } catch let error as RPCError where error.code == .unavailable && error.message.contains("isn't ready") {
+                logger.warning("⏳ \(method, privacy: .public): канал не готов, попытка \(attempt + 1)/5")
+                lastError = error
+            } catch {
+                logger.error("✗ \(method, privacy: .public): \(String(describing: error), privacy: .public)")
+                throw error
+            }
         }
+
+        logger.error("✗ \(method, privacy: .public): \(String(describing: lastError!), privacy: .public)")
+        throw lastError!
     }
 }
