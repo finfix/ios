@@ -33,11 +33,11 @@ struct AccountsTabView: View {
                 
                 let columnsCount = max(1, Int(geometry.size.width / (itemWidth + horizontalSpacing)))
                 let rowsCount = if let minRows {
-                    minRows
+                    max(minRows, Int(geometry.size.height / itemHeight))
                 } else if let maxRows {
-                    min(maxRows, Int(geometry.size.height / itemHeight))
+                    min(maxRows, max(1, Int(geometry.size.height / itemHeight)))
                 } else {
-                    max(1, Int(geometry.size.height / itemHeight))
+                    max(3, Int(geometry.size.height / itemHeight))
                 }
                 
                 let itemsPerPage = columnsCount * rowsCount
@@ -180,6 +180,7 @@ struct AccountCirclesView: View {
                             maxRows: nil
                         )
                         .frame(maxHeight: .infinity)
+                        .frame(minHeight: 360)
                     }
                     .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
                     .scrollIndicators(.hidden)

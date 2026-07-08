@@ -194,14 +194,32 @@ struct ChartView: View {
                     }
                 }
                 .font(.callout)
-                if vm.chartType != .earningsAndExpenses {
-                    HStack {
-                        Text(vm.chartType == .balance ? "Итого:" : "Всего:")
-                        Spacer()
-                        Text(formatter.string(number: vm.totalBySelectedDate))
+                if !vm.data.isEmpty {
+                    let totalLabel = vm.chartType == .balance ? "Итого" : "Всего"
+                    let aggregationTotal = vm.aggregationInformation.values.reduce(0, +)
+                    let selectedDateTotal = vm.totalBySelectedDate
+                    let isPercent = vm.aggregationMethod == .percent
+                    Divider()
+                    LazyVGrid(columns: [GridItem(.flexible(minimum: 150)), GridItem(.flexible()), GridItem(.flexible())]) {
+                        Text(totalLabel)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        HStack {
+                            Spacer()
+                            if isPercent {
+                                Text(aggregationTotal, format: .percent.precision(.fractionLength(0)))
+                            } else {
+                                Text(formatter.string(number: aggregationTotal))
+                            }
+                        }
+                        .foregroundStyle(.secondary)
+                        HStack {
+                            Spacer()
+                            Text(formatter.string(number: selectedDateTotal))
+                        }
                     }
-                    .padding(.top)
-                    .font(.title2)
+                    .bold()
+                    .padding(.top, 4)
+                    .font(.callout)
                 }
             }
             .padding(.horizontal, 15)
