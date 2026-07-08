@@ -32,6 +32,7 @@ struct MyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.locale, Locale(identifier: "ru_RU"))
                 .preferredColorScheme(isDarkMode ? .dark : .light)
                 .alert(item: $alert) { alert in
                     Alert(title:

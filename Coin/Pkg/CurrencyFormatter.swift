@@ -10,6 +10,7 @@ import Foundation
 enum NumberFormatters {
     static let textField: NumberFormatter = {
         let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
         formatter.zeroSymbol = ""
         formatter.maximumFractionDigits = 7
         return formatter
@@ -39,7 +40,7 @@ class CurrencyFormatter: NumberFormatter {
             self.maximumFractionDigits = maximumFractionDigits
             self.userMaximumFractionDigits = true
         }
-        self.groupingSeparator = "."
+        self.locale = Locale(identifier: "ru_RU")
         self.usesGroupingSeparator = true
         if let currency = currency {
             self.currencyCode = currency.code
