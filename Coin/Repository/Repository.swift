@@ -603,7 +603,7 @@ class Repository {
                 FROM transactionDB t
                 \(joins.joined(separator: "\n"))
                 \(filters.isEmpty ? "" : "WHERE \(filters.joined(separator: "\nAND "))")
-                ORDER BY t.dateTransaction DESC, t.id DESC
+                ORDER BY t.dateTransaction DESC, t.datetimeCreate DESC
                 LIMIT \(limit) OFFSET \(offset)
             """
             
