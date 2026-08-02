@@ -162,21 +162,6 @@ class Repository {
         }
     }
     
-    func changeSerialNumbers(accountGroup: AccountGroup, oldValue: UInt32, newValue: UInt32) async throws {
-        try await sqlite.write { db in
-            var req = AccountDB.filter(AccountDB.Columns.accountGroupId == accountGroup.id)
-            if newValue < oldValue {
-                try req
-                    .filter(AccountDB.Columns.serialNumber >= newValue && AccountDB.Columns.serialNumber < oldValue)
-                    .updateAll(db, AccountDB.Columns.serialNumber += 1)
-            } else {
-                try req
-                    .filter(AccountDB.Columns.serialNumber > oldValue && AccountDB.Columns.serialNumber <= newValue)
-                    .updateAll(db, AccountDB.Columns.serialNumber -= 1)
-            }
-        }
-    }
-    
     func createTag(_ tag: Tag) async throws {
         try await sqlite.write { db in
             try TagDB(tag).insert(db)
@@ -466,7 +451,7 @@ class Repository {
     ) async throws -> [AccountDB] {
         try await sqlite.read { db in
             var request = AccountDB
-                .order(AccountDB.Columns.serialNumber)
+                .order(AccountDB.Columns.rank)
             
             if let ids = ids {
                 request = request.filter(keys: ids)

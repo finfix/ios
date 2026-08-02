@@ -65,7 +65,7 @@ extension APIManager {
                 parentAccountID: account.parentAccountID != Data() ? try account.parentAccountID.toUUID() : nil,
                 currency: account.currency,
                 accountGroupID: try account.accountGroupID.toUUID(),
-                serialNumber: account.serialNumber,
+                rank: account.rank,
                 isParent: account.isParent,
                 datetimeCreate: account.datetimeCreate.toDate()
             )
@@ -91,9 +91,6 @@ extension APIManager {
             $0.currency = req.currency
             $0.iconID = req.iconID.data
             $0.name = req.name
-            if let remainder = req.remainder {
-                $0.remainder = remainder.doubleValue
-            }
             guard let accountType = AccountType(rawValue: req.type) else {
                 throw ErrorModel(humanText: "Неизвестный тип счета: \(req.type)")
             }
@@ -103,6 +100,7 @@ extension APIManager {
                 $0.parentAccountID = parentAccountID.data
             }
             $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)
+            $0.rank = req.rank
         }
         
         let response = try await grpcCall("CreateAccount", request: request) {
@@ -130,9 +128,6 @@ extension APIManager {
             if let name = req.name {
                 $0.name = name
             }
-            if let remainder = req.remainder {
-                $0.remainder = remainder.doubleValue
-            }
             if let visible = req.visible {
                 $0.visible = visible
             }
@@ -145,8 +140,8 @@ extension APIManager {
             if let iconID = req.iconID {
                 $0.iconID = iconID.data
             }
-            if let serialNumber = req.serialNumber {
-                $0.serialNumber = serialNumber
+            if let rank = req.rank {
+                $0.rank = rank
             }
             $0.budget = Account_UpdateAccountBudgetRequest.with {
                 if let amount = req.budget.amount {

@@ -28,7 +28,7 @@ struct GetAccountsRes: Decodable {
     var parentAccountID: UUID?
     var currency: String
     var accountGroupID: UUID
-    var serialNumber: UInt32
+    var rank: String
     var isParent: Bool
     var datetimeCreate: Date
 }
@@ -53,7 +53,8 @@ struct CreateAccountReq: Codable {
     var isParent: Bool
     var parentAccountID: UUID?
     var datetimeCreate: Date
-    
+    var rank: String
+
     init(
         id: UUID,
         accountGroupID: UUID,
@@ -66,7 +67,8 @@ struct CreateAccountReq: Codable {
         type: String,
         isParent: Bool,
         parentAccountID: UUID? = nil,
-        datetimeCreate: Date
+        datetimeCreate: Date,
+        rank: String
     ) {
         self.id = id
         self.accountGroupID = accountGroupID
@@ -80,6 +82,7 @@ struct CreateAccountReq: Codable {
         self.isParent = isParent
         self.parentAccountID = parentAccountID
         self.datetimeCreate = datetimeCreate
+        self.rank = rank
     }
 }
 
@@ -92,17 +95,9 @@ struct CreateAccountBudgetReq: Codable {
 
 
 struct CreateAccountRes: Decodable {
-    var id: UUID
-    var serialNumber: UInt32
-    var balancingTransactionID: UUID?
-    var balancingAccountID: UUID?
-    var balancingAccountSerialNumber: UInt32?
 }
 
 struct UpdateAccountRes: Decodable {
-    var balancingTransactionID: UUID?
-    var balancingAccountID: UUID?
-    var balancingAccountSerialNumber: UInt32?
 }
 
 struct UpdateAccountReq: Codable {
@@ -114,9 +109,9 @@ struct UpdateAccountReq: Codable {
     var currencyCode: String?
     var parentAccountID: UUID?
     var iconID: UUID?
-    var serialNumber: UInt32?
+    var rank: String?
     var budget: UpdateBudgetReq
-    
+
     init(
         id: UUID,
         accountingInHeader: Bool? = nil,
@@ -126,7 +121,7 @@ struct UpdateAccountReq: Codable {
         currencyCode: String? = nil,
         parentAccountID: UUID? = nil,
         iconID: UUID? = nil,
-        serialNumber: UInt32? = nil,
+        rank: String? = nil,
         budget: UpdateBudgetReq
     ) {
         self.id = id
@@ -137,7 +132,7 @@ struct UpdateAccountReq: Codable {
         self.currencyCode = currencyCode
         self.parentAccountID = parentAccountID
         self.iconID = iconID
-        self.serialNumber = serialNumber
+        self.rank = rank
         self.budget = budget
     }
 }

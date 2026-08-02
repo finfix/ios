@@ -36,7 +36,7 @@ struct Account: Identifiable, Hashable {
     var showingRemainder: Decimal
     var type: AccountType
     var visible: Bool
-    var serialNumber: UInt32
+    var rank: String
     var isParent: Bool
     var budgetAmount: Decimal
     var showingBudgetAmount: Decimal
@@ -63,7 +63,7 @@ struct Account: Identifiable, Hashable {
         showingRemainder: Decimal = 0,
         type: AccountType = .regular,
         visible: Bool = true,
-        serialNumber: UInt32 = 0,
+        rank: String = "",
         isParent: Bool = false,
         budgetAmount: Decimal = 0,
         showingBudgetAmount: Decimal = 0,
@@ -88,7 +88,7 @@ struct Account: Identifiable, Hashable {
         self.visible = visible
         self.parentAccountID = parentAccountID
         self.parentAccount = parentAccount
-        self.serialNumber = serialNumber
+        self.rank = rank
         self.isParent = isParent
         self.budgetAmount = budgetAmount
         self.showingBudgetAmount = showingBudgetAmount
@@ -116,7 +116,7 @@ struct Account: Identifiable, Hashable {
         self.showingRemainder = 0
         self.type = dbModel.type
         self.visible = dbModel.visible
-        self.serialNumber = dbModel.serialNumber
+        self.rank = dbModel.rank
         self.isParent = dbModel.isParent
         self.budgetAmount = dbModel.budgetAmount
         self.showingBudgetAmount = 0
@@ -223,8 +223,8 @@ extension Account {
             }
         }
         for (i, account) in accountsContainer.enumerated() {
-            accountsContainer[i].childrenAccounts = account.childrenAccounts.sorted { $0.serialNumber < $1.serialNumber }
+            accountsContainer[i].childrenAccounts = account.childrenAccounts.sorted { $0.rank < $1.rank }
         }
-        return accountsContainer.sorted { $0.serialNumber < $1.serialNumber }
+        return accountsContainer.sorted { $0.rank < $1.rank }
     }
 }

@@ -19,7 +19,7 @@ struct AccountDB {
     var type: AccountType
     var visible: Bool
     var parentAccountId: UUID?
-    var serialNumber: UInt32
+    var rank: String
     var isParent: Bool
     var currencyCode: String
     var accountGroupId: UUID
@@ -39,7 +39,7 @@ struct AccountDB {
         type: AccountType,
         visible: Bool,
         parentAccountId: UUID?,
-        serialNumber: UInt32,
+        rank: String,
         isParent: Bool,
         currencyCode: String,
         accountGroupId: UUID,
@@ -58,7 +58,7 @@ struct AccountDB {
         self.type = type
         self.visible = visible
         self.parentAccountId = parentAccountId
-        self.serialNumber = serialNumber
+        self.rank = rank
         self.isParent = isParent
         self.currencyCode = currencyCode
         self.accountGroupId = accountGroupId
@@ -80,7 +80,7 @@ struct AccountDB {
         self.type = res.type
         self.visible = res.visible
         self.parentAccountId = res.parentAccountID
-        self.serialNumber = res.serialNumber
+        self.rank = res.rank
         self.isParent = res.isParent
         self.budgetAmount = res.budget.amount
         self.budgetFixedSum = res.budget.fixedSum
@@ -104,7 +104,7 @@ struct AccountDB {
         self.remainder = model.remainder
         self.type = model.type
         self.visible = model.visible
-        self.serialNumber = model.serialNumber
+        self.rank = model.rank
         self.isParent = model.isParent
         self.budgetAmount = model.budgetAmount
         self.budgetFixedSum = model.budgetFixedSum
@@ -167,8 +167,8 @@ struct AccountDB {
             if serverModel.parentAccountId != localModel.parentAccountId {
                 difference["parentAccountId"] = (server: serverModel.parentAccountId ?? 0, local: localModel.parentAccountId ?? 0)
             }
-            if serverModel.serialNumber != localModel.serialNumber {
-                difference["serialNumber"] = (server: serverModel.serialNumber, local: localModel.serialNumber)
+            if serverModel.rank != localModel.rank {
+                difference["rank"] = (server: serverModel.rank, local: localModel.rank)
             }
             if serverModel.isParent != localModel.isParent {
                 difference["isParent"] = (server: serverModel.isParent, local: localModel.isParent)
@@ -215,7 +215,7 @@ extension AccountDB: Codable, FetchableRecord, PersistableRecord {
         static let type = Column(CodingKeys.type)
         static let visible = Column(CodingKeys.visible)
         static let parentAccountId = Column(CodingKeys.parentAccountId)
-        static let serialNumber = Column(CodingKeys.serialNumber)
+        static let rank = Column(CodingKeys.rank)
         static let isParent = Column(CodingKeys.isParent)
         static let currencyCode = Column(CodingKeys.currencyCode)
         static let accountGroupId = Column(CodingKeys.accountGroupId)

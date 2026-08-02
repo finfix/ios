@@ -121,7 +121,7 @@ struct EditAccount: View {
                     let accountsToReorder: [Account] = vm.currentAccount.parentAccountID == nil
                         ? Account.groupAccounts(accounts)
                         : accounts.filter { $0.parentAccountID == vm.currentAccount.parentAccountID! }
-                            .sorted { $0.serialNumber < $1.serialNumber }
+                            .sorted { $0.rank < $1.rank }
                     NavigationLink("Изменить порядок счетов") {
                         ReorderAccountsView(accounts: accountsToReorder)
                     }
@@ -246,7 +246,7 @@ struct EditAccount: View {
             name: "Тестовый счет",
             type: .expense,
             visible: true,
-            serialNumber: 2,
+            rank: "2",
             isParent: false,
             budgetAmount: 1000,
             showingBudgetAmount: 1000,

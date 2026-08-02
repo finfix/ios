@@ -519,7 +519,7 @@ func getAccountsForShowingInCreate(accounts: [Account], position: Position, tran
     default:
         subfiltered = []
     }
-    var grouped = Account.groupAccounts(subfiltered.sorted(by: { $1.serialNumber > $0.serialNumber }))
+    var grouped = Account.groupAccounts(subfiltered.sorted(by: { $1.rank > $0.rank }))
     if let currency = preferredCurrency {
         // Сортируем дочерние счета внутри каждого родителя: совпадающая валюта — первой
         for i in grouped.indices {

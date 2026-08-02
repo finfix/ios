@@ -406,6 +406,21 @@ extension SQLite {
             }
         }
 
+        // Заменяем serialNumber на rank: строковый лексикографический ранг вместо целого номера,
+        // чтобы перемещение счета правило только его собственную запись, без сдвига соседей
+        migrator.registerMigration("accountSerialNumberToRank") { db in
+            try db.alter(table: "accountDB") { table in
+                table.add(column: "rank", .text)
+            }
+
+            // Бэкфилл: превращаем текущий serialNumber в лексикографически эквивалентный ранг
+            try db.execute(sql: "UPDATE accountDB SET rank = printf('%020d', serialNumber)")
+
+            try db.alter(table: "accountDB") { table in
+                table.drop(column: "serialNumber")
+            }
+        }
+
         return migrator
     }
 }

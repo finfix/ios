@@ -12,9 +12,10 @@ extension Service {
     // MARK: Create
     func createAccount(_ account: Account) async throws {
         var account = account
-        
+
         account.remainder = account.remainder.round(factor: 6)
-        
+        account.rank = try await nextRank(in: account.accountGroup)
+
         try validateAccount(account)
                 
         try await repository.createAccount(account)
@@ -40,10 +41,11 @@ extension Service {
                 type: account.type.rawValue,
                 isParent: account.isParent,
                 parentAccountID: account.parentAccountID,
-                datetimeCreate: account.datetimeCreate
+                datetimeCreate: account.datetimeCreate,
+                rank: account.rank
             )
         )
-        
+
         if account.remainder != 0 {
             let balancingAccount = try await findOrCreateBalancingAccount(for: account)
             try await createBalancingTransaction(
@@ -108,15 +110,6 @@ extension Service {
             )
         }
         
-        // Если изменился порядковый номер счета
-        if newAccount.serialNumber != oldAccount.serialNumber {
-            try await repository.changeSerialNumbers(
-                accountGroup: newAccount.accountGroup,
-                oldValue: oldAccount.serialNumber,
-                newValue: newAccount.serialNumber
-            )
-        }
-        
         // Получаем родительский счет
         var parentAccount: Account?
         if let parentAccountID = newAccount.parentAccountID {
@@ -169,7 +162,7 @@ extension Service {
                 currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
                 parentAccountID: parentAccountIDToReq,
                 iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
-                serialNumber: oldAccount.serialNumber != newAccount.serialNumber ? newAccount.serialNumber : nil,
+                rank: oldAccount.rank != newAccount.rank ? newAccount.rank : nil,
                 budget: UpdateBudgetReq(
                     amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
                     fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
@@ -180,18 +173,28 @@ extension Service {
     }
     
     // MARK: Reorder
+    // Пересчитывает rank только у счетов, чьё положение в новом порядке не согласуется
+    // с их текущим rank. Каждое изменение — независимая задача на один счет, без
+    // затрагивания соседей (в отличие от старой схемы со сдвигом serialNumber)
     func reorderAccounts(_ accounts: [Account]) async throws {
-        // Берём текущие порядковые номера и переназначаем их в новом порядке
-        let sortedSerialNumbers = accounts.map(\.serialNumber).sorted()
-        for (index, account) in accounts.enumerated() {
-            let newSerialNumber = sortedSerialNumbers[index]
-            guard account.serialNumber != newSerialNumber else { continue }
+        var accounts = accounts
+        for index in accounts.indices {
+            let account = accounts[index]
+            let prevRank = index > 0 ? accounts[index - 1].rank : nil
+            let nextRank = index < accounts.count - 1 ? accounts[index + 1].rank : nil
+
+            let isInOrder = (prevRank.map { $0 < account.rank } ?? true) && (nextRank.map { account.rank < $0 } ?? true)
+            guard !isInOrder else { continue }
+
+            let newRank = Rank.between(prevRank, nextRank)
+            accounts[index].rank = newRank
+
             var updated = account
-            updated.serialNumber = newSerialNumber
+            updated.rank = newRank
             try await repository.updateAccount(updated)
             taskManager.createTask(
                 actionName: .updateAccount,
-                reqModel: UpdateAccountReq(id: updated.id, serialNumber: newSerialNumber, budget: UpdateBudgetReq())
+                reqModel: UpdateAccountReq(id: updated.id, rank: newRank, budget: UpdateBudgetReq())
             )
         }
     }
@@ -278,7 +281,7 @@ extension Service {
             remainder: 0,
             type: .balancing,
             visible: true,
-            serialNumber: 0,
+            rank: try await nextRank(in: account.accountGroup),
             isParent: false,
             budgetAmount: 0,
             showingBudgetAmount: 0,
@@ -311,7 +314,8 @@ extension Service {
                 type: balancingAccount.type.rawValue,
                 isParent: balancingAccount.isParent,
                 parentAccountID: balancingAccount.parentAccountID,
-                datetimeCreate: balancingAccount.datetimeCreate
+                datetimeCreate: balancingAccount.datetimeCreate,
+                rank: balancingAccount.rank
             )
         )
         
@@ -360,6 +364,12 @@ extension Service {
         ))
     }
     
+    // Вычисляет rank для нового счета — сразу после последнего существующего счета группы
+    private func nextRank(in accountGroup: AccountGroup) async throws -> String {
+        let lastRank = try await getAccounts(accountGroups: [accountGroup]).map(\.rank).max()
+        return Rank.between(lastRank, nil)
+    }
+
     private func validateAccount(_ account: Account) throws {
         guard account.name != "" else {
             throw ErrorModel(humanText: "Имя счета не может быть пустым")
