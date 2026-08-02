@@ -19,6 +19,7 @@ struct DeveloperTools: View {
     @AppStorage("grpcPort") private var grpcPort = defaultGrpcPort
     @AppStorage("accessToken") private var accessToken: String = ""
     @AppStorage("refreshToken") private var refreshToken: String = ""
+    @AppStorage("debugShowStaticLocations") private var debugShowStaticLocations = false
     @Environment(AlertManager.self) var alert
     
     @State var shouldDisableUI = false
@@ -104,6 +105,9 @@ struct DeveloperTools: View {
                 .frame(maxWidth: .infinity)
                 Section {
                     NavigationLink("Показать все задачи", value: DeveloperToolsRoute.tasksList)
+                }
+                Section(header: Text("Отладка")) {
+                    Toggle("Показывать staticLocations кружками", isOn: $debugShowStaticLocations)
                 }
                 Section {
                     TextField("Access token", text: $accessToken)

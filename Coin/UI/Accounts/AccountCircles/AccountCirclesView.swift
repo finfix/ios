@@ -128,6 +128,7 @@ struct AccountCirclesView: View {
     @State private var vm = AccountCirclesViewModel()
     @State private var quickStatisticVM = QuickStatisticViewModel()
     @State private var dragLocation: CGPoint?
+    @AppStorage("debugShowStaticLocations") private var debugShowStaticLocations = false
     
     let horizontalSpacing: CGFloat = 10
     
@@ -138,6 +139,8 @@ struct AccountCirclesView: View {
                     VStack {
                         QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
                         
+                        let groupID = selectedAccountGroup.selectedAccountGroup.id
+
                         let earningsAccounts = vm.accounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.showingRemainder > 0) }
                         AccountsTabView(
                             vm: $vm,
@@ -149,6 +152,7 @@ struct AccountCirclesView: View {
                             minRows: 1,
                             maxRows: nil
                         )
+                        .id(groupID)
                         .frame(height: 120)
                         
                         Divider()
@@ -164,6 +168,7 @@ struct AccountCirclesView: View {
                             minRows: 1,
                             maxRows: nil
                         )
+                        .id(groupID)
                         .frame(height: 120)
                         
                         Divider()
@@ -179,12 +184,39 @@ struct AccountCirclesView: View {
                             minRows: nil,
                             maxRows: nil
                         )
+                        .id(groupID)
                         .frame(maxHeight: .infinity)
                         .frame(minHeight: 360)
                     }
                     .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
                     .scrollIndicators(.hidden)
                     
+                    if debugShowStaticLocations {
+                        // Читаем снимок staticLocations при каждом рендере (vm.accounts — наблюдаемый триггер)
+                        let _ = vm.accounts
+                        let allAccounts = vm.accounts.flatMap { [$0] + $0.childrenAccounts }
+                        ForEach(Array(vm.staticLocations.keys), id: \.self) { accountID in
+                            if let point = vm.staticLocations[accountID] {
+                                let name = allAccounts.first(where: { $0.id == accountID })?.name ?? accountID.uuidString.prefix(8).description
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.red.opacity(0.35))
+                                        .frame(width: 60, height: 60)
+                                    Text(name)
+                                        .font(.system(size: 8, weight: .bold))
+                                        .foregroundStyle(.white)
+                                        .multilineTextAlignment(.center)
+                                        .frame(width: 56)
+                                }
+                                .position(CGPoint(
+                                    x: point.x,
+                                    y: point.y - geometry.safeAreaInsets.top
+                                ))
+                                .allowsHitTesting(false)
+                            }
+                        }
+                    }
+
                     if let draggableLocation = vm.draggableLocation {
                         Circle()
                             .fill(.orange)
@@ -217,8 +249,6 @@ struct AccountCirclesView: View {
                 }
             }
             .onChange(of: selectedAccountGroup.selectedAccountGroup) { _, newValue in
-                vm.currentAccountGroup = newValue
-                vm.deleteStaticLocations()
                 Task {
                     do {
                         try await vm.load(accountGroup: selectedAccountGroup.selectedAccountGroup)
