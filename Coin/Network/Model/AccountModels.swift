@@ -49,7 +49,6 @@ struct CreateAccountReq: Codable {
     var currency: String
     var iconID: UUID
     var name: String
-    var remainder: Decimal?
     var type: String
     var isParent: Bool
     var parentAccountID: UUID?
@@ -64,7 +63,6 @@ struct CreateAccountReq: Codable {
         currency: String,
         iconID: UUID,
         name: String,
-        remainder: Decimal? = nil,
         type: String,
         isParent: Bool,
         parentAccountID: UUID? = nil,
@@ -78,7 +76,6 @@ struct CreateAccountReq: Codable {
         self.currency = currency
         self.iconID = iconID
         self.name = name
-        self.remainder = remainder
         self.type = type
         self.isParent = isParent
         self.parentAccountID = parentAccountID
@@ -113,7 +110,6 @@ struct UpdateAccountReq: Codable {
     var accountingInHeader: Bool?
     var accountingInCharts: Bool?
     var name: String?
-    var remainder: Decimal?
     var visible: Bool?
     var currencyCode: String?
     var parentAccountID: UUID?
@@ -126,7 +122,6 @@ struct UpdateAccountReq: Codable {
         accountingInHeader: Bool? = nil,
         accountingInCharts: Bool? = nil,
         name: String? = nil,
-        remainder: Decimal? = nil,
         visible: Bool? = nil,
         currencyCode: String? = nil,
         parentAccountID: UUID? = nil,
@@ -138,7 +133,6 @@ struct UpdateAccountReq: Codable {
         self.accountingInHeader = accountingInHeader
         self.accountingInCharts = accountingInCharts
         self.name = name
-        self.remainder = remainder
         self.visible = visible
         self.currencyCode = currencyCode
         self.parentAccountID = parentAccountID

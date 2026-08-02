@@ -19,55 +19,8 @@ extension Service {
                 
         try await repository.createAccount(account)
         
-        if account.remainder != 0 {
-            // Получаем балансировочный счет группы счетов
-            var balancingAccount = try await getAccounts(
-                accountGroups: [account.accountGroup],
-                types: [.balancing],
-                currencyCode: account.currency.code,
-                isParent: false
-            ).first
-            
-            // Если балансировочный счет не найден
-            if balancingAccount == nil {
-                
-                // Получаем родительский балансировочный счет группы счетов
-                let parentBalancingAccount = try await getAccounts(
-                    accountGroups: [account.accountGroup],
-                    types: [.balancing],
-                    isParent: true
-                ).first
-                
-                guard parentBalancingAccount != nil else {
-                    throw ErrorModel(humanText: "Не смогли найти родительский балансировочный счет для группы счетов \(account.accountGroup.id)")
-                }
-                
-                // Создаем и получаем балансировочный счет группы счетов
-                balancingAccount = try await repository.createAccountAndReturn(Account(
-                    accountingInHeader: true,
-                    accountingInCharts: true,
-                    icon: Icon(id: UUID(uuid: UUID_NULL)),
-                    name: "Балансировочный",
-                    remainder: 0,
-                    type: .balancing,
-                    visible: true,
-                    serialNumber: 0,
-                    isParent: false,
-                    budgetAmount: 0,
-                    showingBudgetAmount: 0,
-                    budgetFixedSum: 0,
-                    budgetDaysOffset: 0,
-                    budgetGradualFilling: false,
-                    parentAccountID: parentBalancingAccount!.id,
-                    accountGroup: account.accountGroup,
-                    currency: account.currency,
-                    childrenAccounts: []
-                ))
-            }
-                        
-            try await recalculateAccountBalances(accounts: [balancingAccount!])
-        }
-        
+        // Добавляем таску создания счета до создания балансировочной транзакции,
+        // чтобы на сервере счет существовал раньше транзакции
         taskManager.createTask(
             actionName: .createAccount,
             reqModel: CreateAccountReq(
@@ -75,7 +28,7 @@ extension Service {
                 accountGroupID: account.accountGroup.id,
                 accountingInHeader: account.accountingInHeader,
                 accountingInCharts: account.accountingInCharts,
-                budget: CreateAccountBudgetReq (
+                budget: CreateAccountBudgetReq(
                     amount: account.budgetAmount,
                     gradualFilling: account.budgetGradualFilling,
                     daysOffset: account.budgetDaysOffset,
@@ -84,13 +37,21 @@ extension Service {
                 currency: account.currency.code,
                 iconID: account.icon.id,
                 name: account.name,
-                remainder: account.remainder != 0 ? account.remainder : nil,
                 type: account.type.rawValue,
                 isParent: account.isParent,
                 parentAccountID: account.parentAccountID,
                 datetimeCreate: account.datetimeCreate
             )
         )
+        
+        if account.remainder != 0 {
+            let balancingAccount = try await findOrCreateBalancingAccount(for: account)
+            try await createBalancingTransaction(
+                account: account,
+                balancingAccount: balancingAccount,
+                delta: account.remainder
+            )
+        }
     }
     
     // MARK: Read
@@ -137,54 +98,14 @@ extension Service {
         
         try validateAccount(newAccount)
                 
-        // Если изменился баланс счета
+        // Если изменился баланс счета — явно создаем балансировочную транзакцию
         if oldAccount.remainder != newAccount.remainder {
-            // Получаем балансировочный счет группы счетов
-            var balancingAccount = try await getAccounts(
-                accountGroups: [newAccount.accountGroup],
-                types: [.balancing],
-                currencyCode: newAccount.currency.code,
-                isParent: false
-            ).first
-            
-            // Если балансировочный счет не найден
-            if balancingAccount == nil {
-                
-                // Получаем родительский балансировочный счет группы счетов
-                let parentBalancingAccount = try await getAccounts(
-                    accountGroups: [newAccount.accountGroup],
-                    types: [.balancing],
-                    isParent: true
-                ).first
-                
-                guard parentBalancingAccount != nil else {
-                    throw ErrorModel(humanText: "Не смогли найти родительский балансировочный счет для группы счетов \(newAccount.accountGroup.id)")
-                }
-                
-                // Создаем и получаем балансировочный счет группы счетов
-                balancingAccount = try await repository.createAccountAndReturn(Account(
-                    accountingInHeader: true,
-                    accountingInCharts: true,
-                    icon: Icon(id: UUID(uuid: UUID_NULL)),
-                    name: "Балансировочный",
-                    remainder: 0,
-                    type: .balancing,
-                    visible: true,
-                    serialNumber: 0,
-                    isParent: false,
-                    budgetAmount: 0,
-                    showingBudgetAmount: 0,
-                    budgetFixedSum: 0,
-                    budgetDaysOffset: 0,
-                    budgetGradualFilling: false,
-                    parentAccountID: parentBalancingAccount!.id,
-                    accountGroup: newAccount.accountGroup,
-                    currency: newAccount.currency,
-                    childrenAccounts: []
-                ))
-            }
-                        
-            try await recalculateAccountBalances(accounts: [balancingAccount!])
+            let balancingAccount = try await findOrCreateBalancingAccount(for: newAccount)
+            try await createBalancingTransaction(
+                account: newAccount,
+                balancingAccount: balancingAccount,
+                delta: newAccount.remainder - oldAccount.remainder
+            )
         }
         
         // Если изменился порядковый номер счета
@@ -244,7 +165,6 @@ extension Service {
                 accountingInHeader: oldAccount.accountingInHeader != newAccount.accountingInHeader ? newAccount.accountingInHeader : nil,
                 accountingInCharts: oldAccount.accountingInCharts != newAccount.accountingInCharts ? newAccount.accountingInCharts : nil,
                 name: oldAccount.name != newAccount.name ? newAccount.name : nil,
-                remainder: oldAccount.remainder != newAccount.remainder ? newAccount.remainder : nil,
                 visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
                 currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
                 parentAccountID: parentAccountIDToReq,
@@ -326,6 +246,118 @@ extension Service {
         for (accountID, balance) in balances {
             try await repository.updateBalance(id: accountID, newBalance: balance.round(factor: 7))
         }
+    }
+    
+    // Ищет балансировочный дочерний счет нужной валюты; если не найден — создаёт его
+    // и добавляет таску синхронизации с сервером
+    private func findOrCreateBalancingAccount(for account: Account) async throws -> Account {
+        if let existing = try await getAccounts(
+            accountGroups: [account.accountGroup],
+            types: [.balancing],
+            currencyCode: account.currency.code,
+            isParent: false
+        ).first {
+            return existing
+        }
+        
+        // Дочерний балансировочный счет не найден — ищем родительский
+        guard let parentBalancingAccount = try await getAccounts(
+            accountGroups: [account.accountGroup],
+            types: [.balancing],
+            isParent: true
+        ).first else {
+            throw ErrorModel(humanText: "Не смогли найти родительский балансировочный счет для группы счетов \(account.accountGroup.id)")
+        }
+        
+        // Создаем дочерний балансировочный счет локально
+        let balancingAccount = try await repository.createAccountAndReturn(Account(
+            accountingInHeader: true,
+            accountingInCharts: true,
+            icon: Icon(id: UUID(uuid: UUID_NULL)),
+            name: "Балансировочный",
+            remainder: 0,
+            type: .balancing,
+            visible: true,
+            serialNumber: 0,
+            isParent: false,
+            budgetAmount: 0,
+            showingBudgetAmount: 0,
+            budgetFixedSum: 0,
+            budgetDaysOffset: 0,
+            budgetGradualFilling: false,
+            parentAccountID: parentBalancingAccount.id,
+            accountGroup: account.accountGroup,
+            currency: account.currency,
+            childrenAccounts: []
+        ))
+        
+        // Синхронизируем создание балансировочного счета с сервером
+        taskManager.createTask(
+            actionName: .createAccount,
+            reqModel: CreateAccountReq(
+                id: balancingAccount.id,
+                accountGroupID: balancingAccount.accountGroup.id,
+                accountingInHeader: balancingAccount.accountingInHeader,
+                accountingInCharts: balancingAccount.accountingInCharts,
+                budget: CreateAccountBudgetReq(
+                    amount: 0,
+                    gradualFilling: false,
+                    daysOffset: 0,
+                    fixedSum: 0
+                ),
+                currency: balancingAccount.currency.code,
+                iconID: balancingAccount.icon.id,
+                name: balancingAccount.name,
+                type: balancingAccount.type.rawValue,
+                isParent: balancingAccount.isParent,
+                parentAccountID: balancingAccount.parentAccountID,
+                datetimeCreate: balancingAccount.datetimeCreate
+            )
+        )
+        
+        return balancingAccount
+    }
+    
+    // Создает балансировочную транзакцию на delta между балансировочным счетом и целевым.
+    // Для earnings: balance = -remainder, поэтому направление транзакции обратное.
+    private func createBalancingTransaction(
+        account: Account,
+        balancingAccount: Account,
+        delta: Decimal
+    ) async throws {
+        guard delta != 0 else { return }
+        
+        let amount = abs(delta)
+        
+        // Определяем, нужно ли увеличить balance счета
+        let shouldIncreaseBalance: Bool
+        if account.type == .earnings {
+            // Для earnings: remainder = -balance, рост remainder уменьшает balance
+            shouldIncreaseBalance = delta < 0
+        } else {
+            shouldIncreaseBalance = delta > 0
+        }
+        
+        let accountFrom: Account
+        let accountTo: Account
+        if shouldIncreaseBalance {
+            // Увеличиваем balance: balancingAccount -> account
+            accountFrom = balancingAccount
+            accountTo = account
+        } else {
+            // Уменьшаем balance: account -> balancingAccount
+            accountFrom = account
+            accountTo = balancingAccount
+        }
+        
+        try await createTransaction(Transaction(
+            amountFrom: amount,
+            amountTo: amount,
+            type: .balancing,
+            accountFrom: accountFrom,
+            accountTo: accountTo,
+            accountGroupID: account.accountGroup.id
+        ))
     }
     
     private func validateAccount(_ account: Account) throws {
