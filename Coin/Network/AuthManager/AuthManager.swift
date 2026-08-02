@@ -60,6 +60,10 @@ class AuthManager {
         return accessToken
     }
 
+    func forceRefreshTokens() async throws {
+        _ = try await refreshAccessToken()
+    }
+
     private func refreshAccessToken() async throws -> String {
         
         guard let refreshToken else {

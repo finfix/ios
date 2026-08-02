@@ -27,6 +27,10 @@ extension Service {
         try await sync()
     }
     
+    func forceRefreshTokens() async throws {
+        try await authManager.forceRefreshTokens()
+    }
+
     func register(
         login: String,
         password: String,

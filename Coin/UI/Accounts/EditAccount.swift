@@ -160,6 +160,7 @@ struct EditAccount: View {
                     Text("Сохранить")
                 }
                 .frame(maxWidth: .infinity)
+                .disabled(!vm.isChanged)
             }
             if vm.currentAccount.id != UUID(uuid: UUID_NULL) {
                 Section {

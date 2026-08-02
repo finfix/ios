@@ -151,25 +151,25 @@ extension Service {
         
         try await repository.updateAccount(newAccount)
         
-        taskManager.createTask(
-            actionName: .updateAccount,
-            reqModel: UpdateAccountReq(
-                id: newAccount.id,
-                accountingInHeader: oldAccount.accountingInHeader != newAccount.accountingInHeader ? newAccount.accountingInHeader : nil,
-                accountingInCharts: oldAccount.accountingInCharts != newAccount.accountingInCharts ? newAccount.accountingInCharts : nil,
-                name: oldAccount.name != newAccount.name ? newAccount.name : nil,
-                visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
-                currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
-                parentAccountID: parentAccountIDToReq,
-                iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
-                rank: oldAccount.rank != newAccount.rank ? newAccount.rank : nil,
-                budget: UpdateBudgetReq(
-                    amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
-                    fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
-                    daysOffset: oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ? newAccount.budgetDaysOffset : nil,
-                    gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
-            )
+        let updateReq = UpdateAccountReq(
+            id: newAccount.id,
+            accountingInHeader: oldAccount.accountingInHeader != newAccount.accountingInHeader ? newAccount.accountingInHeader : nil,
+            accountingInCharts: oldAccount.accountingInCharts != newAccount.accountingInCharts ? newAccount.accountingInCharts : nil,
+            name: oldAccount.name != newAccount.name ? newAccount.name : nil,
+            visible: oldAccount.visible != newAccount.visible ? newAccount.visible : nil,
+            currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
+            parentAccountID: parentAccountIDToReq,
+            iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
+            rank: oldAccount.rank != newAccount.rank ? newAccount.rank : nil,
+            budget: UpdateBudgetReq(
+                amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
+                fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
+                daysOffset: oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ? newAccount.budgetDaysOffset : nil,
+                gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
         )
+        if updateReq.hasChanges {
+            taskManager.createTask(actionName: .updateAccount, reqModel: updateReq)
+        }
     }
     
     // MARK: Reorder
@@ -187,6 +187,7 @@ extension Service {
             guard !isInOrder else { continue }
 
             let newRank = Rank.between(prevRank, nextRank)
+            guard newRank != account.rank else { continue }
             accounts[index].rank = newRank
 
             var updated = account

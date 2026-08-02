@@ -112,6 +112,12 @@ struct UpdateAccountReq: Codable {
     var rank: String?
     var budget: UpdateBudgetReq
 
+    var hasChanges: Bool {
+        accountingInHeader != nil || accountingInCharts != nil || name != nil ||
+        visible != nil || currencyCode != nil || parentAccountID != nil ||
+        iconID != nil || rank != nil || budget.hasChanges
+    }
+
     init(
         id: UUID,
         accountingInHeader: Bool? = nil,
@@ -142,6 +148,10 @@ struct UpdateBudgetReq: Codable {
     var fixedSum: Decimal?
     var daysOffset: Int8?
     var gradualFilling: Bool?
+
+    var hasChanges: Bool {
+        amount != nil || fixedSum != nil || daysOffset != nil || gradualFilling != nil
+    }
 }
 
 struct DeleteAccountReq: Codable {

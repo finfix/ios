@@ -59,6 +59,10 @@ class EditAccountViewModel {
         self.remainder = currentAccount.remainder.doubleValue
     }
     
+    var isChanged: Bool {
+        mode == .update ? currentAccount != oldAccount : true
+    }
+
     var permissions: AccountPermissions {
         GetPermissions(account: currentAccount)
     }

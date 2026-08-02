@@ -20,4 +20,8 @@ class DeveloperToolsViewModel {
     func reconnectGRPC(host: String, port: Int) throws {
         try service.reconnectGRPC(host: host, port: port)
     }
+
+    func forceRefreshTokens() async throws {
+        try await service.forceRefreshTokens()
+    }
 }

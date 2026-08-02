@@ -108,6 +108,17 @@ struct DeveloperTools: View {
                 Section {
                     TextField("Access token", text: $accessToken)
                     TextField("Refresh token", text: $refreshToken)
+                    Button("Принудительный рефреш токенов") {
+                        Task {
+                            shouldDisableUI = true
+                            defer { shouldDisableUI = false }
+                            do {
+                                try await vm.forceRefreshTokens()
+                            } catch {
+                                alert.error(error)
+                            }
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .alert(isPresented: $shouldShowAlert) {

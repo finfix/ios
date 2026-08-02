@@ -394,6 +394,7 @@ struct EditTransaction: View {
                         Text("Сохранить")
                     }
                     .frame(maxWidth: .infinity)
+                    .disabled(!vm.isChanged)
                 }
                 Section(footer:
                     VStack(alignment: .leading) {

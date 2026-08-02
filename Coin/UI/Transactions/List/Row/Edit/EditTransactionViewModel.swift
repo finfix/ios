@@ -119,6 +119,10 @@ class EditTransactionViewModel {
     var oldTransaction = Transaction()
     var accountGroup = AccountGroup()
     var mode: mode
+
+    var isChanged: Bool {
+        mode == .update ? currentTransaction != oldTransaction : true
+    }
     
     var intercurrency: Bool {
         currentTransaction.accountFrom.currency != currentTransaction.accountTo.currency
