@@ -141,7 +141,8 @@ struct AccountCirclesView: View {
                         
                         let groupID = selectedAccountGroup.selectedAccountGroup.id
 
-                        let earningsAccounts = vm.accounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.showingRemainder > 0) }
+                        // Балансировочный с showingRemainder < 0 — деньги пришли из ниоткуда (доход)
+                        let earningsAccounts = vm.accounts.filter { $0.type == .earnings || ($0.type == .balancing && $0.showingRemainder < 0) }
                         AccountsTabView(
                             vm: $vm,
                             path: $path.path,
@@ -173,7 +174,8 @@ struct AccountCirclesView: View {
                         
                         Divider()
                         
-                        let expenseAccounts = vm.accounts.filter { $0.type == .expense }
+                        // Балансировочный с showingRemainder > 0 — деньги ушли в никуда (расход)
+                        let expenseAccounts = vm.accounts.filter { $0.type == .expense || ($0.type == .balancing && $0.showingRemainder > 0) }
                         AccountsTabView(
                             vm: $vm,
                             path: $path.path,

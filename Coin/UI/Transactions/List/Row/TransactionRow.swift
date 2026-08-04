@@ -13,8 +13,9 @@ struct TransactionRow: View {
         
     var prefix: String {
         switch transaction.type {
-        case .income, .balancing: return "+ "
+        case .income: return "+ "
         case .consumption: return "- "
+        case .balancing: return transaction.accountFrom.type == .balancing ? "+ " : "- "
         default: return ""
         }
     }
@@ -28,6 +29,11 @@ struct TransactionRow: View {
         }
     }
     
+    // Для балансировочных транзакций всегда показываем не-балансировочный счет
+    var displayAccount: Account {
+        transaction.accountFrom.type == .balancing ? transaction.accountTo : transaction.accountFrom
+    }
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -38,7 +44,7 @@ struct TransactionRow: View {
                     .font(.footnote)
                 }
                 HStack {
-                    Text(transaction.accountTo.name)
+                    Text(transaction.type == .balancing ? displayAccount.name : transaction.accountTo.name)
                 }
             }
             Spacer()
@@ -48,7 +54,7 @@ struct TransactionRow: View {
                         Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom.currency, withUnits: false))
                             .font(.footnote)
                     }
-                    Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: transaction.accountTo.currency, withUnits: false))
+                    Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: displayAccount.currency, withUnits: false))
                 }
                 .foregroundStyle(color)
                 if transaction.note != "" {

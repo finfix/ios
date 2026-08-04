@@ -181,7 +181,11 @@ extension Service {
         for index in accounts.indices {
             let account = accounts[index]
             let prevRank = index > 0 ? accounts[index - 1].rank : nil
-            let nextRank = index < accounts.count - 1 ? accounts[index + 1].rank : nil
+            var nextRank = index < accounts.count - 1 ? accounts[index + 1].rank : nil
+
+            // Если prevRank >= nextRank (возможно из-за старых rank в неправильном формате),
+            // игнорируем nextRank чтобы не передавать невалидный диапазон в Rank.between
+            if let p = prevRank, let n = nextRank, p >= n { nextRank = nil }
 
             let isInOrder = (prevRank.map { $0 < account.rank } ?? true) && (nextRank.map { account.rank < $0 } ?? true)
             guard !isInOrder else { continue }
@@ -332,35 +336,17 @@ extension Service {
     ) async throws {
         guard delta != 0 else { return }
         
-        let amount = abs(delta)
-        
-        // Определяем, нужно ли увеличить balance счета
-        let shouldIncreaseBalance: Bool
-        if account.type == .earnings {
-            // Для earnings: remainder = -balance, рост remainder уменьшает balance
-            shouldIncreaseBalance = delta < 0
-        } else {
-            shouldIncreaseBalance = delta > 0
-        }
-        
-        let accountFrom: Account
-        let accountTo: Account
-        if shouldIncreaseBalance {
-            // Увеличиваем balance: balancingAccount -> account
-            accountFrom = balancingAccount
-            accountTo = account
-        } else {
-            // Уменьшаем balance: account -> balancingAccount
-            accountFrom = account
-            accountTo = balancingAccount
-        }
+        // Сервер требует: accountFrom — всегда балансировочный, accountTo — обычный/долг.
+        // Для уменьшения баланса amountTo отрицательный.
+        // Для earnings: remainder = -balance, поэтому знак amountTo инвертируется.
+        let amountTo: Decimal = account.type == .earnings ? -delta : delta
         
         try await createTransaction(Transaction(
-            amountFrom: amount,
-            amountTo: amount,
+            amountFrom: amountTo,
+            amountTo: amountTo,
             type: .balancing,
-            accountFrom: accountFrom,
-            accountTo: accountTo,
+            accountFrom: balancingAccount,
+            accountTo: account,
             accountGroupID: account.accountGroup.id
         ))
     }

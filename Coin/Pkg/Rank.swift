@@ -4,10 +4,13 @@
 //
 
 import Foundation
+import OSLog
 
 // Лексикографический ранг для сортировки счетов (fractional indexing / LexoRank).
 // Перемещение счета — мутация только его собственного rank, без сдвига соседей.
 enum Rank {
+
+    private static let logger = Logger(subsystem: "Coin", category: "Rank")
 
     // Упорядоченный алфавит base62: сортировка строк совпадает с сортировкой по этому алфавиту
     static let alphabet = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
@@ -25,7 +28,12 @@ enum Rank {
         case (nil, let next?):
             return below(next)
         case (let prev?, let next?):
-            precondition(prev < next, "prev должен быть строго меньше next")
+            if prev >= next {
+                logger.error("Rank.between: нарушение prev >= next! prev='\(prev)' next='\(next)'")
+                assertionFailure("Rank.between: prev должен быть строго меньше next, prev='\(prev)' next='\(next)'")
+                // Fallback для release-сборок: игнорируем next и идём выше prev
+                return above(prev)
+            }
             return mid(prev, next)
         }
     }
