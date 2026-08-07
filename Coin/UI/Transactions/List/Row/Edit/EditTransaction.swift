@@ -91,25 +91,6 @@ struct Tags: View {
             }
         }
         .buttonStyle(.plain)
-        .toolbar(content: {
-            ToolbarItem {
-                Button(role: .destructive) {
-                    Task {
-                        do {
-                            try await vm.deleteTransaction()
-                        } catch {
-                            alert.error(error)
-                            return
-                        }
-                        
-                        dismiss()
-                    }
-                } label: {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
-                }
-            }
-        })
     }
 }
 
@@ -158,9 +139,6 @@ struct EditTransaction: View {
     
     var body: some View {
         Form {
-            Section {
-                Tags(vm: vm)
-            }
             if vm.currentTransaction.type != .balancing {
                 Section {
                     Pickers(
@@ -280,29 +258,46 @@ struct EditTransaction: View {
                     }
                 }
             } footer: {
-                VStack(alignment: .leading) {
-                    if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency {
-                        Text("В валюте группы счетов: " + convert(
-                                amountFrom: vm.currentTransaction.amountFrom,
-                                currencyRateFrom: vm.currentTransaction.accountFrom.currency.rate,
-                                currencyRateTo: vm.accountGroup.currency.rate
-                            )
-                            .currencyString(
-                                formatter: CurrencyFormatter(
-                                    currency: vm.accountGroup.currency,
-                                    withUnits: false
+                if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency || vm.showRateString != nil {
+                    VStack(alignment: .leading) {
+                        if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency {
+                            Text("В валюте группы счетов: " + convert(
+                                    amountFrom: vm.currentTransaction.amountFrom,
+                                    currencyRateFrom: vm.currentTransaction.accountFrom.currency.rate,
+                                    currencyRateTo: vm.accountGroup.currency.rate
+                                )
+                                .currencyString(
+                                    formatter: CurrencyFormatter(
+                                        currency: vm.accountGroup.currency,
+                                        withUnits: false
+                                    )
                                 )
                             )
-                        )
-                    }
-                    if let showRateString = vm.showRateString {
-                        Text("Курс: \(showRateString)")
+                        }
+                        if let showRateString = vm.showRateString {
+                            Text("Курс: \(showRateString)")
+                        }
                     }
                 }
             }
             Section {
                 TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
                     .focused($focusedField, equals: .note)
+            }
+            Section {
+                CarouselDatePicker(selectedDate: $vm.currentTransaction.dateTransaction)
+                    .onChange(of: vm.currentTransaction.dateTransaction) { _, _ in
+                        Task {
+                            do {
+                                try await vm.save()
+                            } catch {
+                                alert.error(error)
+                                return
+                            }
+
+                            dismiss()
+                        }
+                    }
             }
             Section(footer:
                 Button {
@@ -320,6 +315,9 @@ struct EditTransaction: View {
                 .buttonStyle(.plain)
             ) {}
             if vm.shouldShowAdditionalSettings {
+                Section {
+                    Tags(vm: vm)
+                }
                 Section {
                     Toggle("Учитывать транзакцию в графиках", isOn: $vm.currentTransaction.accountingInCharts)
                 }
@@ -385,21 +383,6 @@ struct EditTransaction: View {
                     }
                 }
             }
-            Section {
-                CarouselDatePicker(selectedDate: $vm.currentTransaction.dateTransaction)
-                    .onChange(of: vm.currentTransaction.dateTransaction) { _, _ in
-                        Task {
-                            do {
-                                try await vm.save()
-                            } catch {
-                                alert.error(error)
-                                return
-                            }
-                            
-                            dismiss()
-                        }
-                    }
-            }
             if vm.mode == .update {
                 Section {
                     Button {
@@ -429,6 +412,25 @@ struct EditTransaction: View {
 			
         }
         .toolbar {
+            if vm.mode == .update {
+                ToolbarItem {
+                    Button(role: .destructive) {
+                        Task {
+                            do {
+                                try await vm.deleteTransaction()
+                            } catch {
+                                alert.error(error)
+                                return
+                            }
+
+                            dismiss()
+                        }
+                    } label: {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red)
+                    }
+                }
+            }
             ToolbarItemGroup(placement: .keyboard) {
                 HStack {
                     

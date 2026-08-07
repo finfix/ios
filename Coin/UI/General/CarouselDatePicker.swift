@@ -29,22 +29,24 @@ struct CarouselDatePicker: View {
                     Button {
                         selectedDate = date
                     } label: {
-                        VStack {
+                        VStack(spacing: 2) {
                             Text(formatDate(date).uppercased())
-                                .bold()
+                                .font(.callout.bold())
                             Text(formatDayOfWeek(date).uppercased())
-                                .font(.caption)
+                                .font(.caption2)
                         }
                     }
-                    .padding()
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
                     Divider()
-                        .frame(height: 40)
+                        .frame(height: 28)
                 }
-                
+
                 // Календарная иконка
                 Image(systemName: "calendar")
-                    .font(.title)
-                    .padding()
+                    .font(.title3)
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 10)
                     .overlay{
                         DatePicker(
                             "",

@@ -15,6 +15,7 @@ struct EditAccount: View {
 
     @State private var vm: EditAccountViewModel
 
+    @FocusState private var isNameFocused: Bool
     @State private var isRemainderFocused = false
     @State private var isBudgetAmountFocused = false
     @State private var isBudgetFixedSumFocused = false
@@ -66,7 +67,8 @@ struct EditAccount: View {
             Section {
                 
                 TextField("Название счета", text: $vm.currentAccount.name)
-                
+                    .focused($isNameFocused)
+
                 if vm.permissions.changeRemainder {
                     CalculatorField(
                         title: vm.mode == .create ? "Начальный баланс" : "Баланс",
@@ -74,7 +76,18 @@ struct EditAccount: View {
                         isFocused: $isRemainderFocused
                     )
                         .overlay(alignment: .trailing) {
-                            Text(vm.currentAccount.currency.symbol)
+                            HStack {
+                                Text(vm.currentAccount.currency.symbol)
+                                if isRemainderFocused {
+                                    Button {
+                                        UIPasteboard.general.string = NumberFormatters.textField.string(from: NSNumber(value: vm.remainder))
+                                    } label: {
+                                        Image(systemName: "doc.on.doc")
+                                    }
+                                    .buttonStyle(.plain)
+                                    .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                 }
                 
@@ -218,6 +231,11 @@ struct EditAccount: View {
             }
         }
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
+        .onAppear {
+            if vm.mode == .create {
+                isNameFocused = true
+            }
+        }
         .task {
             do {
                 try await vm.load(accountGroup: selectedAccountGroup)
