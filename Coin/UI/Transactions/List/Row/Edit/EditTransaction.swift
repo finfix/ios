@@ -119,6 +119,8 @@ struct EditTransaction: View {
         case amountFromSelector, amountToSelector, note
     }
     @FocusState private var focusedField: Field?
+    @State private var isAmountFromFocused = false
+    @State private var isAmountToFocused = false
     
     @Environment(\.dismiss) private var dismiss
     @State private var vm: EditTransactionViewModel
@@ -205,7 +207,7 @@ struct EditTransaction: View {
                         guard newValue.id != UUID(uuid: UUID_NULL) else { return }
                         withAnimation {
                             vm.shouldShowPickerAccountTo = false
-                            focusedField = .amountFromSelector
+                            isAmountFromFocused = true
                         }
                     }
                 }
@@ -213,46 +215,67 @@ struct EditTransaction: View {
             }
             Section {
                 if vm.currentTransaction.type != .balancing {
-                    TextField(
-                        vm.suggestAmountFromString ?? (vm.intercurrency ? "Сумма списания" : "Сумма"),
-                        text: $vm.amountFromString
-                    )
-                    .keyboardType(.decimalPad)
-                    .focused($focusedField, equals: .amountFromSelector)
-                    .onSubmit {
-                        if vm.intercurrency {
-                            focusedField = .amountToSelector
-                        } else {
-                            focusedField = .note
+                    CalculatorField(
+                        title: vm.suggestAmountFromString ?? (vm.intercurrency ? "Сумма списания" : "Сумма"),
+                        text: $vm.amountFromString,
+                        isFocused: Binding(
+                            get: { isAmountFromFocused },
+                            set: { newValue in
+                                isAmountFromFocused = newValue
+                                if newValue { isAmountToFocused = false }
+                            }
+                        ),
+                        onDone: {
+                            if vm.intercurrency {
+                                isAmountToFocused = true
+                            } else {
+                                focusedField = .note
+                            }
                         }
-                    }
+                    )
                     .overlay(alignment: .trailing) {
                         HStack {
                             Text(vm.currentTransaction.accountFrom.currency.symbol)
-                            PasteButton(payloadType: String.self) { strings in
-                                vm.amountFromString = strings[0]
+                            if isAmountFromFocused {
+                                Button {
+                                    UIPasteboard.general.string = vm.amountFromString
+                                } label: {
+                                    Image(systemName: "doc.on.doc")
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(.secondary)
                             }
-                            .labelStyle(.iconOnly)
-                            .tint(Color(UIColor.systemGray6))
                         }
                     }
 
                 }
                 if vm.intercurrency || vm.currentTransaction.type == .balancing {
-                    TextField(vm.suggestAmountToString ?? "Сумма начисления", text: $vm.amountToString)
-                    .keyboardType(.decimalPad)
-                    .focused($focusedField, equals: .amountToSelector)
-                    .onSubmit {
-                        focusedField = .note
-                    }
+                    CalculatorField(
+                        title: vm.suggestAmountToString ?? "Сумма начисления",
+                        text: $vm.amountToString,
+                        isFocused: Binding(
+                            get: { isAmountToFocused },
+                            set: { newValue in
+                                isAmountToFocused = newValue
+                                if newValue { isAmountFromFocused = false }
+                            }
+                        ),
+                        onDone: {
+                            focusedField = .note
+                        }
+                    )
                     .overlay(alignment: .trailing) {
                         HStack {
                             Text(vm.currentTransaction.accountTo.currency.symbol)
-                            PasteButton(payloadType: String.self) { strings in
-                                vm.amountToString = strings[0]
+                            if isAmountToFocused {
+                                Button {
+                                    UIPasteboard.general.string = vm.amountToString
+                                } label: {
+                                    Image(systemName: "doc.on.doc")
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(.secondary)
                             }
-                            .labelStyle(.iconOnly)
-                            .tint(Color(UIColor.systemGray6))
                         }
                     }
                 }
@@ -410,7 +433,7 @@ struct EditTransaction: View {
                 HStack {
                     
                     // Если (выбранное поле = поле ввода суммы списания) И (счет списания имеет ненулевой баланс) И (тип транзакции расход ИЛИ перевод)
-                    if focusedField == .amountFromSelector && vm.currentTransaction.accountFrom.remainder != 0 && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer)  {
+                    if isAmountFromFocused && vm.currentTransaction.accountFrom.remainder != 0 && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer)  {
                         
                         // Кнопка ввода всего возможного баланса в поле ввода суммы списания
                         Button("Весь баланс: " + CurrencyFormatter().string(
@@ -473,7 +496,7 @@ struct EditTransaction: View {
                 if vm.currentTransaction.accountFrom.id == UUID(uuid: UUID_NULL) {
                     vm.shouldShowPickerAccountFrom = true
                 } else {
-                    focusedField = .amountFromSelector
+                    isAmountFromFocused = true
                 }
             }
             do {
