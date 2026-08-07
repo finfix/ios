@@ -19,8 +19,8 @@ struct CalculatorField: View {
     var onDone: () -> Void
 
     @State private var rawInput: String = ""
-    @State private var cursorPosition: Int = 0
     @State private var didSeedFromBinding = false
+    @State private var lastValidValue: Double? = nil
 
     init(
         title: String,
@@ -71,31 +71,48 @@ struct CalculatorField: View {
         return evaluateExpression(expressionString)
     }
 
+    /// Показываем результат последнего успешного вычисления, если текущее выражение
+    /// сейчас невалидно (например, деление на ноль или "9//*9").
+    private var displayValue: Double? {
+        evaluatedValue ?? lastValidValue
+    }
+
     private var resultFormattedText: String? {
-        guard let evaluatedValue else { return nil }
-        return NumberFormatters.textField.string(from: NSNumber(value: evaluatedValue))
+        guard let displayValue else { return nil }
+        return NumberFormatters.textField.string(from: NSNumber(value: displayValue))
     }
 
     var body: some View {
         HStack {
-            if rawInput.isEmpty {
-                Text(title)
-                    .foregroundStyle(.secondary)
-            } else if isFocused.wrappedValue {
-                VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 2) {
+                if isFocused.wrappedValue {
+                    CalculatorInputBridge(
+                        text: $rawInput,
+                        isFocused: isFocused,
+                        allowsOperators: allowsOperators,
+                        doneTitle: "Готово",
+                        placeholder: title,
+                        font: hasOperator ? .preferredFont(forTextStyle: .caption1) : .preferredFont(forTextStyle: .body),
+                        textColor: hasOperator ? .secondaryLabel : .label,
+                        onDone: onDone
+                    )
+                    .frame(height: hasOperator ? 16 : 24)
                     if hasOperator {
-                        CursorText(text: rawInput, cursorPosition: cursorPosition, font: .caption, color: .secondary)
                         Text(resultFormattedText ?? rawInput)
                             .font(.body.bold())
-                    } else {
-                        CursorText(text: rawInput, cursorPosition: cursorPosition, font: .body, color: .primary)
                     }
+                } else if rawInput.isEmpty {
+                    Text(title)
+                        .foregroundStyle(.secondary)
+                        .contentShape(Rectangle())
+                        .onTapGesture { isFocused.wrappedValue = true }
+                } else {
+                    Text(resultFormattedText ?? rawInput)
+                        .contentShape(Rectangle())
+                        .onTapGesture { isFocused.wrappedValue = true }
                 }
-            } else {
-                Text(resultFormattedText ?? rawInput)
             }
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             if hasOperator, let resultFormattedText {
                 Button {
@@ -107,21 +124,12 @@ struct CalculatorField: View {
                 .foregroundStyle(.secondary)
             }
         }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            isFocused.wrappedValue = true
-        }
-        .background(
-            CalculatorInputBridge(
-                isFocused: isFocused,
-                allowsOperators: allowsOperators,
-                doneTitle: "Готово",
-                onKey: handleKey
-            )
-        )
         .onAppear(perform: seedFromBindingIfNeeded)
         .onChange(of: text) { _, _ in
             seedFromBindingIfNeeded()
+        }
+        .onChange(of: rawInput) { _, _ in
+            pushValueToBinding()
         }
     }
 
@@ -130,54 +138,21 @@ struct CalculatorField: View {
         didSeedFromBinding = true
         if !text.isEmpty {
             rawInput = text
-            cursorPosition = rawInput.count
         }
-    }
-
-    private func insert(_ string: String) {
-        let index = rawInput.index(rawInput.startIndex, offsetBy: cursorPosition)
-        rawInput.insert(contentsOf: string, at: index)
-        cursorPosition += string.count
-    }
-
-    private func handleKey(_ key: CalculatorKey) {
-        switch key {
-        case .digit(let digit):
-            insert(digit)
-        case .decimalSeparator:
-            insert(".")
-        case .op(let op):
-            insert(op.rawValue)
-        case .leftParen:
-            insert("(")
-        case .rightParen:
-            insert(")")
-        case .percent:
-            insert("%")
-        case .backspace:
-            guard cursorPosition > 0 else { return }
-            let index = rawInput.index(rawInput.startIndex, offsetBy: cursorPosition - 1)
-            rawInput.remove(at: index)
-            cursorPosition -= 1
-        case .clearAll:
-            rawInput = ""
-            cursorPosition = 0
-        case .moveCursorLeft:
-            cursorPosition = max(0, cursorPosition - 1)
-        case .moveCursorRight:
-            cursorPosition = min(rawInput.count, cursorPosition + 1)
-        case .done:
-            isFocused.wrappedValue = false
-            onDone()
-        }
-        pushValueToBinding()
     }
 
     private func pushValueToBinding() {
         guard let evaluatedValue else {
-            text = ""
+            // Текущее выражение невалидно (например "9//*9" или "100/0") — не трогаем
+            // ни сохранённое значение, ни последний успешный результат, только когда
+            // поле полностью очищено сбрасываем всё.
+            if rawInput.isEmpty {
+                lastValidValue = nil
+                text = ""
+            }
             return
         }
+        lastValidValue = evaluatedValue
         text = NSDecimalNumber(value: evaluatedValue).stringValue
     }
 }
@@ -366,40 +341,4 @@ private func evaluateExpression(_ input: String) -> Double? {
           let ast = CalcParser(tokens).parseAll()
     else { return nil }
     return calcEvaluate(ast)
-}
-
-/// Текст с видимым мигающим курсором в позиции `cursorPosition`.
-private struct CursorText: View {
-
-    var text: String
-    var cursorPosition: Int
-    var font: Font
-    var color: Color
-
-    @State private var isCursorVisible = true
-
-    var body: some View {
-        let chars = Array(text)
-        let clamped = min(max(cursorPosition, 0), chars.count)
-        let prefix = String(chars[0..<clamped])
-        let suffix = String(chars[clamped...])
-
-        return HStack(spacing: 0) {
-            Text(prefix)
-                .font(font)
-                .foregroundStyle(color)
-            Rectangle()
-                .fill(color)
-                .frame(width: 2, height: 18)
-                .opacity(isCursorVisible ? 1 : 0)
-                .onAppear {
-                    withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
-                        isCursorVisible.toggle()
-                    }
-                }
-            Text(suffix)
-                .font(font)
-                .foregroundStyle(color)
-        }
-    }
 }
