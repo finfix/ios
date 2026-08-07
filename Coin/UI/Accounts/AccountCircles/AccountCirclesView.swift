@@ -153,7 +153,7 @@ struct AccountCirclesView: View {
                             minRows: 1,
                             maxRows: nil
                         )
-                        .id(groupID)
+                        .id("\(groupID)-\(vm.reloadToken)")
                         .frame(height: 120)
                         
                         Divider()
@@ -169,7 +169,7 @@ struct AccountCirclesView: View {
                             minRows: 1,
                             maxRows: nil
                         )
-                        .id(groupID)
+                        .id("\(groupID)-\(vm.reloadToken)")
                         .frame(height: 120)
                         
                         Divider()
@@ -186,7 +186,7 @@ struct AccountCirclesView: View {
                             minRows: nil,
                             maxRows: nil
                         )
-                        .id(groupID)
+                        .id("\(groupID)-\(vm.reloadToken)")
                         .frame(maxHeight: .infinity)
                         .frame(minHeight: 360)
                     }

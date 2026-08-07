@@ -20,6 +20,14 @@ class AccountCirclesViewModel {
     var accounts: [Account] = []
     var currentAccountGroup: AccountGroup? = nil
 
+    /// Увеличивается при каждой успешной загрузке счетов. Используется как часть `.id()`
+    /// у AccountsTabView, чтобы форсировать полный remount сетки кружков — иначе после
+    /// возврата с другого экрана (навигация push/pop приостанавливает и заново запускает
+    /// `.task`) SwiftUI иногда не пересчитывает GeometryReader/onPreferenceChange у уже
+    /// существующих (по значению совпадающих) DraggableAccountCircleItem, из-за чего
+    /// staticLocations не переинициализируются и перетаскивание перестаёт находить цель.
+    var reloadToken = 0
+
     @MainActor
     func load(accountGroup: AccountGroup) async throws {
         logger.debug("load: начало для группы '\(accountGroup.name)'")
@@ -34,6 +42,7 @@ class AccountCirclesViewModel {
         }
         deleteStaticLocations()
         self.accounts = Account.groupAccounts(loaded)
+        reloadToken += 1
         logger.debug("load: завершён для '\(accountGroup.name)', счетов: \(loaded.count)")
     }
 
