@@ -107,11 +107,8 @@ struct EditAccount: View {
                 }
                 
                 if vm.mode == .create || vm.permissions.changeCurrency {
-                    Picker("Валюта", selection: $vm.currentAccount.currency) {
-                        ForEach(vm.currencies) { currency in
-                            Text(currency.code)
-                                .tag(currency)
-                        }
+                    NavigationLink("Валюта: \(vm.currentAccount.currency.code)") {
+                        CurrencyPicker(selectedCurrency: $vm.currentAccount.currency, currencies: vm.currencies)
                     }
                 }
                 NavigationLink("Иконка", destination: IconPicker(selectedIcon: $vm.currentAccount.icon))
@@ -184,6 +181,12 @@ struct EditAccount: View {
                         Text("Дата и время создания: \(vm.currentAccount.datetimeCreate, format: .dateTime)")
                     }
                 ) {}
+            }
+        }
+        .onChange(of: vm.currentAccount.parentAccountID) { _, newValue in
+            guard vm.currentAccount.name.isEmpty, let parentID = newValue else { return }
+            if let parentAccount = accounts.first(where: { $0.id == parentID }) {
+                vm.currentAccount.name = parentAccount.name
             }
         }
         .onChange(of: vm.currentAccount.visible) { _, newValue in
@@ -262,6 +265,48 @@ struct EditAccount: View {
         isHiddenView: false
     )
     .environment(AlertManager(handle: {_ in }))
+}
+
+struct CurrencyPicker: View {
+
+    @Binding var selectedCurrency: Currency
+    let currencies: [Currency]
+    @State private var searchText: String = ""
+    @Environment(\.dismiss) var dismiss
+
+    var filtered: [Currency] {
+        searchText.isEmpty ? currencies : currencies.filter {
+            $0.code.localizedCaseInsensitiveContains(searchText) ||
+            $0.name.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
+    var body: some View {
+        List {
+            ForEach(filtered, id: \.code) { (currency: Currency) in
+                Button {
+                    selectedCurrency = currency
+                    dismiss()
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(currency.code).bold()
+                            if !currency.name.isEmpty {
+                                Text(currency.name).font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        if currency == selectedCurrency {
+                            Image(systemName: "checkmark").foregroundStyle(Color.accentColor)
+                        }
+                    }
+                }
+                .foregroundStyle(.primary)
+            }
+        }
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Поиск валюты")
+        .navigationTitle("Выбор валюты")
+    }
 }
 
 struct IconPicker: View {
