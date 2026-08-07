@@ -29,6 +29,7 @@ enum CalculatorKey: Hashable {
     case rightParen
     case percent
     case backspace
+    case clearAll
     case moveCursorLeft
     case moveCursorRight
     case done
@@ -40,13 +41,13 @@ struct CalculatorKeypad: View {
     var doneTitle: String
     var onKey: (CalculatorKey) -> Void
 
-    private let extraRow: [String] = ["(", ")", "%"]
+    private let extraRow: [String] = ["(", ")", "⌫"]
 
     private let digitRows: [[String]] = [
         ["7", "8", "9"],
         ["4", "5", "6"],
         ["1", "2", "3"],
-        [".", "0", "⌫"]
+        ["%", "0", "."]
     ]
 
     var body: some View {
@@ -100,7 +101,7 @@ struct CalculatorKeypad: View {
 
                 if allowsOperators {
                     VStack(spacing: 8) {
-                        Color.clear.frame(height: 44)
+                        clearButton()
                         operatorButton(.divide)
                         operatorButton(.multiply)
                         operatorButton(.subtract)
@@ -141,6 +142,22 @@ struct CalculatorKeypad: View {
         }
         .buttonStyle(.plain)
         .background(Color(UIColor.systemBackground))
+        .foregroundStyle(Color.primary)
+        .cornerRadius(8)
+    }
+
+    @ViewBuilder
+    private func clearButton() -> some View {
+        Button {
+            onKey(.clearAll)
+        } label: {
+            Text("AC")
+                .font(.title3)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .background(Color(UIColor.systemGray4))
         .foregroundStyle(Color.primary)
         .cornerRadius(8)
     }

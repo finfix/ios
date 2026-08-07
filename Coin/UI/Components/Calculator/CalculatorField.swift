@@ -159,6 +159,9 @@ struct CalculatorField: View {
             let index = rawInput.index(rawInput.startIndex, offsetBy: cursorPosition - 1)
             rawInput.remove(at: index)
             cursorPosition -= 1
+        case .clearAll:
+            rawInput = ""
+            cursorPosition = 0
         case .moveCursorLeft:
             cursorPosition = max(0, cursorPosition - 1)
         case .moveCursorRight:
