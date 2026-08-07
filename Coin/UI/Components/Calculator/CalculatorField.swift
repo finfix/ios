@@ -17,6 +17,9 @@ struct CalculatorField: View {
     var isFocused: Binding<Bool>
     var allowsOperators: Bool
     var onDone: () -> Void
+    /// Сообщает наружу, находится ли поле сейчас в "режиме вычисления" (введён арифметический
+    /// знак/скобка/процент) — чтобы вызывающий экран мог, например, показывать кнопку копирования.
+    var onCalculationModeChange: (Bool) -> Void
 
     @State private var rawInput: String = ""
     @State private var didSeedFromBinding = false
@@ -27,13 +30,15 @@ struct CalculatorField: View {
         text: Binding<String>,
         isFocused: Binding<Bool>,
         allowsOperators: Bool = true,
-        onDone: @escaping () -> Void = {}
+        onDone: @escaping () -> Void = {},
+        onCalculationModeChange: @escaping (Bool) -> Void = { _ in }
     ) {
         self.title = title
         self._text = text
         self.isFocused = isFocused
         self.allowsOperators = allowsOperators
         self.onDone = onDone
+        self.onCalculationModeChange = onCalculationModeChange
     }
 
     /// Удобный инициализатор для полей, хранящих значение как `Double` (баланс, бюджет и т.п.).
@@ -42,7 +47,8 @@ struct CalculatorField: View {
         value: Binding<Double>,
         isFocused: Binding<Bool>,
         allowsOperators: Bool = true,
-        onDone: @escaping () -> Void = {}
+        onDone: @escaping () -> Void = {},
+        onCalculationModeChange: @escaping (Bool) -> Void = { _ in }
     ) {
         self.init(
             title: title,
@@ -52,7 +58,8 @@ struct CalculatorField: View {
             ),
             isFocused: isFocused,
             allowsOperators: allowsOperators,
-            onDone: onDone
+            onDone: onDone,
+            onCalculationModeChange: onCalculationModeChange
         )
     }
 
@@ -123,6 +130,12 @@ struct CalculatorField: View {
         }
         .onChange(of: rawInput) { _, _ in
             pushValueToBinding()
+        }
+        .onChange(of: hasOperator) { _, newValue in
+            onCalculationModeChange(newValue)
+        }
+        .onAppear {
+            onCalculationModeChange(hasOperator)
         }
     }
 

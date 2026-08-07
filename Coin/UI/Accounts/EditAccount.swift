@@ -17,18 +17,24 @@ struct EditAccount: View {
 
     @FocusState private var isNameFocused: Bool
     @State private var isRemainderFocused = false
+    @State private var isRemainderCalcMode = false
     @State private var isBudgetAmountFocused = false
     @State private var isBudgetFixedSumFocused = false
     @State private var isBudgetDaysOffsetFocused = false
 
     var selectedAccountGroup: AccountGroup
-    
+
+    /// Родитель, которому нужно назначить создаваемый счёт (например, при создании
+    /// прямо из выбора счёта в транзакции внутри уже раскрытого родительского счёта).
+    /// Присваивается уже после загрузки счетов, чтобы сработала фича наследования названия.
+    var initialParentAccountID: UUID?
+
     var accounts: [Account] {
         vm.accounts.filter {
             $0.accountGroup == selectedAccountGroup
         }
     }
-        
+
     init(_ account: Account, selectedAccountGroup: AccountGroup, isHiddenView: Bool = false) {
         vm = EditAccountViewModel(
             currentAccount: account,
@@ -38,8 +44,8 @@ struct EditAccount: View {
         )
         self.selectedAccountGroup = selectedAccountGroup
     }
-    
-    init(accountType: AccountType, accountGroup: AccountGroup) {
+
+    init(accountType: AccountType, accountGroup: AccountGroup, initialParentAccountID: UUID? = nil) {
         vm = EditAccountViewModel(
             currentAccount: Account(
                 type: accountType,
@@ -49,6 +55,7 @@ struct EditAccount: View {
             mode: .create
         )
         self.selectedAccountGroup = accountGroup
+        self.initialParentAccountID = initialParentAccountID
     }
         
     var body: some View {
@@ -73,12 +80,13 @@ struct EditAccount: View {
                     CalculatorField(
                         title: vm.mode == .create ? "Начальный баланс" : "Баланс",
                         value: $vm.remainder,
-                        isFocused: $isRemainderFocused
+                        isFocused: $isRemainderFocused,
+                        onCalculationModeChange: { isRemainderCalcMode = $0 }
                     )
                         .overlay(alignment: .trailing) {
                             HStack {
                                 Text(vm.currentAccount.currency.symbol)
-                                if isRemainderFocused {
+                                if isRemainderCalcMode {
                                     Button {
                                         UIPasteboard.general.string = NumberFormatters.textField.string(from: NSNumber(value: vm.remainder))
                                     } label: {
@@ -241,6 +249,9 @@ struct EditAccount: View {
                 try await vm.load(accountGroup: selectedAccountGroup)
                 if vm.mode == .create && vm.currentAccount.currency != Currency() {
                     vm.currentAccount.currency = vm.currencies.first(where: { $0 == selectedAccountGroup.currency }) ?? Currency()
+                }
+                if let initialParentAccountID {
+                    vm.currentAccount.parentAccountID = initialParentAccountID
                 }
             } catch {
                 alert.error(error)

@@ -102,6 +102,8 @@ struct EditTransaction: View {
     @FocusState private var focusedField: Field?
     @State private var isAmountFromFocused = false
     @State private var isAmountToFocused = false
+    @State private var isAmountFromCalcMode = false
+    @State private var isAmountToCalcMode = false
     
     @Environment(\.dismiss) private var dismiss
     @State private var vm: EditTransactionViewModel
@@ -137,127 +139,144 @@ struct EditTransaction: View {
         )
     }
     
+    @ViewBuilder
+    private var amountFromField: some View {
+        if vm.currentTransaction.type != .balancing {
+            CalculatorField(
+                title: vm.suggestAmountFromString ?? (vm.intercurrency ? "Сумма списания" : "Сумма"),
+                text: $vm.amountFromString,
+                isFocused: Binding(
+                    get: { isAmountFromFocused },
+                    set: { newValue in
+                        isAmountFromFocused = newValue
+                        if newValue { isAmountToFocused = false }
+                    }
+                ),
+                onDone: {
+                    if vm.intercurrency {
+                        isAmountToFocused = true
+                    } else {
+                        focusedField = .note
+                    }
+                },
+                onCalculationModeChange: { isAmountFromCalcMode = $0 }
+            )
+            .frame(maxWidth: .infinity)
+            .overlay(alignment: .trailing) {
+                HStack {
+                    Text(vm.currentTransaction.accountFrom.currency.symbol)
+                    if isAmountFromCalcMode {
+                        Button {
+                            UIPasteboard.general.string = vm.amountFromString
+                        } label: {
+                            Image(systemName: "doc.on.doc")
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var amountToField: some View {
+        if vm.intercurrency || vm.currentTransaction.type == .balancing {
+            CalculatorField(
+                title: vm.suggestAmountToString ?? "Сумма начисления",
+                text: $vm.amountToString,
+                isFocused: Binding(
+                    get: { isAmountToFocused },
+                    set: { newValue in
+                        isAmountToFocused = newValue
+                        if newValue { isAmountFromFocused = false }
+                    }
+                ),
+                onDone: {
+                    focusedField = .note
+                },
+                onCalculationModeChange: { isAmountToCalcMode = $0 }
+            )
+            .frame(maxWidth: .infinity)
+            .overlay(alignment: .trailing) {
+                HStack {
+                    Text(vm.currentTransaction.accountTo.currency.symbol)
+                    if isAmountToCalcMode {
+                        Button {
+                            UIPasteboard.general.string = vm.amountToString
+                        } label: {
+                            Image(systemName: "doc.on.doc")
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
     var body: some View {
-        Form {
-            if vm.currentTransaction.type != .balancing {
-                Section {
-                    Pickers(
-                        isPickerShowing: $vm.shouldShowPickerAccountFrom,
-                        buttonName: "Счет списания",
-                        account: $vm.currentTransaction.accountFrom,
-                        accounts: vm.accounts,
-                        position: .up,
-                        transactionType: vm.currentTransaction.type
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                if vm.currentTransaction.type != .balancing {
+                    TransferAccountsSelector(
+                        fromTitle: "Счет списания",
+                        accountFrom: $vm.currentTransaction.accountFrom,
+                        accountsFrom: getAccountsForShowingInCreate(
+                            accounts: vm.accounts,
+                            position: .up,
+                            transactionType: vm.currentTransaction.type,
+                            excludedAccount: nil
+                        ),
+                        displayedBalanceFrom: vm.predictedAfterFrom,
+                        isFromPickerShowing: $vm.shouldShowPickerAccountFrom,
+                        toTitle: "Счет пополнения",
+                        accountTo: $vm.currentTransaction.accountTo,
+                        accountsTo: getAccountsForShowingInCreate(
+                            accounts: vm.accounts,
+                            position: .down,
+                            transactionType: vm.currentTransaction.type,
+                            excludedAccount: vm.currentTransaction.accountFrom,
+                            preferredCurrency: vm.currentTransaction.accountFrom.id != UUID(uuid: UUID_NULL) ? vm.currentTransaction.accountFrom.currency : nil
+                        ),
+                        displayedBalanceTo: vm.predictedAfterTo,
+                        isToPickerShowing: $vm.shouldShowPickerAccountTo,
+                        accountGroup: vm.accountGroup
                     )
+                    .frame(maxWidth: .infinity)
                     .onChange(of: vm.currentTransaction.accountFrom) { _, newValue in
                         guard newValue.id != UUID(uuid: UUID_NULL) else { return }
-                        withAnimation {
-                            vm.shouldShowPickerAccountFrom = false
-                            // Авто-выбор счёта пополнения с той же валютой
-                            if vm.currentTransaction.accountTo.id == UUID(uuid: UUID_NULL) {
-                                let candidates = getAccountsForShowingInCreate(
-                                    accounts: vm.accounts,
-                                    position: .down,
-                                    transactionType: vm.currentTransaction.type,
-                                    excludedAccount: newValue
-                                )
-                                if let match = candidates.first(where: { !$0.isParent && $0.currency == newValue.currency }) {
-                                    vm.currentTransaction.accountTo = match
-                                } else {
-                                    vm.shouldShowPickerAccountTo = true
-                                }
-                            } else {
-                                vm.shouldShowPickerAccountTo = true
+                        // Авто-выбор счёта пополнения с той же валютой
+                        if vm.currentTransaction.accountTo.id == UUID(uuid: UUID_NULL) {
+                            let candidates = getAccountsForShowingInCreate(
+                                accounts: vm.accounts,
+                                position: .down,
+                                transactionType: vm.currentTransaction.type,
+                                excludedAccount: newValue
+                            )
+                            if let match = candidates.first(where: { !$0.isParent && $0.currency == newValue.currency }) {
+                                vm.currentTransaction.accountTo = match
                             }
-                        }
-                    }
-                    Pickers(
-                        isPickerShowing: $vm.shouldShowPickerAccountTo,
-                        buttonName: "Счет пополнения",
-                        account: $vm.currentTransaction.accountTo,
-                        accounts: vm.accounts,
-                        position: .down,
-                        transactionType: vm.currentTransaction.type,
-                        excludeAccount: vm.currentTransaction.accountFrom,
-                        preferredCurrency: vm.currentTransaction.accountFrom.id != UUID(uuid: UUID_NULL) ? vm.currentTransaction.accountFrom.currency : nil
-                    )
-                    .onChange(of: vm.currentTransaction.accountTo) { _, newValue in
-                        guard newValue.id != UUID(uuid: UUID_NULL) else { return }
-                        withAnimation {
-                            vm.shouldShowPickerAccountTo = false
-                            isAmountFromFocused = true
                         }
                     }
                 }
-                .pickerStyle(.wheel)
-            }
-            Section {
-                if vm.currentTransaction.type != .balancing {
-                    CalculatorField(
-                        title: vm.suggestAmountFromString ?? (vm.intercurrency ? "Сумма списания" : "Сумма"),
-                        text: $vm.amountFromString,
-                        isFocused: Binding(
-                            get: { isAmountFromFocused },
-                            set: { newValue in
-                                isAmountFromFocused = newValue
-                                if newValue { isAmountToFocused = false }
-                            }
-                        ),
-                        onDone: {
-                            if vm.intercurrency {
-                                isAmountToFocused = true
-                            } else {
-                                focusedField = .note
-                            }
-                        }
-                    )
-                    .overlay(alignment: .trailing) {
-                        HStack {
-                            Text(vm.currentTransaction.accountFrom.currency.symbol)
-                            if isAmountFromFocused {
-                                Button {
-                                    UIPasteboard.general.string = vm.amountFromString
-                                } label: {
-                                    Image(systemName: "doc.on.doc")
-                                }
-                                .buttonStyle(.plain)
-                                .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
 
-                }
-                if vm.intercurrency || vm.currentTransaction.type == .balancing {
-                    CalculatorField(
-                        title: vm.suggestAmountToString ?? "Сумма начисления",
-                        text: $vm.amountToString,
-                        isFocused: Binding(
-                            get: { isAmountToFocused },
-                            set: { newValue in
-                                isAmountToFocused = newValue
-                                if newValue { isAmountFromFocused = false }
-                            }
-                        ),
-                        onDone: {
-                            focusedField = .note
+                let showAmountTo = vm.intercurrency || vm.currentTransaction.type == .balancing
+                if vm.intercurrency {
+                    HStack(spacing: 16) {
+                        EditCard(padding: 10) { amountFromField }
+                        EditCard(padding: 10) { amountToField }
+                    }
+                } else {
+                    VStack(spacing: 16) {
+                        if vm.currentTransaction.type != .balancing {
+                            EditCard(padding: 10) { amountFromField }
                         }
-                    )
-                    .overlay(alignment: .trailing) {
-                        HStack {
-                            Text(vm.currentTransaction.accountTo.currency.symbol)
-                            if isAmountToFocused {
-                                Button {
-                                    UIPasteboard.general.string = vm.amountToString
-                                } label: {
-                                    Image(systemName: "doc.on.doc")
-                                }
-                                .buttonStyle(.plain)
-                                .foregroundStyle(.secondary)
-                            }
+                        if showAmountTo {
+                            EditCard(padding: 10) { amountToField }
                         }
                     }
                 }
-            } footer: {
                 if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency || vm.showRateString != nil {
                     VStack(alignment: .leading) {
                         if vm.currentTransaction.accountFrom.currency != vm.accountGroup.currency {
@@ -278,28 +297,32 @@ struct EditTransaction: View {
                             Text("Курс: \(showRateString)")
                         }
                     }
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 4)
                 }
-            }
-            Section {
-                TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
-                    .focused($focusedField, equals: .note)
-            }
-            Section {
-                CarouselDatePicker(selectedDate: $vm.currentTransaction.dateTransaction)
-                    .onChange(of: vm.currentTransaction.dateTransaction) { _, _ in
-                        Task {
-                            do {
-                                try await vm.save()
-                            } catch {
-                                alert.error(error)
-                                return
-                            }
 
-                            dismiss()
+                EditCard {
+                    TextField("Заметка", text: $vm.currentTransaction.note, axis: .vertical)
+                        .focused($focusedField, equals: .note)
+                }
+
+                EditCard {
+                    CarouselDatePicker(selectedDate: $vm.currentTransaction.dateTransaction)
+                        .onChange(of: vm.currentTransaction.dateTransaction) { _, _ in
+                            Task {
+                                do {
+                                    try await vm.save()
+                                } catch {
+                                    alert.error(error)
+                                    return
+                                }
+
+                                dismiss()
+                            }
                         }
-                    }
-            }
-            Section(footer:
+                }
+
                 Button {
                     withAnimation {
                         vm.shouldShowAdditionalSettings.toggle()
@@ -313,78 +336,83 @@ struct EditTransaction: View {
                     .font(.caption)
                 }
                 .buttonStyle(.plain)
-            ) {}
-            if vm.shouldShowAdditionalSettings {
-                Section {
-                    Tags(vm: vm)
-                }
-                Section {
-                    Toggle("Учитывать транзакцию в графиках", isOn: $vm.currentTransaction.accountingInCharts)
-                }
-                if vm.mode == .create, vm.predictedAfterFrom != nil || vm.predictedAfterTo != nil {
-                    Section("Прогноз баланса") {
-                        if let after = vm.predictedAfterFrom {
-                            HStack {
-                                Text(vm.currentTransaction.accountFrom.name)
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Text(CurrencyFormatter().string(number: vm.currentTransaction.accountFrom.remainder, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
-                                Image(systemName: "arrow.right")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                Text(CurrencyFormatter().string(number: after, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
-                                    .bold()
-                                    .foregroundStyle(after < 0 ? .red : .primary)
+
+                if vm.shouldShowAdditionalSettings {
+                    EditCard {
+                        Tags(vm: vm)
+                    }
+                    EditCard {
+                        Toggle("Учитывать транзакцию в графиках", isOn: $vm.currentTransaction.accountingInCharts)
+                    }
+                    if vm.mode == .create, vm.predictedAfterFrom != nil || vm.predictedAfterTo != nil {
+                        EditSectionHeader("Прогноз баланса")
+                        EditCard {
+                            VStack(spacing: 10) {
+                                if let after = vm.predictedAfterFrom {
+                                    HStack {
+                                        Text(vm.currentTransaction.accountFrom.name)
+                                            .foregroundStyle(.secondary)
+                                        Spacer()
+                                        Text(CurrencyFormatter().string(number: vm.currentTransaction.accountFrom.remainder, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                        Image(systemName: "arrow.right")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                        Text(CurrencyFormatter().string(number: after, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                            .bold()
+                                            .foregroundStyle(after < 0 ? .red : .primary)
+                                    }
+                                }
+                                if let after = vm.predictedAfterTo {
+                                    HStack {
+                                        Text(vm.currentTransaction.accountTo.name)
+                                            .foregroundStyle(.secondary)
+                                        Spacer()
+                                        if vm.currentTransaction.type != .balancing {
+                                            Text(CurrencyFormatter().string(number: vm.currentTransaction.accountTo.remainder, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                            Image(systemName: "arrow.right")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        Text(CurrencyFormatter().string(number: after, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                            .bold()
+                                    }
+                                }
                             }
                         }
-                        if let after = vm.predictedAfterTo {
-                            HStack {
-                                Text(vm.currentTransaction.accountTo.name)
-                                    .foregroundStyle(.secondary)
-                                Spacer()
+                    }
+                    if vm.mode == .update && vm.currentTransaction.balanceAfterFrom != 0 {
+                        EditSectionHeader("Баланс счетов")
+                        EditCard {
+                            VStack(spacing: 10) {
                                 if vm.currentTransaction.type != .balancing {
-                                    Text(CurrencyFormatter().string(number: vm.currentTransaction.accountTo.remainder, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                    HStack {
+                                        Text(vm.currentTransaction.accountFrom.name)
+                                            .foregroundStyle(.secondary)
+                                        Spacer()
+                                        Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceBeforeFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                        Image(systemName: "arrow.right")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                        Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceAfterFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                            .bold()
+                                    }
+                                }
+                                HStack {
+                                    Text(vm.currentTransaction.accountTo.name)
+                                        .foregroundStyle(.secondary)
+                                    Spacer()
+                                    Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceBeforeTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
                                     Image(systemName: "arrow.right")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
+                                    Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceAfterTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                        .bold()
                                 }
-                                Text(CurrencyFormatter().string(number: after, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
-                                    .bold()
                             }
                         }
                     }
                 }
-                if vm.mode == .update && vm.currentTransaction.balanceAfterFrom != 0 {
-                    Section("Баланс счетов") {
-                        if vm.currentTransaction.type != .balancing {
-                            HStack {
-                                Text(vm.currentTransaction.accountFrom.name)
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceBeforeFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
-                                Image(systemName: "arrow.right")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceAfterFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
-                                    .bold()
-                            }
-                        }
-                        HStack {
-                            Text(vm.currentTransaction.accountTo.name)
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceBeforeTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
-                            Image(systemName: "arrow.right")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceAfterTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
-                                .bold()
-                        }
-                    }
-                }
-            }
-            if vm.mode == .update {
-                Section {
+                if vm.mode == .update {
                     Button {
                         Task {
                             do {
@@ -398,19 +426,26 @@ struct EditTransaction: View {
                         }
                     } label: {
                         Text("Сохранить")
+                            .frame(maxWidth: .infinity)
                     }
-                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(vm.isChanged ? Color.accentColor : Color(UIColor.systemGray4))
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
                     .disabled(!vm.isChanged)
-                }
-                Section(footer:
+
                     VStack(alignment: .leading) {
                         Text("ID: \(vm.currentTransaction.id)")
                         Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
                     }
-                ) {}
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 4)
+                }
             }
-			
+            .padding()
         }
+        .background(Color(UIColor.systemGroupedBackground))
         .toolbar {
             if vm.mode == .update {
                 ToolbarItem {
@@ -518,6 +553,37 @@ struct EditTransaction: View {
     .environment(AlertManager(handle: {_ in }))
 }
 
+/// Карточка-контейнер, заменяющая гриду Form's Section там, где нужен серый фон
+/// (Form/Section больше не используется на этом экране).
+private struct EditCard<Content: View>: View {
+    var padding: CGFloat = 16
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        content
+            .padding(padding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(UIColor.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+}
+
+/// Заголовок группы (аналог заголовка Section("...") у Form).
+private struct EditSectionHeader: View {
+    var title: String
+
+    init(_ title: String) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title.uppercased())
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 4)
+    }
+}
+
 enum Position {
     case up, down
 }
@@ -561,111 +627,4 @@ func getAccountsForShowingInCreate(accounts: [Account], position: Position, tran
         }
     }
     return grouped
-}
-
-private struct Pickers: View {
-
-
-    @Binding var isPickerShowing: Bool
-    var buttonName: String
-    @State var parentAccount = Account()
-    @Binding var account: Account
-    var accounts: [Account]
-    var position: Position
-    var transactionType: TransactionType
-    var excludeAccount: Account?
-    var preferredCurrency: Currency? = nil
-    @State var openSecondPicker: Bool = false
-
-    var accountsToShow: [Account] {
-        getAccountsForShowingInCreate(accounts: accounts, position: position, transactionType: transactionType, excludedAccount: excludeAccount, preferredCurrency: preferredCurrency)
-    }
-    
-    var body: some View {
-        Group {
-            Button {
-                withAnimation {
-                    isPickerShowing.toggle()
-                    if isPickerShowing && account.id != UUID(uuid: UUID_NULL) {
-                        // Если у выбранного счета есть родитель
-                        if let parentId = account.parentAccountID,
-                           let foundParent = accountsToShow.first(where: { $0.id == parentId }) {
-                            parentAccount = foundParent
-                            openSecondPicker = true
-                        } else if account.isParent {
-                            // Если выбранный счет сам родитель
-                            parentAccount = account
-                            openSecondPicker = true
-                        }
-                    }
-                }
-            } label: {
-                Text(buttonName)
-                Spacer()
-                Text(account.name)
-                    .foregroundStyle(.secondary)
-                Text(account.currency.symbol)
-                    .foregroundColor(.secondary)
-            }
-            if isPickerShowing {
-                HStack {
-                    Picker("", selection: $parentAccount) {
-                        Text("Не выбрано")
-                            .tag(Account())
-                        ForEach (accountsToShow) { account in
-                            HStack {
-                                Text(account.name)
-                            }
-                            .tag(account)
-                        }
-                    }
-                    .onChange(of: parentAccount) { _, newValue in
-                        if !newValue.isParent {
-                            account = parentAccount
-                            withAnimation {
-                                openSecondPicker = false
-                            }
-                        } else {
-                            if newValue.childrenAccounts.count == 1 {
-                                account = newValue.childrenAccounts[0]
-                            } else {
-                                withAnimation {
-                                    openSecondPicker = true
-                                }
-                            }
-                        }
-                    }
-                    if openSecondPicker {
-                        Picker("", selection: $account) {
-                            Text("Не выбрано")
-                                .tag(Account())
-                            ForEach (parentAccount.childrenAccounts) { account in
-                                HStack {
-                                    Text(account.name)
-                                    Spacer()
-                                    Text(account.currency.symbol)
-                                        .foregroundColor(.secondary)
-                                }
-                                .tag(account)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .buttonStyle(.plain)
-        .task {
-            if account.id != UUID(uuid: UUID_NULL) {
-                // При первой загрузке тоже проверяем родительский счет
-                if let parentId = account.parentAccountID,
-                   let foundParent = accountsToShow.first(where: { $0.id == parentId }) {
-                    parentAccount = foundParent
-                    openSecondPicker = true
-                } else if account.isParent {
-                    parentAccount = account
-                    openSecondPicker = true
-                }
-            }
-        }
-    }
 }

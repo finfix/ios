@@ -11,6 +11,7 @@ struct CurrencyPicker: View {
     let currencies: [Currency]
     @State private var searchText: String = ""
     @Environment(\.dismiss) var dismiss
+    @FocusState private var isSearchFocused: Bool
 
     var filtered: [Currency] {
         searchText.isEmpty ? currencies : currencies.filter {
@@ -43,6 +44,10 @@ struct CurrencyPicker: View {
             }
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Поиск валюты")
+        .searchFocused($isSearchFocused)
         .navigationTitle("Выбор валюты")
+        .onAppear {
+            isSearchFocused = true
+        }
     }
 }
