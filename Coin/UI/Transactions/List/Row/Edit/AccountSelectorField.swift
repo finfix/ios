@@ -94,6 +94,7 @@ struct AccountSelectorField: View {
     var isExpanded: Bool
     var accountGroup: AccountGroup
     var onTap: () -> Void
+    var onAccountChanged: () -> Void = {}
 
     @State private var isEditingAccount = false
 
@@ -136,7 +137,7 @@ struct AccountSelectorField: View {
                 }
                 .exclusively(before: TapGesture().onEnded(onTap))
         )
-        .sheet(isPresented: $isEditingAccount) {
+        .sheet(isPresented: $isEditingAccount, onDismiss: onAccountChanged) {
             NavigationStack {
                 EditAccount(account, selectedAccountGroup: accountGroup)
             }
@@ -160,6 +161,7 @@ struct TransferAccountsSelector: View {
     @Binding var isToPickerShowing: Bool
 
     var accountGroup: AccountGroup
+    var onAccountChanged: () -> Void = {}
 
     @State private var drillParentFrom: Account?
     @State private var drillParentTo: Account?
@@ -173,7 +175,8 @@ struct TransferAccountsSelector: View {
                     displayedBalance: displayedBalanceFrom,
                     isExpanded: isFromPickerShowing,
                     accountGroup: accountGroup,
-                    onTap: toggleFrom
+                    onTap: toggleFrom,
+                    onAccountChanged: onAccountChanged
                 )
                 Image(systemName: "arrow.right")
                     .foregroundStyle(.secondary)
@@ -184,7 +187,8 @@ struct TransferAccountsSelector: View {
                     displayedBalance: displayedBalanceTo,
                     isExpanded: isToPickerShowing,
                     accountGroup: accountGroup,
-                    onTap: toggleTo
+                    onTap: toggleTo,
+                    onAccountChanged: onAccountChanged
                 )
             }
             if isFromPickerShowing {
@@ -193,7 +197,8 @@ struct TransferAccountsSelector: View {
                     selected: $accountFrom,
                     drillParent: $drillParentFrom,
                     onSelect: { isFromPickerShowing = false },
-                    accountGroup: accountGroup
+                    accountGroup: accountGroup,
+                    onAccountChanged: onAccountChanged
                 )
             }
             if isToPickerShowing {
@@ -202,7 +207,8 @@ struct TransferAccountsSelector: View {
                     selected: $accountTo,
                     drillParent: $drillParentTo,
                     onSelect: { isToPickerShowing = false },
-                    accountGroup: accountGroup
+                    accountGroup: accountGroup,
+                    onAccountChanged: onAccountChanged
                 )
             }
         }
@@ -239,6 +245,7 @@ struct AccountInlinePicker: View {
     @Binding var drillParent: Account?
     var onSelect: () -> Void
     var accountGroup: AccountGroup
+    var onAccountChanged: () -> Void = {}
 
     private var currentList: [Account] {
         drillParent?.childrenAccounts ?? accounts
@@ -285,10 +292,16 @@ struct AccountInlinePicker: View {
                                 drillParent = nil
                                 onSelect()
                             }
-                        }
+                        },
+                        onAccountChanged: onAccountChanged
                     )
                 }
-                CreateAccountButton(accountType: newAccountType, accountGroup: accountGroup, parentAccountID: drillParent?.id)
+                CreateAccountButton(
+                    accountType: newAccountType,
+                    accountGroup: accountGroup,
+                    parentAccountID: drillParent?.id,
+                    onAccountChanged: onAccountChanged
+                )
             }
             .padding(.vertical, 4)
         }
@@ -311,6 +324,7 @@ private struct AccountInlinePickerRow: View {
     var isHighlighted: Bool
     var accountGroup: AccountGroup
     var onTap: () -> Void
+    var onAccountChanged: () -> Void = {}
 
     @State private var isEditingAccount = false
 
@@ -340,7 +354,7 @@ private struct AccountInlinePickerRow: View {
                 .onEnded { _ in isEditingAccount = true }
                 .exclusively(before: TapGesture().onEnded(onTap))
         )
-        .sheet(isPresented: $isEditingAccount) {
+        .sheet(isPresented: $isEditingAccount, onDismiss: onAccountChanged) {
             NavigationStack {
                 EditAccount(account, selectedAccountGroup: accountGroup)
             }
@@ -355,6 +369,7 @@ private struct CreateAccountButton: View {
     var accountType: AccountType
     var accountGroup: AccountGroup
     var parentAccountID: UUID?
+    var onAccountChanged: () -> Void = {}
 
     @State private var isPresented = false
 
@@ -381,7 +396,7 @@ private struct CreateAccountButton: View {
             .frame(width: 70)
         }
         .buttonStyle(.plain)
-        .sheet(isPresented: $isPresented) {
+        .sheet(isPresented: $isPresented, onDismiss: onAccountChanged) {
             NavigationStack {
                 EditAccount(
                     accountType: accountType,

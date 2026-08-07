@@ -40,17 +40,11 @@ struct AppTabView: View {
     
     var body: some View {
         TabView(selection: $selectionTab) {
-//            AccountHomeTab()
-//                .tag(1)
-//                .tabItem {
-//                    Image(systemName: "list.bullet.rectangle.fill")
-//                    Text("Счета")
-//                }
             AccountCirclesTab()
                 .tag(2)
                 .tabItem {
                     Image(systemName: "2.circle")
-                    Text("Счета 2")
+                    Text("Счета")
                 }
             TransactionsTab()
                 .tag(3)

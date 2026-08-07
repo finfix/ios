@@ -139,6 +139,25 @@ struct EditTransaction: View {
         )
     }
     
+    /// Перезагружает счета (например, после создания/редактирования счёта прямо из пикера
+    /// в этом экране) и подтягивает свежие значения (баланс, название и т.п.) уже выбранных
+    /// счётов списания/пополнения.
+    private func refreshAccounts() {
+        Task {
+            do {
+                try await vm.load()
+                if let fresh = vm.accounts.first(where: { $0.id == vm.currentTransaction.accountFrom.id }) {
+                    vm.currentTransaction.accountFrom = fresh
+                }
+                if let fresh = vm.accounts.first(where: { $0.id == vm.currentTransaction.accountTo.id }) {
+                    vm.currentTransaction.accountTo = fresh
+                }
+            } catch {
+                alert.error(error)
+            }
+        }
+    }
+
     @ViewBuilder
     private var amountFromField: some View {
         if vm.currentTransaction.type != .balancing {
@@ -241,7 +260,8 @@ struct EditTransaction: View {
                         ),
                         displayedBalanceTo: vm.predictedAfterTo,
                         isToPickerShowing: $vm.shouldShowPickerAccountTo,
-                        accountGroup: vm.accountGroup
+                        accountGroup: vm.accountGroup,
+                        onAccountChanged: refreshAccounts
                     )
                     .frame(maxWidth: .infinity)
                     .onChange(of: vm.currentTransaction.accountFrom) { _, newValue in
