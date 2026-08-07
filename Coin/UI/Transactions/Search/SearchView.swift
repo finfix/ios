@@ -25,6 +25,9 @@ struct SearchView: View {
     
     var body: some View {
         List {
+            Section {
+                TextField("Поиск", text: $searchText)
+            }
             Section(header: Text("Управление фильтрами")) {
                 Button {
                     areFiltersLocked.toggle()
@@ -56,36 +59,23 @@ struct SearchView: View {
                 ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $filters.dateTo)
             }
             Section(header: Text("Типы транзакций")) {
-                ForEach(TransactionType.allCases, id: \.rawValue) { transactionType in
+                ForEach(TransactionType.allCases.filter { !filters.transactionTypes.contains($0) }, id: \.rawValue) { transactionType in
                     Button(transactionType.name) {
-//                        switch transactionType {
-//                        case .expense:
-//                            chartType = .expenses
-//                        case .earnings:
-//                            chartType = .earnings
-//                        default: break
-//                        }
                         filters.transactionTypes.append(transactionType)
-                        searchText = ""
-                        showFilters = false
                     }
                 }
             }
             Section(header: Text("Заметки")) {
                 Button("Искать транзакции по заметке по строке: \"\(searchText)\"") {
                     filters.searchText = searchText
-                    searchText = ""
-                    showFilters = false
                 }
                 .disabled(searchText.isEmpty)
             }
             Section(header: Text("Валюты")) {
                 if !searchText.isEmpty {
-                    ForEach(vm.currencies) { currency in
+                    ForEach(vm.currencies.filter { !filters.currencies.contains($0) }) { currency in
                         Button(currency.name) {
                             filters.currencies.append(currency)
-                            searchText = ""
-                            showFilters = false
                         }
                     }
                 } else {
@@ -95,12 +85,10 @@ struct SearchView: View {
             }
             Section(header: Text("Группы счетов")) {
                 if !searchText.isEmpty {
-                    ForEach(vm.accountGroups) { accountGroup in
+                    ForEach(vm.accountGroups.filter { !filters.accountGroups.contains($0) }) { accountGroup in
                         Button(accountGroup.name) {
                             filters.accountGroups.append(accountGroup)
                             chartType = .earningsAndExpenses
-                            searchText = ""
-                            showFilters = false
                         }
                     }
                 } else {
@@ -110,12 +98,10 @@ struct SearchView: View {
             }
             Section(header: Text("Доходы")) {
                 if !searchText.isEmpty {
-                    ForEach(vm.earnings) { account in
+                    ForEach(vm.earnings.filter { !filters.accounts.contains($0) }) { account in
                         Button {
                             filters.accounts.append(account)
                             chartType = .earnings
-                            searchText = ""
-                            showFilters = false
                         } label: {
                             HStack {
                                 if filters.accountGroups.count != 1 {
@@ -137,12 +123,10 @@ struct SearchView: View {
             }
             Section(header: Text("Счета")) {
                 if !searchText.isEmpty {
-                    ForEach(vm.regulars) { account in
+                    ForEach(vm.regulars.filter { !filters.accounts.contains($0) }) { account in
                         Button {
                             filters.accounts.append(account)
                             chartType = .earningsAndExpenses
-                            searchText = ""
-                            showFilters = false
                         } label: {
                             HStack {
                                 if filters.accountGroups.count != 1 {
@@ -164,12 +148,10 @@ struct SearchView: View {
             }
             Section(header: Text("Расходы")) {
                 if !searchText.isEmpty {
-                    ForEach(vm.expenses) { account in
+                    ForEach(vm.expenses.filter { !filters.accounts.contains($0) }) { account in
                         Button {
                             filters.accounts.append(account)
                             chartType = .expenses
-                            searchText = ""
-                            showFilters = false
                         } label: {
                             HStack {
                                 if filters.accountGroups.count != 1 {
@@ -191,12 +173,10 @@ struct SearchView: View {
             }
             Section(header: Text("Подкатегории")) {
                 if !searchText.isEmpty {
-                    ForEach(vm.tags) { tag in
+                    ForEach(vm.tags.filter { !filters.tags.contains($0) }) { tag in
                         Button {
                             filters.tags.append(tag)
                             chartType = .earningsAndExpenses
-                            searchText = ""
-                            showFilters = false
                         } label: {
                             HStack {
                                 if filters.accountGroups.count != 1 {

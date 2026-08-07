@@ -284,16 +284,16 @@ struct EditTransaction: View {
                 let showAmountTo = vm.intercurrency || vm.currentTransaction.type == .balancing
                 if vm.intercurrency {
                     HStack(spacing: 16) {
-                        EditCard(padding: 10) { amountFromField }
-                        EditCard(padding: 10) { amountToField }
+                        EditCard(padding: 16) { amountFromField }
+                        EditCard(padding: 16) { amountToField }
                     }
                 } else {
                     VStack(spacing: 16) {
                         if vm.currentTransaction.type != .balancing {
-                            EditCard(padding: 10) { amountFromField }
+                            EditCard(padding: 16) { amountFromField }
                         }
                         if showAmountTo {
-                            EditCard(padding: 10) { amountToField }
+                            EditCard(padding: 16) { amountToField }
                         }
                     }
                 }
@@ -455,7 +455,7 @@ struct EditTransaction: View {
                     .disabled(!vm.isChanged)
 
                     VStack(alignment: .leading) {
-                        Text("ID: \(vm.currentTransaction.id)")
+                        CopyableIDText(id: vm.currentTransaction.id.uuidString)
                         Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
                     }
                     .font(.footnote)

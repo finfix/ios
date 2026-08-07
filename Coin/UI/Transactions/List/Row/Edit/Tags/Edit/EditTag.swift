@@ -75,7 +75,7 @@ struct EditTag: View {
             if vm.currentTag.id != UUID(uuid: UUID_NULL) {
                 Section(footer:
                     VStack(alignment: .leading) {
-                        Text("ID: \(vm.currentTag.id)")
+                        CopyableIDText(id: vm.currentTag.id.uuidString)
                         Text("Дата и время создания: \(vm.currentTag.datetimeCreate, format: .dateTime)")
                     }
                 ) {}

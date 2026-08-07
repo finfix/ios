@@ -221,7 +221,7 @@ struct EditAccount: View {
                 
                 Section(footer:
                     VStack(alignment: .leading) {
-                        Text("ID: \(vm.currentAccount.id)")
+                        CopyableIDText(id: vm.currentAccount.id.uuidString)
                         Text("Дата и время создания: \(vm.currentAccount.datetimeCreate, format: .dateTime)")
                     }
                 ) {}

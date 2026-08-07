@@ -90,7 +90,15 @@ struct TransactionsView: View {
                 filters.accountGroups = [newValue]
             }
         }
-        .searchable(text: $searchText, isPresented: $showFilters)
+        .toolbar {
+            ToolbarItem {
+                Button {
+                    showFilters.toggle()
+                } label: {
+                    Image(systemName: showFilters ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                }
+            }
+        }
     }
 }
 

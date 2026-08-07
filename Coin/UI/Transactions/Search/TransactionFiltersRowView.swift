@@ -8,84 +8,60 @@
 import SwiftUI
 
 struct TransactionFiltersRowView: View {
-    
+
     @Binding var filters: TransactionFilters
-    
+
     var body: some View {
         ScrollView(.horizontal) {
             HStack {
                 if !filters.accountGroups.isEmpty {
                     ForEach(Array(zip(filters.accountGroups.indices, filters.accountGroups)), id: \.0) { i, accountGroup in
-                        Button {
+                        TransactionFiltersRowItem(text: accountGroup.name, color: Color.orange) {
                             filters.accountGroups.remove(at: i)
-                        } label: {
-                            TransactionFiltersRowItem(text: accountGroup.name, color: Color.orange)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 if !filters.accounts.isEmpty {
                     ForEach(Array(zip(filters.accounts.indices, filters.accounts)), id: \.0) { i, account in
-                        Button {
+                        TransactionFiltersRowItem(text: "\(account.name) · \(account.accountGroup.name)", color: Color.yellow) {
                             filters.accounts.remove(at: i)
-                        } label: {
-                            TransactionFiltersRowItem(text: account.name, color: Color.yellow)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 if let dateFrom = filters.dateFrom {
-                    Button {
+                    TransactionFiltersRowItem(text: "C \(dateFrom.formatted(date: .abbreviated, time: .omitted))", color: Color.blue) {
                         filters.dateFrom = nil
-                    } label: {
-                        TransactionFiltersRowItem(text: "C \(dateFrom.formatted(date: .abbreviated, time: .omitted))", color: Color.blue)
                     }
-                    .buttonStyle(.plain)
                 }
                 if let dateTo = filters.dateTo {
-                    Button {
+                    TransactionFiltersRowItem(text: "По \(dateTo.formatted(date: .abbreviated, time: .omitted))", color: Color.blue) {
                         filters.dateTo = nil
-                    } label: {
-                        TransactionFiltersRowItem(text: "По \(dateTo.formatted(date: .abbreviated, time: .omitted))", color: Color.blue)
                     }
-                    .buttonStyle(.plain)
                 }
                 if !filters.transactionTypes.isEmpty {
                     ForEach(Array(zip(filters.transactionTypes.indices, filters.transactionTypes)), id: \.0) { i, transactionType in
-                        Button {
+                        TransactionFiltersRowItem(text: transactionType.name, color: Color.red) {
                             filters.transactionTypes.remove(at: i)
-                        } label: {
-                            TransactionFiltersRowItem(text: transactionType.name, color: Color.red)
                         }
                     }
-                    .buttonStyle(.plain)
                 }
                 if !filters.currencies.isEmpty {
                     ForEach(Array(zip(filters.currencies.indices, filters.currencies)), id: \.0) { i, currency in
-                        Button {
+                        TransactionFiltersRowItem(text: currency.name, color: Color.purple) {
                             filters.currencies.remove(at: i)
-                        } label: {
-                            TransactionFiltersRowItem(text: currency.name, color: Color.purple)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 if !filters.searchText.isEmpty {
-                    Button {
+                    TransactionFiltersRowItem(text: "Заметка: \"\(filters.searchText)\"", color: Color.green) {
                         filters.searchText = ""
-                    } label: {
-                        TransactionFiltersRowItem(text: "Заметка: \"\(filters.searchText)\"", color: Color.green)
                     }
-                    .buttonStyle(.plain)
                 }
                 if !filters.tags.isEmpty {
                     ForEach(Array(zip(filters.tags.indices, filters.tags)), id: \.0) { i, tag in
-                        Button {
+                        TransactionFiltersRowItem(text: tag.name, color: Color.brown) {
                             filters.tags.remove(at: i)
-                        } label: {
-                            TransactionFiltersRowItem(text: tag.name, color: Color.brown)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -95,16 +71,15 @@ struct TransactionFiltersRowView: View {
 }
 
 struct TransactionFiltersRowItem: View {
-    
+
     var text: String
     var color: Color
-    
+    var onRemove: () -> Void
+
     var body: some View {
         HStack {
             Text(text)
-            Button {
-                
-            } label: {
+            Button(action: onRemove) {
                 Image(systemName: "xmark")
             }
             .buttonStyle(.plain)

@@ -80,7 +80,7 @@ struct EditAccountGroup: View {
             if vm.currentAccountGroup.id != UUID(uuid: UUID_NULL) {
                 Section(footer:
                     VStack(alignment: .leading) {
-                        Text("ID: \(vm.currentAccountGroup.id)")
+                        CopyableIDText(id: vm.currentAccountGroup.id.uuidString)
                         Text("Дата и время создания: \(vm.currentAccountGroup.datetimeCreate, format: .dateTime)")
                     }
                 ) {}

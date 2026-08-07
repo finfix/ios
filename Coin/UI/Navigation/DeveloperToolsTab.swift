@@ -24,6 +24,14 @@ struct DeveloperToolsTab: View {
                     case .taskDetails(let task): TaskDetails(task: task)
                     }
                 }
+                .navigationDestination(for: DeveloperObjectRoute.self) { screen in
+                    switch screen {
+                    case .account(let account): EditAccount(account, selectedAccountGroup: account.accountGroup)
+                    case .transaction(let transaction): EditTransaction(transaction)
+                    case .tag(let tag): EditTag(tag)
+                    case .accountGroup(let accountGroup): EditAccountGroup(accountGroup)
+                    }
+                }
 
         }
         .environment(path)

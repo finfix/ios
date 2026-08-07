@@ -296,10 +296,13 @@
 		B5FF351E2AEC091F007694F9 /* Defaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF351D2AEC091F007694F9 /* Defaults.swift */; };
 		B5FFB96630265DA700307D05 /* CurrencyPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FFB96530265DA700307D05 /* CurrencyPicker.swift */; };
 		B5FFB96730265DA700307D05 /* CurrencyPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FFB96530265DA700307D05 /* CurrencyPicker.swift */; };
+		B8152E709AED309F0777CEFF /* CopyableIDText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */; };
 		CC6E1F09B771C086A225F83E /* CalculatorKeypad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735D64AA0AB4EAC878339270 /* CalculatorKeypad.swift */; };
+		D3EA9B8AB10B0516E5DEA3E9 /* CopyableIDText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CopyableIDText.swift; sourceTree = "<group>"; };
 		735D64AA0AB4EAC878339270 /* CalculatorKeypad.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CalculatorKeypad.swift; path = CalculatorKeypad.swift; sourceTree = "<group>"; };
 		8BB2AB01AFE2D8CE38A0A20A /* Rank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rank.swift; sourceTree = "<group>"; };
 		B5024EB12AE1A20F00F60449 /* EditAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccount.swift; sourceTree = "<group>"; };
@@ -927,6 +930,7 @@
 			isa = PBXGroup;
 			children = (
 				178FF8D254203101E59A7987 /* Calculator */,
+				46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */,
 			);
 			name = Components;
 			path = Components;
@@ -1191,6 +1195,7 @@
 				20305E2B5EE309B2273264F8 /* CalculatorInputBridge.swift in Sources */,
 				8283F591BA0823F86A679B31 /* CalculatorField.swift in Sources */,
 				1E13AB8FCAE5AC1DE3D5F5D6 /* AccountSelectorField.swift in Sources */,
+				D3EA9B8AB10B0516E5DEA3E9 /* CopyableIDText.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1333,6 +1338,7 @@
 				24E946188EEEF578310E6B4D /* CalculatorInputBridge.swift in Sources */,
 				3F63E099800339504F53AC06 /* CalculatorField.swift in Sources */,
 				8CCB3410542A225354DFE02C /* AccountSelectorField.swift in Sources */,
+				B8152E709AED309F0777CEFF /* CopyableIDText.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

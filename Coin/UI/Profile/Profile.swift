@@ -19,8 +19,6 @@ struct Profile: View {
     @Environment(AlertManager.self) private var alert
     @State var vm = ProfileViewModel()
     
-    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
-    
     @AppStorage("accessToken") private var accessToken: String?
     @AppStorage("refreshToken") private var refreshToken: String?
     @AppStorage("isLogin") private var isLogin: Bool = false
@@ -29,8 +27,6 @@ struct Profile: View {
     @State var shouldShowProgress = false
     
     var body: some View {
-        QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-
         Form {
             Section {
                 NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)

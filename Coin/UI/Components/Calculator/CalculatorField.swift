@@ -70,7 +70,7 @@ struct CalculatorField: View {
 
     private var evaluatedValue: Double? {
         guard hasOperator else {
-            return Double(rawInput.replacingOccurrences(of: ",", with: "."))
+            return Double(rawInput.replacingOccurrences(of: ",", with: ".").filter { !$0.isWhitespace })
         }
         var expressionString = rawInput
         for op in CalculatorOperator.allCases {
@@ -100,23 +100,25 @@ struct CalculatorField: View {
                         allowsOperators: allowsOperators,
                         doneTitle: "Готово",
                         placeholder: title,
-                        font: hasOperator ? .preferredFont(forTextStyle: .caption1) : .preferredFont(forTextStyle: .body),
+                        font: hasOperator ? .preferredFont(forTextStyle: .footnote) : .preferredFont(forTextStyle: .title3),
                         textColor: hasOperator ? .secondaryLabel : .label,
                         onDone: onDone
                     )
-                    .frame(height: hasOperator ? 16 : 24)
+                    .frame(height: hasOperator ? 18 : 32)
                     if hasOperator {
                         Text(resultFormattedText ?? "0")
-                            .font(.body.bold())
+                            .font(.title3.bold())
                             .foregroundStyle(resultFormattedText == nil ? .secondary : .primary)
                     }
                 } else if rawInput.isEmpty {
                     Text(title)
+                        .font(.title3)
                         .foregroundStyle(.secondary)
                         .contentShape(Rectangle())
                         .onTapGesture { isFocused.wrappedValue = true }
                 } else {
                     Text(resultFormattedText ?? "0")
+                        .font(.title3)
                         .foregroundStyle(resultFormattedText == nil ? .secondary : .primary)
                         .contentShape(Rectangle())
                         .onTapGesture { isFocused.wrappedValue = true }
@@ -321,7 +323,8 @@ private func calcEvaluate(_ node: CalcNode) -> Double? {
 }
 
 private func evaluateExpression(_ input: String) -> Double? {
-    var expressionString = input
+    // Пробелы (например, разделители тысяч при вставке "1 234 567") не должны мешать расчёту.
+    var expressionString = input.filter { !$0.isWhitespace }
 
     // Отбрасываем висящий оператор или незакрытую скобку на конце (например "100+" или "(2+3+")
     while let last = expressionString.last, "+-*/(".contains(last) {

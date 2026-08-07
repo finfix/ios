@@ -11,6 +11,9 @@ enum NumberFormatters {
     static let textField: NumberFormatter = {
         let formatter = NumberFormatter()
         formatter.locale = Locale(identifier: "ru_RU")
+        formatter.numberStyle = .decimal
+        formatter.usesGroupingSeparator = true
+        formatter.groupingSeparator = " "
         formatter.zeroSymbol = ""
         formatter.maximumFractionDigits = 7
         return formatter
