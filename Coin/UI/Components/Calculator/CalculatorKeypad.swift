@@ -25,6 +25,9 @@ enum CalculatorKey: Hashable {
     case digit(String)
     case decimalSeparator
     case op(CalculatorOperator)
+    case leftParen
+    case rightParen
+    case percent
     case backspace
     case moveCursorLeft
     case moveCursorRight
@@ -36,6 +39,8 @@ struct CalculatorKeypad: View {
     var allowsOperators: Bool
     var doneTitle: String
     var onKey: (CalculatorKey) -> Void
+
+    private let extraRow: [String] = ["(", ")", "%"]
 
     private let digitRows: [[String]] = [
         ["7", "8", "9"],
@@ -52,12 +57,14 @@ struct CalculatorKeypad: View {
                 } label: {
                     Image(systemName: "chevron.left")
                         .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 Button {
                     onKey(.moveCursorRight)
                 } label: {
                     Image(systemName: "chevron.right")
                         .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 Spacer()
                 Button(doneTitle) {
@@ -75,6 +82,13 @@ struct CalculatorKeypad: View {
 
             HStack(alignment: .top, spacing: 8) {
                 VStack(spacing: 8) {
+                    if allowsOperators {
+                        HStack(spacing: 8) {
+                            ForEach(extraRow, id: \.self) { symbol in
+                                keyButton(for: symbol)
+                            }
+                        }
+                    }
                     ForEach(digitRows, id: \.self) { row in
                         HStack(spacing: 8) {
                             ForEach(row, id: \.self) { symbol in
@@ -86,6 +100,7 @@ struct CalculatorKeypad: View {
 
                 if allowsOperators {
                     VStack(spacing: 8) {
+                        Color.clear.frame(height: 44)
                         operatorButton(.divide)
                         operatorButton(.multiply)
                         operatorButton(.subtract)
@@ -97,6 +112,7 @@ struct CalculatorKeypad: View {
             .padding(.horizontal, 8)
             .padding(.bottom, 8)
         }
+        .padding(.bottom, 24)
         .background(Color(UIColor.systemGray5))
     }
 
@@ -106,6 +122,9 @@ struct CalculatorKeypad: View {
             switch symbol {
             case "⌫": onKey(.backspace)
             case ".": onKey(.decimalSeparator)
+            case "(": onKey(.leftParen)
+            case ")": onKey(.rightParen)
+            case "%": onKey(.percent)
             default: onKey(.digit(symbol))
             }
         } label: {
@@ -118,6 +137,7 @@ struct CalculatorKeypad: View {
             }
             .font(.title2)
             .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .background(Color(UIColor.systemBackground))
@@ -133,6 +153,7 @@ struct CalculatorKeypad: View {
             Text(op.rawValue)
                 .font(.title2)
                 .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .background(Color.accentColor)

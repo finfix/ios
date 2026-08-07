@@ -14,7 +14,12 @@ struct EditAccount: View {
     @Environment(AlertManager.self) private var alert
 
     @State private var vm: EditAccountViewModel
-    
+
+    @State private var isRemainderFocused = false
+    @State private var isBudgetAmountFocused = false
+    @State private var isBudgetFixedSumFocused = false
+    @State private var isBudgetDaysOffsetFocused = false
+
     var selectedAccountGroup: AccountGroup
     
     var accounts: [Account] {
@@ -63,8 +68,11 @@ struct EditAccount: View {
                 TextField("Название счета", text: $vm.currentAccount.name)
                 
                 if vm.permissions.changeRemainder {
-                    TextField(vm.mode == .create ? "Начальный баланс" : "Баланс", value: $vm.remainder, formatter: NumberFormatters.textField)
-                        .keyboardType(.decimalPad)
+                    CalculatorField(
+                        title: vm.mode == .create ? "Начальный баланс" : "Баланс",
+                        value: $vm.remainder,
+                        isFocused: $isRemainderFocused
+                    )
                         .overlay(alignment: .trailing) {
                             Text(vm.currentAccount.currency.symbol)
                         }
@@ -74,20 +82,33 @@ struct EditAccount: View {
             
             if vm.permissions.changeBudget {
                 Section(header: Text("Бюджет")) {
-                    TextField("Бюджет", value: $vm.budgetAmount, formatter: NumberFormatters.textField)
-                        .keyboardType(.decimalPad)
+                    CalculatorField(
+                        title: "Бюджет",
+                        value: $vm.budgetAmount,
+                        isFocused: $isBudgetAmountFocused
+                    )
                         .overlay(alignment: .trailing) {
                             Text(vm.currentAccount.currency.symbol)
                         }
                     if vm.currentAccount.budgetAmount != 0 {
-                        TextField("Фиксированная сумма", value: $vm.budgetFixedSum, formatter: NumberFormatters.textField)
-                            .keyboardType(.decimalPad)
+                        CalculatorField(
+                            title: "Фиксированная сумма",
+                            value: $vm.budgetFixedSum,
+                            isFocused: $isBudgetFixedSumFocused
+                        )
                             .overlay(alignment: .trailing) {
                                 Text(vm.currentAccount.currency.symbol)
                             }
                         if vm.currentAccount.budgetFixedSum != 0 {
-                            TextField("Отступ в днях", value: $vm.currentAccount.budgetDaysOffset, formatter: NumberFormatters.textField)
-                                .keyboardType(.numberPad)
+                            CalculatorField(
+                                title: "Отступ в днях",
+                                value: Binding(
+                                    get: { Double(vm.currentAccount.budgetDaysOffset) },
+                                    set: { vm.currentAccount.budgetDaysOffset = Int8(clamping: Int($0.rounded())) }
+                                ),
+                                isFocused: $isBudgetDaysOffsetFocused,
+                                allowsOperators: false
+                            )
                                 .overlay(alignment: .trailing) {
                                     Text("дней")
                                 }

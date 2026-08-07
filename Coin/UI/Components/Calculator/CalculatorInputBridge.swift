@@ -25,7 +25,8 @@ struct CalculatorInputBridge: UIViewRepresentable {
         field.isUserInteractionEnabled = false
 
         let hosting = context.coordinator.hostingController
-        hosting.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 260)
+        let height: CGFloat = allowsOperators ? 344 : 284
+        hosting.view.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: height)
         hosting.view.backgroundColor = .clear
         hosting.view.autoresizingMask = [.flexibleWidth]
         field.inputView = hosting.view

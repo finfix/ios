@@ -12,12 +12,9 @@ struct CurrencyConverter: View {
     @State var vm = CurrencyRatesViewModel()
     @Environment(AlertManager.self) private var alert
     
-    private enum Field: Hashable {
-        case number1, number2
-    }
-    
-    @FocusState private var focusedField: Field?
-    
+    @State private var isNumber1Focused = false
+    @State private var isNumber2Focused = false
+
     @State var currency1 = Currency()
     @State var currency2 = Currency()
     @State var currencyFind: String = ""
@@ -41,16 +38,22 @@ struct CurrencyConverter: View {
                 }
             }
             Section {
-                TextField("Сумма первой валюты", value: $number1, formatter: NumberFormatters.textField)
-                    .focused($focusedField, equals: Field.number1)
+                CalculatorField(
+                    title: "Сумма первой валюты",
+                    value: $number1,
+                    isFocused: $isNumber1Focused
+                )
                     .overlay(alignment: .trailing) {
                         Text(currency1.symbol)
                     }
                     .onChange(of: number1) { _, newValue in
                         number2 = newValue * (currency2.rate / currency1.rate).doubleValue
                     }
-                TextField("Сумма второй валюты", value: $number2, formatter: NumberFormatters.textField)
-                    .focused($focusedField, equals: Field.number2)
+                CalculatorField(
+                    title: "Сумма второй валюты",
+                    value: $number2,
+                    isFocused: $isNumber2Focused
+                )
                     .overlay(alignment: .trailing) {
                         Text(currency2.symbol)
                     }
@@ -58,7 +61,6 @@ struct CurrencyConverter: View {
                         number1 = newValue * (currency1.rate / currency2.rate).doubleValue
                     }
             }
-            .keyboardType(.numberPad)
 
         }
         .task {
