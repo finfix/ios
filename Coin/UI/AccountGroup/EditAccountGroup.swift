@@ -12,7 +12,7 @@ private let logger = Logger(subsystem: "Coin", category: "EditAccountGroup")
 
 struct EditAccountGroup: View {
     
-    @Environment (\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss
     @State private var vm: EditAccountGroupViewModel
     @Environment(AlertManager.self) private var alert
     
@@ -40,11 +40,10 @@ struct EditAccountGroup: View {
                 TextField("Название", text: $vm.currentAccountGroup.name)
             }
             Section {
-                Picker("Валюта", selection: $vm.currentAccountGroup.currency) {
-                    ForEach(vm.currencies) { currency in
-                        Text(currency.name)
-                            .tag(currency)
-                    }
+                NavigationLink {
+                    CurrencyPicker(selectedCurrency: $vm.currentAccountGroup.currency, currencies: vm.currencies)
+                } label: {
+                    LabeledContent("Валюта", value: vm.currentAccountGroup.currency.code)
                 }
             }
             Section {
