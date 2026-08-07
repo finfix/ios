@@ -32,6 +32,14 @@ struct CalculatorInputBridge: UIViewRepresentable {
         field.text = text
         field.placeholder = placeholder
         field.addTarget(context.coordinator, action: #selector(Coordinator.textFieldEditingChanged), for: .editingChanged)
+        // На Mac Catalyst вставка через ⌘V иногда не генерирует .editingChanged,
+        // поэтому дополнительно слушаем универсальное уведомление об изменении текста.
+        NotificationCenter.default.addObserver(
+            context.coordinator,
+            selector: #selector(Coordinator.textFieldEditingChanged),
+            name: UITextField.textDidChangeNotification,
+            object: field
+        )
 
         let hosting = context.coordinator.hostingController
         let height: CGFloat = allowsOperators ? 344 : 284
@@ -74,6 +82,10 @@ struct CalculatorInputBridge: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator {
         Coordinator(text: $text, isFocused: $isFocused)
+    }
+
+    static func dismantleUIView(_ uiView: UITextField, coordinator: Coordinator) {
+        NotificationCenter.default.removeObserver(coordinator, name: UITextField.textDidChangeNotification, object: uiView)
     }
 
     final class Coordinator: NSObject, UITextFieldDelegate {

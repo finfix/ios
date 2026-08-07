@@ -236,11 +236,15 @@ struct EditTransaction: View {
                     .overlay(alignment: .trailing) {
                         HStack {
                             Text(vm.currentTransaction.accountFrom.currency.symbol)
-                            PasteButton(payloadType: String.self) { strings in
-                                vm.amountFromString = strings[0]
+                            if isAmountFromFocused {
+                                Button {
+                                    UIPasteboard.general.string = vm.amountFromString
+                                } label: {
+                                    Image(systemName: "doc.on.doc")
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(.secondary)
                             }
-                            .labelStyle(.iconOnly)
-                            .tint(Color(UIColor.systemGray6))
                         }
                     }
 
@@ -263,11 +267,15 @@ struct EditTransaction: View {
                     .overlay(alignment: .trailing) {
                         HStack {
                             Text(vm.currentTransaction.accountTo.currency.symbol)
-                            PasteButton(payloadType: String.self) { strings in
-                                vm.amountToString = strings[0]
+                            if isAmountToFocused {
+                                Button {
+                                    UIPasteboard.general.string = vm.amountToString
+                                } label: {
+                                    Image(systemName: "doc.on.doc")
+                                }
+                                .buttonStyle(.plain)
+                                .foregroundStyle(.secondary)
                             }
-                            .labelStyle(.iconOnly)
-                            .tint(Color(UIColor.systemGray6))
                         }
                     }
                 }

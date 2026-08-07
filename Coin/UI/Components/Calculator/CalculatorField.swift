@@ -57,7 +57,8 @@ struct CalculatorField: View {
     }
 
     private var hasOperator: Bool {
-        rawInput.contains { "+-×÷()%".contains($0) }
+        // ASCII "*"/"/" учитываем на случай вставленного (например, скопированного откуда-то) выражения.
+        rawInput.contains { "+-*/×÷()%".contains($0) }
     }
 
     private var evaluatedValue: Double? {
@@ -98,8 +99,9 @@ struct CalculatorField: View {
                     )
                     .frame(height: hasOperator ? 16 : 24)
                     if hasOperator {
-                        Text(resultFormattedText ?? rawInput)
+                        Text(resultFormattedText ?? "0")
                             .font(.body.bold())
+                            .foregroundStyle(resultFormattedText == nil ? .secondary : .primary)
                     }
                 } else if rawInput.isEmpty {
                     Text(title)
@@ -107,22 +109,13 @@ struct CalculatorField: View {
                         .contentShape(Rectangle())
                         .onTapGesture { isFocused.wrappedValue = true }
                 } else {
-                    Text(resultFormattedText ?? rawInput)
+                    Text(resultFormattedText ?? "0")
+                        .foregroundStyle(resultFormattedText == nil ? .secondary : .primary)
                         .contentShape(Rectangle())
                         .onTapGesture { isFocused.wrappedValue = true }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
-            if hasOperator, let resultFormattedText {
-                Button {
-                    UIPasteboard.general.string = resultFormattedText
-                } label: {
-                    Image(systemName: "doc.on.doc")
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-            }
         }
         .onAppear(perform: seedFromBindingIfNeeded)
         .onChange(of: text) { _, _ in
