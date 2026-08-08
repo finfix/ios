@@ -40,6 +40,7 @@ struct ChartView: View {
     @Binding var chartViewGroupBy: ChartViewGroupBy
     @State private var vm: ChartViewModel
     @State private var chartDisplayType: ChartDisplayType = .linear
+    @State private var showFullScreenChart = false
     @Environment(PathSharedState.self) var path
     @Environment(\.calendar) var calendar
     @Binding var filters: TransactionFilters
@@ -60,10 +61,45 @@ struct ChartView: View {
     }
     
     var formatter: CurrencyFormatter
-    
+
     let chartHeight: CGFloat = UIScreen.main.bounds.height * 0.3 // Треть экрана
+
+    // Баланс всегда рисуется столбцами (см. Graph.swift), а не линией — подписываем
+    // кнопку переключения вида соответственно, а не просто "Линейный".
+    private var displayTypeIcon: String {
+        if vm.chartType == .balance && chartDisplayType == .linear {
+            return "chart.bar.fill"
+        }
+        return chartDisplayType == .linear ? "chart.xyaxis.line" : "chart.pie.fill"
+    }
+
+    private var displayTypeLabel: String {
+        if vm.chartType == .balance && chartDisplayType == .linear {
+            return "Столбчатый"
+        }
+        return chartDisplayType.name
+    }
     
     var body: some View {
+        normalContent
+            .fullScreenCover(isPresented: $showFullScreenChart) {
+                ChartFullScreenView(
+                    vm: vm,
+                    chartDisplayType: chartDisplayType,
+                    chartViewGroupBy: chartViewGroupBy,
+                    currency: currency,
+                    formatter: formatter,
+                    filters: $filters,
+                    isPresented: $showFullScreenChart
+                )
+                // fullScreenCover не всегда наследует @Environment(PathSharedState.self) от
+                // NavigationStack-предка — пробрасываем явно, иначе список серий крашится
+                // при попытке перейти к транзакциям.
+                .environment(path)
+            }
+    }
+
+    private var normalContent: some View {
         VStack {
             Picker(vm.chartType.name, selection: $vm.chartType) {
                 ForEach(ChartType.allCases, id: \.self) { type in
@@ -71,16 +107,28 @@ struct ChartView: View {
                         .tag(type)
                 }
             }
-            if vm.chartType != .earningsAndExpenses {
-                Picker("Вид графика", selection: $chartDisplayType) {
-                    ForEach(ChartDisplayType.allCases, id: \.self) { type in
-                        Text(type.name).tag(type)
+            HStack {
+                if vm.chartType != .earningsAndExpenses {
+                    Button {
+                        chartDisplayType = chartDisplayType == .linear ? .ring : .linear
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: displayTypeIcon)
+                            Text(displayTypeLabel)
+                        }
                     }
                 }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.bottom, 2)
+                Spacer()
+                Button {
+                    showFullScreenChart = true
+                } label: {
+                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                }
             }
+            .font(.caption)
+            .foregroundColor(.blue)
+            .padding(.horizontal)
+            .padding(.bottom, 2)
             Menu {
                 Picker("", selection: $vm.period) {
                     ForEach(ChartPeriod.allCases, id: \.self) { p in

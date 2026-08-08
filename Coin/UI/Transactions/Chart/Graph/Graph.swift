@@ -42,42 +42,84 @@ struct Graph: View {
         ))
     }
     
+    /// Диапазон дат, который должен учитываться при автоскейлинге: то, что видно на экране
+    /// (от `xPosition` до `xPosition + visibleRange*unitRange`), плюс ровно одна скрытая
+    /// точка с каждой стороны — чтобы график не "прыгал" по масштабу при скролле на один шаг.
+    private var scalingDateRange: ClosedRange<Date> {
+        let windowStart = xPosition.startOfPeriod(period)
+        let windowEnd = xPosition + TimeInterval(visibleRange * unitRange)
+        return (windowStart - TimeInterval(unitRange))...(windowEnd + TimeInterval(unitRange))
+    }
+
+    /// Для баланса ось не должна упираться в ноль: автоскейлим и по нижней, и по верхней
+    /// границе от реальных значений в видимом диапазоне (плюс запас по обеим сторонам).
+    ///
+    /// Важно: тут нельзя генерировать даты циклом и сравнивать их на точное равенство
+    /// с ключами `series.data` — из-за несовпадения календарной привязки (часовой пояс,
+    /// день месяца и т.п.) точного совпадения могло вообще не быть ни на одной итерации,
+    /// из-за чего суммы всегда получались нулевыми, а автоскейл откатывался на
+    /// бессмысленный запасной диапазон. Вместо этого просто суммируем реальные ключи,
+    /// попадающие в видимый диапазон.
+    private var balanceRangeBounds: (min: Double, max: Double) {
+        let range = scalingDateRange
+        var sumsByDate: [Date: Double] = [:]
+        for series in data {
+            for (date, amount) in series.data where range.contains(date) {
+                sumsByDate[date, default: 0] += amount.doubleValue
+            }
+        }
+        guard let minValue = sumsByDate.values.min(), let maxValue = sumsByDate.values.max() else {
+            return (0, 1)
+        }
+        let span = maxValue - minValue
+        let padding = span == 0 ? max(abs(maxValue), 1) * 0.1 : span * 0.1
+        return (minValue - padding, maxValue + padding)
+    }
+
     var maxSum: Double {
+        if chartType == .balance {
+            return balanceRangeBounds.max
+        }
         var maxValue: Double = 0
-        
+        let range = scalingDateRange
+
         switch chartType {
-        case .earnings, .expenses, .balance:
-            let maxDate: Date = xPosition + TimeInterval((visibleRange + 1) * unitRange)
-            var currentDate: Date = (xPosition - TimeInterval(unitRange)).startOfPeriod(period)
-            
-            while true {
-                if currentDate > maxDate {
-                    break
-                }
+        case .earnings, .expenses:
+            var currentDate: Date = range.lowerBound
+
+            while currentDate <= range.upperBound {
                 let sumOfSeriesOnDate: Double = (data.map { $0.data.filter( { $0.key == currentDate } ).values.reduce(0) { $0 + $1 } }.reduce(0) { $0 + $1 }).doubleValue
                 if maxValue < sumOfSeriesOnDate {
                     maxValue = sumOfSeriesOnDate
                 }
                 currentDate = currentDate.adding(period.calendarComponent, value: 1)
             }
-            
+
         case .earningsAndExpenses:
-            let dateRange = xPosition-TimeInterval(unitRange)...xPosition + TimeInterval((visibleRange+1)*unitRange)
-            
             for series in data {
-                if let value = series.data.filter({ dateRange.contains($0.key) }).values.max() {
+                if let value = series.data.filter({ range.contains($0.key) }).values.max() {
                     if maxValue < value.doubleValue {
                         maxValue = value.doubleValue
                     }
                 }
             }
+
+        case .balance:
+            break
         }
         if maxValue == 0 {
             maxValue = 1
         }
         return maxValue * 1.1
     }
-    
+
+    /// Минимум нужен только для баланса — он может уходить в минус, и в отличие от
+    /// доходов/расходов там нельзя просто отталкиваться от нуля.
+    var minSum: Double {
+        guard chartType == .balance else { return 0 }
+        return balanceRangeBounds.min
+    }
+
     var body: some View {
         VStack {
             ZStack(alignment: .bottomTrailing) {
@@ -90,6 +132,13 @@ struct Graph: View {
                                     y: .value("Сумма", amount)
                                 )
                                 .lineStyle(.init(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                            } else if chartType == .balance {
+                                // Накопительная площадь плохо читается с отрицательными значениями —
+                                // для баланса используем столбцы, которые могут уходить ниже нуля.
+                                BarMark(
+                                    x: .value("Период", month, unit: period.calendarComponent),
+                                    y: .value("Сумма", amount)
+                                )
                             } else {
                                 AreaMark(
                                     x: .value("Период", month, unit: period.calendarComponent),
@@ -115,7 +164,7 @@ struct Graph: View {
                 .chartScrollableAxes(.horizontal)
                 .chartScrollPosition(x: $xPosition)
                 .chartXVisibleDomain(length: visibleRange * unitRange)
-                .chartYScale(domain: 0...maxSum)
+                .chartYScale(domain: minSum...maxSum)
                 .chartXSelection(value: $rawSelectedDate)
                 .chartXAxis {
                     switch period {
@@ -158,17 +207,20 @@ struct Graph: View {
                         }
                     }
                 }
-                if let firstSeries = data.first {
+                if !data.isEmpty {
+                    // Границы масштабирования не должны зависеть от количества точек в данных —
+                    // иначе при малом количестве точек (например, у графика баланса) верхняя
+                    // граница совпадает со стартовым значением, и кнопки перестают что-либо делать.
                     VStack {
                         Button {
-                            if 2 < visibleRange {
+                            if visibleRange > 2 {
                                 visibleRange -= 1
                             }
                         } label: {
                             ScaleButton(imageName: "plus")
                         }
                         Button {
-                            if visibleRange < firstSeries.data.count+2 {
+                            if visibleRange < 120 {
                                 visibleRange += 1
                             }
                         } label: {

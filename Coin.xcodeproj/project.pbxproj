@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		16A4C2ADE2B923596104165D /* ChartFullScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9906CB2308AAEDDA966D1CB4 /* ChartFullScreenView.swift */; };
 		1E13AB8FCAE5AC1DE3D5F5D6 /* AccountSelectorField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AA10897BB379EE462E8FB5 /* AccountSelectorField.swift */; };
 		20305E2B5EE309B2273264F8 /* CalculatorInputBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3B07E535C5F58D1F9BD8346 /* CalculatorInputBridge.swift */; };
 		24E946188EEEF578310E6B4D /* CalculatorInputBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3B07E535C5F58D1F9BD8346 /* CalculatorInputBridge.swift */; };
 		2F4DD2C1A6B6C76BA9F6ACEE /* Rank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB2AB01AFE2D8CE38A0A20A /* Rank.swift */; };
 		3F63E099800339504F53AC06 /* CalculatorField.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA043DC403A9EC5257137D2E /* CalculatorField.swift */; };
+		52AFF0003A53E408BBC65193 /* ChartFullScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9906CB2308AAEDDA966D1CB4 /* ChartFullScreenView.swift */; };
 		8283F591BA0823F86A679B31 /* CalculatorField.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA043DC403A9EC5257137D2E /* CalculatorField.swift */; };
 		87C09068EB3FBEA422A42139 /* Rank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB2AB01AFE2D8CE38A0A20A /* Rank.swift */; };
 		8CCB3410542A225354DFE02C /* AccountSelectorField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4AA10897BB379EE462E8FB5 /* AccountSelectorField.swift */; };
@@ -305,6 +307,7 @@
 		46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CopyableIDText.swift; sourceTree = "<group>"; };
 		735D64AA0AB4EAC878339270 /* CalculatorKeypad.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CalculatorKeypad.swift; path = CalculatorKeypad.swift; sourceTree = "<group>"; };
 		8BB2AB01AFE2D8CE38A0A20A /* Rank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rank.swift; sourceTree = "<group>"; };
+		9906CB2308AAEDDA966D1CB4 /* ChartFullScreenView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChartFullScreenView.swift; sourceTree = "<group>"; };
 		B5024EB12AE1A20F00F60449 /* EditAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditAccount.swift; sourceTree = "<group>"; };
 		B5038AF42C3EC915003FA6C0 /* JWTChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JWTChecker.swift; sourceTree = "<group>"; };
 		B5038AF82C3ECA55003FA6C0 /* DateSubstraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateSubstraction.swift; sourceTree = "<group>"; };
@@ -504,6 +507,7 @@
 				B50DBAD62BCD8CD900A58B53 /* ChartView.swift */,
 				B50DBAD82BCD8CF500A58B53 /* ChartViewModel.swift */,
 				B52F76512D2EF16D00B6E617 /* ChartListItemView.swift */,
+				9906CB2308AAEDDA966D1CB4 /* ChartFullScreenView.swift */,
 			);
 			path = Chart;
 			sourceTree = "<group>";
@@ -1196,6 +1200,7 @@
 				8283F591BA0823F86A679B31 /* CalculatorField.swift in Sources */,
 				1E13AB8FCAE5AC1DE3D5F5D6 /* AccountSelectorField.swift in Sources */,
 				D3EA9B8AB10B0516E5DEA3E9 /* CopyableIDText.swift in Sources */,
+				16A4C2ADE2B923596104165D /* ChartFullScreenView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1339,6 +1344,7 @@
 				3F63E099800339504F53AC06 /* CalculatorField.swift in Sources */,
 				8CCB3410542A225354DFE02C /* AccountSelectorField.swift in Sources */,
 				B8152E709AED309F0777CEFF /* CopyableIDText.swift in Sources */,
+				52AFF0003A53E408BBC65193 /* ChartFullScreenView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
