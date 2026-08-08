@@ -29,6 +29,7 @@ struct TransactionsView: View {
     @State var vm: TransactionsViewModel = TransactionsViewModel()
     @State private var showFilters: Bool = false
     @State private var areFiltersLocked: Bool = false
+    @State private var isChartFullScreen: Bool = false
     let aggregateIntoParents: Bool
 
     var hasActiveFilters: Bool {
@@ -57,16 +58,34 @@ struct TransactionsView: View {
         VStack {
             // Если строка поиска пустая -> Показываем список транзакций
             if !showFilters {
-                ScrollView {
-                    TransactionFiltersRowView(filters: $filters)
-                    ChartView(
-                        chartType: chartType,
-                        chartViewGroupBy: $chartGroupBy,
-                        filters: $filters,
-                        currency: currency,
-                        aggregateIntoParents: aggregateIntoParents
-                    )
-                    TransactionsList(filters: filters)
+                // ChartView всегда остаётся на одном и том же месте в дереве (просто внутри
+                // ScrollView) — если рисовать её в двух разных ветках if/else (как раньше),
+                // SwiftUI теряет идентичность вью при переключении в полноэкранный режим и
+                // обратно, из-за чего вместе с ChartViewModel сбрасываются и фильтры/тип
+                // графика. В полноэкранном режиме просто растягиваем её на всю высоту и
+                // прячем строку фильтров/список транзакций, а скролл отключаем.
+                GeometryReader { geo in
+                    ScrollView {
+                        if !isChartFullScreen {
+                            TransactionFiltersRowView(filters: $filters)
+                        }
+                        ChartView(
+                            chartType: chartType,
+                            chartViewGroupBy: $chartGroupBy,
+                            filters: $filters,
+                            currency: currency,
+                            aggregateIntoParents: aggregateIntoParents,
+                            isFullScreen: $isChartFullScreen
+                        )
+                        // height (не minHeight!) — иначе при длинном списке серий контент
+                        // ChartFullScreenView просто продавливает контейнер выше экрана, и
+                        // "Всего" внизу становится недоступной (скролл-то отключён).
+                        .frame(height: isChartFullScreen ? geo.size.height : nil)
+                        if !isChartFullScreen {
+                            TransactionsList(filters: filters)
+                        }
+                    }
+                    .scrollDisabled(isChartFullScreen)
                 }
             } else { // Если в строку поиска уже что-то написали
                 SearchView(

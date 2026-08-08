@@ -35,68 +35,131 @@ enum ChartViewRoute: Hashable {
     case chartDrillDown(filters: TransactionFilters, chartType: ChartType)
 }
 
+// Баланс всегда рисуется столбцами (см. Graph.swift), а не линией — подписываем
+// кнопку переключения вида соответственно, а не просто "Линейный". Общие для обычного
+// и полноэкранного режима, поэтому вынесены наружу.
+func chartDisplayTypeIcon(chartType: ChartType, displayType: ChartDisplayType) -> String {
+    if chartType == .balance && displayType == .linear {
+        return "chart.bar.fill"
+    }
+    return displayType == .linear ? "chart.xyaxis.line" : "chart.pie.fill"
+}
+
+func chartDisplayTypeLabel(chartType: ChartType, displayType: ChartDisplayType) -> String {
+    if chartType == .balance && displayType == .linear {
+        return "Столбчатый"
+    }
+    return displayType.name
+}
+
+/// Сортировка серий по сумме (значению из `aggregationInformation`, той же, что
+/// отображается в колонке "Сумма"), по убыванию. Нулевые серии всегда уходят в конец.
+func seriesSortedByAmount(_ series: [Series], using vm: ChartViewModel) -> [Series] {
+    series.sorted { a, b in
+        let aValue = vm.aggregationInformation[a.id] ?? 0
+        let bValue = vm.aggregationInformation[b.id] ?? 0
+        if aValue == 0 { return false }
+        if bValue == 0 { return true }
+        return aValue > bValue
+    }
+}
+
 struct ChartView: View {
     @Environment(AlertManager.self) private var alert
     @Binding var chartViewGroupBy: ChartViewGroupBy
     @State private var vm: ChartViewModel
     @State private var chartDisplayType: ChartDisplayType = .linear
-    @State private var showFullScreenChart = false
+    /// Сортировка серий по сумме включается тапом на заголовок колонки "Сумма".
+    @State private var isSortedByAmount = false
+    /// Управляется снаружи (из `TransactionsView`), т.к. в полноэкранном режиме нужно
+    /// убрать список транзакций и строку фильтров — это уже не забота `ChartView`.
+    @Binding var isFullScreen: Bool
     @Environment(PathSharedState.self) var path
     @Environment(\.calendar) var calendar
     @Binding var filters: TransactionFilters
     var currency: Currency
-    
+
     init(
         chartType: ChartType = .earningsAndExpenses,
         chartViewGroupBy: Binding<ChartViewGroupBy>,
         filters: Binding<TransactionFilters>,
         currency: Currency,
-        aggregateIntoParents: Bool = true
+        aggregateIntoParents: Bool = true,
+        isFullScreen: Binding<Bool> = .constant(false)
     ) {
         self.formatter = CurrencyFormatter(currency: currency, withUnits: false)
         self._chartViewGroupBy = chartViewGroupBy
         vm = ChartViewModel(chartType: chartType, aggregateIntoParents: aggregateIntoParents)
         self.currency = currency
         self._filters = filters
+        self._isFullScreen = isFullScreen
     }
     
     var formatter: CurrencyFormatter
 
     let chartHeight: CGFloat = UIScreen.main.bounds.height * 0.3 // Треть экрана
 
-    // Баланс всегда рисуется столбцами (см. Graph.swift), а не линией — подписываем
-    // кнопку переключения вида соответственно, а не просто "Линейный".
     private var displayTypeIcon: String {
-        if vm.chartType == .balance && chartDisplayType == .linear {
-            return "chart.bar.fill"
-        }
-        return chartDisplayType == .linear ? "chart.xyaxis.line" : "chart.pie.fill"
+        chartDisplayTypeIcon(chartType: vm.chartType, displayType: chartDisplayType)
     }
 
     private var displayTypeLabel: String {
-        if vm.chartType == .balance && chartDisplayType == .linear {
-            return "Столбчатый"
-        }
-        return chartDisplayType.name
+        chartDisplayTypeLabel(chartType: vm.chartType, displayType: chartDisplayType)
     }
-    
+
+    private var displayedData: [Series] {
+        isSortedByAmount ? seriesSortedByAmount(vm.data, using: vm) : vm.data
+    }
+
     var body: some View {
-        normalContent
-            .fullScreenCover(isPresented: $showFullScreenChart) {
+        Group {
+            if isFullScreen {
                 ChartFullScreenView(
                     vm: vm,
-                    chartDisplayType: chartDisplayType,
+                    chartDisplayType: $chartDisplayType,
                     chartViewGroupBy: chartViewGroupBy,
                     currency: currency,
                     formatter: formatter,
                     filters: $filters,
-                    isPresented: $showFullScreenChart
+                    isPresented: $isFullScreen,
+                    isSortedByAmount: $isSortedByAmount
                 )
-                // fullScreenCover не всегда наследует @Environment(PathSharedState.self) от
-                // NavigationStack-предка — пробрасываем явно, иначе список серий крашится
-                // при попытке перейти к транзакциям.
-                .environment(path)
+            } else {
+                normalContent
             }
+        }
+        .task {
+            do {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            } catch {
+                alert.error(error)
+            }
+        }
+        .onChange(of: vm.chartType) { _, newType in
+            if newType == .earningsAndExpenses || newType == .balance {
+                chartDisplayType = .linear
+            }
+            Task {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            }
+        }
+        .onChange(of: filters) { _, _ in
+            Task {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            }
+        }
+        .onChange(of: chartViewGroupBy) { _, _ in
+            Task {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            }
+        }
+        .onChange(of: vm.period) { _, newPeriod in
+            vm.lastSelectedDate = Date.now.startOfPeriod(newPeriod)
+            vm.data = []
+            Task {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            }
+        }
     }
 
     private var normalContent: some View {
@@ -120,7 +183,7 @@ struct ChartView: View {
                 }
                 Spacer()
                 Button {
-                    showFullScreenChart = true
+                    isFullScreen = true
                 } label: {
                     Image(systemName: "arrow.up.left.and.arrow.down.right")
                 }
@@ -221,16 +284,24 @@ struct ChartView: View {
                         .foregroundColor(.blue)
                     }
                     .id(vm.aggregationMethod)
-                    
-                    HStack {
-                        Spacer()
-                        Text("Сумма")
+
+                    Button {
+                        isSortedByAmount.toggle()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("Сумма")
+                            if isSortedByAmount {
+                                Image(systemName: "chevron.down")
+                            }
+                        }
                     }
+                    .foregroundStyle(isSortedByAmount ? .blue : .primary)
                 }
                 .bold()
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.flexible(minimum: 150)), GridItem(.flexible()), GridItem(.flexible())]) {
-                        ForEach(Array(vm.data.enumerated()), id: \.element) { (i, series) in
+                        ForEach(Array(displayedData.enumerated()), id: \.element) { (i, series) in
                             ChartListItemView(
                                 chartViewGroupBy: chartViewGroupBy,
                                 vm: $vm,
@@ -271,38 +342,6 @@ struct ChartView: View {
                 }
             }
             .padding(.horizontal, 15)
-        }
-        .task {
-            do {
-                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
-            } catch {
-                alert.error(error)
-            }
-        }
-        .onChange(of: vm.chartType) { _, newType in
-            if newType == .earningsAndExpenses || newType == .balance {
-                chartDisplayType = .linear
-            }
-            Task {
-                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
-            }
-        }
-        .onChange(of: filters) { _, _ in
-            Task {
-                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
-            }
-        }
-        .onChange(of: chartViewGroupBy) { _, _ in
-            Task {
-                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
-            }
-        }
-        .onChange(of: vm.period) { _, newPeriod in
-            vm.lastSelectedDate = Date.now.startOfPeriod(newPeriod)
-            vm.data = []
-            Task {
-                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
-            }
         }
     }
 }
