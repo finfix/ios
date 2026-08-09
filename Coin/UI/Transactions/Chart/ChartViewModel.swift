@@ -8,9 +8,6 @@
 import Foundation
 import SwiftUI
 import Factory
-import os
-
-private let logger = Logger(subsystem: "Coin", category: "ChartViewModel")
 
 enum ChartPeriod: CaseIterable {
     case day, week, month, quarter, year
@@ -138,9 +135,9 @@ class ChartViewModel {
     
     var chartType: ChartType
     var data: [Series] = []
-    
+
     var lastSelectedDate: Date = Date.now.startOfMonth(inUTC: true)
-    
+
     var aggregationInformation: [UUID: Decimal] {
         var result: [UUID: Decimal] = [:]
         let totalBySelectedDate = totalBySelectedDate
@@ -212,18 +209,7 @@ class ChartViewModel {
         // Для периодов с ограничением истории: используем defaultDateFrom, если фильтр не задаёт явную дату
         let effectiveDateFrom = filters.dateFrom ?? period.defaultDateFrom
 
-        logger.debug("""
-            load() called: chartType=\(String(describing: self.chartType), privacy: .public) \
-            groupBy=\(String(describing: groupBy), privacy: .public) \
-            period=\(String(describing: self.period), privacy: .public) \
-            accountGroupIDs=\(filters.accountGroups.map(\.id).map(\.uuidString), privacy: .public) \
-            accountIDs=\(accountIDs.map(\.uuidString), privacy: .public) \
-            dateFrom=\(String(describing: effectiveDateFrom), privacy: .public) \
-            dateTo=\(String(describing: filters.dateTo), privacy: .public) \
-            tagIDs=\(filters.tags.map(\.id).map(\.uuidString), privacy: .public)
-            """)
-
-        let result = try await service.getStatisticByMonth(
+        data = try await service.getStatisticByMonth(
             chartType: chartType,
             groupBy: groupBy,
             period: period,
@@ -235,13 +221,6 @@ class ChartViewModel {
             tagIDs: filters.tags.map(\.id),
             aggregateIntoParents: aggregateIntoParents && groupBy == .byAccount
         )
-
-        logger.debug("""
-            load() returned \(result.count, privacy: .public) series: \
-            \(result.map { $0.account?.name ?? $0.tag?.name ?? $0.type?.name ?? "?" }, privacy: .public)
-            """)
-
-        data = result
     }
 }
 

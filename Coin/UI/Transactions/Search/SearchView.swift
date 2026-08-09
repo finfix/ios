@@ -56,7 +56,10 @@ struct SearchView: View {
 
             Section(header: Text("Дата")) {
                 ExpandableDatePicker(buttonName: "C", isCalendarShowing: $shouldShowDateFrom, date: $filters.dateFrom)
-                ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $filters.dateTo)
+                // Конец диапазона нормализуем на конец выбранного дня, иначе выбранная
+                // дата фактически исключается из диапазона (фильтр сравнивает по времени,
+                // а из пикера приходит полночь этого дня).
+                ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $filters.dateTo, normalizeToEndOfDay: true)
             }
             Section(header: Text("Типы транзакций")) {
                 ForEach(TransactionType.allCases.filter { !filters.transactionTypes.contains($0) }, id: \.rawValue) { transactionType in
@@ -227,7 +230,8 @@ struct ExpandableDatePicker: View {
     @Binding var isCalendarShowing: Bool
     @Binding var date: Date?
     var showClearButton: Bool = true
-    
+    var normalizeToEndOfDay: Bool = false
+
     var body: some View {
         Group {
             Button {
@@ -260,7 +264,13 @@ struct ExpandableDatePicker: View {
             .buttonStyle(.plain)
             if isCalendarShowing {
                 DatePicker(buttonName,
-                           selection: Binding<Date>(get: {date ?? Date()}, set: {date = $0}),
+                           selection: Binding<Date>(get: {date ?? Date()}, set: { newValue in
+                               if normalizeToEndOfDay {
+                                   date = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: newValue)
+                               } else {
+                                   date = newValue
+                               }
+                           }),
                            displayedComponents: .date)
                 .datePickerStyle(.graphical)
             }

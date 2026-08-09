@@ -111,6 +111,10 @@ struct ChartView: View {
         isSortedByAmount ? seriesSortedByAmount(vm.data, using: vm) : vm.data
     }
 
+    /// В обычном (не полноэкранном) режиме показываем только первые несколько серий —
+    /// весь список открывается через "Показать ещё", которая ведёт в полноэкранный режим.
+    private let collapsedSeriesLimit = 4
+
     var body: some View {
         Group {
             if isFullScreen {
@@ -160,6 +164,11 @@ struct ChartView: View {
                 try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
             }
         }
+        .onChange(of: vm.aggregateIntoParents) { _, _ in
+            Task {
+                try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
+            }
+        }
     }
 
     private var normalContent: some View {
@@ -182,11 +191,6 @@ struct ChartView: View {
                     }
                 }
                 Spacer()
-                Button {
-                    isFullScreen = true
-                } label: {
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
-                }
             }
             .font(.caption)
             .foregroundColor(.blue)
@@ -299,47 +303,30 @@ struct ChartView: View {
                     .foregroundStyle(isSortedByAmount ? .blue : .primary)
                 }
                 .bold()
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.flexible(minimum: 150)), GridItem(.flexible()), GridItem(.flexible())]) {
-                        ForEach(Array(displayedData.enumerated()), id: \.element) { (i, series) in
-                            ChartListItemView(
-                                chartViewGroupBy: chartViewGroupBy,
-                                vm: $vm,
-                                series: series,
-                                currency: currency,
-                                filters: $filters
-                            )
-                        }
+                LazyVGrid(columns: [GridItem(.flexible(minimum: 150)), GridItem(.flexible()), GridItem(.flexible())]) {
+                    ForEach(Array(displayedData.prefix(collapsedSeriesLimit).enumerated()), id: \.element) { (i, series) in
+                        ChartListItemView(
+                            chartViewGroupBy: chartViewGroupBy,
+                            vm: $vm,
+                            series: series,
+                            currency: currency,
+                            filters: $filters
+                        )
                     }
                 }
                 .font(.callout)
-                if !vm.data.isEmpty {
-                    let totalLabel = vm.chartType == .balance ? "Итого" : "Всего"
-                    let aggregationTotal = vm.aggregationInformation.values.reduce(0, +)
-                    let selectedDateTotal = vm.totalBySelectedDate
-                    let isPercent = vm.aggregationMethod == .percent
-                    Divider()
-                    LazyVGrid(columns: [GridItem(.flexible(minimum: 150)), GridItem(.flexible()), GridItem(.flexible())]) {
-                        Text(totalLabel)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        HStack {
-                            Spacer()
-                            if isPercent {
-                                Text(aggregationTotal, format: .percent.precision(.fractionLength(0)))
-                            } else {
-                                Text(formatter.string(number: aggregationTotal))
-                            }
-                        }
-                        .foregroundStyle(.secondary)
-                        HStack {
-                            Spacer()
-                            Text(formatter.string(number: selectedDateTotal))
-                        }
+                Button {
+                    isFullScreen = true
+                } label: {
+                    HStack {
+                        Text("Показать ещё")
+                        Image(systemName: "chevron.down")
                     }
-                    .bold()
-                    .padding(.top, 4)
-                    .font(.callout)
+                    .frame(maxWidth: .infinity)
                 }
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
             }
             .padding(.horizontal, 15)
         }

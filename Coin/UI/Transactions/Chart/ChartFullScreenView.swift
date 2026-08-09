@@ -54,17 +54,25 @@ struct ChartFullScreenView: View {
                             Text(displayTypeLabel)
                         }
                     }
+                    .font(.caption)
+                    .foregroundColor(.blue)
                 }
                 Spacer()
-                // На месте кнопки "развернуть" — кнопка "свернуть" в той же позиции.
+                // На месте кнопки "развернуть" — кнопка "свернуть" в той же позиции,
+                // но крупнее и в стилистике системной круглой кнопки закрытия (как в шитах).
+                // В самом HStack, а не в overlay — иначе при пустой строке (earningsAndExpenses)
+                // кнопка выходила за пределы своей строки и перекрывала пикер периода снизу.
                 Button {
                     isPresented = false
                 } label: {
                     Image(systemName: "arrow.down.right.and.arrow.up.left")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 30, height: 30)
+                        .background(Color(.systemGray5))
+                        .clipShape(Circle())
                 }
             }
-            .font(.caption)
-            .foregroundColor(.blue)
             .padding(.horizontal)
             .padding(.bottom, 2)
 
@@ -105,7 +113,6 @@ struct ChartFullScreenView: View {
                     .id(vm.period)
                 }
             }
-            .padding(.horizontal)
             .frame(height: UIScreen.main.bounds.height * 0.35)
 
             if !vm.data.isEmpty {
@@ -188,12 +195,26 @@ struct ChartFullScreenView: View {
 
             if !vm.data.isEmpty {
                 let totalLabel = vm.chartType == .balance ? "Итого" : "Всего"
+                let aggregationTotal = vm.aggregationInformation.values.reduce(0, +)
                 let selectedDateTotal = vm.totalBySelectedDate
+                let isPercent = vm.aggregationMethod == .percent
                 Divider()
-                HStack {
+                LazyVGrid(columns: [GridItem(.flexible(minimum: 150)), GridItem(.flexible()), GridItem(.flexible())]) {
                     Text(totalLabel)
-                    Spacer()
-                    Text(formatter.string(number: selectedDateTotal))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack {
+                        Spacer()
+                        if isPercent {
+                            Text(aggregationTotal, format: .percent.precision(.fractionLength(0)))
+                        } else {
+                            Text(formatter.string(number: aggregationTotal))
+                        }
+                    }
+                    .foregroundStyle(.secondary)
+                    HStack {
+                        Spacer()
+                        Text(formatter.string(number: selectedDateTotal))
+                    }
                 }
                 .font(.title3.bold())
                 .padding()

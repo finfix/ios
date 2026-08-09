@@ -54,7 +54,12 @@ struct ChartListItemView: View {
                 HStack {
                     HStack {
                         Text(account.name)
-                        Text(account.currency.symbol)
+                        // В сгруппированном по родителям состоянии серии — это суммы (возможно,
+                        // по нескольким валютам дочерних счетов), поэтому единственный символ
+                        // валюты был бы неверным — не показываем его вообще ни у одного счёта.
+                        if !vm.aggregateIntoParents {
+                            Text(account.currency.symbol)
+                        }
                     }
                     .foregroundStyle(series.color)
                     .frame(height: 30)

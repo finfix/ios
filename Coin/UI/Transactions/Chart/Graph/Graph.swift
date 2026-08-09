@@ -60,17 +60,32 @@ struct Graph: View {
     /// из-за чего суммы всегда получались нулевыми, а автоскейл откатывался на
     /// бессмысленный запасной диапазон. Вместо этого просто суммируем реальные ключи,
     /// попадающие в видимый диапазон.
+    ///
+    /// Ещё важно: BarMark по умолчанию стекует сегменты по x — положительные счета растут
+    /// вверх от нуля, отрицательные вниз от нуля, независимо друг от друга. Поэтому нельзя
+    /// брать чистую сумму (положительные + отрицательные) на дату — из-за взаимной
+    /// компенсации она может оказаться близкой к нулю, даже когда сам столбик проваливается
+    /// далеко вниз. Считаем сумму положительных и сумму отрицательных сегментов раздельно —
+    /// это и есть верх и низ фактического стека.
     private var balanceRangeBounds: (min: Double, max: Double) {
         let range = scalingDateRange
-        var sumsByDate: [Date: Double] = [:]
+        var positiveSumsByDate: [Date: Double] = [:]
+        var negativeSumsByDate: [Date: Double] = [:]
         for series in data {
             for (date, amount) in series.data where range.contains(date) {
-                sumsByDate[date, default: 0] += amount.doubleValue
+                let value = amount.doubleValue
+                if value >= 0 {
+                    positiveSumsByDate[date, default: 0] += value
+                } else {
+                    negativeSumsByDate[date, default: 0] += value
+                }
             }
         }
-        guard let minValue = sumsByDate.values.min(), let maxValue = sumsByDate.values.max() else {
+        guard !positiveSumsByDate.isEmpty || !negativeSumsByDate.isEmpty else {
             return (0, 1)
         }
+        let maxValue = positiveSumsByDate.values.max() ?? 0
+        let minValue = negativeSumsByDate.values.min() ?? 0
         let span = maxValue - minValue
         let padding = span == 0 ? max(abs(maxValue), 1) * 0.1 : span * 0.1
         return (minValue - padding, maxValue + padding)
@@ -125,7 +140,13 @@ struct Graph: View {
             ZStack(alignment: .bottomTrailing) {
                 Chart {
                     ForEach(Array(data.reversed().enumerated()), id: \.element) { (i, series) in
-                        ForEach(series.data.sorted(by: >), id: \.key) { month, amount in
+                        // Для столбчатого графика (баланс) нулевые точки не добавляют ничего
+                        // визуально — не рисуем их вообще, чтобы не тратить память/время на
+                        // лишние BarMark при большом количестве периодов.
+                        let seriesEntries = chartType == .balance
+                            ? series.data.filter { $0.value != 0 }
+                            : series.data
+                        ForEach(seriesEntries.sorted(by: >), id: \.key) { month, amount in
                             if chartType == .earningsAndExpenses {
                                 LineMark(
                                     x: .value("Период", month, unit: period.calendarComponent),
@@ -238,7 +259,8 @@ struct Graph: View {
         }
         .onChange(of: rawSelectedDate) { _, newValue in
             if let newValue {
-                lastSelectedDate = newValue.startOfPeriod(period)
+                let startOfPeriod = newValue.startOfPeriod(period)
+                lastSelectedDate = startOfPeriod
             }
         }
     }

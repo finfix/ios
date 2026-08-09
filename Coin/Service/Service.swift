@@ -259,19 +259,65 @@ extension Service {
                 var balance = account.remainder * currencyRate
                 seriesData[currentPeriod] = balance.round(factor: 0)
                 
-                // Восстанавливаем исторический баланс, идя назад от текущего периода
+                // Восстанавливаем исторический баланс, идя назад от текущего периода.
+                // `currentPeriod` выровнен по UTC-полуночи (см. `startOfPeriod`), поэтому и
+                // шаг назад должен считаться в UTC-календаре — иначе `.adding(...)` по
+                // умолчанию берёт `Calendar.current` (локальный, чувствительный к
+                // историческим сдвигам часового пояса/DST), и на датах, где абсолютное
+                // смещение зоны отличалось от текущего (для Москвы это годы до 2014),
+                // курсор уезжает на час и попадает не на ту UTC-полночь. В результате в
+                // `seriesData` появляется два ключа на один и тот же календарный месяц:
+                // "правильный" с реальным значением и паразитный на UTC-полночи с нулём —
+                // и точечный поиск по дате в списке серий натыкается именно на нулевой.
+                var utcCalendar = Calendar.current
+                utcCalendar.timeZone = TimeZone(abbreviation: "UTC")!
                 if let earliestPeriod = accountFlows.keys.min() {
                     var cursor = currentPeriod
                     while cursor >= earliestPeriod {
                         balance -= accountFlows[cursor] ?? 0
-                        cursor = cursor.adding(period.calendarComponent, value: -1)
+                        cursor = cursor.adding(period.calendarComponent, value: -1, using: utcCalendar)
                         seriesData[cursor] = balance.round(factor: 0)
                     }
                 }
                 
                 data.append(Series(account: account, objectID: account.id, data: seriesData))
             }
-            
+
+            // В отличие от доходов/расходов, баланс до этого момента никогда не сворачивал
+            // дочерние счета в родительские — из-за `saveChildren: true` в `groupAccounts`
+            // список всегда содержал и родителя, и каждого ребёнка отдельной серией. Теперь
+            // приводим к тому же поведению: при глобальном просмотре графика (не внутри
+            // конкретного родительского счёта) суммируем дочерние серии в родительскую и
+            // убираем дочерние из списка — аналогично блоку для .earnings/.expenses ниже.
+            if aggregateIntoParents {
+                var parentSeriesIndexMap: [UUID: Int] = [:]
+                for (i, series) in data.enumerated() {
+                    if let account = series.account, account.isParent {
+                        parentSeriesIndexMap[account.id] = i
+                    }
+                }
+
+                var childIndicesToRemove: [Int] = []
+                for (i, series) in data.enumerated() {
+                    guard let account = series.account, let parentID = account.parentAccountID else { continue }
+
+                    if let parentIndex = parentSeriesIndexMap[parentID] {
+                        for (date, value) in series.data {
+                            data[parentIndex].data[date, default: 0] += value
+                        }
+                    } else if let parentAccount = balanceAccounts.first(where: { $0.id == parentID }) {
+                        let parentSeries = Series(account: parentAccount, objectID: parentID, data: series.data)
+                        data.append(parentSeries)
+                        parentSeriesIndexMap[parentID] = data.count - 1
+                    }
+                    childIndicesToRemove.append(i)
+                }
+
+                for index in childIndicesToRemove.sorted(by: >) {
+                    data.remove(at: index)
+                }
+            }
+
             // Сортируем по текущему балансу и назначаем цвета
             data = data.sorted { ($0.data[currentPeriod] ?? 0) > ($1.data[currentPeriod] ?? 0) }
             for (i, _) in data.enumerated() {
