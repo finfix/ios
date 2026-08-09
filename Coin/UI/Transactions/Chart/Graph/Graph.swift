@@ -100,14 +100,19 @@ struct Graph: View {
 
         switch chartType {
         case .earnings, .expenses:
-            var currentDate: Date = range.lowerBound
-
-            while currentDate <= range.upperBound {
-                let sumOfSeriesOnDate: Double = (data.map { $0.data.filter( { $0.key == currentDate } ).values.reduce(0) { $0 + $1 } }.reduce(0) { $0 + $1 }).doubleValue
-                if maxValue < sumOfSeriesOnDate {
-                    maxValue = sumOfSeriesOnDate
+            // Как и для баланса — нельзя генерировать даты циклом и сравнивать на точное
+            // равенство с ключами `series.data` (см. `balanceRangeBounds`): при рассинхроне
+            // календаря это давало maxValue=0 на каждой итерации, и график схлопывался до
+            // запасного домена 0...1 при скролле. Считаем сумму по реальным ключам, которые
+            // попадают в видимый диапазон.
+            var sumsByDate: [Date: Double] = [:]
+            for series in data {
+                for (date, amount) in series.data where range.contains(date) {
+                    sumsByDate[date, default: 0] += amount.doubleValue
                 }
-                currentDate = currentDate.adding(period.calendarComponent, value: 1)
+            }
+            if let value = sumsByDate.values.max(), maxValue < value {
+                maxValue = value
             }
 
         case .earningsAndExpenses:
@@ -235,14 +240,14 @@ struct Graph: View {
                     VStack {
                         Button {
                             if visibleRange > 2 {
-                                visibleRange -= 1
+                                zoom(by: -1)
                             }
                         } label: {
                             ScaleButton(imageName: "plus")
                         }
                         Button {
                             if visibleRange < 120 {
-                                visibleRange += 1
+                                zoom(by: 1)
                             }
                         } label: {
                             ScaleButton(imageName: "minus")
@@ -263,6 +268,18 @@ struct Graph: View {
                 lastSelectedDate = startOfPeriod
             }
         }
+    }
+
+    /// Кнопки +/- раньше меняли только `visibleRange`, оставляя `xPosition` нетронутым —
+    /// Charts' внутреннее состояние скролла и наш `scalingDateRange` расходились до первого
+    /// ручного скролла (только он реально протаскивает свежий `xPosition` через биндинг),
+    /// из-за чего автоскейл Y иногда не учитывал только что открывшуюся часть графика.
+    /// Явно пересчитываем `xPosition`, удерживая правый край окна на месте — это и даёт
+    /// привычное поведение зума, и гарантированно синхронизирует оба состояния сразу.
+    private func zoom(by delta: Int) {
+        let oldRightEdge = xPosition + TimeInterval(visibleRange * unitRange)
+        visibleRange += delta
+        xPosition = oldRightEdge - TimeInterval(visibleRange * unitRange)
     }
 }
 

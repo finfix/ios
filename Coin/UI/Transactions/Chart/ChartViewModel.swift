@@ -52,10 +52,13 @@ enum ChartPeriod: CaseIterable {
         }
     }
 
-    // Ограничение глубины истории по умолчанию (nil = без ограничений)
-    var defaultDateFrom: Date? {
+    // Ограничение глубины истории по умолчанию (nil = без ограничений). Для подневного
+    // графика отсчитываем 3 месяца назад не всегда от "сейчас", а от даты "До" фильтра,
+    // если она задана — иначе при выбранном диапазоне в прошлом график всё равно тянул
+    // данные относительно текущей даты.
+    func defaultDateFrom(relativeTo dateTo: Date?) -> Date? {
         switch self {
-        case .day: Date.now.adding(.month, value: -6)
+        case .day: (dateTo ?? Date.now).adding(.month, value: -3)
         case .week: nil
         case .month: nil
         case .quarter: nil
@@ -207,7 +210,7 @@ class ChartViewModel {
         }
 
         // Для периодов с ограничением истории: используем defaultDateFrom, если фильтр не задаёт явную дату
-        let effectiveDateFrom = filters.dateFrom ?? period.defaultDateFrom
+        let effectiveDateFrom = filters.dateFrom ?? period.defaultDateFrom(relativeTo: filters.dateTo)
 
         data = try await service.getStatisticByMonth(
             chartType: chartType,

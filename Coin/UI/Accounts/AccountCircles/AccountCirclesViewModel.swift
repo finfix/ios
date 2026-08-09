@@ -43,7 +43,6 @@ class AccountCirclesViewModel {
         deleteStaticLocations()
         self.accounts = Account.groupAccounts(loaded)
         reloadToken += 1
-        logger.debug("load: завершён для '\(accountGroup.name)', счетов: \(loaded.count)")
     }
 
     var highlitedAccount: Account? = nil
@@ -56,15 +55,12 @@ class AccountCirclesViewModel {
 
     func initializateStaticLocations(location: CGPoint, for account: Account, in accountGroup: AccountGroup) {
         guard accountGroup.id == currentAccountGroup?.id else {
-            logger.warning("initializateStaticLocations: отклонён '\(account.name)' группа '\(accountGroup.name)' != current '\(self.currentAccountGroup?.name ?? "nil")'")
             return
         }
         self.staticLocations[account.id] = location
-        logger.debug("initializateStaticLocations: зарегистрирован '\(account.name)' total=\(self.staticLocations.count)")
     }
 
     func deleteStaticLocations() {
-        logger.debug("deleteStaticLocations: очищено \(self.staticLocations.count) локаций")
         self.staticLocations = [UUID: CGPoint]()
     }
     
