@@ -13,6 +13,11 @@ struct TransactionItem: Identifiable {
     let index: Int
     let transaction: Transaction
     let isNewSection: Bool
+    // Заполняется только у последней транзакции дня — суммарный расход за день,
+    // сконвертированный в валюту группы счетов.
+    let isLastOfDay: Bool
+    let dailyExpenseTotal: Decimal?
+    let dailyExpenseCurrency: Currency?
 }
 
 @Observable
@@ -58,18 +63,44 @@ class TransactionsListViewModel {
             tagIDs: filters.tags.map(\.id),
             accountGroupIDs: filters.accountGroups.map(\.id)
         )
-        
+
+        self.user = try await service.getUsers()[0]
+        let targetCurrency = filters.accountGroups.count == 1 ? filters.accountGroups[0].currency : user.defaultCurrency
+
         self.transactionItems = transactions.enumerated().map({ index, transaction in
-            
+
             var isNewSection = true
             if index > 0 {
                 isNewSection = transactions[index].dateTransaction != transactions[index - 1].dateTransaction
             }
-            
-            return TransactionItem(id: transaction.id, index: index, transaction: transaction, isNewSection: isNewSection)
+
+            var isLastOfDay = true
+            if index < transactions.count - 1 {
+                isLastOfDay = transactions[index].dateTransaction != transactions[index + 1].dateTransaction
+            }
+
+            var dailyExpenseTotal: Decimal?
+            if isLastOfDay {
+                var total: Decimal = 0
+                for other in transactions where other.dateTransaction == transaction.dateTransaction && other.type == .consumption {
+                    let currencyRate = targetCurrency.rate / other.accountTo.currency.rate
+                    total += other.amountTo * currencyRate
+                }
+                if total != 0 {
+                    dailyExpenseTotal = total
+                }
+            }
+
+            return TransactionItem(
+                id: transaction.id,
+                index: index,
+                transaction: transaction,
+                isNewSection: isNewSection,
+                isLastOfDay: isLastOfDay,
+                dailyExpenseTotal: dailyExpenseTotal,
+                dailyExpenseCurrency: dailyExpenseTotal != nil ? targetCurrency : nil
+            )
         })
-                                
-        self.user = try await service.getUsers()[0]
     }
         
     func deleteTransaction(_ transaction: Transaction) async throws {

@@ -66,7 +66,7 @@ struct QuickStatisticView: View {
             }
             .buttonStyle(.plain)
             Spacer()
-            AccountGroupSelector(mode: .icon)
+            AccountGroupSelector(mode: .word)
             Spacer()
         }
         .task {

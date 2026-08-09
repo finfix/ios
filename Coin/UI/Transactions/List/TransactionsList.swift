@@ -61,6 +61,17 @@ struct TransactionsList: View {
                         Divider()
                     }
                     .background(Color(.systemGray6))
+                    if let dailyExpenseTotal = item.dailyExpenseTotal, let dailyExpenseCurrency = item.dailyExpenseCurrency {
+                        HStack {
+                            Text("Расход за день")
+                            Spacer()
+                            Text(CurrencyFormatter().string(number: dailyExpenseTotal, currency: dailyExpenseCurrency, withUnits: false))
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                    }
                 }
             }
         }
