@@ -47,6 +47,11 @@ class AccountCirclesViewModel {
 
     var highlitedAccount: Account? = nil
 
+    /// Режим редактирования счетов ("трясущиеся" кружки с карандашиками, как на главном
+    /// экране iOS) — общий для всех AccountsTabView на экране, включается долгим тапом на
+    /// любой кружок и выключается кнопкой "Готово".
+    var isEditMode = false
+
     var draggableLocation: CGPoint? = nil
     var draggableAccount: Account? = nil
     @ObservationIgnored var staticLocations: [UUID: CGPoint] = [:]

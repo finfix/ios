@@ -32,9 +32,34 @@ struct DraggableAccountCircleItem: View {
     @State var isChildrenOpen = false
     @Environment(\.dismiss) var dismiss
     var isAlreadyOpened: Bool = false
-    
+
+    // Текущий угол поворота — анимируется императивно через withAnimation(repeatForever),
+    // а не через `.animation(_:value:)`: тот запускает переход только один раз при смене
+    // vm.isEditMode и не гарантирует непрерывное покачивание туда-сюда (а заодно утаскивает
+    // в тот же repeatForever-цикл и transition карандашика, отсюда мигание).
+    @State private var jiggleRotation: Double = 0
+
+    // Небольшая вариация угла/задержки по id счёта — чтобы кружки в режиме редактирования
+    // тряслись вразнобой, а не идеально синхронно, как на главном экране iOS.
+    private var jiggleAngle: Double {
+        abs(account.id.hashValue) % 2 == 0 ? 1.6 : -1.6
+    }
+    private var jiggleDelay: Double {
+        Double(abs(account.id.hashValue) % 5) * 0.02
+    }
+
+    private func startJiggleIfNeeded() {
+        guard vm.isEditMode else {
+            jiggleRotation = 0
+            return
+        }
+        withAnimation(.easeInOut(duration: 0.14).repeatForever(autoreverses: true).delay(jiggleDelay)) {
+            jiggleRotation = jiggleAngle
+        }
+    }
+
     var body: some View {
-        
+
         VStack {
             AccountCircleItemHeader(account: account)
             ZStack {
@@ -68,13 +93,14 @@ struct DraggableAccountCircleItem: View {
                     .gesture(
                         DragGesture(coordinateSpace: .global)
                             .onChanged { state in
-                                guard account.type != .balancing && account.type != .expense else { return }
+                                guard !vm.isEditMode, account.type != .balancing && account.type != .expense else { return }
                                 vm.updateDraggableLocation(
                                     location: state.location,
                                     for: account
                                 )
                             }
                             .onEnded { state in
+                                guard !vm.isEditMode else { return }
                                 confirmDraggableDrop(for: account)
                                 if isAlreadyOpened {
                                     dismiss()
@@ -82,17 +108,17 @@ struct DraggableAccountCircleItem: View {
                             }
                     )
                     .simultaneousGesture(
-                        LongPressGesture(minimumDuration: 1)
+                        LongPressGesture(minimumDuration: 0.5)
                             .onEnded { state in
-                                path.append(AccountCircleItemRoute.editAccount(account))
-                                if isAlreadyOpened {
-                                    dismiss()
+                                withAnimation {
+                                    vm.isEditMode = true
                                 }
                             }
                     )
                     .gesture(
                         TapGesture(count: 2)
                             .onEnded {
+                                guard !vm.isEditMode else { return }
                                 if !account.childrenAccounts.isEmpty {
                                     isChildrenOpen = true
                                 }
@@ -101,10 +127,15 @@ struct DraggableAccountCircleItem: View {
                     .gesture(
                         TapGesture(count: 1)
                             .onEnded {
+                                if vm.isEditMode {
+                                    path.append(AccountCircleItemRoute.editAccount(account))
+                                    return
+                                }
+
                                 if isAlreadyOpened {
                                     dismiss()
                                 }
-                                
+
                                 var chartType: ChartType = .earningsAndExpenses
                                 switch account.type {
                                 case .earnings:
@@ -113,16 +144,37 @@ struct DraggableAccountCircleItem: View {
                                     chartType = .expenses
                                 default: break
                                 }
-                                
+
                                 path.append(AccountCircleItemRoute.accountTransactions(account, chartType))
                             }
                     )
+
+                if vm.isEditMode {
+                    Button {
+                        path.append(AccountCircleItemRoute.editAccount(account))
+                    } label: {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.system(size: 22))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .gray)
+                            .background(Circle().fill(Color(.systemBackground)))
+                    }
+                    .offset(x: 26, y: -26)
+                    .transition(.scale.combined(with: .opacity))
+                }
             }
+            .rotationEffect(.degrees(jiggleRotation))
             .opacity(vm.isHighligted(for: account) ? 0.6 : 1)
             AccountCircleItemFooter(account: account)
         }
         .frame(width: 80)
         .opacity(account.accountingInHeader ? 1 : 0.5)
+        .onAppear {
+            startJiggleIfNeeded()
+        }
+        .onChange(of: vm.isEditMode) { _, _ in
+            startJiggleIfNeeded()
+        }
         .popover(isPresented: $isChildrenOpen) {
             ScrollView(.horizontal) {
                 HStack(spacing: 10) {

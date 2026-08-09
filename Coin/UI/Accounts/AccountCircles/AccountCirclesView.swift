@@ -389,6 +389,17 @@ struct AccountCirclesView: View {
                     )
                 }
             }
+            .toolbar {
+                if vm.isEditMode {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Готово") {
+                            withAnimation {
+                                vm.isEditMode = false
+                            }
+                        }
+                    }
+                }
+            }
         }
         .environment(path)
     }
