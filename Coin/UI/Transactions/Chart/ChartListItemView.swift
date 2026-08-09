@@ -34,7 +34,20 @@ struct ChartListItemView: View {
     }
         
     var body: some View {
-        if (chartViewGroupBy == .byAccount || vm.chartType == .balance), let account = series.account {
+        if vm.chartType == .balanceTotal || vm.chartType == .delta {
+            // Единственная сводная серия — открываем несфильтрованный список транзакций,
+            // как и по клику на "Итого"/"Всего" в других типах графиков.
+            Button {
+                path.path.append(ChartViewRoute.transactionView(filters: filters, chartType: .earningsAndExpenses))
+            } label: {
+                HStack {
+                    Text(vm.chartType == .delta ? "Дельта" : "Итого")
+                        .foregroundStyle(series.color)
+                        .frame(height: 30)
+                    Spacer()
+                }
+            }
+        } else if (chartViewGroupBy == .byAccount || vm.chartType == .balance), let account = series.account {
             Button {
                 if vm.chartType == .balance {
                     // Для баланса открываем список транзакций по счёту

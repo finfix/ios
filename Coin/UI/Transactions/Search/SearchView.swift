@@ -22,7 +22,14 @@ struct SearchView: View {
     
     let width: CGFloat = UIScreen.main.bounds.width
     let height: CGFloat = UIScreen.main.bounds.height
-    
+
+    // Для исключения счетов подходит любой счёт вне зависимости от того, доходный он,
+    // расходный или балансовый — объединяем все три пула и убираем дубликаты.
+    private var allAccounts: [Account] {
+        var seen: Set<UUID> = []
+        return (vm.earnings + vm.regulars + vm.expenses).filter { seen.insert($0.id).inserted }
+    }
+
     var body: some View {
         List {
             Section {
@@ -171,6 +178,30 @@ struct SearchView: View {
                     }
                 } else {
                     Text("Начните вводить для поиска расходных счетов")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Section(header: Text("Исключить счета")) {
+                if !searchText.isEmpty {
+                    ForEach(allAccounts.filter { !filters.excludedAccounts.contains($0) }) { account in
+                        Button {
+                            filters.excludedAccounts.append(account)
+                        } label: {
+                            HStack {
+                                if filters.accountGroups.count != 1 {
+                                    Text(account.accountGroup.name)
+                                    Text("•")
+                                }
+                                if let parentAccount = account.parentAccount.account {
+                                    Text(parentAccount.name)
+                                    Text("•")
+                                }
+                                Text(account.name)
+                            }
+                        }
+                    }
+                } else {
+                    Text("Начните вводить для поиска счетов для исключения")
                         .foregroundStyle(.secondary)
                 }
             }

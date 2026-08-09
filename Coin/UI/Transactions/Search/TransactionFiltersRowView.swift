@@ -28,6 +28,13 @@ struct TransactionFiltersRowView: View {
                         }
                     }
                 }
+                if !filters.excludedAccounts.isEmpty {
+                    ForEach(Array(zip(filters.excludedAccounts.indices, filters.excludedAccounts)), id: \.0) { i, account in
+                        TransactionFiltersRowItem(text: "Искл.: \(account.name) · \(account.accountGroup.name)", color: Color.gray) {
+                            filters.excludedAccounts.remove(at: i)
+                        }
+                    }
+                }
                 if let dateFrom = filters.dateFrom {
                     TransactionFiltersRowItem(text: "C \(dateFrom.formatted(date: .abbreviated, time: .omitted))", color: Color.blue) {
                         filters.dateFrom = nil

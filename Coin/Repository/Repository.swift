@@ -496,44 +496,57 @@ class Repository {
         dateTo: Date? = nil,
         searchText: String = "",
         accountIDs: [UUID] = [],
+        excludedAccountIDs: [UUID] = [],
         accountGroupIDs: [UUID] = [],
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
         tagIDs: [UUID] = []
     ) async throws -> [TransactionDB] {
         try await sqlite.read { db in
-            
+
             var joins: [String] = []
             var filters: [String] = []
             var args: StatementArguments = []
-                        
+
             if let dateFrom {
                 filters.append("t.dateTransaction >= ?")
                 _ = args.append(contentsOf: [dateFrom])
             }
-    
+
             if let dateTo {
                 filters.append("t.dateTransaction <= ?")
                 _ = args.append(contentsOf: [dateTo])
             }
-            
+
             if searchText != "" {
                 filters.append("t.note LIKE ?")
                 _ = args.append(contentsOf: ["%"+searchText+"%"])
             }
-                
+
             if !accountIDs.isEmpty {
-                
+
                 var questions: [String] = []
                 for _ in accountIDs {
                     questions.append("?")
                 }
-                
+
                 filters.append("(t.accountFromId IN (\(questions.joined(separator: ","))) OR t.accountToId IN (\(questions.joined(separator: ","))))")
                 _ = args.append(contentsOf: StatementArguments(accountIDs))
                 _ = args.append(contentsOf: StatementArguments(accountIDs))
             }
-            
+
+            if !excludedAccountIDs.isEmpty {
+
+                var questions: [String] = []
+                for _ in excludedAccountIDs {
+                    questions.append("?")
+                }
+
+                filters.append("(t.accountFromId NOT IN (\(questions.joined(separator: ","))) AND t.accountToId NOT IN (\(questions.joined(separator: ","))))")
+                _ = args.append(contentsOf: StatementArguments(excludedAccountIDs))
+                _ = args.append(contentsOf: StatementArguments(excludedAccountIDs))
+            }
+
             if !accountGroupIDs.isEmpty {
                 
                 var questions: [String] = []
@@ -609,6 +622,7 @@ class Repository {
         accountParameterIgnore: Bool = false,
         transactionParameterIgnore: Bool = false,
         accountIDs: [UUID] = [],
+        excludedAccountIDs: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         tagIDs: [UUID] = []
@@ -663,6 +677,14 @@ class Repository {
                 }
                 filters.append("a.id in (\(questions.joined(separator: ", ")))")
                 _ = args.append(contentsOf: StatementArguments(accountIDs))
+            }
+            if !excludedAccountIDs.isEmpty {
+                var questions: [String] = []
+                for _ in excludedAccountIDs {
+                    questions.append("?")
+                }
+                filters.append("a.id not in (\(questions.joined(separator: ", ")))")
+                _ = args.append(contentsOf: StatementArguments(excludedAccountIDs))
             }
             if !accountGroupIDs.isEmpty {
                 var questions: [String] = []
@@ -731,8 +753,8 @@ class Repository {
                         }
                         result[accountID]?[row["month"]] = row["remainder"]
                     }
-                case .balance:
-                    break // Баланс обрабатывается отдельно через getMonthlyNetFlowByAccount
+                case .balance, .balanceTotal, .delta:
+                    break // Баланс обрабатывается отдельно через getMonthlyNetFlowByAccount; дельта сюда не заходит (передаётся .earningsAndExpenses)
                 }
             }
             

@@ -36,7 +36,15 @@ class TransactionsListViewModel {
                 accountIDs.append(childAccount.id)
             }
         }
-        
+
+        var excludedAccountIDs: [UUID] = []
+        for account in filters.excludedAccounts {
+            excludedAccountIDs.append(account.id)
+            for childAccount in account.childrenAccounts {
+                excludedAccountIDs.append(childAccount.id)
+            }
+        }
+
         let transactions = try await service.getTransactions(
             limit: 1000,
             offset: 0,
@@ -44,6 +52,7 @@ class TransactionsListViewModel {
             dateTo: filters.dateTo,
             searchText: filters.searchText,
             accountIDs: accountIDs,
+            excludedAccountIDs: excludedAccountIDs,
             transactionTypes: filters.transactionTypes,
             currencies: filters.currencies,
             tagIDs: filters.tags.map(\.id),

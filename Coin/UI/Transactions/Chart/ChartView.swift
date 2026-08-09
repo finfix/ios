@@ -39,17 +39,28 @@ enum ChartViewRoute: Hashable {
 // кнопку переключения вида соответственно, а не просто "Линейный". Общие для обычного
 // и полноэкранного режима, поэтому вынесены наружу.
 func chartDisplayTypeIcon(chartType: ChartType, displayType: ChartDisplayType) -> String {
-    if chartType == .balance && displayType == .linear {
+    if (chartType == .balance || chartType == .balanceTotal) && displayType == .linear {
         return "chart.bar.fill"
     }
     return displayType == .linear ? "chart.xyaxis.line" : "chart.pie.fill"
 }
 
 func chartDisplayTypeLabel(chartType: ChartType, displayType: ChartDisplayType) -> String {
-    if chartType == .balance && displayType == .linear {
+    if (chartType == .balance || chartType == .balanceTotal) && displayType == .linear {
         return "Столбчатый"
     }
     return displayType.name
+}
+
+/// Заголовок левой колонки списка серий — общий для обычного и полноэкранного режима.
+func chartListHeaderLabel(chartType: ChartType, chartViewGroupBy: ChartViewGroupBy) -> String {
+    switch chartType {
+    case .earnings, .expenses: chartViewGroupBy.name
+    case .balance: "Счёт"
+    case .balanceTotal: "Итого"
+    case .delta: "Дельта"
+    case .earningsAndExpenses: "Тип"
+    }
 }
 
 /// Сортировка серий по сумме (значению из `aggregationInformation`, той же, что
@@ -79,6 +90,11 @@ struct ChartView: View {
     @Binding var filters: TransactionFilters
     var currency: Currency
 
+    // Владеем позицией/масштабом графика здесь (а не внутри Graph), чтобы при переключении
+    // в полноэкранный режим и обратно (это отдельный экземпляр Graph) они не сбрасывались.
+    @State private var visibleRange: Int
+    @State private var xPosition: Date
+
     init(
         chartType: ChartType = .earningsAndExpenses,
         chartViewGroupBy: Binding<ChartViewGroupBy>,
@@ -93,8 +109,13 @@ struct ChartView: View {
         self.currency = currency
         self._filters = filters
         self._isFullScreen = isFullScreen
+        let defaultPeriod = ChartPeriod.month
+        self._visibleRange = State(initialValue: defaultPeriod.defaultVisibleRange)
+        self._xPosition = State(initialValue: Date.now.addingTimeInterval(
+            TimeInterval(-1 * defaultPeriod.secondsPerUnit * defaultPeriod.defaultVisibleRange)
+        ))
     }
-    
+
     var formatter: CurrencyFormatter
 
     let chartHeight: CGFloat = UIScreen.main.bounds.height * 0.3 // Треть экрана
@@ -115,6 +136,15 @@ struct ChartView: View {
     /// весь список открывается через "Показать ещё", которая ведёт в полноэкранный режим.
     private let collapsedSeriesLimit = 4
 
+    /// Сдвигает (а не расширяет) весь диапазон фильтра "От"/"До" на полгода в одну сторону —
+    /// вызывается кнопками на подневном графике при достижении края загруженных данных.
+    private func shiftDateRange(byMonths months: Int) {
+        let effectiveDateTo = filters.dateTo ?? Date.now
+        let effectiveDateFrom = filters.dateFrom ?? vm.period.defaultDateFrom(relativeTo: filters.dateTo) ?? effectiveDateTo.adding(.year, value: -1)
+        filters.dateFrom = effectiveDateFrom.adding(.month, value: months)
+        filters.dateTo = effectiveDateTo.adding(.month, value: months)
+    }
+
     var body: some View {
         Group {
             if isFullScreen {
@@ -126,7 +156,11 @@ struct ChartView: View {
                     formatter: formatter,
                     filters: $filters,
                     isPresented: $isFullScreen,
-                    isSortedByAmount: $isSortedByAmount
+                    isSortedByAmount: $isSortedByAmount,
+                    visibleRange: $visibleRange,
+                    xPosition: $xPosition,
+                    onExtendRangeEarlier: vm.period == .day ? { shiftDateRange(byMonths: -6) } : nil,
+                    onExtendRangeLater: vm.period == .day ? { shiftDateRange(byMonths: 6) } : nil
                 )
             } else {
                 normalContent
@@ -140,7 +174,7 @@ struct ChartView: View {
             }
         }
         .onChange(of: vm.chartType) { _, newType in
-            if newType == .earningsAndExpenses || newType == .balance {
+            if newType != .balance && newType != .balanceTotal {
                 chartDisplayType = .linear
             }
             Task {
@@ -160,6 +194,10 @@ struct ChartView: View {
         .onChange(of: vm.period) { _, newPeriod in
             vm.lastSelectedDate = Date.now.startOfPeriod(newPeriod)
             vm.data = []
+            visibleRange = newPeriod.defaultVisibleRange
+            xPosition = Date.now.addingTimeInterval(
+                TimeInterval(-1 * newPeriod.secondsPerUnit * newPeriod.defaultVisibleRange)
+            )
             Task {
                 try await vm.load(groupBy: chartViewGroupBy, filters: filters, targetCurrency: currency)
             }
@@ -180,7 +218,7 @@ struct ChartView: View {
                 }
             }
             HStack {
-                if vm.chartType != .earningsAndExpenses {
+                if vm.chartType == .balance || vm.chartType == .balanceTotal {
                     Button {
                         chartDisplayType = chartDisplayType == .linear ? .ring : .linear
                     } label: {
@@ -215,7 +253,7 @@ struct ChartView: View {
             }
             Group {
                 if !vm.data.isEmpty {
-                    if chartDisplayType == .ring && vm.chartType != .earningsAndExpenses {
+                    if chartDisplayType == .ring && (vm.chartType == .balance || vm.chartType == .balanceTotal) {
                         RingGraph(
                             data: vm.data,
                             period: vm.period,
@@ -228,7 +266,11 @@ struct ChartView: View {
                             period: vm.period,
                             data: vm.data,
                             lastSelectedDate: $vm.lastSelectedDate,
-                            currency: currency
+                            visibleRange: $visibleRange,
+                            xPosition: $xPosition,
+                            currency: currency,
+                            onExtendRangeEarlier: vm.period == .day ? { shiftDateRange(byMonths: -6) } : nil,
+                            onExtendRangeLater: vm.period == .day ? { shiftDateRange(byMonths: 6) } : nil
                         )
                         .id(vm.period)
                     }
@@ -258,11 +300,8 @@ struct ChartView: View {
                         }
                         .id(chartViewGroupBy)
                         .frame(minWidth: 150)
-                    } else if vm.chartType == .balance {
-                        Text("Счёт")
-                            .font(.caption)
                     } else {
-                        Text("Тип")
+                        Text(chartListHeaderLabel(chartType: vm.chartType, chartViewGroupBy: chartViewGroupBy))
                             .font(.caption)
                     }
                     

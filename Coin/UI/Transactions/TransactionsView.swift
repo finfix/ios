@@ -14,6 +14,8 @@ struct TransactionFilters: Equatable, Hashable {
     var transactionTypes: [TransactionType] = []
     var currencies: [Currency] = []
     var accounts: [Account] = []
+    // Счета (и их дочерние счета), транзакции по которым нужно скрыть из выборки.
+    var excludedAccounts: [Account] = []
     var tags: [Tag] = []
     var accountGroups: [AccountGroup]
 }

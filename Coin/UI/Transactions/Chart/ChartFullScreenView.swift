@@ -19,6 +19,10 @@ struct ChartFullScreenView: View {
     @Binding var filters: TransactionFilters
     @Binding var isPresented: Bool
     @Binding var isSortedByAmount: Bool
+    @Binding var visibleRange: Int
+    @Binding var xPosition: Date
+    var onExtendRangeEarlier: (() -> Void)?
+    var onExtendRangeLater: (() -> Void)?
 
     private var displayTypeIcon: String {
         chartDisplayTypeIcon(chartType: vm.chartType, displayType: chartDisplayType)
@@ -45,7 +49,7 @@ struct ChartFullScreenView: View {
             .padding(.horizontal)
 
             HStack {
-                if vm.chartType != .earningsAndExpenses {
+                if vm.chartType == .balance || vm.chartType == .balanceTotal {
                     Button {
                         chartDisplayType = chartDisplayType == .linear ? .ring : .linear
                     } label: {
@@ -95,7 +99,7 @@ struct ChartFullScreenView: View {
             }
 
             Group {
-                if chartDisplayType == .ring && vm.chartType != .earningsAndExpenses {
+                if chartDisplayType == .ring && (vm.chartType == .balance || vm.chartType == .balanceTotal) {
                     RingGraph(
                         data: vm.data,
                         period: vm.period,
@@ -108,9 +112,12 @@ struct ChartFullScreenView: View {
                         period: vm.period,
                         data: vm.data,
                         lastSelectedDate: $vm.lastSelectedDate,
-                        currency: currency
+                        visibleRange: $visibleRange,
+                        xPosition: $xPosition,
+                        currency: currency,
+                        onExtendRangeEarlier: onExtendRangeEarlier,
+                        onExtendRangeLater: onExtendRangeLater
                     )
-                    .id(vm.period)
                 }
             }
             .frame(height: UIScreen.main.bounds.height * 0.35)
@@ -118,16 +125,8 @@ struct ChartFullScreenView: View {
             if !vm.data.isEmpty {
                 VStack {
                     HStack {
-                        if vm.chartType == .earnings || vm.chartType == .expenses {
-                            Text(chartViewGroupBy.name)
-                                .font(.caption)
-                        } else if vm.chartType == .balance {
-                            Text("Счёт")
-                                .font(.caption)
-                        } else {
-                            Text("Тип")
-                                .font(.caption)
-                        }
+                        Text(chartListHeaderLabel(chartType: vm.chartType, chartViewGroupBy: chartViewGroupBy))
+                            .font(.caption)
 
                         Spacer()
                         Menu {
@@ -194,7 +193,7 @@ struct ChartFullScreenView: View {
             }
 
             if !vm.data.isEmpty {
-                let totalLabel = vm.chartType == .balance ? "Итого" : "Всего"
+                let totalLabel = (vm.chartType == .balance || vm.chartType == .balanceTotal) ? "Итого" : "Всего"
                 let aggregationTotal = vm.aggregationInformation.values.reduce(0, +)
                 let selectedDateTotal = vm.totalBySelectedDate
                 let isPercent = vm.aggregationMethod == .percent

@@ -61,15 +61,16 @@ extension Service {
         dateTo: Date? = nil,
         searchText: String = "",
         accountIDs: [UUID] = [],
+        excludedAccountIDs: [UUID] = [],
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
         tagIDs: [UUID] = [],
         accountGroupIDs: [UUID] = []
     ) async throws -> [Transaction] {
-        
+
         let dateFrom: Date? = dateFrom?.stripTime()
         let dateTo: Date? = dateTo?.stripTime()
-        
+
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await repository.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await repository.getAccountGroups(), currenciesMap: currenciesMap))
         let accountsMap = Account.convertToMap(Account.convertFromDBModel(try await repository.getAccounts(), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: nil))
@@ -83,6 +84,7 @@ extension Service {
                 dateTo: dateTo,
                 searchText: searchText,
                 accountIDs: accountIDs,
+                excludedAccountIDs: excludedAccountIDs,
                 accountGroupIDs: accountGroupIDs,
                 transactionTypes: transactionTypes,
                 currencies: currencies,

@@ -102,6 +102,7 @@ extension Service {
         targetCurrency: Currency,
         accountGroupIDs: [UUID] = [],
         accountIDs: [UUID] = [],
+        excludedAccountIDs: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         tagIDs: [UUID] = [],
@@ -145,6 +146,7 @@ extension Service {
                 accountGroupIDs: accountGroupIDs,
                 targetCurrency: targetCurrency,
                 accountIDs: accountIDs,
+                excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs
@@ -166,6 +168,7 @@ extension Service {
                 accountGroupIDs: accountGroupIDs,
                 targetCurrency: targetCurrency,
                 accountIDs: accountIDs,
+                excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs
@@ -190,6 +193,7 @@ extension Service {
                 accountGroupIDs: accountGroupIDs,
                 targetCurrency: targetCurrency,
                 accountIDs: accountIDs,
+                excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs
@@ -207,13 +211,57 @@ extension Service {
                 accountGroupIDs: accountGroupIDs,
                 targetCurrency: targetCurrency,
                 accountIDs: accountIDs,
+                excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs
             )
             
-        // Текущий баланс счетов в каждый период
-        case .balance:
+        // Дельта: совокупный доход минус совокупный расход за период, одной линией
+        case .delta:
+
+            let expenses = try await repository.getStatisticByMonth(
+                chartType: .earningsAndExpenses,
+                groupBy: groupBy,
+                period: period,
+                transactionType: .consumption,
+                accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
+                accountIDs: accountIDs,
+                excludedAccountIDs: excludedAccountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                tagIDs: tagIDs
+            )
+            let earnings = try await repository.getStatisticByMonth(
+                chartType: .earningsAndExpenses,
+                groupBy: groupBy,
+                period: period,
+                transactionType: .income,
+                accountGroupIDs: accountGroupIDs,
+                targetCurrency: targetCurrency,
+                accountIDs: accountIDs,
+                excludedAccountIDs: excludedAccountIDs,
+                dateFrom: dateFrom,
+                dateTo: dateTo,
+                tagIDs: tagIDs
+            )
+
+            var deltaData: [Date: Decimal] = [:]
+            for series in earnings {
+                for (date, value) in series.data {
+                    deltaData[date, default: 0] += value
+                }
+            }
+            for series in expenses {
+                for (date, value) in series.data {
+                    deltaData[date, default: 0] -= value
+                }
+            }
+            data = [Series(account: nil, objectID: UUID(), color: .blue, data: deltaData)]
+
+        // Текущий баланс счетов в каждый период (детально по счетам, либо одной сводной серией)
+        case .balance, .balanceTotal:
             
             let currentPeriod = Date.now.startOfPeriod(period)
             
@@ -239,9 +287,10 @@ extension Service {
                 guard (account.type == .regular || account.type == .debt) && account.accountingInCharts else { return false }
                 let groupMatch = accountGroupIDs.isEmpty || accountGroupIDs.contains(account.accountGroup.id)
                 let accountMatch = accountIDs.isEmpty || accountIDs.contains(account.id)
-                return groupMatch && accountMatch
+                let excludedMatch = !excludedAccountIDs.contains(account.id)
+                return groupMatch && accountMatch && excludedMatch
             }
-            
+
             // Получаем чистые потоки по периодам для каждого счёта
             let netFlows = try await repository.getMonthlyNetFlowByAccount(
                 period: period,
@@ -271,11 +320,18 @@ extension Service {
                 // и точечный поиск по дате в списке серий натыкается именно на нулевой.
                 var utcCalendar = Calendar.current
                 utcCalendar.timeZone = TimeZone(abbreviation: "UTC")!
+                // Не восстанавливаем баланс глубже, чем просит dateFrom (например, для
+                // подневного графика это ограничение в 3 месяца) — иначе для баланса это
+                // ограничение молча игнорировалось и график всегда считал всю историю.
+                let earliestAllowedPeriod = dateFrom?.startOfPeriod(period)
                 if let earliestPeriod = accountFlows.keys.min() {
                     var cursor = currentPeriod
                     while cursor >= earliestPeriod {
                         balance -= accountFlows[cursor] ?? 0
                         cursor = cursor.adding(period.calendarComponent, value: -1, using: utcCalendar)
+                        if let earliestAllowedPeriod, cursor < earliestAllowedPeriod {
+                            break
+                        }
                         seriesData[cursor] = balance.round(factor: 0)
                     }
                 }
@@ -283,46 +339,58 @@ extension Service {
                 data.append(Series(account: account, objectID: account.id, data: seriesData))
             }
 
-            // В отличие от доходов/расходов, баланс до этого момента никогда не сворачивал
-            // дочерние счета в родительские — из-за `saveChildren: true` в `groupAccounts`
-            // список всегда содержал и родителя, и каждого ребёнка отдельной серией. Теперь
-            // приводим к тому же поведению: при глобальном просмотре графика (не внутри
-            // конкретного родительского счёта) суммируем дочерние серии в родительскую и
-            // убираем дочерние из списка — аналогично блоку для .earnings/.expenses ниже.
-            if aggregateIntoParents {
-                var parentSeriesIndexMap: [UUID: Int] = [:]
-                for (i, series) in data.enumerated() {
-                    if let account = series.account, account.isParent {
-                        parentSeriesIndexMap[account.id] = i
+            if chartType == .balanceTotal {
+                // "Общий" вид: схлопываем все счета в одну сводную серию с суммарным балансом —
+                // никакого сворачивания в родителей тут не нужно, просто суммируем всё подряд.
+                var totalData: [Date: Decimal] = [:]
+                for series in data {
+                    for (date, value) in series.data {
+                        totalData[date, default: 0] += value
                     }
                 }
-
-                var childIndicesToRemove: [Int] = []
-                for (i, series) in data.enumerated() {
-                    guard let account = series.account, let parentID = account.parentAccountID else { continue }
-
-                    if let parentIndex = parentSeriesIndexMap[parentID] {
-                        for (date, value) in series.data {
-                            data[parentIndex].data[date, default: 0] += value
+                data = [Series(account: nil, objectID: UUID(), color: .blue, data: totalData)]
+            } else {
+                // В отличие от доходов/расходов, баланс до этого момента никогда не сворачивал
+                // дочерние счета в родительские — из-за `saveChildren: true` в `groupAccounts`
+                // список всегда содержал и родителя, и каждого ребёнка отдельной серией. Теперь
+                // приводим к тому же поведению: при глобальном просмотре графика (не внутри
+                // конкретного родительского счёта) суммируем дочерние серии в родительскую и
+                // убираем дочерние из списка — аналогично блоку для .earnings/.expenses ниже.
+                if aggregateIntoParents {
+                    var parentSeriesIndexMap: [UUID: Int] = [:]
+                    for (i, series) in data.enumerated() {
+                        if let account = series.account, account.isParent {
+                            parentSeriesIndexMap[account.id] = i
                         }
-                    } else if let parentAccount = balanceAccounts.first(where: { $0.id == parentID }) {
-                        let parentSeries = Series(account: parentAccount, objectID: parentID, data: series.data)
-                        data.append(parentSeries)
-                        parentSeriesIndexMap[parentID] = data.count - 1
                     }
-                    childIndicesToRemove.append(i)
+
+                    var childIndicesToRemove: [Int] = []
+                    for (i, series) in data.enumerated() {
+                        guard let account = series.account, let parentID = account.parentAccountID else { continue }
+
+                        if let parentIndex = parentSeriesIndexMap[parentID] {
+                            for (date, value) in series.data {
+                                data[parentIndex].data[date, default: 0] += value
+                            }
+                        } else if let parentAccount = balanceAccounts.first(where: { $0.id == parentID }) {
+                            let parentSeries = Series(account: parentAccount, objectID: parentID, data: series.data)
+                            data.append(parentSeries)
+                            parentSeriesIndexMap[parentID] = data.count - 1
+                        }
+                        childIndicesToRemove.append(i)
+                    }
+
+                    for index in childIndicesToRemove.sorted(by: >) {
+                        data.remove(at: index)
+                    }
                 }
 
-                for index in childIndicesToRemove.sorted(by: >) {
-                    data.remove(at: index)
+                // Сортируем по текущему балансу и назначаем цвета
+                data = data.sorted { ($0.data[currentPeriod] ?? 0) > ($1.data[currentPeriod] ?? 0) }
+                for (i, _) in data.enumerated() {
+                    data[i].serialNumber = UInt32(i)
+                    data[i].color = defaultColors[i % defaultColors.count]
                 }
-            }
-
-            // Сортируем по текущему балансу и назначаем цвета
-            data = data.sorted { ($0.data[currentPeriod] ?? 0) > ($1.data[currentPeriod] ?? 0) }
-            for (i, _) in data.enumerated() {
-                data[i].serialNumber = UInt32(i)
-                data[i].color = defaultColors[i % defaultColors.count]
             }
         }
         

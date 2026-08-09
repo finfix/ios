@@ -53,12 +53,13 @@ enum ChartPeriod: CaseIterable {
     }
 
     // Ограничение глубины истории по умолчанию (nil = без ограничений). Для подневного
-    // графика отсчитываем 3 месяца назад не всегда от "сейчас", а от даты "До" фильтра,
+    // графика отсчитываем год назад не всегда от "сейчас", а от даты "До" фильтра,
     // если она задана — иначе при выбранном диапазоне в прошлом график всё равно тянул
-    // данные относительно текущей даты.
+    // данные относительно текущей даты. Когда пользователь доскроллит до края этого года,
+    // кнопки на графике (см. Graph.swift) расширяют сам фильтр ещё на полгода.
     func defaultDateFrom(relativeTo dateTo: Date?) -> Date? {
         switch self {
-        case .day: (dateTo ?? Date.now).adding(.month, value: -3)
+        case .day: (dateTo ?? Date.now).adding(.year, value: -1)
         case .week: nil
         case .month: nil
         case .quarter: nil
@@ -118,14 +119,16 @@ enum ChartPeriod: CaseIterable {
 }
 
 enum ChartType: CaseIterable {
-    case earningsAndExpenses, earnings, expenses, balance
-    
+    case earningsAndExpenses, earnings, expenses, balance, balanceTotal, delta
+
     var name: String {
         switch self {
         case .earningsAndExpenses: return "Доходы и расходы"
         case .earnings: return "Доходы"
         case .expenses: return "Расходы"
-        case .balance: return "В наличии"
+        case .balance: return "В наличии (детально)"
+        case .balanceTotal: return "В наличии (общее)"
+        case .delta: return "Дельта"
         }
     }
 }
@@ -209,6 +212,14 @@ class ChartViewModel {
             }
         }
 
+        var excludedAccountIDs: [UUID] = []
+        for account in filters.excludedAccounts {
+            excludedAccountIDs.append(account.id)
+            for childAccount in account.childrenAccounts {
+                excludedAccountIDs.append(childAccount.id)
+            }
+        }
+
         // Для периодов с ограничением истории: используем defaultDateFrom, если фильтр не задаёт явную дату
         let effectiveDateFrom = filters.dateFrom ?? period.defaultDateFrom(relativeTo: filters.dateTo)
 
@@ -219,6 +230,7 @@ class ChartViewModel {
             targetCurrency: targetCurrency,
             accountGroupIDs: filters.accountGroups.map(\.id),
             accountIDs: accountIDs,
+            excludedAccountIDs: excludedAccountIDs,
             dateFrom: effectiveDateFrom,
             dateTo: filters.dateTo,
             tagIDs: filters.tags.map(\.id),

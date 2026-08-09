@@ -17,29 +17,72 @@ struct Graph: View {
     let data: [Series]
     @Environment(\.calendar) var calendar
     @State private var rawSelectedDate: Date?
+    @State private var zoomTimer: Timer?
+    @State private var zoomTickCount: Int = 0
     @Binding var lastSelectedDate: Date
-    @State var visibleRange: Int
-    @State var xPosition: Date
+    // Владелец — вызывающий View (ChartView), а не сам Graph: при переключении в
+    // полноэкранный режим создаётся отдельный экземпляр Graph, и если бы позиция/масштаб
+    // были собственным @State, они бы каждый раз сбрасывались на дефолт.
+    @Binding var visibleRange: Int
+    @Binding var xPosition: Date
     let currencyFormatter: CurrencyFormatter
-    
+    // Показываются только когда заданы (сейчас — только для подневного графика, у которого
+    // есть жёсткая граница загруженных данных, см. `ChartPeriod.defaultDateFrom`). Тап
+    // должен раздвинуть сам фильтр по датам ещё на полгода в соответствующую сторону.
+    var onExtendRangeEarlier: (() -> Void)?
+    var onExtendRangeLater: (() -> Void)?
+
     private var unitRange: Int { period.secondsPerUnit }
-    
+
+    private var dataMinDate: Date? {
+        data.compactMap { $0.data.keys.min() }.min()
+    }
+
+    private var dataMaxDate: Date? {
+        data.compactMap { $0.data.keys.max() }.max()
+    }
+
+    // Край экрана считаем достигнутым, когда видимое окно почти вплотную подходит к
+    // границе загруженных данных (с запасом в один период, чтобы не мигать на подходе).
+    private var hasReachedEarliestEdge: Bool {
+        guard let dataMinDate else { return false }
+        return xPosition.startOfPeriod(period) <= dataMinDate + TimeInterval(unitRange)
+    }
+
+    private var hasReachedLatestEdge: Bool {
+        guard let dataMaxDate else { return false }
+        let windowEnd = xPosition + TimeInterval(visibleRange * unitRange)
+        return windowEnd >= dataMaxDate - TimeInterval(unitRange)
+    }
+
+    // Swift Charts (BinningUnit) не поддерживает Calendar.Component.quarter — падает с
+    // "Component is not supported" при биннинге меток/осей. Наши квартальные точки уже
+    // выровнены по началу квартала (1 янв/апр/июл/окт), поэтому для целей отрисовки
+    // квартал можно безопасно подменить на .month — сама точка от этого не сдвигается.
+    private var chartUnit: Calendar.Component {
+        period.calendarComponent == .quarter ? .month : period.calendarComponent
+    }
+
     init(
         chartType: ChartType,
         period: ChartPeriod = .month,
         data: [Series],
         lastSelectedDate: Binding<Date>,
-        currency: Currency
+        visibleRange: Binding<Int>,
+        xPosition: Binding<Date>,
+        currency: Currency,
+        onExtendRangeEarlier: (() -> Void)? = nil,
+        onExtendRangeLater: (() -> Void)? = nil
     ) {
         self.chartType = chartType
         self.period = period
         self.data = data
         self._lastSelectedDate = lastSelectedDate
         self.currencyFormatter = CurrencyFormatter(currency: currency, withUnits: true)
-        self._visibleRange = State(initialValue: period.defaultVisibleRange)
-        self._xPosition = State(initialValue: Date.now.addingTimeInterval(
-            TimeInterval(-1 * period.secondsPerUnit * period.defaultVisibleRange)
-        ))
+        self._visibleRange = visibleRange
+        self._xPosition = xPosition
+        self.onExtendRangeEarlier = onExtendRangeEarlier
+        self.onExtendRangeLater = onExtendRangeLater
     }
     
     /// Диапазон дат, который должен учитываться при автоскейлинге: то, что видно на экране
@@ -92,7 +135,9 @@ struct Graph: View {
     }
 
     var maxSum: Double {
-        if chartType == .balance {
+        // Дельта считается так же, как баланс: может уходить в минус, и границы должны
+        // подстраиваться и снизу, и сверху (не просто от нуля).
+        if chartType == .balance || chartType == .balanceTotal || chartType == .delta {
             return balanceRangeBounds.max
         }
         var maxValue: Double = 0
@@ -124,7 +169,7 @@ struct Graph: View {
                 }
             }
 
-        case .balance:
+        case .balance, .balanceTotal, .delta:
             break
         }
         if maxValue == 0 {
@@ -133,11 +178,34 @@ struct Graph: View {
         return maxValue * 1.1
     }
 
-    /// Минимум нужен только для баланса — он может уходить в минус, и в отличие от
+    /// Минимум нужен для баланса и дельты — оба могут уходить в минус, и в отличие от
     /// доходов/расходов там нельзя просто отталкиваться от нуля.
     var minSum: Double {
-        guard chartType == .balance else { return 0 }
+        guard chartType == .balance || chartType == .balanceTotal || chartType == .delta else { return 0 }
         return balanceRangeBounds.min
+    }
+
+    /// Красит линию дельты по знаку значения: зелёная выше нуля, красная ниже. Строится как
+    /// вертикальный градиент с резким переходом ровно на позиции y=0 внутри текущего домена
+    /// (minSum...maxSum) — Charts применяет градиент в системе координат значений, а не
+    /// точек линии, поэтому цвет остаётся верным в любой точке independent от масштаба/скролла,
+    /// включая случаи с несколькими пересечениями нуля.
+    private var deltaZeroCrossingGradient: LinearGradient {
+        let range = maxSum - minSum
+        guard range > 0 else {
+            return LinearGradient(colors: [minSum >= 0 ? .green : .red], startPoint: .top, endPoint: .bottom)
+        }
+        let zeroLocation = min(max((maxSum - 0) / range, 0), 1)
+        return LinearGradient(
+            stops: [
+                .init(color: .green, location: 0),
+                .init(color: .green, location: zeroLocation),
+                .init(color: .red, location: zeroLocation),
+                .init(color: .red, location: 1)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
     }
 
     var body: some View {
@@ -148,26 +216,33 @@ struct Graph: View {
                         // Для столбчатого графика (баланс) нулевые точки не добавляют ничего
                         // визуально — не рисуем их вообще, чтобы не тратить память/время на
                         // лишние BarMark при большом количестве периодов.
-                        let seriesEntries = chartType == .balance
+                        let seriesEntries = (chartType == .balance || chartType == .balanceTotal)
                             ? series.data.filter { $0.value != 0 }
                             : series.data
                         ForEach(seriesEntries.sorted(by: >), id: \.key) { month, amount in
-                            if chartType == .earningsAndExpenses {
+                            if chartType == .delta {
                                 LineMark(
-                                    x: .value("Период", month, unit: period.calendarComponent),
+                                    x: .value("Период", month, unit: chartUnit),
                                     y: .value("Сумма", amount)
                                 )
                                 .lineStyle(.init(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                            } else if chartType == .balance {
+                                .foregroundStyle(deltaZeroCrossingGradient)
+                            } else if chartType == .earningsAndExpenses {
+                                LineMark(
+                                    x: .value("Период", month, unit: chartUnit),
+                                    y: .value("Сумма", amount)
+                                )
+                                .lineStyle(.init(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                            } else if chartType == .balance || chartType == .balanceTotal {
                                 // Накопительная площадь плохо читается с отрицательными значениями —
                                 // для баланса используем столбцы, которые могут уходить ниже нуля.
                                 BarMark(
-                                    x: .value("Период", month, unit: period.calendarComponent),
+                                    x: .value("Период", month, unit: chartUnit),
                                     y: .value("Сумма", amount)
                                 )
                             } else {
                                 AreaMark(
-                                    x: .value("Период", month, unit: period.calendarComponent),
+                                    x: .value("Период", month, unit: chartUnit),
                                     y: .value("Сумма", amount),
                                     stacking: .standard
                                 )
@@ -179,7 +254,7 @@ struct Graph: View {
                     }
                     
                     RuleMark(
-                        x: .value("Selected", lastSelectedDate, unit: period.calendarComponent)
+                        x: .value("Selected", lastSelectedDate, unit: chartUnit)
                     )
                     .foregroundStyle(Color.gray.opacity(0.3))
                     .offset(yStart: -10)
@@ -212,7 +287,9 @@ struct Graph: View {
                                     .dateTime.year(), centered: true)
                         }
                     case .quarter:
-                        AxisMarks(values: .stride(by: .quarter)) { _ in
+                        // Charts не умеет бинить по .quarter — данные и так лежат по началам
+                        // кварталов (1 янв/апр/июл/окт), поэтому просто шагаем по 3 месяца.
+                        AxisMarks(values: .stride(by: .month, count: 3)) { _ in
                             AxisTick()
                             AxisValueLabel(format: .dateTime.year().month(.abbreviated), centered: true)
                         }
@@ -233,25 +310,54 @@ struct Graph: View {
                         }
                     }
                 }
+                // Кнопки-"подгрузчики": показываются, только если вызывающий экран их передал
+                // (сейчас — только подневный график, у которого есть жёсткая граница
+                // загруженных данных), и только когда экран действительно доскроллен до края.
+                .overlay(alignment: .leading) {
+                    if let onExtendRangeEarlier, hasReachedEarliestEdge {
+                        Button(action: onExtendRangeEarlier) {
+                            Image(systemName: "chevron.left.circle.fill")
+                                .font(.title2)
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(.blue, Color(.systemBackground))
+                        }
+                        .padding(.leading, 4)
+                    }
+                }
+                .overlay(alignment: .trailing) {
+                    if let onExtendRangeLater, hasReachedLatestEdge {
+                        Button(action: onExtendRangeLater) {
+                            Image(systemName: "chevron.right.circle.fill")
+                                .font(.title2)
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(.blue, Color(.systemBackground))
+                        }
+                        .padding(.trailing, 4)
+                    }
+                }
                 if !data.isEmpty {
                     // Границы масштабирования не должны зависеть от количества точек в данных —
                     // иначе при малом количестве точек (например, у графика баланса) верхняя
                     // граница совпадает со стартовым значением, и кнопки перестают что-либо делать.
                     VStack {
-                        Button {
-                            if visibleRange > 2 {
-                                zoom(by: -1)
-                            }
-                        } label: {
-                            ScaleButton(imageName: "plus")
-                        }
-                        Button {
-                            if visibleRange < 120 {
-                                zoom(by: 1)
-                            }
-                        } label: {
-                            ScaleButton(imageName: "minus")
-                        }
+                        ScaleButton(imageName: "plus")
+                            .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { isPressing in
+                                if isPressing {
+                                    performZoomStep(direction: -1)
+                                    startZoomRepeat(direction: -1)
+                                } else {
+                                    stopZoomRepeat()
+                                }
+                            }, perform: {})
+                        ScaleButton(imageName: "minus")
+                            .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { isPressing in
+                                if isPressing {
+                                    performZoomStep(direction: 1)
+                                    startZoomRepeat(direction: 1)
+                                } else {
+                                    stopZoomRepeat()
+                                }
+                            }, perform: {})
                     }
                     .padding(.trailing, 25)
                     .padding(.bottom, 40)
@@ -280,6 +386,40 @@ struct Graph: View {
         let oldRightEdge = xPosition + TimeInterval(visibleRange * unitRange)
         visibleRange += delta
         xPosition = oldRightEdge - TimeInterval(visibleRange * unitRange)
+    }
+
+    private func performZoomStep(direction: Int) {
+        if direction < 0 {
+            if visibleRange > 2 {
+                zoom(by: -1)
+            }
+        } else {
+            if visibleRange < 120 {
+                zoom(by: 1)
+            }
+        }
+    }
+
+    /// Долгое удержание +/- зумит в ускоренном режиме: интервал между шагами сокращается
+    /// по мере удержания, вплоть до минимального.
+    private func startZoomRepeat(direction: Int) {
+        stopZoomRepeat()
+        scheduleNextZoomTick(direction: direction)
+    }
+
+    private func scheduleNextZoomTick(direction: Int) {
+        let interval = max(0.03, 0.35 - Double(zoomTickCount) * 0.03)
+        zoomTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
+            performZoomStep(direction: direction)
+            zoomTickCount += 1
+            scheduleNextZoomTick(direction: direction)
+        }
+    }
+
+    private func stopZoomRepeat() {
+        zoomTimer?.invalidate()
+        zoomTimer = nil
+        zoomTickCount = 0
     }
 }
 
