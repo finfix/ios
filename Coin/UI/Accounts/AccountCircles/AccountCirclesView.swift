@@ -24,13 +24,23 @@ struct AccountsTabView: View {
     let horizontalSpacing: CGFloat
     let minRows: Int?
     let maxRows: Int?
-    
+
+    @State private var pageSelection = 0
+    // Направление, в котором палец сейчас удерживается у края — используется, чтобы понять,
+    // не сменился ли край (или перетаскивание не закончилось) с прошлого срабатывания таймера.
+    @State private var edgePagingDirection: Int?
+    @State private var edgePagingTimer: Timer?
+
+    // Насколько близко к краю экрана (а не этого конкретного view — TabView и так на всю
+    // ширину) нужно удерживать перетаскиваемый счёт, чтобы запустить перелистывание.
+    private let edgeZoneWidth: CGFloat = 60
+
     var body: some View {
         GeometryReader { geometry in
             if geometry.size.width > 0 && geometry.size.height > 0 {
                 let itemWidth: CGFloat = 80
                 let itemHeight: CGFloat = 120
-                
+
                 let columnsCount = max(1, Int(geometry.size.width / (itemWidth + horizontalSpacing)))
                 let rowsCount = if let minRows {
                     max(minRows, Int(geometry.size.height / itemHeight))
@@ -39,14 +49,14 @@ struct AccountsTabView: View {
                 } else {
                     max(3, Int(geometry.size.height / itemHeight))
                 }
-                
+
                 let itemsPerPage = columnsCount * rowsCount
                 let pagesCount = max(1, Int(ceil(Double(accounts.count + 1) / Double(itemsPerPage))))
-                
+
                 let totalSpacing = geometry.size.width - (CGFloat(columnsCount) * itemWidth)
                 let evenSpacing = totalSpacing / CGFloat(columnsCount + 1)
-                
-                TabView {
+
+                TabView(selection: $pageSelection) {
                     ForEach(0..<pagesCount, id: \.self) { pageIndex in
                         VStack {
                             LazyVGrid(
@@ -56,24 +66,89 @@ struct AccountsTabView: View {
                                 let startIndex = pageIndex * itemsPerPage
                                 let endIndex = min(startIndex + itemsPerPage, accounts.count)
                                 let pageAccounts = accounts[startIndex..<endIndex]
-                                
+
                                 ForEach(pageAccounts) { account in
                                     DraggableAccountCircleItem(vm: $vm, accountGroup: accountGroup, account: account, path: $path)
                                 }
-                                
+
                                 if pageIndex == pagesCount - 1 {
                                     PlusNewAccount(accountType: accountType)
                                 }
                             }
                             Spacer()
                         }
+                        .tag(pageIndex)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
+                .onChange(of: vm.draggableLocation) { _, newLocation in
+                    handleEdgeAutoPaging(location: newLocation, pagesCount: pagesCount)
+                }
+                .onChange(of: pagesCount) { _, newValue in
+                    pageSelection = min(pageSelection, newValue - 1)
+                }
             } else {
                 Color.clear
             }
         }
+    }
+
+    // Какие типы счетов вообще можно принять как цель для текущего перетаскиваемого счёта —
+    // см. правила в AccountCirclesViewModel.updateDraggableLocation (earnings→regular,
+    // regular→regular/expense). Листать нужно только тот уровень, куда действительно можно
+    // уронить — иначе при переносе с "Доходов" на "Обычные" одновременно листались бы и
+    // "Расходы", хотя туда доходный счёт всё равно уронить нельзя.
+    private func isValidDropTargetRow(for draggableAccountType: AccountType) -> Bool {
+        switch draggableAccountType {
+        case .earnings: accountType == .regular
+        case .regular: accountType == .regular || accountType == .expense
+        case .expense, .debt, .balancing: false
+        }
+    }
+
+    // Перетаскиваемый счёт может понадобиться уронить на счёт с другой "страницы" пейджинга —
+    // без этого механизма перетаскивание работало только внутри одной видимой страницы, т.к.
+    // позиции счетов с других страниц (staticLocations) не регистрируются, пока страница не
+    // показана. Держим палец у края экрана — через паузу страница листается, и так повторно,
+    // пока палец не уйдёт от края или перетаскивание не закончится.
+    private func handleEdgeAutoPaging(location: CGPoint?, pagesCount: Int) {
+        guard let location, let draggableAccount = vm.draggableAccount, isValidDropTargetRow(for: draggableAccount.type) else {
+            stopEdgePaging()
+            return
+        }
+        let screenWidth = UIScreen.main.bounds.width
+        let direction: Int?
+        if location.x < edgeZoneWidth {
+            direction = -1
+        } else if location.x > screenWidth - edgeZoneWidth {
+            direction = 1
+        } else {
+            direction = nil
+        }
+
+        guard let direction else {
+            stopEdgePaging()
+            return
+        }
+        guard direction != edgePagingDirection else { return }
+
+        edgePagingDirection = direction
+        edgePagingTimer?.invalidate()
+        edgePagingTimer = Timer.scheduledTimer(withTimeInterval: 0.7, repeats: true) { _ in
+            Task { @MainActor in
+                let nextPage = pageSelection + direction
+                guard nextPage >= 0 && nextPage < pagesCount else { return }
+                withAnimation {
+                    pageSelection = nextPage
+                }
+            }
+        }
+    }
+
+    private func stopEdgePaging() {
+        edgePagingDirection = nil
+        edgePagingTimer?.invalidate()
+        edgePagingTimer = nil
     }
 }
 
