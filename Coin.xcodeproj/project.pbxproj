@@ -73,6 +73,10 @@
 		B54F3DB62BD57DBB00780460 /* EditTagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */; };
 		B557AA0E290D959F00631421 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557AA0D290D959F00631421 /* NetworkManager.swift */; };
 		B55EF9DD2BE2CFF5003C8882 /* Hasher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */; };
+		9CCBDBFD4683594A80A07546 /* TextDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4511A853879C02BB2E894A63 /* TextDiff.swift */; };
+		0818FB9AE3BBABAD663F6198 /* TextDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4511A853879C02BB2E894A63 /* TextDiff.swift */; };
+		C8FA42AFFF5E287E12C1DD1A /* DiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 861C1330E6CA566399615FD3 /* DiffView.swift */; };
+		9B7F46686F4BA766891B24F1 /* DiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 861C1330E6CA566399615FD3 /* DiffView.swift */; };
 		B5610EFD28FC98B50063AFEB /* TransactionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610EFC28FC98B50063AFEB /* TransactionModels.swift */; };
 		B5610F0428FC9A420063AFEB /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5610F0328FC9A420063AFEB /* APIManager.swift */; };
 		B562CB162C70D2F600AFB056 /* CarouselDatePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB152C70D2F600AFB056 /* CarouselDatePicker.swift */; };
@@ -367,6 +371,8 @@
 		B54F3DB52BD57DBB00780460 /* EditTagViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTagViewModel.swift; sourceTree = "<group>"; };
 		B557AA0D290D959F00631421 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hasher.swift; sourceTree = "<group>"; };
+		4511A853879C02BB2E894A63 /* TextDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextDiff.swift; sourceTree = "<group>"; };
+		861C1330E6CA566399615FD3 /* DiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffView.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
 		B5610F0328FC9A420063AFEB /* APIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIManager.swift; sourceTree = "<group>"; };
 		B562CB152C70D2F600AFB056 /* CarouselDatePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarouselDatePicker.swift; sourceTree = "<group>"; };
@@ -799,6 +805,7 @@
 				B54DA3A72BBD7EE9008A9FD1 /* GetMonthPeriodFromDate.swift */,
 				B54DA3A92BBD81D9008A9FD1 /* StripTime.swift */,
 				B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */,
+				4511A853879C02BB2E894A63 /* TextDiff.swift */,
 				B5038AF42C3EC915003FA6C0 /* JWTChecker.swift */,
 			);
 			path = Pkg;
@@ -971,6 +978,7 @@
 				178FF8D254203101E59A7987 /* Calculator */,
 				46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */,
 				D92BCD6DBA4CCC7E58CADDDD /* CopyToast.swift */,
+				861C1330E6CA566399615FD3 /* DiffView.swift */,
 			);
 			name = Components;
 			path = Components;
@@ -1106,6 +1114,8 @@
 				B5DEFCDD2C07015A001D7E61 /* EditTag.swift in Sources */,
 				B5DEFCDE2C07015A001D7E61 /* AccountGroupDB.swift in Sources */,
 				B5DEFCDF2C07015A001D7E61 /* Hasher.swift in Sources */,
+				9CCBDBFD4683594A80A07546 /* TextDiff.swift in Sources */,
+				C8FA42AFFF5E287E12C1DD1A /* DiffView.swift in Sources */,
 				B5DEFCE02C07015A001D7E61 /* AccountModels.swift in Sources */,
 				B562CB552C71E2FF00AFB056 /* AuthService.swift in Sources */,
 				B5DEFCE12C07015A001D7E61 /* ChartView.swift in Sources */,
@@ -1256,6 +1266,8 @@
 				B54F3DB42BD57D8900780460 /* EditTag.swift in Sources */,
 				B51CE1F22BAC403800682D48 /* AccountGroupDB.swift in Sources */,
 				B55EF9DD2BE2CFF5003C8882 /* Hasher.swift in Sources */,
+				0818FB9AE3BBABAD663F6198 /* TextDiff.swift in Sources */,
+				9B7F46686F4BA766891B24F1 /* DiffView.swift in Sources */,
 				B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */,
 				B50DBAD72BCD8CD900A58B53 /* ChartView.swift in Sources */,
 				B562CB562C71E2FF00AFB056 /* AuthService.swift in Sources */,

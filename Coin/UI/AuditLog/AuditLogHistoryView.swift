@@ -88,15 +88,18 @@ private struct AuditLogDetails: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            if let before = log.snapshotBeforePretty {
-                Section(header: Text("До изменения")) {
+            if let before = log.snapshotBeforePretty, let after = log.snapshotAfterPretty {
+                Section(header: Text("Изменения")) {
+                    DiffView(old: before, new: after)
+                }
+            } else if let before = log.snapshotBeforePretty {
+                Section(header: Text("Слепок до удаления")) {
                     Text(before)
                         .font(.system(.footnote, design: .monospaced))
                         .copyableOnTap(before)
                 }
-            }
-            if let after = log.snapshotAfterPretty {
-                Section(header: Text("После изменения")) {
+            } else if let after = log.snapshotAfterPretty {
+                Section(header: Text("Слепок после создания")) {
                     Text(after)
                         .font(.system(.footnote, design: .monospaced))
                         .copyableOnTap(after)
