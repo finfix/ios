@@ -228,3 +228,27 @@ extension Account {
         return accountsContainer.sorted { $0.rank < $1.rank }
     }
 }
+
+extension Account {
+    /// Доля бюджета (0...1), которая должна быть потрачена к дню `today` при постепенном
+    /// заполнении бюджета — тот же расчёт, что и офсет текущего дня на BudgetBar (см.
+    /// offsetForLine/width там), но выраженный как доля, а не в пикселях, чтобы им могли
+    /// пользоваться и BudgetBar, и кружок счета на главном экране.
+    func expectedSpentFraction(today: Int, daysInMonth: Int) -> CGFloat {
+        guard showingBudgetAmount != 0 else { return 0 }
+
+        if budgetFixedSum != 0 {
+            let daysOffset = budgetDaysOffset == 0 ? 1 : budgetDaysOffset
+            let fixedFraction = CGFloat(budgetFixedSum.doubleValue / showingBudgetAmount.doubleValue)
+
+            if budgetDaysOffset != 0, today <= budgetDaysOffset {
+                return fixedFraction / CGFloat(daysOffset) * CGFloat(today)
+            }
+
+            let leftFraction = (1 - fixedFraction) / CGFloat(daysInMonth - Int(budgetDaysOffset))
+            return fixedFraction + leftFraction * CGFloat(today - Int(budgetDaysOffset))
+        }
+
+        return CGFloat(today) / CGFloat(daysInMonth)
+    }
+}

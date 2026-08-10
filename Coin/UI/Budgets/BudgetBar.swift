@@ -30,14 +30,7 @@ struct BudgetBar: View {
     }
     
     var offsetForLine: CGFloat {
-        if account.budgetFixedSum != 0 {
-            if account.budgetDaysOffset != 0, today <= account.budgetDaysOffset {
-                return partWidthFixed * CGFloat(today)
-            }
-            let daysOffset = account.budgetDaysOffset == 0 ? 1 : account.budgetDaysOffset
-            return partWidthFixed * CGFloat(daysOffset) + partWidthLeft * CGFloat(today-Int(account.budgetDaysOffset))
-        }
-        return partWidthLeft * CGFloat(today)
+        account.expectedSpentFraction(today: today, daysInMonth: daysInMonth) * width
     }
     
     var body: some View {

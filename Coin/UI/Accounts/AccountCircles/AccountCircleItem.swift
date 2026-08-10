@@ -50,11 +50,19 @@ struct AccountCircleItemCircle: View {
                     endPoint: .bottom
                 )
             case account.showingBudgetAmount >= account.showingRemainder:
-                
+
                 let fillingCoef = CGFloat((account.showingRemainder / account.showingBudgetAmount).doubleValue)
-                
+
+                // Если бюджет со постепенным заполнением и уже потрачено больше, чем
+                // полагается на сегодняшний день — заполняем не зеленым, а желтым
+                // (та же логика, что и на странице бюджетов, см. BudgetBar).
+                let daysInMonth = Calendar.current.range(of: .day, in: .month, for: Date())!.count
+                let today = Calendar.current.component(.day, from: Date())
+                let isOverTodaysBudget = account.budgetGradualFilling
+                    && fillingCoef > account.expectedSpentFraction(today: today, daysInMonth: daysInMonth)
+
                 return LinearGradient(
-                    gradient: Gradient(colors: [.gray, .green]),
+                    gradient: Gradient(colors: [.gray, isOverTodaysBudget ? .yellow : .green]),
                     startPoint: .init(x: 0.5, y: 1 - fillingCoef),
                     endPoint: .init(x: 0.5, y: 1 - fillingCoef + 0.01)
                 )
