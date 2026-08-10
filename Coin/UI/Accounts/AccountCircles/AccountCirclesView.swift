@@ -65,11 +65,13 @@ struct AccountsTabView: View {
                             ) {
                                 let startIndex = pageIndex * itemsPerPage
                                 let endIndex = min(startIndex + itemsPerPage, accounts.count)
-                                let pageAccounts = accounts[startIndex..<endIndex]
+                                let pageAccounts = Array(accounts[startIndex..<endIndex])
+                                let displayedAccounts = liveReorderedAccounts(pageAccounts, itemsPerPage: itemsPerPage)
 
-                                ForEach(pageAccounts) { account in
+                                ForEach(displayedAccounts) { account in
                                     DraggableAccountCircleItem(vm: $vm, accountGroup: accountGroup, account: account, path: $path)
                                 }
+                                .animation(.spring(response: 0.35, dampingFraction: 0.75), value: displayedAccounts.map(\.id))
 
                                 if pageIndex == pagesCount - 1 {
                                     PlusNewAccount(accountType: accountType)
@@ -84,6 +86,9 @@ struct AccountsTabView: View {
                 .onChange(of: vm.draggableLocation) { _, newLocation in
                     handleEdgeAutoPaging(location: newLocation, pagesCount: pagesCount)
                 }
+                .onChange(of: vm.reorderDraggableLocation) { _, newLocation in
+                    handleEdgeAutoPaging(location: newLocation, pagesCount: pagesCount)
+                }
                 .onChange(of: pagesCount) { _, newValue in
                     pageSelection = min(pageSelection, newValue - 1)
                 }
@@ -91,6 +96,55 @@ struct AccountsTabView: View {
                 Color.clear
             }
         }
+    }
+
+    // Живой предпросмотр перестановки: пока счёт перетаскивается внутри этой же страницы,
+    // остальные кружки визуально "расступаются" — переставляем перетаскиваемый счёт рядом
+    // с текущей целью в том же массиве, который рендерит сетка. Как только меняется порядок,
+    // ForEach (см. .animation(value: displayedAccounts.map(\.id)) выше) сам анимирует сдвиг.
+    // Сам перетаскиваемый кружок в этом массиве остаётся (чтобы сетка не схлопывалась), но
+    // визуально скрыт (opacity 0 в DraggableAccountCircleItem) — на экране вместо него летит
+    // отдельный "призрак" под пальцем (см. AccountCirclesView).
+    private func liveReorderedAccounts(_ pageAccounts: [Account], itemsPerPage: Int) -> [Account] {
+        guard vm.isEditMode,
+              let dragged = vm.reorderDraggableAccount,
+              dragged.type == accountType,
+              let target = vm.reorderTargetAccount,
+              dragged.id != target.id,
+              let originalTargetIndex = pageAccounts.firstIndex(where: { $0.id == target.id }) else {
+            return pageAccounts
+        }
+
+        var result = pageAccounts
+        // Перетаскиваемый счёт может быть с ДРУГОЙ страницы — например, после автолистания
+        // краем экрана во время перестановки. В этом случае его просто нет в pageAccounts,
+        // и его нужно не убирать, а сразу "вставить", подвинув счета этой страницы.
+        let draggedIndexOnThisPage = result.firstIndex(where: { $0.id == dragged.id })
+        let movingForward: Bool
+        if let draggedIndexOnThisPage {
+            movingForward = draggedIndexOnThisPage < originalTargetIndex
+            result.remove(at: draggedIndexOnThisPage)
+        } else {
+            let sameTypeSorted = vm.accounts.filter { $0.type == accountType }.sorted { $0.rank < $1.rank }
+            let draggedGlobalIndex = sameTypeSorted.firstIndex(where: { $0.id == dragged.id }) ?? 0
+            let targetGlobalIndex = sameTypeSorted.firstIndex(where: { $0.id == target.id }) ?? 0
+            movingForward = draggedGlobalIndex < targetGlobalIndex
+        }
+
+        guard let targetIndexAfterRemoval = result.firstIndex(where: { $0.id == target.id }) else {
+            return pageAccounts
+        }
+        let insertIndex = movingForward ? targetIndexAfterRemoval + 1 : targetIndexAfterRemoval
+        result.insert(dragged, at: min(insertIndex, result.count))
+
+        // Вставка счёта с другой страницы может раздуть массив сверх itemsPerPage — тогда
+        // LazyVGrid просто заворачивает лишний элемент на вторую строку (особенно заметно
+        // в однорядных секциях вроде "Доходы"). Нужно, чтобы последний счёт вместо этого
+        // "убегал" за пределы страницы, поэтому обрезаем до итогового лимита.
+        if result.count > itemsPerPage {
+            result.removeLast(result.count - itemsPerPage)
+        }
+        return result
     }
 
     // Какие типы счетов вообще можно принять как цель для текущего перетаскиваемого счёта —
@@ -112,7 +166,18 @@ struct AccountsTabView: View {
     // показана. Держим палец у края экрана — через паузу страница листается, и так повторно,
     // пока палец не уйдёт от края или перетаскивание не закончится.
     private func handleEdgeAutoPaging(location: CGPoint?, pagesCount: Int) {
-        guard let location, let draggableAccount = vm.draggableAccount, isValidDropTargetRow(for: draggableAccount.type) else {
+        // Тот же механизм нужен и для перестановки счетов местами (режим редактирования) —
+        // там своп разрешён только внутри одной секции, поэтому листаем только ту страницу,
+        // чей accountType совпадает с типом перетаскиваемого счёта.
+        let isValidRow: Bool
+        if let reorderAccount = vm.reorderDraggableAccount {
+            isValidRow = reorderAccount.type == accountType
+        } else if let draggableAccount = vm.draggableAccount {
+            isValidRow = isValidDropTargetRow(for: draggableAccount.type)
+        } else {
+            isValidRow = false
+        }
+        guard let location, isValidRow else {
             stopEdgePaging()
             return
         }
@@ -140,6 +205,15 @@ struct AccountsTabView: View {
                 guard nextPage >= 0 && nextPage < pagesCount else { return }
                 withAnimation {
                     pageSelection = nextPage
+                }
+                // Цель при перестановке ищется по замороженному снимку (см.
+                // AccountCirclesViewModel) — после перелистывания нужно подмешать в него
+                // позиции только что появившихся там счетов, иначе отпустить перетаскиваемый
+                // счёт на них будет невозможно. Ждём, пока новая страница отрисуется и
+                // зарегистрирует свои позиции через GeometryReader/preference.
+                if vm.reorderDraggableAccount != nil {
+                    try? await Task.sleep(nanoseconds: 200_000_000)
+                    vm.mergeIntoReorderReferenceLocations()
                 }
             }
         }
@@ -275,9 +349,19 @@ struct AccountCirclesView: View {
                         ForEach(Array(vm.staticLocations.keys), id: \.self) { accountID in
                             if let point = vm.staticLocations[accountID] {
                                 let name = allAccounts.first(where: { $0.id == accountID })?.name ?? accountID.uuidString.prefix(8).description
+                                // Зелёный — сейчас это reorderTargetAccount (то, с кем реально
+                                // произойдёт своп при отпускании), синий — сам перетаскиваемый
+                                // счёт (его позиция уже не актуальна, кружок скрыт), красный —
+                                // все остальные зарегистрированные позиции.
+                                let isTarget = vm.reorderTargetAccount?.id == accountID
+                                let isDragged = vm.reorderDraggableAccount?.id == accountID
+                                let markerColor: Color = isTarget ? .green : (isDragged ? .blue : .red)
                                 ZStack {
                                     Circle()
-                                        .fill(Color.red.opacity(0.35))
+                                        .fill(markerColor.opacity(0.35))
+                                        .frame(width: 60, height: 60)
+                                    Circle()
+                                        .strokeBorder(markerColor, lineWidth: isTarget ? 3 : 1)
                                         .frame(width: 60, height: 60)
                                     Text(name)
                                         .font(.system(size: 8, weight: .bold))
@@ -291,6 +375,70 @@ struct AccountCirclesView: View {
                                 ))
                                 .allowsHitTesting(false)
                             }
+                        }
+
+                        // Радиус, в котором вообще ищутся кандидаты на цель (triggerZone) —
+                        // рисуется вокруг текущей позиции пальца при перестановке.
+                        if let reorderLocation = vm.reorderDraggableLocation {
+                            Circle()
+                                .strokeBorder(Color.yellow.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [4, 4]))
+                                .frame(width: vm.triggerZone * 2, height: vm.triggerZone * 2)
+                                .position(CGPoint(
+                                    x: reorderLocation.x,
+                                    y: reorderLocation.y - geometry.safeAreaInsets.top
+                                ))
+                                .allowsHitTesting(false)
+                        }
+
+                        // Точка, где система СЕЙЧАС считает палец при перестановке — сверяем
+                        // с местом реального (visible) призрака-кружка ниже. Если они всегда
+                        // совпадают в момент отрисовки, значит "перемещается через одну" — не
+                        // про рассинхрон местоположения самого пальца, а про то, что onChanged
+                        // у DragGesture в принципе не гарантирует событие на КАЖДЫЙ пиксель
+                        // движения (шлёт с частотой сэмплирования тача, обычно ~60–120 Гц, но
+                        // не более одного события за кадр рендера) — на глаз можно решить, что
+                        // "прыгает через раз", хотя на деле рисуется каждое полученное значение.
+                        if let reorderLocation = vm.reorderDraggableLocation {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.cyan.opacity(0.5))
+                                    .frame(width: 40, height: 40)
+                                Text("👻")
+                                    .font(.system(size: 16))
+                            }
+                            .position(CGPoint(
+                                x: reorderLocation.x,
+                                y: reorderLocation.y - geometry.safeAreaInsets.top
+                            ))
+                            .allowsHitTesting(false)
+                        }
+
+                        // Табличка с числами последней итерации updateReorderDraggableLocation,
+                        // плавающая прямо НАД пальцем (а не в фиксированном месте экрана) —
+                        // чтобы не приходилось переводить взгляд туда-сюда между пальцем и HUD.
+                        // Показывает: лучший кандидат сейчас и расстояние до него, прежняя цель
+                        // и расстояние до неё, порог гистерезиса, и сменилась ли цель именно
+                        // в этом кадре.
+                        if let reorderLocation = vm.reorderDraggableLocation, let snapshot = vm.reorderDebugSnapshot {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("best: \(snapshot.bestCandidateName ?? "—")  \(snapshot.bestCandidateDistance.map { String(format: "%.0f", $0) } ?? "—")pt")
+                                Text("target: \(snapshot.currentTargetName ?? "—")  \(snapshot.currentTargetDistance.map { String(format: "%.0f", $0) } ?? "—")pt")
+                                Text("hysteresis: \(Int(vm.reorderHysteresis))pt · zone: \(Int(vm.triggerZone))pt")
+                                if snapshot.targetChanged {
+                                    Text("→ ЦЕЛЬ СМЕНИЛАСЬ")
+                                        .foregroundStyle(.yellow)
+                                }
+                            }
+                            .font(.system(size: 10, weight: .medium, design: .monospaced))
+                            .foregroundStyle(.white)
+                            .padding(6)
+                            .background(Color.black.opacity(0.75), in: RoundedRectangle(cornerRadius: 6))
+                            .fixedSize()
+                            .position(CGPoint(
+                                x: min(max(reorderLocation.x, 90), geometry.size.width - 90),
+                                y: reorderLocation.y - geometry.safeAreaInsets.top - 70
+                            ))
+                            .allowsHitTesting(false)
                         }
                     }
 
@@ -313,6 +461,34 @@ struct AccountCirclesView: View {
                                 x: draggableLocation.x,
                                 y: draggableLocation.y - geometry.safeAreaInsets.top
                             ))
+                    }
+
+                    // "Призрак" перетаскиваемого в режиме редактирования счёта — летит прямо
+                    // за пальцем, пока сетка под ним (см. liveReorderedAccounts) уже показывает,
+                    // куда он встанет после отпускания.
+                    if let reorderLocation = vm.reorderDraggableLocation, let reorderAccount = vm.reorderDraggableAccount {
+                        // AccountCircleItemCircle сама фиксирует только высоту (60) — обычно её
+                        // ширину неявно задаёт containing VStack(width: 80). Если тут задать
+                        // несимметричный внешний .frame (например, 70x70), внутренняя
+                        // Circle().frame(height: 60) получает предложение по ширине от НАШЕГО
+                        // фрейма и рисуется овалом (70×60), а не кругом — отсюда видимое
+                        // смещение "мимо пальца". Даём квадратный фрейм, совпадающий с её
+                        // реальным диаметром.
+                        AccountCircleItemCircle(account: reorderAccount)
+                            .frame(width: 60, height: 60)
+                            .scaleEffect(1.15)
+                            .shadow(color: .black.opacity(0.35), radius: 10)
+                            .position(CGPoint(
+                                x: reorderLocation.x,
+                                y: reorderLocation.y - geometry.safeAreaInsets.top
+                            ))
+                            // Позиция призрака всегда должна прыгать мгновенно вслед за пальцем —
+                            // без этого она наследует ambient-анимацию от withAnimation вокруг
+                            // смены pageSelection при автолистании и на время слайда страницы
+                            // визуально "отстаёт" от реального пальца, догоняя только к концу
+                            // анимации перехода.
+                            .animation(nil, value: reorderLocation)
+                            .allowsHitTesting(false)
                     }
                 }
             }

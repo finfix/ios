@@ -110,12 +110,6 @@ class Repository {
         }
     }
     
-    func createAccountAndReturn(_ account: Account) async throws -> Account {
-        try await sqlite.write { db in
-            let account = try AccountDB(account).insertAndFetch(db)
-            return Account(account, currenciesMap: nil, accountGroupsMap: nil, iconsMap: nil)
-        }
-    }
     
     func updateAccount(_ account: Account) async throws {
         try await sqlite.write { db in

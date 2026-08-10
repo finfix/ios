@@ -278,10 +278,10 @@ extension Service {
         }
         
         // Создаем дочерний балансировочный счет локально
-        let balancingAccount = try await repository.createAccountAndReturn(Account(
+        let balancingAccount = Account(
             accountingInHeader: true,
             accountingInCharts: true,
-            icon: Icon(id: UUID(uuid: UUID_NULL)),
+            icon: parentBalancingAccount.icon,
             name: "Балансировочный",
             remainder: 0,
             type: .balancing,
@@ -297,7 +297,8 @@ extension Service {
             accountGroup: account.accountGroup,
             currency: account.currency,
             childrenAccounts: []
-        ))
+        )
+        try await repository.createAccount(balancingAccount)
         
         // Синхронизируем создание балансировочного счета с сервером
         taskManager.createTask(

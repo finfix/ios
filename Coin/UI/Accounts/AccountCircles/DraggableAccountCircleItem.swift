@@ -93,14 +93,23 @@ struct DraggableAccountCircleItem: View {
                     .gesture(
                         DragGesture(coordinateSpace: .global)
                             .onChanged { state in
-                                guard !vm.isEditMode, account.type != .balancing && account.type != .expense else { return }
+                                if vm.isEditMode {
+                                    // В режиме редактирования тот же жест "отклеивает" счёт
+                                    // и позволяет поменять его местами с другим.
+                                    vm.updateReorderDraggableLocation(location: state.location, for: account)
+                                    return
+                                }
+                                guard account.type != .balancing && account.type != .expense else { return }
                                 vm.updateDraggableLocation(
                                     location: state.location,
                                     for: account
                                 )
                             }
                             .onEnded { state in
-                                guard !vm.isEditMode else { return }
+                                if vm.isEditMode {
+                                    Task { await vm.confirmReorder() }
+                                    return
+                                }
                                 confirmDraggableDrop(for: account)
                                 if isAlreadyOpened {
                                     dismiss()
@@ -165,6 +174,10 @@ struct DraggableAccountCircleItem: View {
             }
             .rotationEffect(.degrees(jiggleRotation))
             .opacity(vm.isHighligted(for: account) ? 0.6 : 1)
+            // Сам оригинальный кружок прячем (но не удаляем — жест на нём должен дожить до
+            // конца перетаскивания), пока за пальцем летит его "призрак" в AccountCirclesView.
+            .opacity(vm.reorderDraggableAccount?.id == account.id ? 0 : 1)
+            .animation(.easeOut(duration: 0.15), value: vm.reorderDraggableAccount?.id == account.id)
             AccountCircleItemFooter(account: account)
         }
         .frame(width: 80)
@@ -174,6 +187,14 @@ struct DraggableAccountCircleItem: View {
         }
         .onChange(of: vm.isEditMode) { _, _ in
             startJiggleIfNeeded()
+        }
+        .onDisappear {
+            // staticLocations раньше только пополнялся и никогда не чистился — когда счёт
+            // уходит со страницы (перелистывание TabView выгружает её из памяти), его
+            // последняя известная позиция навсегда "застревала" в словаре и могла случайно
+            // совпасть по координатам с каким-то другим (реально видимым сейчас) счётом,
+            // из-за чего hit-test при перестановке иногда попадал не туда.
+            vm.staticLocations.removeValue(forKey: account.id)
         }
         .popover(isPresented: $isChildrenOpen) {
             ScrollView(.horizontal) {

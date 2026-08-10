@@ -299,12 +299,15 @@
 		B5FFB96630265DA700307D05 /* CurrencyPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FFB96530265DA700307D05 /* CurrencyPicker.swift */; };
 		B5FFB96730265DA700307D05 /* CurrencyPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FFB96530265DA700307D05 /* CurrencyPicker.swift */; };
 		B8152E709AED309F0777CEFF /* CopyableIDText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */; };
+		C5749B9090CF1295A32548F0 /* CopyToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92BCD6DBA4CCC7E58CADDDD /* CopyToast.swift */; };
+		75EDEA17CAF4E4DB9DCE7C94 /* CopyToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = D92BCD6DBA4CCC7E58CADDDD /* CopyToast.swift */; };
 		CC6E1F09B771C086A225F83E /* CalculatorKeypad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735D64AA0AB4EAC878339270 /* CalculatorKeypad.swift */; };
 		D3EA9B8AB10B0516E5DEA3E9 /* CopyableIDText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CopyableIDText.swift; sourceTree = "<group>"; };
+		D92BCD6DBA4CCC7E58CADDDD /* CopyToast.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CopyToast.swift; sourceTree = "<group>"; };
 		735D64AA0AB4EAC878339270 /* CalculatorKeypad.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CalculatorKeypad.swift; path = CalculatorKeypad.swift; sourceTree = "<group>"; };
 		8BB2AB01AFE2D8CE38A0A20A /* Rank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rank.swift; sourceTree = "<group>"; };
 		9906CB2308AAEDDA966D1CB4 /* ChartFullScreenView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChartFullScreenView.swift; sourceTree = "<group>"; };
@@ -935,6 +938,7 @@
 			children = (
 				178FF8D254203101E59A7987 /* Calculator */,
 				46EC7513A4654D28E18A8B2B /* CopyableIDText.swift */,
+				D92BCD6DBA4CCC7E58CADDDD /* CopyToast.swift */,
 			);
 			name = Components;
 			path = Components;
@@ -1200,6 +1204,7 @@
 				8283F591BA0823F86A679B31 /* CalculatorField.swift in Sources */,
 				1E13AB8FCAE5AC1DE3D5F5D6 /* AccountSelectorField.swift in Sources */,
 				D3EA9B8AB10B0516E5DEA3E9 /* CopyableIDText.swift in Sources */,
+				75EDEA17CAF4E4DB9DCE7C94 /* CopyToast.swift in Sources */,
 				16A4C2ADE2B923596104165D /* ChartFullScreenView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1344,6 +1349,7 @@
 				3F63E099800339504F53AC06 /* CalculatorField.swift in Sources */,
 				8CCB3410542A225354DFE02C /* AccountSelectorField.swift in Sources */,
 				B8152E709AED309F0777CEFF /* CopyableIDText.swift in Sources */,
+				C5749B9090CF1295A32548F0 /* CopyToast.swift in Sources */,
 				52AFF0003A53E408BBC65193 /* ChartFullScreenView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

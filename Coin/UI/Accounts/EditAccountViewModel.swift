@@ -24,6 +24,7 @@ class EditAccountViewModel {
     var accounts: [Account] = []
     
     var currentAccount = Account()
+    @ObservationIgnored private var hasLoadedDefaults = false
     var remainder: Double {
         didSet {
             currentAccount.remainder = Decimal(floatLiteral: remainder)
@@ -76,13 +77,17 @@ class EditAccountViewModel {
             visible = true
         }
         accounts = try await service.getAccounts(visible: visible, types: [currentAccount.type])
-        if mode == .create {
+        // Валюту/иконку по умолчанию проставляем только при первой загрузке — иначе load()
+        // (который заново вызывается из .task при каждом возврате с других экранов формы,
+        // например из CurrencyPicker) стирал бы уже выбранную пользователем валюту.
+        if mode == .create && !hasLoadedDefaults {
             currentAccount.currency = currencies.first(where: { accountGroup.currency.code == $0.code }) ?? currencies.first ?? Currency()
 
             if let icon = icons.first {
                 currentAccount.icon = icon
             }
         }
+        hasLoadedDefaults = true
     }
     
     func createAccount() async throws {

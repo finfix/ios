@@ -247,9 +247,6 @@ struct EditAccount: View {
         .task {
             do {
                 try await vm.load(accountGroup: selectedAccountGroup)
-                if vm.mode == .create && vm.currentAccount.currency != Currency() {
-                    vm.currentAccount.currency = vm.currencies.first(where: { $0 == selectedAccountGroup.currency }) ?? Currency()
-                }
                 if let initialParentAccountID {
                     vm.currentAccount.parentAccountID = initialParentAccountID
                 }

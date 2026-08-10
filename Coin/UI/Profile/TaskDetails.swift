@@ -76,11 +76,14 @@ struct TaskDetails: View {
                 }
             }
             Section(header: Text("Параметры")) {
-                Text(String(data: vm.task.fieldsJSON, encoding: .utf8) ?? "NULL")
+                let parametersText = String(data: vm.task.fieldsJSON, encoding: .utf8) ?? "NULL"
+                Text(parametersText)
+                    .copyableOnTap(parametersText)
             }
             Section(header: Text("Ошибка")) {
                 HStack {
                     Text(vm.task.error ?? "")
+                        .copyableOnTap(vm.task.error ?? "")
                 }
             }
         }
