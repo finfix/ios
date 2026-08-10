@@ -70,6 +70,7 @@ extension APIManager {
         
         let request = Tag_CreateTagRequest.with {
             $0.accessToken = accessToken
+            $0.id = req.id.data
             $0.name = req.name
             $0.accountGroupID = req.accountGroupID.data
             $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)

@@ -48,6 +48,7 @@ extension APIManager {
         
         let request = AccountGroup_CreateAccountGroupRequest.with {
             $0.accessToken = accessToken
+            $0.id = req.id.data
             $0.name = req.name
             $0.currency = req.currency
             $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)

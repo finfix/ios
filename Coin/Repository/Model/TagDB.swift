@@ -77,9 +77,10 @@ struct TagDB {
             if serverModel.accountGroupID != localModels[i].accountGroupID {
                 difference["accountGroupID"] = (server: serverModel.accountGroupID, local: localModels[i].accountGroupID)
             }
-//            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
-//                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
-//            }
+            // Допуск в 1с — см. пояснение в TransactionDB.compareTwoArrays.
+            if abs(serverModel.datetimeCreate.timeIntervalSince(localModels[i].datetimeCreate)) > 1 {
+                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
+            }
             if !difference.isEmpty {
                 differences[serverModel.id!] = difference
             }

@@ -101,9 +101,13 @@ struct TransactionDB {
             if serverModel.type != localModels[i].type {
                 difference["type"] = (server: serverModel.type, local: localModels[i].type)
             }
-//            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
-//                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
-//            }
+            // Сравниваем с допуском в 1с — round-trip через Google_Protobuf_Timestamp
+            // (seconds + nanos, вычисляемые через floating point) может давать
+            // субмиллисекундный дрейф, из-за которого строгое `!=` ложно срабатывало бы
+            // всегда.
+            if abs(serverModel.datetimeCreate.timeIntervalSince(localModels[i].datetimeCreate)) > 1 {
+                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
+            }
             if serverModel.accountFromId != localModels[i].accountFromId {
                 difference["accountFromId"] = (server: serverModel.accountFromId, local: localModels[i].accountFromId)
             }

@@ -20,6 +20,7 @@ extension Service {
         taskManager.createTask(
             actionName: .createAccountGroup,
             reqModel: CreateAccountGroupReq(
+                id: accountGroup.id,
                 name: accountGroup.name,
                 currency: accountGroup.currency.code,
                 datetimeCreate: accountGroup.datetimeCreate

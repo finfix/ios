@@ -228,40 +228,48 @@ class Repository {
         }
     }
     
+    // Считает только невыполненные таски — используется как гейт перед операциями,
+    // которым нужно дождаться окончания фоновой синхронизации (см. compareLocalAndServerData).
     func getCountTasks() async throws -> UInt32 {
         try await sqlite.read { db in
-            return UInt32(try SyncTaskDB.fetchCount(db))
+            return UInt32(try SyncTaskDB.filter(!SyncTaskDB.Columns.completed).fetchCount(db))
         }
     }
-    
-    func deleteTasks(
+
+    // Помечает таски выполненными вместо физического удаления — так их можно показать
+    // в списке по переключателю "Показать выполненные" вместо безвозвратной потери истории.
+    func completeTasks(
         ids: [UUID]? = nil
     ) async throws {
         try await sqlite.write { db in
-                                    
+
             var request = SyncTaskDB.filter(SyncTaskDB.Columns.id != 0)
             if let ids {
                 request = request.filter(ids.contains(SyncTaskDB.Columns.id))
             }
-            
-            _ = try request.deleteAll(db)
+
+            _ = try request.updateAll(db, SyncTaskDB.Columns.completed.set(to: true))
         }
     }
-    
+
     func getSyncTasks(
         ids: [UUID]? = nil,
-        limit: UInt32? = nil
+        limit: UInt32? = nil,
+        includeCompleted: Bool = false
     ) async throws -> [SyncTask] {
         try await sqlite.read { db in
-            
+
             var request = SyncTaskDB
                 .order(SyncTaskDB.Columns.datetimeCreate)
-                .filter(SyncTaskDB.Columns.enabled)
-            
+
+            if !includeCompleted {
+                request = request.filter(!SyncTaskDB.Columns.completed)
+            }
+
             if let limit {
                 request = request.limit(Int(limit))
             }
-            
+
             if let ids {
                 request = request.filter(ids.contains(SyncTaskDB.Columns.id))
             }

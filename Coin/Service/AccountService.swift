@@ -256,6 +256,65 @@ extension Service {
         }
     }
     
+    // Создаёт родительский балансировочный счет для группы счетов, если его почему-то ещё
+    // нет (например, группа была создана раньше, чем появилась логика его автосоздания,
+    // либо создание таски на бэк ранее не долетело). Currency у родительского счета не
+    // используется при поиске (isParent: true не фильтруется по currencyCode), поэтому
+    // берём валюту группы счетов просто как разумное значение по умолчанию.
+    private func createParentBalancingAccount(for accountGroup: AccountGroup) async throws -> Account {
+        guard let icon = try await getIcons().first else {
+            throw ErrorModel(humanText: "Не смогли найти иконку для родительского балансировочного счета")
+        }
+
+        let parentBalancingAccount = Account(
+            accountingInHeader: false,
+            accountingInCharts: false,
+            icon: icon,
+            name: "Балансировочный",
+            remainder: 0,
+            type: .balancing,
+            visible: true,
+            rank: try await nextRank(in: accountGroup),
+            isParent: true,
+            budgetAmount: 0,
+            showingBudgetAmount: 0,
+            budgetFixedSum: 0,
+            budgetDaysOffset: 0,
+            budgetGradualFilling: false,
+            parentAccountID: nil,
+            accountGroup: accountGroup,
+            currency: accountGroup.currency,
+            childrenAccounts: []
+        )
+        try await repository.createAccount(parentBalancingAccount)
+
+        taskManager.createTask(
+            actionName: .createAccount,
+            reqModel: CreateAccountReq(
+                id: parentBalancingAccount.id,
+                accountGroupID: parentBalancingAccount.accountGroup.id,
+                accountingInHeader: parentBalancingAccount.accountingInHeader,
+                accountingInCharts: parentBalancingAccount.accountingInCharts,
+                budget: CreateAccountBudgetReq(
+                    amount: 0,
+                    gradualFilling: false,
+                    daysOffset: 0,
+                    fixedSum: 0
+                ),
+                currency: parentBalancingAccount.currency.code,
+                iconID: parentBalancingAccount.icon.id,
+                name: parentBalancingAccount.name,
+                type: parentBalancingAccount.type.rawValue,
+                isParent: parentBalancingAccount.isParent,
+                parentAccountID: parentBalancingAccount.parentAccountID,
+                datetimeCreate: parentBalancingAccount.datetimeCreate,
+                rank: parentBalancingAccount.rank
+            )
+        )
+
+        return parentBalancingAccount
+    }
+
     // Ищет балансировочный дочерний счет нужной валюты; если не найден — создаёт его
     // и добавляет таску синхронизации с сервером
     private func findOrCreateBalancingAccount(for account: Account) async throws -> Account {
@@ -269,14 +328,18 @@ extension Service {
         }
         
         // Дочерний балансировочный счет не найден — ищем родительский
-        guard let parentBalancingAccount = try await getAccounts(
+        let existingParentBalancingAccount = try await getAccounts(
             accountGroups: [account.accountGroup],
             types: [.balancing],
             isParent: true
-        ).first else {
-            throw ErrorModel(humanText: "Не смогли найти родительский балансировочный счет для группы счетов \(account.accountGroup.id)")
+        ).first
+        let parentBalancingAccount: Account
+        if let existingParentBalancingAccount {
+            parentBalancingAccount = existingParentBalancingAccount
+        } else {
+            parentBalancingAccount = try await createParentBalancingAccount(for: account.accountGroup)
         }
-        
+
         // Создаем дочерний балансировочный счет локально
         let balancingAccount = Account(
             accountingInHeader: true,

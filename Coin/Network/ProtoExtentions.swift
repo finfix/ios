@@ -135,3 +135,64 @@ extension AccountType {
     }
 }
 
+// MARK: - AuditLogEntity Extensions
+
+extension AuditLogEntity {
+
+    private static let protoMap: [AuditLogEntity: AuditLog_AuditLogEntity] = [
+        .transaction: .transaction,
+        .account: .account,
+        .accountGroup: .accountGroup,
+        .tag: .tag,
+        .user: .user,
+        .currency: .currency
+    ]
+
+    private static var reversedProtoMap: [AuditLog_AuditLogEntity: AuditLogEntity] {
+        return Dictionary(uniqueKeysWithValues: protoMap.map { ($1, $0) })
+    }
+
+    func toProto() throws -> AuditLog_AuditLogEntity {
+        guard let proto = AuditLogEntity.protoMap[self] else {
+            throw ErrorModel(humanText: "Неизвестная сущность аудит-лога: \(self.rawValue)")
+        }
+        return proto
+    }
+
+    init(from proto: AuditLog_AuditLogEntity) throws {
+        guard let entity = AuditLogEntity.reversedProtoMap[proto] else {
+            throw ErrorModel(humanText: "Неизвестная proto сущность аудит-лога: \(proto)")
+        }
+        self = entity
+    }
+}
+
+// MARK: - AuditLogMethod Extensions
+
+extension AuditLogMethod {
+
+    private static let protoMap: [AuditLogMethod: AuditLog_AuditLogMethod] = [
+        .create: .create,
+        .update: .update,
+        .delete: .delete
+    ]
+
+    private static var reversedProtoMap: [AuditLog_AuditLogMethod: AuditLogMethod] {
+        return Dictionary(uniqueKeysWithValues: protoMap.map { ($1, $0) })
+    }
+
+    func toProto() throws -> AuditLog_AuditLogMethod {
+        guard let proto = AuditLogMethod.protoMap[self] else {
+            throw ErrorModel(humanText: "Неизвестный метод аудит-лога: \(self.rawValue)")
+        }
+        return proto
+    }
+
+    init(from proto: AuditLog_AuditLogMethod) throws {
+        guard let method = AuditLogMethod.reversedProtoMap[proto] else {
+            throw ErrorModel(humanText: "Неизвестный proto метод аудит-лога: \(proto)")
+        }
+        self = method
+    }
+}
+

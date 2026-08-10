@@ -20,6 +20,7 @@ extension Service {
         taskManager.createTask(
             actionName: .createTag,
             reqModel: CreateTagReq(
+                id: tag.id,
                 name: tag.name,
                 accountGroupID: tag.accountGroup.id,
                 datetimeCreate: tag.datetimeCreate

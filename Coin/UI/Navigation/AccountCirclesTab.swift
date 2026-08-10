@@ -35,6 +35,8 @@ struct AccountCirclesTab: View {
                     switch screen {
                     case .tagsList:
                         TagsList(accountGroup: selectedAccountGroup.selectedAccountGroup)
+                    case .auditLogHistory(let entityID, let accountGroupID):
+                        AuditLogHistoryView(entity: .transaction, entityID: entityID, accountGroupID: accountGroupID)
                     }
                 }
                 .navigationDestination(for: TagsListRoute.self) { screen in

@@ -58,8 +58,7 @@ class TaskManager {
             try await repository.createTask(SyncTask(
                 actionName: actionName,
                 tryCount: 0,
-                fieldsJSON: fieldsJSON,
-                enabled: true
+                fieldsJSON: fieldsJSON
             ))
         }
     }
@@ -135,19 +134,20 @@ class TaskManager {
             throw error
         }
         
-        try await repository.deleteTasks(ids: [task.id])
+        try await repository.completeTasks(ids: [task.id])
     }
-    
+
     func getSyncTasks(
-        ids: [UUID]? = nil
+        ids: [UUID]? = nil,
+        includeCompleted: Bool = false
     ) async throws -> [SyncTask] {
-        return try await repository.getSyncTasks(ids: ids)
+        return try await repository.getSyncTasks(ids: ids, includeCompleted: includeCompleted)
     }
-    
-    func deleteTasks(
+
+    func completeTasks(
         ids: [UUID]? = nil
     ) async throws {
-        return try await repository.deleteTasks(ids: ids)
+        return try await repository.completeTasks(ids: ids)
     }
     
     func getCountTasks() async throws -> UInt32 {

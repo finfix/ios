@@ -20,19 +20,19 @@ class TasksDetailsViewModel {
     }
 
     func load() async throws {
-        let tasks = try await service.taskManager.getSyncTasks(ids: [task.id])
+        let tasks = try await service.taskManager.getSyncTasks(ids: [task.id], includeCompleted: true)
         guard !tasks.isEmpty else {
-            throw ErrorModel(humanText: "Задача уже выполнена или удалена")
+            throw ErrorModel(humanText: "Задача не найдена")
         }
         task = tasks[0]
     }
-    
+
     func delete() async throws {
-        try await service.taskManager.deleteTasks(ids: [task.id])
+        try await service.taskManager.completeTasks(ids: [task.id])
     }
-    
+
     func deleteAllTasks() async throws {
-        try await service.taskManager.deleteTasks()
+        try await service.taskManager.completeTasks()
     }
 
     /// Разбирает `fieldsJSON` таски и подгружает объект, к которому относится это

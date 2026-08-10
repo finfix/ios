@@ -71,7 +71,8 @@ struct AccountGroupDB {
             if serverModel.currencyCode != localModels[i].currencyCode {
                 difference["currencyCode"] = (server: serverModel.currencyCode, local: localModels[i].currencyCode)
             }
-            if serverModel.datetimeCreate != localModels[i].datetimeCreate {
+            // Допуск в 1с — см. пояснение в TransactionDB.compareTwoArrays.
+            if abs(serverModel.datetimeCreate.timeIntervalSince(localModels[i].datetimeCreate)) > 1 {
                 difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModels[i].datetimeCreate)
             }
             if !difference.isEmpty {

@@ -84,12 +84,17 @@ struct DeveloperTools: View {
                                 shouldShowProgress = false
                                 shouldDisableUI = false
                             }
+                            differences = nil
                             do {
                                 differences = try await vm.compareLocalAndServerData()
+                                shouldShowAlert = true
                             } catch {
+                                // Если сравнение упало с ошибкой (например, есть незавершённые
+                                // фоновые задачи), не показываем следом алерт "Все данные
+                                // совпадают" — differences так и остался nil, хотя сравнение
+                                // фактически не выполнялось.
                                 alert.error(error)
                             }
-                            shouldShowAlert = true
                         }
                     } label: {
                         if !shouldShowProgress {

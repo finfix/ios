@@ -12,6 +12,7 @@ private let logger = Logger(subsystem: "Coin", category: "EditTransaction")
 
 enum EditTransactionRoute: Hashable {
     case tagsList
+    case auditLogHistory(entityID: String, accountGroupID: UUID)
 }
 
 struct Tags: View {
@@ -453,6 +454,17 @@ struct EditTransaction: View {
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                     .disabled(!vm.isChanged)
+
+                    Button {
+                        path.path.append(EditTransactionRoute.auditLogHistory(
+                            entityID: vm.currentTransaction.id.uuidString,
+                            accountGroupID: vm.currentTransaction.accountGroupID
+                        ))
+                    } label: {
+                        Text("Посмотреть историю изменений")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .padding()
 
                     VStack(alignment: .leading) {
                         CopyableIDText(id: vm.currentTransaction.id.uuidString)

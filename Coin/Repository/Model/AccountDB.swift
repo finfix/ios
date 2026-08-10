@@ -191,9 +191,10 @@ struct AccountDB {
             if serverModel.budgetGradualFilling != localModel.budgetGradualFilling {
                 difference["budgetGradualFilling"] = (server: serverModel.budgetGradualFilling, local: localModel.budgetGradualFilling)
             }
-//            if serverModel.datetimeCreate != localModel.datetimeCreate {
-//                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModel.datetimeCreate)
-//            }
+            // Допуск в 1с — см. пояснение в TransactionDB.compareTwoArrays.
+            if abs(serverModel.datetimeCreate.timeIntervalSince(localModel.datetimeCreate)) > 1 {
+                difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModel.datetimeCreate)
+            }
             
             if !difference.isEmpty {
                 differences[serverModel.id!] = difference

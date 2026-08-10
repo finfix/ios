@@ -78,6 +78,17 @@ struct EditAccountGroup: View {
                 .frame(maxWidth: .infinity)
             }
             if vm.currentAccountGroup.id != UUID(uuid: UUID_NULL) {
+                Section {
+                    NavigationLink {
+                        AuditLogHistoryView(
+                            entity: .accountGroup,
+                            entityID: vm.currentAccountGroup.id.uuidString,
+                            accountGroupID: vm.currentAccountGroup.id
+                        )
+                    } label: {
+                        Text("Посмотреть историю изменений")
+                    }
+                }
                 Section(footer:
                     VStack(alignment: .leading) {
                         CopyableIDText(id: vm.currentAccountGroup.id.uuidString)

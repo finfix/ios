@@ -92,6 +92,18 @@
 		B562CB3D2C71DC2500AFB056 /* AccountService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB3C2C71DC2500AFB056 /* AccountService.swift */; };
 		B562CB3E2C71DC2500AFB056 /* AccountService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB3C2C71DC2500AFB056 /* AccountService.swift */; };
 		B562CB402C71DC3200AFB056 /* TagService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB3F2C71DC3200AFB056 /* TagService.swift */; };
+		EE9DAAEDA9E838990FD482B6 /* AuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD0DB3B9E7782C7CFA231B1 /* AuditLog.swift */; };
+		E1A94294D8CA21886C2F020C /* AuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD0DB3B9E7782C7CFA231B1 /* AuditLog.swift */; };
+		2A2BD53DC5D949E83F7CEA7D /* AuditLogModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAE09DE8A536454F22652243 /* AuditLogModels.swift */; };
+		29C9AEA846CB7E369B22284C /* AuditLogModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAE09DE8A536454F22652243 /* AuditLogModels.swift */; };
+		1DE50E349157B56AC7FF4259 /* AuditLogAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17D3822A168AB5D9F332EC0 /* AuditLogAPI.swift */; };
+		CC8C3F599D4EAD04715317FF /* AuditLogAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17D3822A168AB5D9F332EC0 /* AuditLogAPI.swift */; };
+		68B04B258F8E55BD2143FB68 /* AuditLogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F38A2ABE8262A027E5C7FB /* AuditLogService.swift */; };
+		19B98BAF2007B09E6E9C5754 /* AuditLogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F38A2ABE8262A027E5C7FB /* AuditLogService.swift */; };
+		76283BCF00CC2B3E0937B163 /* AuditLogHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B38360B994BA0C15656381 /* AuditLogHistoryViewModel.swift */; };
+		36BBEB9B331C647F4AEDF744 /* AuditLogHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B38360B994BA0C15656381 /* AuditLogHistoryViewModel.swift */; };
+		D88B5FBD03128E2B1B505EBD /* AuditLogHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2259B67507BC24425C19AB2 /* AuditLogHistoryView.swift */; };
+		06DADEFC759120DA7253E309 /* AuditLogHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2259B67507BC24425C19AB2 /* AuditLogHistoryView.swift */; };
 		B562CB412C71DC3200AFB056 /* TagService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB3F2C71DC3200AFB056 /* TagService.swift */; };
 		B562CB432C71DC3E00AFB056 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB422C71DC3E00AFB056 /* UserService.swift */; };
 		B562CB442C71DC3E00AFB056 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562CB422C71DC3E00AFB056 /* UserService.swift */; };
@@ -365,6 +377,12 @@
 		B562CB392C71DC1B00AFB056 /* TransactionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionService.swift; sourceTree = "<group>"; };
 		B562CB3C2C71DC2500AFB056 /* AccountService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountService.swift; sourceTree = "<group>"; };
 		B562CB3F2C71DC3200AFB056 /* TagService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagService.swift; sourceTree = "<group>"; };
+		7BD0DB3B9E7782C7CFA231B1 /* AuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLog.swift; sourceTree = "<group>"; };
+		CAE09DE8A536454F22652243 /* AuditLogModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogModels.swift; sourceTree = "<group>"; };
+		E17D3822A168AB5D9F332EC0 /* AuditLogAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogAPI.swift; sourceTree = "<group>"; };
+		C2F38A2ABE8262A027E5C7FB /* AuditLogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogService.swift; sourceTree = "<group>"; };
+		72B38360B994BA0C15656381 /* AuditLogHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogHistoryViewModel.swift; sourceTree = "<group>"; };
+		D2259B67507BC24425C19AB2 /* AuditLogHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogHistoryView.swift; sourceTree = "<group>"; };
 		B562CB422C71DC3E00AFB056 /* UserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
 		B562CB482C71DD8100AFB056 /* AccountGroupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroupService.swift; sourceTree = "<group>"; };
 		B562CB4E2C71DE4500AFB056 /* SettingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsService.swift; sourceTree = "<group>"; };
@@ -620,6 +638,7 @@
 				B562CB482C71DD8100AFB056 /* AccountGroupService.swift */,
 				B562CB4E2C71DE4500AFB056 /* SettingsService.swift */,
 				B562CB542C71E2FF00AFB056 /* AuthService.swift */,
+				C2F38A2ABE8262A027E5C7FB /* AuditLogService.swift */,
 			);
 			path = Service;
 			sourceTree = "<group>";
@@ -667,6 +686,7 @@
 				B5FF351D2AEC091F007694F9 /* Defaults.swift */,
 				B5744EA52BD2DA9B004C9AC7 /* TagAPI.swift */,
 				B5192F992BFF5BDC004A8BFD /* AccountGroupAPI.swift */,
+				E17D3822A168AB5D9F332EC0 /* AuditLogAPI.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -733,6 +753,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		681AEA19F967B9A1510031ED /* AuditLog */ = {
+			isa = PBXGroup;
+			children = (
+				D2259B67507BC24425C19AB2 /* AuditLogHistoryView.swift */,
+				72B38360B994BA0C15656381 /* AuditLogHistoryViewModel.swift */,
+			);
+			path = AuditLog;
+			sourceTree = "<group>";
+		};
 		B58EAE0D2BFD0F7B0054E359 /* AccountGroup */ = {
 			isa = PBXGroup;
 			children = (
@@ -755,6 +784,7 @@
 				B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */,
 				B5744EA72BD2DAC5004C9AC7 /* TagModels.swift */,
 				B5192F972BFF4AE5004A8BFD /* AccountGroupModels.swift */,
+				CAE09DE8A536454F22652243 /* AuditLogModels.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -810,6 +840,7 @@
 				B5744EA02BD2A4BA004C9AC7 /* Icon.swift */,
 				B5744EAD2BD2DE41004C9AC7 /* Tag.swift */,
 				B56FB6102BEA343A00CBFB1E /* SyncTask.swift */,
+				7BD0DB3B9E7782C7CFA231B1 /* AuditLog.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -856,6 +887,7 @@
 				B5FB6AA128F3D5EF00C2A2AC /* Transactions */,
 				B5B9504D2ADF234F00798F8C /* Profile */,
 				C7C277948452242DCFCE84B1 /* Components */,
+				681AEA19F967B9A1510031ED /* AuditLog */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -1099,6 +1131,9 @@
 				B5DEFCF12C07015A001D7E61 /* FileStorageManager.swift in Sources */,
 				B5DEFCF22C07015A001D7E61 /* AccountsHomeView.swift in Sources */,
 				B5DEFCF32C07015A001D7E61 /* Tag.swift in Sources */,
+				EE9DAAEDA9E838990FD482B6 /* AuditLog.swift in Sources */,
+				76283BCF00CC2B3E0937B163 /* AuditLogHistoryViewModel.swift in Sources */,
+				D88B5FBD03128E2B1B505EBD /* AuditLogHistoryView.swift in Sources */,
 				B52F764D2D2EC62D00B6E617 /* SearchView.swift in Sources */,
 				B5DEFCF42C07015A001D7E61 /* TagsList.swift in Sources */,
 				B5DEFCF52C07015A001D7E61 /* ProfileViewModel.swift in Sources */,
@@ -1117,6 +1152,7 @@
 				B5DEFD002C07015A001D7E61 /* CurrencyFormatter.swift in Sources */,
 				87C09068EB3FBEA422A42139 /* Rank.swift in Sources */,
 				B5DEFD012C07015A001D7E61 /* TagAPI.swift in Sources */,
+				1DE50E349157B56AC7FF4259 /* AuditLogAPI.swift in Sources */,
 				B5DEFD022C07015A001D7E61 /* UserAPI.swift in Sources */,
 				B52F76592D2FFBDB00B6E617 /* TransactionsViewModel.swift in Sources */,
 				B5DEFD032C07015A001D7E61 /* TasksListViewModel.swift in Sources */,
@@ -1131,6 +1167,7 @@
 				B5DEFD0B2C07015A001D7E61 /* Line.swift in Sources */,
 				B5DEFD0C2C07015A001D7E61 /* AccountCirclesViewModel.swift in Sources */,
 				B562CB412C71DC3200AFB056 /* TagService.swift in Sources */,
+				68B04B258F8E55BD2143FB68 /* AuditLogService.swift in Sources */,
 				B58133642C0CADFC004EB2B6 /* ProfileTab.swift in Sources */,
 				B5DEFD0D2C07015A001D7E61 /* TaskDetailsViewModel.swift in Sources */,
 				B58133682C0CAE7A004EB2B6 /* DeveloperTools.swift in Sources */,
@@ -1168,6 +1205,7 @@
 				B5DEFD272C07015A001D7E61 /* AccountPermissions.swift in Sources */,
 				B5DEFD282C07015A001D7E61 /* CurrencyDB.swift in Sources */,
 				B5DEFD292C07015A001D7E61 /* TagModels.swift in Sources */,
+				2A2BD53DC5D949E83F7CEA7D /* AuditLogModels.swift in Sources */,
 				B5DEFD2A2C07015A001D7E61 /* AccountGroupListViewModel.swift in Sources */,
 				B5DEFD2B2C07015A001D7E61 /* TransactionRow.swift in Sources */,
 				B562CB492C71DD8100AFB056 /* AccountGroupService.swift in Sources */,
@@ -1244,6 +1282,9 @@
 				B5744E9F2BD29C8B004C9AC7 /* FileStorageManager.swift in Sources */,
 				B5FB6AAE28F3D86000C2A2AC /* AccountsHomeView.swift in Sources */,
 				B5744EAE2BD2DE41004C9AC7 /* Tag.swift in Sources */,
+				E1A94294D8CA21886C2F020C /* AuditLog.swift in Sources */,
+				36BBEB9B331C647F4AEDF744 /* AuditLogHistoryViewModel.swift in Sources */,
+				06DADEFC759120DA7253E309 /* AuditLogHistoryView.swift in Sources */,
 				B52F764C2D2EC62D00B6E617 /* SearchView.swift in Sources */,
 				B54F3DB02BD579FA00780460 /* TagsList.swift in Sources */,
 				B5B068F12BAC70A100AEEC98 /* ProfileViewModel.swift in Sources */,
@@ -1260,6 +1301,7 @@
 				B5CF7D342AE57A9B0086C0B6 /* CurrencyFormatter.swift in Sources */,
 				2F4DD2C1A6B6C76BA9F6ACEE /* Rank.swift in Sources */,
 				B5744EA62BD2DA9B004C9AC7 /* TagAPI.swift in Sources */,
+				CC8C3F599D4EAD04715317FF /* AuditLogAPI.swift in Sources */,
 				B504B7E52AE46EEB0078643A /* UserAPI.swift in Sources */,
 				B5F4C3F12BDF9B82007CCFC9 /* TasksListViewModel.swift in Sources */,
 				B58133662C0CAE0B004EB2B6 /* DeveloperToolsTab.swift in Sources */,
@@ -1276,6 +1318,7 @@
 				B5D6DE282BB1E04000A06D67 /* AccountCirclesViewModel.swift in Sources */,
 				B596508A2BED547C009C6E52 /* TaskDetailsViewModel.swift in Sources */,
 				B562CB402C71DC3200AFB056 /* TagService.swift in Sources */,
+				19B98BAF2007B09E6E9C5754 /* AuditLogService.swift in Sources */,
 				B5610F0428FC9A420063AFEB /* APIManager.swift in Sources */,
 				B5192F932BFF4807004A8BFD /* EditAccountGroup.swift in Sources */,
 				B510BE8F2AE03109002CDB54 /* BudgetDetails.swift in Sources */,
@@ -1309,6 +1352,7 @@
 				B51CE1F82BAC431700682D48 /* AccountPermissions.swift in Sources */,
 				B51CE1F42BAC40BB00682D48 /* CurrencyDB.swift in Sources */,
 				B5744EA82BD2DAC5004C9AC7 /* TagModels.swift in Sources */,
+				29C9AEA846CB7E369B22284C /* AuditLogModels.swift in Sources */,
 				B562CB4F2C71DE4500AFB056 /* SettingsService.swift in Sources */,
 				B58EAE112BFD0FD40054E359 /* AccountGroupListViewModel.swift in Sources */,
 				B5B950552ADF258700798F8C /* TransactionRow.swift in Sources */,

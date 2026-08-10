@@ -20,10 +20,23 @@ struct TasksList: View {
     
     var body: some View {
         List {
+            Section {
+                Toggle("Показать выполненные", isOn: $vm.showCompleted)
+                    .onChange(of: vm.showCompleted) {
+                        Task {
+                            do {
+                                try await vm.load()
+                            } catch {
+                                alert.error(error)
+                            }
+                        }
+                    }
+            }
             Section(footer: Text("Количество: \(vm.tasks.count)")) {
                 ForEach(vm.tasks) { task in
                     NavigationLink(value: TasksListRoute.taskDetails(task)) {
                         Text("\(task.id). \(task.actionName)")
+                            .foregroundStyle(task.completed ? .secondary : .primary)
                     }
                     .buttonStyle(.plain)
                 }

@@ -203,6 +203,19 @@ struct EditAccount: View {
                 .frame(maxWidth: .infinity)
                 .disabled(!vm.isChanged)
             }
+            if vm.mode == .update {
+                Section {
+                    NavigationLink {
+                        AuditLogHistoryView(
+                            entity: .account,
+                            entityID: vm.currentAccount.id.uuidString,
+                            accountGroupID: selectedAccountGroup.id
+                        )
+                    } label: {
+                        Text("Посмотреть историю изменений")
+                    }
+                }
+            }
             if vm.currentAccount.id != UUID(uuid: UUID_NULL) {
                 Section {
                     NavigationLink {

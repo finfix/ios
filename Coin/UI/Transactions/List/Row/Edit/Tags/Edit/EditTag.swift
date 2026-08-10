@@ -73,6 +73,17 @@ struct EditTag: View {
                 .frame(maxWidth: .infinity)
             }
             if vm.currentTag.id != UUID(uuid: UUID_NULL) {
+                Section {
+                    NavigationLink {
+                        AuditLogHistoryView(
+                            entity: .tag,
+                            entityID: vm.currentTag.id.uuidString,
+                            accountGroupID: vm.currentTag.accountGroup.id
+                        )
+                    } label: {
+                        Text("Посмотреть историю изменений")
+                    }
+                }
                 Section(footer:
                     VStack(alignment: .leading) {
                         CopyableIDText(id: vm.currentTag.id.uuidString)

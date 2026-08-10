@@ -15,12 +15,13 @@ class TasksListViewModel {
 
     var accountGroup = AccountGroup()
     var tasks: [SyncTask] = []
+    var showCompleted = false
 
     func load() async throws {
-        tasks = try await service.taskManager.getSyncTasks()
+        tasks = try await service.taskManager.getSyncTasks(includeCompleted: showCompleted)
     }
-    
+
     func deleteAllTasks() async throws {
-        try await service.taskManager.deleteTasks()
+        try await service.taskManager.completeTasks()
     }
 }

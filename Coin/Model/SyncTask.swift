@@ -14,7 +14,7 @@ struct SyncTask: Identifiable, Hashable {
     var tryCount: UInt32
     var error: String?
     var fieldsJSON: Data
-    var enabled: Bool
+    var completed: Bool
     var datetimeCreate: Date
 
     init(
@@ -23,7 +23,7 @@ struct SyncTask: Identifiable, Hashable {
         tryCount: UInt32 = 0,
         error: String? = nil,
         fieldsJSON: Data = Data(),
-        enabled: Bool = true,
+        completed: Bool = false,
         datetimeCreate: Date = Date()
     ) {
         self.id = id
@@ -31,7 +31,7 @@ struct SyncTask: Identifiable, Hashable {
         self.tryCount = tryCount
         self.error = error
         self.fieldsJSON = fieldsJSON
-        self.enabled = enabled
+        self.completed = completed
         self.datetimeCreate = datetimeCreate
     }
 
@@ -41,7 +41,7 @@ struct SyncTask: Identifiable, Hashable {
         self.actionName = dbModel.actionName
         self.tryCount = dbModel.tryCount
         self.error = dbModel.error
-        self.enabled = dbModel.enabled
+        self.completed = dbModel.completed
         self.fieldsJSON = dbModel.fieldsJson
         self.datetimeCreate = dbModel.datetimeCreate
     }

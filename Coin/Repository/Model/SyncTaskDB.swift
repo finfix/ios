@@ -14,7 +14,7 @@ struct SyncTaskDB {
     var actionName: ActionName
     var error: String?
     var tryCount: UInt32
-    var enabled: Bool
+    var completed: Bool
     var fieldsJson: Data
     var datetimeCreate: Date
 
@@ -27,7 +27,7 @@ struct SyncTaskDB {
         self.error = model.error
         self.actionName = model.actionName
         self.tryCount = model.tryCount
-        self.enabled = model.enabled
+        self.completed = model.completed
         self.fieldsJson = model.fieldsJSON
         self.datetimeCreate = model.datetimeCreate
     }
@@ -40,7 +40,7 @@ extension SyncTaskDB: Codable, FetchableRecord, PersistableRecord {
         static let actionName = Column(CodingKeys.actionName)
         static let tryCount = Column(CodingKeys.tryCount)
         static let error = Column(CodingKeys.error)
-        static let enabled = Column(CodingKeys.enabled)
+        static let completed = Column(CodingKeys.completed)
         static let fieldsJson = Column(CodingKeys.fieldsJson)
         static let datetimeCreate = Column(CodingKeys.datetimeCreate)
     }

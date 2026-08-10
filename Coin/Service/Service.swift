@@ -523,7 +523,7 @@ extension Service {
         var localAccounts = try await repository.getAccounts()
         var localTags = try await repository.getTags()
         var localTagsToTransactions = try await repository.getTagsToTransactions()
-        var localTransactions = try await repository.getTransactions()
+        var localTransactions = try await repository.getTransactions(limit: Int.max)
                         
         let iconsDifferences = IconDB.compareTwoArrays(try await serverIcons, localIcons)
         if !iconsDifferences.isEmpty {

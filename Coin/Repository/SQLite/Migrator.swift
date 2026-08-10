@@ -421,6 +421,22 @@ extension SQLite {
             }
         }
 
+        // Заменяем enabled (не использовался, задачи всегда создавались с enabled = true)
+        // на completed: успешно выполненные и вручную удалённые таски теперь не удаляются
+        // физически, а помечаются выполненными — это даёт возможность показать их в списке
+        // по переключателю "Показать выполненные" вместо безвозвратного удаления.
+        migrator.registerMigration("replaceEnabledWithCompletedInSyncTask") { db in
+            try db.alter(table: "syncTaskDB") { table in
+                table.add(column: "completed", .boolean)
+                    .defaults(to: false)
+                    .notNull()
+            }
+
+            try db.alter(table: "syncTaskDB") { table in
+                table.drop(column: "enabled")
+            }
+        }
+
         return migrator
     }
 }
