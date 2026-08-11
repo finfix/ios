@@ -51,12 +51,6 @@ extension APIManager {
                 id: try account.id.toUUID(),
                 accountingInHeader: account.accountingInHeader,
                 accountingInCharts: account.accountingInCharts,
-                budget: GetAccountBudgetRes(
-                    amount: Decimal(account.budget.amount),
-                    fixedSum: Decimal(account.budget.fixedSum),
-                    gradualFilling: account.budget.gradualFilling,
-                    daysOffset: Int8(account.budget.daysOffset)
-                ),
                 iconID: try account.iconID.toUUID(),
                 name: account.name,
                 remainder: Decimal(account.remainder),
@@ -82,12 +76,6 @@ extension APIManager {
             $0.accountGroupID = req.accountGroupID.data
             $0.accountingInHeader = req.accountingInHeader
             $0.accountingInCharts = req.accountingInCharts
-            $0.budget = Account_AccountBudget.with {
-                $0.amount = req.budget.amount.doubleValue
-                $0.gradualFilling = req.budget.gradualFilling
-                $0.daysOffset = UInt32(req.budget.daysOffset)
-                $0.fixedSum = req.budget.fixedSum.doubleValue
-            }
             $0.currency = req.currency
             $0.iconID = req.iconID.data
             $0.name = req.name
@@ -142,20 +130,6 @@ extension APIManager {
             }
             if let rank = req.rank {
                 $0.rank = rank
-            }
-            $0.budget = Account_UpdateAccountBudgetRequest.with {
-                if let amount = req.budget.amount {
-                    $0.amount = amount.doubleValue
-                }
-                if let fixedSum = req.budget.fixedSum {
-                    $0.fixedSum = fixedSum.doubleValue
-                }
-                if let daysOffset = req.budget.daysOffset {
-                    $0.daysOffset = UInt32(daysOffset)
-                }
-                if let gradualFilling = req.budget.gradualFilling {
-                    $0.gradualFilling = gradualFilling
-                }
             }
         }
         

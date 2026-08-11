@@ -122,7 +122,6 @@ struct TransactionsList: View {
                 }
             }
         }
-        .navigationTitle("Транзакции")
     }
 }
 

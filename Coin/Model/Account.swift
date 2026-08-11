@@ -106,7 +106,8 @@ struct Account: Identifiable, Hashable {
          _ dbModel: AccountDB,
          currenciesMap: [String: Currency]?,
          accountGroupsMap: [UUID: AccountGroup]?,
-         iconsMap: [UUID: Icon]?
+         iconsMap: [UUID: Icon]?,
+         budgetsMap: [UUID: AccountBudget]? = nil
     ) {
         self.id = dbModel.id!
         self.accountingInHeader = dbModel.accountingInHeader
@@ -118,32 +119,39 @@ struct Account: Identifiable, Hashable {
         self.visible = dbModel.visible
         self.rank = dbModel.rank
         self.isParent = dbModel.isParent
-        self.budgetAmount = dbModel.budgetAmount
+        // Бюджет больше не хранится на самом счёте — резолвится из локальной истории версий
+        // AccountBudget (см. Service.effectiveAccountBudgets), budgetsMap — уже посчитанная
+        // на нужную дату "действующая версия на счёт". nil, если счёт без бюджета либо budgetsMap
+        // не передавался (вызовам, которым бюджет не нужен, например встраиванию Account в
+        // Transaction, дешевле не резолвить его вовсе).
+        let budget = budgetsMap?[dbModel.id!]
+        self.budgetAmount = budget?.amount ?? 0
         self.showingBudgetAmount = 0
-        self.budgetFixedSum = dbModel.budgetFixedSum
-        self.budgetDaysOffset = dbModel.budgetDaysOffset
-        self.budgetGradualFilling = dbModel.budgetGradualFilling
+        self.budgetFixedSum = budget?.fixedSum ?? 0
+        self.budgetDaysOffset = budget?.daysOffset ?? 0
+        self.budgetGradualFilling = budget?.gradualFilling ?? false
         self.datetimeCreate = dbModel.datetimeCreate
-        
+
         self.parentAccountID = dbModel.parentAccountId
         self.parentAccount = nil
-        
+
         self.icon = iconsMap?[dbModel.iconID] ?? Icon()
         self.accountGroup = accountGroupsMap?[dbModel.accountGroupId] ?? AccountGroup()
         self.currency = currenciesMap?[dbModel.currencyCode] ?? Currency()
-        
+
         self.childrenAccounts = []
     }
-    
+
     static func convertFromDBModel(
         _ accountsDB: [AccountDB],
         currenciesMap: [String: Currency]?,
         accountGroupsMap: [UUID: AccountGroup]?,
-        iconsMap: [UUID: Icon]?
+        iconsMap: [UUID: Icon]?,
+        budgetsMap: [UUID: AccountBudget]? = nil
     ) -> [Account] {
         var accounts: [Account] = []
         for accountDB in accountsDB {
-            accounts.append(Account(accountDB, currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap))
+            accounts.append(Account(accountDB, currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap, budgetsMap: budgetsMap))
         }
         return accounts
     }

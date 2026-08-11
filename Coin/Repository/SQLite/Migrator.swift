@@ -437,6 +437,41 @@ extension SQLite {
             }
         }
 
+        // Бюджет счёта выносится в отдельную версионируемую сущность accountBudgetDB (сервер
+        // хранит историю версий с датой effectiveFrom вместо перезаписи 4 полей на самом
+        // счёте) — старые бюджетные колонки на accountDB больше не источник правды.
+        migrator.registerMigration("addAccountBudget") { db in
+            try db.create(table: "accountBudgetDB") { table in
+                table.primaryKey("id", .blob)
+                table.column("amount", .text)
+                    .notNull()
+                table.column("fixedSum", .text)
+                    .notNull()
+                table.column("daysOffset", .integer)
+                    .notNull()
+                table.column("gradualFilling", .boolean)
+                    .notNull()
+                table.column("effectiveFrom", .date)
+                    .notNull()
+                table.column("createdByUserID", .blob)
+                    .notNull()
+                table.column("datetimeCreate", .datetime)
+                    .notNull()
+                table.column("accountGroupID", .blob)
+                    .notNull()
+
+                table.belongsTo("account", inTable: "accountDB")
+                    .notNull()
+            }
+
+            try db.alter(table: "accountDB") { table in
+                table.drop(column: "budgetAmount")
+                table.drop(column: "budgetFixedSum")
+                table.drop(column: "budgetDaysOffset")
+                table.drop(column: "budgetGradualFilling")
+            }
+        }
+
         return migrator
     }
 }

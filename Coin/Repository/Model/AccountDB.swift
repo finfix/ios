@@ -9,7 +9,7 @@ import Foundation
 import GRDB
 
 struct AccountDB {
-    
+
     var id: UUID?
     var accountingInHeader: Bool
     var accountingInCharts: Bool
@@ -23,12 +23,8 @@ struct AccountDB {
     var isParent: Bool
     var currencyCode: String
     var accountGroupId: UUID
-    var budgetAmount: Decimal
-    var budgetFixedSum: Decimal
-    var budgetDaysOffset: Int8
-    var budgetGradualFilling: Bool
     var datetimeCreate: Date
-    
+
     init(
         id: UUID,
         accountingInHeader: Bool,
@@ -43,10 +39,6 @@ struct AccountDB {
         isParent: Bool,
         currencyCode: String,
         accountGroupId: UUID,
-        budgetAmount: Decimal,
-        budgetFixedSum: Decimal,
-        budgetDaysOffset: Int8,
-        budgetGradualFilling: Bool,
         datetimeCreate: Date
     ) {
         self.id = id
@@ -62,13 +54,9 @@ struct AccountDB {
         self.isParent = isParent
         self.currencyCode = currencyCode
         self.accountGroupId = accountGroupId
-        self.budgetAmount = budgetAmount
-        self.budgetFixedSum = budgetFixedSum
-        self.budgetDaysOffset = budgetDaysOffset
-        self.budgetGradualFilling = budgetGradualFilling
         self.datetimeCreate = datetimeCreate
     }
-    
+
     // Инициализатор из сетевой модели
     init(_ res: GetAccountsRes) {
         self.id = res.id
@@ -82,15 +70,11 @@ struct AccountDB {
         self.parentAccountId = res.parentAccountID
         self.rank = res.rank
         self.isParent = res.isParent
-        self.budgetAmount = res.budget.amount
-        self.budgetFixedSum = res.budget.fixedSum
-        self.budgetDaysOffset = res.budget.daysOffset
-        self.budgetGradualFilling = res.budget.gradualFilling
         self.accountGroupId = res.accountGroupID
         self.currencyCode = res.currency
         self.datetimeCreate = res.datetimeCreate
     }
-    
+
     // Инициализатор из бизнес модели
     init(_ model: Account) {
         self.id = model.id
@@ -106,17 +90,13 @@ struct AccountDB {
         self.visible = model.visible
         self.rank = model.rank
         self.isParent = model.isParent
-        self.budgetAmount = model.budgetAmount
-        self.budgetFixedSum = model.budgetFixedSum
-        self.budgetDaysOffset = model.budgetDaysOffset
-        self.budgetGradualFilling = model.budgetGradualFilling
         self.accountGroupId = model.accountGroup.id
         self.currencyCode = model.currency.code
         self.parentAccountId = model.parentAccountID
         self.datetimeCreate = model.datetimeCreate
     }
-    
-    
+
+
     static func convertFromApiModel(_ accounts: [GetAccountsRes]) -> [AccountDB] {
         var accountsDB: [AccountDB] = []
         for account in accounts {
@@ -124,19 +104,19 @@ struct AccountDB {
         }
         return accountsDB
     }
-    
+
     static func compareTwoArrays(_ serverModels: [AccountDB], _ localModels: [AccountDB]) -> [UUID: [String: (server: Any, local: Any)]] {
         let serverModels = serverModels.sorted { $0.id! < $1.id! }
         let localModels = localModels.sorted { $0.id! < $1.id! }
-        
+
         var differences: [UUID: [String: (server: Any, local: Any)]] = [:]
-        
+
         guard serverModels.count == localModels.count else {
             var difference: [String: (server: Any, local: Any)] = ["count": (server: serverModels.count, local: localModels.count)]
             differences[UUID(uuid: UUID_NULL)] = difference
             return differences
         }
-        
+
         for (i, serverModel) in serverModels.enumerated() {
             var difference: [String: (server: Any, local: Any)] = [:]
             let localModel = localModels[i]
@@ -179,23 +159,11 @@ struct AccountDB {
             if serverModel.accountGroupId != localModel.accountGroupId {
                 difference["accountGroupId"] = (server: serverModel.accountGroupId, local: localModel.accountGroupId)
             }
-            if serverModel.budgetAmount != localModel.budgetAmount {
-                difference["budgetAmount"] = (server: serverModel.budgetAmount, local: localModel.budgetAmount)
-            }
-            if serverModel.budgetFixedSum != localModel.budgetFixedSum {
-                difference["budgetFixedSum"] = (server: serverModel.budgetFixedSum, local: localModel.budgetFixedSum)
-            }
-            if serverModel.budgetDaysOffset != localModel.budgetDaysOffset {
-                difference["budgetDaysOffset"] = (server: serverModel.budgetDaysOffset, local: localModel.budgetDaysOffset)
-            }
-            if serverModel.budgetGradualFilling != localModel.budgetGradualFilling {
-                difference["budgetGradualFilling"] = (server: serverModel.budgetGradualFilling, local: localModel.budgetGradualFilling)
-            }
             // Допуск в 1с — см. пояснение в TransactionDB.compareTwoArrays.
             if abs(serverModel.datetimeCreate.timeIntervalSince(localModel.datetimeCreate)) > 1 {
                 difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModel.datetimeCreate)
             }
-            
+
             if !difference.isEmpty {
                 differences[serverModel.id!] = difference
             }
@@ -220,10 +188,6 @@ extension AccountDB: Codable, FetchableRecord, PersistableRecord {
         static let isParent = Column(CodingKeys.isParent)
         static let currencyCode = Column(CodingKeys.currencyCode)
         static let accountGroupId = Column(CodingKeys.accountGroupId)
-        static let budgetAmount = Column(CodingKeys.budgetAmount)
-        static let budgetFixedSum = Column(CodingKeys.budgetFixedSum)
-        static let budgetDaysOffset = Column(CodingKeys.budgetDaysOffset)
-        static let budgetGradualFilling = Column(CodingKeys.budgetGradualFilling)
         static let datetimeCreate = Column(CodingKeys.datetimeCreate)
     }
 }

@@ -120,6 +120,10 @@ class TaskManager {
             case .updateUser:
                 let req = try decoder.decode(UpdateUserReq.self, from: task.fieldsJSON)
                 try await apiManager.UpdateUser(req: req)
+
+            case .createAccountBudget:
+                let req = try decoder.decode(CreateAccountBudgetReq.self, from: task.fieldsJSON)
+                try await apiManager.CreateAccountBudget(req: req)
             }
         } catch {
             logger.warning("\(error)")
@@ -161,4 +165,5 @@ enum ActionName: String, Codable {
     case createTag, updateTag, deleteTag
     case createAccountGroup, updateAccountGroup, deleteAccountGroup
     case updateUser
+    case createAccountBudget
 }

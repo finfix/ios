@@ -29,12 +29,6 @@ extension Service {
                 accountGroupID: account.accountGroup.id,
                 accountingInHeader: account.accountingInHeader,
                 accountingInCharts: account.accountingInCharts,
-                budget: CreateAccountBudgetReq(
-                    amount: account.budgetAmount,
-                    gradualFilling: account.budgetGradualFilling,
-                    daysOffset: account.budgetDaysOffset,
-                    fixedSum: account.budgetFixedSum
-                ),
                 currency: account.currency.code,
                 iconID: account.icon.id,
                 name: account.name,
@@ -45,6 +39,18 @@ extension Service {
                 rank: account.rank
             )
         )
+
+        if account.budgetAmount != 0 {
+            try await createAccountBudget(
+                accountID: account.id,
+                accountGroupID: account.accountGroup.id,
+                amount: account.budgetAmount,
+                fixedSum: account.budgetFixedSum,
+                daysOffset: account.budgetDaysOffset,
+                gradualFilling: account.budgetGradualFilling,
+                effectiveFrom: Date.now
+            )
+        }
 
         if account.remainder != 0 {
             let balancingAccount = try await findOrCreateBalancingAccount(for: account)
@@ -70,7 +76,8 @@ extension Service {
         let iconsMap = Icon.convertToMap(Icon.convertFromDBModel(try await repository.getIcons()))
         let currenciesMap = Currency.convertToMap(Currency.convertFromDBModel(try await repository.getCurrencies()))
         let accountGroupsMap = AccountGroup.convertToMap(AccountGroup.convertFromDBModel(try await repository.getAccountGroups(), currenciesMap: currenciesMap))
-        return Account.convertFromDBModel(try await repository.getAccounts(
+
+        let accountsDB = try await repository.getAccounts(
             ids: ids,
             accountGroupIDs: accountGroups?.map(\.id),
             visible: visible,
@@ -79,7 +86,17 @@ extension Service {
             currencyCode: currencyCode,
             isParent: isParent,
             name: name
-        ), currenciesMap: currenciesMap, accountGroupsMap: accountGroupsMap, iconsMap: iconsMap)
+        )
+
+        let budgetsMap = try await effectiveAccountBudgets(accountIDs: accountsDB.map { $0.id! }, on: Date.now)
+
+        return Account.convertFromDBModel(
+            accountsDB,
+            currenciesMap: currenciesMap,
+            accountGroupsMap: accountGroupsMap,
+            iconsMap: iconsMap,
+            budgetsMap: budgetsMap
+        )
     }
     
     // MARK: Update
@@ -150,7 +167,7 @@ extension Service {
         }
         
         try await repository.updateAccount(newAccount)
-        
+
         let updateReq = UpdateAccountReq(
             id: newAccount.id,
             accountingInHeader: oldAccount.accountingInHeader != newAccount.accountingInHeader ? newAccount.accountingInHeader : nil,
@@ -160,15 +177,27 @@ extension Service {
             currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
             parentAccountID: parentAccountIDToReq,
             iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
-            rank: oldAccount.rank != newAccount.rank ? newAccount.rank : nil,
-            budget: UpdateBudgetReq(
-                amount: oldAccount.budgetAmount != newAccount.budgetAmount ? newAccount.budgetAmount : nil,
-                fixedSum: oldAccount.budgetFixedSum != newAccount.budgetFixedSum ? newAccount.budgetFixedSum : nil,
-                daysOffset: oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ? newAccount.budgetDaysOffset : nil,
-                gradualFilling: oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling ? newAccount.budgetGradualFilling : nil)
+            rank: oldAccount.rank != newAccount.rank ? newAccount.rank : nil
         )
         if updateReq.hasChanges {
             taskManager.createTask(actionName: .updateAccount, reqModel: updateReq)
+        }
+
+        // Бюджет — отдельная версионируемая сущность: если хоть одно из полей поменялось,
+        // создаём НОВУЮ версию (не апдейт), действующую с сегодняшнего дня.
+        if oldAccount.budgetAmount != newAccount.budgetAmount ||
+            oldAccount.budgetFixedSum != newAccount.budgetFixedSum ||
+            oldAccount.budgetDaysOffset != newAccount.budgetDaysOffset ||
+            oldAccount.budgetGradualFilling != newAccount.budgetGradualFilling {
+            try await createAccountBudget(
+                accountID: newAccount.id,
+                accountGroupID: newAccount.accountGroup.id,
+                amount: newAccount.budgetAmount,
+                fixedSum: newAccount.budgetFixedSum,
+                daysOffset: newAccount.budgetDaysOffset,
+                gradualFilling: newAccount.budgetGradualFilling,
+                effectiveFrom: Date.now
+            )
         }
     }
     
@@ -199,7 +228,7 @@ extension Service {
             try await repository.updateAccount(updated)
             taskManager.createTask(
                 actionName: .updateAccount,
-                reqModel: UpdateAccountReq(id: updated.id, rank: newRank, budget: UpdateBudgetReq())
+                reqModel: UpdateAccountReq(id: updated.id, rank: newRank)
             )
         }
     }
@@ -295,12 +324,6 @@ extension Service {
                 accountGroupID: parentBalancingAccount.accountGroup.id,
                 accountingInHeader: parentBalancingAccount.accountingInHeader,
                 accountingInCharts: parentBalancingAccount.accountingInCharts,
-                budget: CreateAccountBudgetReq(
-                    amount: 0,
-                    gradualFilling: false,
-                    daysOffset: 0,
-                    fixedSum: 0
-                ),
                 currency: parentBalancingAccount.currency.code,
                 iconID: parentBalancingAccount.icon.id,
                 name: parentBalancingAccount.name,
@@ -371,12 +394,6 @@ extension Service {
                 accountGroupID: balancingAccount.accountGroup.id,
                 accountingInHeader: balancingAccount.accountingInHeader,
                 accountingInCharts: balancingAccount.accountingInCharts,
-                budget: CreateAccountBudgetReq(
-                    amount: 0,
-                    gradualFilling: false,
-                    daysOffset: 0,
-                    fixedSum: 0
-                ),
                 currency: balancingAccount.currency.code,
                 iconID: balancingAccount.icon.id,
                 name: balancingAccount.name,
@@ -424,26 +441,6 @@ extension Service {
     private func validateAccount(_ account: Account) throws {
         guard account.name != "" else {
             throw ErrorModel(humanText: "Имя счета не может быть пустым")
-        }
-        
-        guard account.budgetAmount >= 0 else {
-            throw ErrorModel(humanText: "Бюджет не может быть отрицательным")
-        }
-        
-        guard account.budgetFixedSum >= 0 else {
-            throw ErrorModel(humanText: "Фиксированная сумма бюджета не может быть отрицательной")
-        }
-        
-        guard account.budgetDaysOffset >= 0 else {
-            throw ErrorModel(humanText: "Количество дней отступа не может быть отрицательным")
-        }
-        
-        guard account.budgetFixedSum <= account.budgetAmount else {
-            throw ErrorModel(humanText: "Фиксированная сумма бюджета не может быть больше бюджета")
-        }
-        
-        guard account.budgetDaysOffset < Calendar.current.range(of: .day, in: .month, for: Date())!.count else {
-            throw ErrorModel(humanText: "Количество дней отступа не может быть больше или равно количеству дней в месяце")
         }
     }
 }

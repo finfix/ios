@@ -77,11 +77,20 @@ class Repository {
             }
         }
     }
-    
+
+    func importAccountBudgets(_ budgets: [AccountBudgetDB]) async throws {
+        try await sqlite.write { db in
+            for budget in budgets {
+                try budget.insert(db)
+            }
+        }
+    }
+
     func deleteAllData() async throws {
         try await sqlite.write { db in
             _ = try TagToTransactionDB.deleteAll(db)
             _ = try TransactionDB.deleteAll(db)
+            _ = try AccountBudgetDB.deleteAll(db)
             _ = try AccountDB.deleteAll(db)
             _ = try TagDB.deleteAll(db)
             _ = try AccountGroupDB.deleteAll(db)
@@ -109,8 +118,26 @@ class Repository {
             try AccountDB(account).insert(db)
         }
     }
-    
-    
+
+    func createAccountBudget(_ budget: AccountBudget) async throws {
+        try await sqlite.write { db in
+            try AccountBudgetDB(budget).insert(db)
+        }
+    }
+
+    // Все версии бюджета (всех счетов), опционально отфильтрованные по конкретным счетам —
+    // резолв "какая версия действует на дату X" делается уже в Service, чисто в памяти,
+    // поскольку версий на счёт обычно немного.
+    func getAccountBudgets(accountIDs: [UUID]? = nil) async throws -> [AccountBudgetDB] {
+        try await sqlite.read { db in
+            var request = AccountBudgetDB.order(AccountBudgetDB.Columns.effectiveFrom.desc)
+            if let accountIDs {
+                request = request.filter(accountIDs.contains(AccountBudgetDB.Columns.accountId))
+            }
+            return try request.fetchAll(db)
+        }
+    }
+
     func updateAccount(_ account: Account) async throws {
         try await sqlite.write { db in
             _ = try AccountDB(account).update(db)

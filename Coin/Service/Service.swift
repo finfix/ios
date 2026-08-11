@@ -588,6 +588,8 @@ extension Service {
         async let _user = try await apiManager.GetUser()
         async let _accountGroups = try await apiManager.GetAccountGroups()
         async let _accounts = try await apiManager.GetAccounts(req: GetAccountsReq(dateFrom: dateFrom, dateTo: dateTo))
+        // accountGroupIDs пустой — сервер сам ограничивает доступными пользователю группами.
+        async let _accountBudgets = try await apiManager.GetAccountBudgets(req: GetAccountBudgetsReq())
         async let _tags = try await apiManager.GetTags()
         async let _tagsToTransactions = try await apiManager.GetTagsToTransaction()
         async let _transactions = try await apiManager.GetTransactions(
@@ -597,7 +599,7 @@ extension Service {
             )
         )
 
-        let (icons, currencies, user, accountGroups, accounts, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _tags, _tagsToTransactions, _transactions)
+        let (icons, currencies, user, accountGroups, accounts, accountBudgets, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _accountBudgets, _tags, _tagsToTransactions, _transactions)
 
         // Сохраняем иконки из gRPC ответа в локальные файлы
         logger.info("Сохраняем иконки из gRPC")
@@ -627,6 +629,8 @@ extension Service {
         try await repository.importAccountGroups(AccountGroupDB.convertFromApiModel(accountGroups))
         logger.info("Сохраняем счета")
         try await repository.importAccounts(AccountDB.convertFromApiModel(accounts).sorted { l, _ in l.isParent })
+        logger.info("Сохраняем историю бюджетов счетов")
+        try await repository.importAccountBudgets(AccountBudgetDB.convertFromApiModel(accountBudgets))
         logger.info("Сохраняем подкатегории")
         try await repository.importTags(TagDB.convertFromApiModel(tags))
         logger.info("Сохраняем транзакции")

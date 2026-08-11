@@ -59,6 +59,11 @@ class TasksDetailsViewModel {
         case .createAccountGroup, .updateAccountGroup:
             guard let group = try await service.getAccountGroups().first(where: { $0.id == ref.id }) else { return nil }
             return .accountGroup(group)
+        case .createAccountBudget:
+            // id в fieldsJSON — это id версии бюджета, а не счёта, к которому нужно перейти.
+            guard let req = try? JSONDecoder().decode(CreateAccountBudgetReq.self, from: task.fieldsJSON),
+                  let account = try await service.getAccounts(ids: [req.accountID]).first else { return nil }
+            return .account(account)
         case .deleteTransaction, .deleteAccount, .deleteTag, .deleteAccountGroup, .updateUser:
             return nil
         }

@@ -19,7 +19,6 @@ struct GetAccountsRes: Decodable {
     var id: UUID
     var accountingInHeader: Bool
     var accountingInCharts: Bool
-    var budget: GetAccountBudgetRes
     var iconID: UUID
     var name: String
     var remainder: Decimal
@@ -33,19 +32,11 @@ struct GetAccountsRes: Decodable {
     var datetimeCreate: Date
 }
 
-struct GetAccountBudgetRes: Decodable {
-    var amount: Decimal
-    var fixedSum: Decimal
-    var gradualFilling: Bool
-    var daysOffset: Int8
-}
-
 struct CreateAccountReq: Codable {
     var id: UUID
     var accountGroupID: UUID
     var accountingInHeader: Bool
     var accountingInCharts: Bool
-    var budget: CreateAccountBudgetReq
     var currency: String
     var iconID: UUID
     var name: String
@@ -60,7 +51,6 @@ struct CreateAccountReq: Codable {
         accountGroupID: UUID,
         accountingInHeader: Bool,
         accountingInCharts: Bool,
-        budget: CreateAccountBudgetReq,
         currency: String,
         iconID: UUID,
         name: String,
@@ -74,7 +64,6 @@ struct CreateAccountReq: Codable {
         self.accountGroupID = accountGroupID
         self.accountingInHeader = accountingInHeader
         self.accountingInCharts = accountingInCharts
-        self.budget = budget
         self.currency = currency
         self.iconID = iconID
         self.name = name
@@ -85,14 +74,6 @@ struct CreateAccountReq: Codable {
         self.rank = rank
     }
 }
-
-struct CreateAccountBudgetReq: Codable {
-    var amount: Decimal
-    var gradualFilling: Bool
-    var daysOffset: Int8
-    var fixedSum: Decimal
-}
-
 
 struct CreateAccountRes: Decodable {
 }
@@ -110,12 +91,11 @@ struct UpdateAccountReq: Codable {
     var parentAccountID: UUID?
     var iconID: UUID?
     var rank: String?
-    var budget: UpdateBudgetReq
 
     var hasChanges: Bool {
         accountingInHeader != nil || accountingInCharts != nil || name != nil ||
         visible != nil || currencyCode != nil || parentAccountID != nil ||
-        iconID != nil || rank != nil || budget.hasChanges
+        iconID != nil || rank != nil
     }
 
     init(
@@ -127,8 +107,7 @@ struct UpdateAccountReq: Codable {
         currencyCode: String? = nil,
         parentAccountID: UUID? = nil,
         iconID: UUID? = nil,
-        rank: String? = nil,
-        budget: UpdateBudgetReq
+        rank: String? = nil
     ) {
         self.id = id
         self.accountingInHeader = accountingInHeader
@@ -139,18 +118,6 @@ struct UpdateAccountReq: Codable {
         self.parentAccountID = parentAccountID
         self.iconID = iconID
         self.rank = rank
-        self.budget = budget
-    }
-}
-
-struct UpdateBudgetReq: Codable {
-    var amount: Decimal?
-    var fixedSum: Decimal?
-    var daysOffset: Int8?
-    var gradualFilling: Bool?
-
-    var hasChanges: Bool {
-        amount != nil || fixedSum != nil || daysOffset != nil || gradualFilling != nil
     }
 }
 
