@@ -57,6 +57,7 @@ extension Service {
     func getTransactions(
         limit: Int = 100,
         offset: Int = 0,
+        ids: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
@@ -80,6 +81,7 @@ extension Service {
             try await repository.getTransactions(
                 limit: limit,
                 offset: offset,
+                ids: ids,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 searchText: searchText,
@@ -126,7 +128,33 @@ extension Service {
 
         return transactions
     }
-    
+
+    /// Только даты, у которых есть транзакции — для горизонтального календаря. Не завязан на
+    /// пагинацию списка транзакций, поэтому показывает сразу всю историю (в рамках фильтров).
+    func getTransactionDays(
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
+        accountIDs: [UUID] = [],
+        excludedAccountIDs: [UUID] = [],
+        transactionTypes: [TransactionType] = [],
+        currencies: [Currency] = [],
+        tagIDs: [UUID] = [],
+        accountGroupIDs: [UUID] = []
+    ) async throws -> [Date] {
+        try await repository.getTransactionDays(
+            dateFrom: dateFrom?.stripTime(),
+            dateTo: dateTo?.stripTime(),
+            searchText: searchText,
+            accountIDs: accountIDs,
+            excludedAccountIDs: excludedAccountIDs,
+            accountGroupIDs: accountGroupIDs,
+            transactionTypes: transactionTypes,
+            currencies: currencies,
+            tagIDs: tagIDs
+        )
+    }
+
     // MARK: Update
     func updateTransaction(newTransaction transaction: Transaction, oldTransaction: Transaction) async throws {
         var newTransaction = transaction

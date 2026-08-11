@@ -24,11 +24,15 @@ struct TransactionsView: View {
     
     @Environment(PathSharedState.self) var path
     @Environment(AccountGroupSharedState.self) private var selectedAccountGroup
+    @Environment(AlertManager.self) private var alert
     @State var filters: TransactionFilters
     @State var searchText: String = ""
     @State var chartType: ChartType
     @State var chartGroupBy: ChartViewGroupBy = .byAccount
     @State var vm: TransactionsViewModel = TransactionsViewModel()
+    @State private var listVM: TransactionsListViewModel = TransactionsListViewModel()
+    @State private var scrolledTransactionID: UUID?
+    @State private var isJumpingToDay = false
     @State private var showFilters: Bool = false
     @State private var areFiltersLocked: Bool = false
     @State private var isChartFullScreen: Bool = false
@@ -84,10 +88,39 @@ struct TransactionsView: View {
                         // "Всего" внизу становится недоступной (скролл-то отключён).
                         .frame(height: isChartFullScreen ? geo.size.height : nil)
                         if !isChartFullScreen {
-                            TransactionsList(filters: filters)
+                            TransactionsList(filters: filters, vm: $listVM)
                         }
                     }
                     .scrollDisabled(isChartFullScreen)
+                    // .scrollPosition(id:), а не ScrollViewReader.scrollTo — список транзакций
+                    // рендерится в LazyVStack (без этого при большой истории CPU улетает в 100%
+                    // от рендера тысяч строк разом), а scrollTo не находит id ещё не
+                    // отрисованных (не долистанных) строк лениво стека. scrollPosition умеет
+                    // прыгать и к нерендеренным элементам.
+                    .scrollPosition(id: $scrolledTransactionID, anchor: .top)
+                    .safeAreaInset(edge: .top) {
+                        if !isChartFullScreen {
+                            TransactionCalendarStrip(days: listVM.transactionDays, isLoading: isJumpingToDay) { day in
+                                Task {
+                                    isJumpingToDay = true
+                                    defer { isJumpingToDay = false }
+                                    do {
+                                        // Если день ещё не среди загруженных строк — точечно
+                                        // подгружаем страницу, начинающуюся с этого дня, одним
+                                        // запросом (а не листаем все страницы между текущим
+                                        // хвостом и этим днём).
+                                        if let transactionID = try await listVM.jumpTo(day: day) {
+                                            withAnimation {
+                                                scrolledTransactionID = transactionID
+                                            }
+                                        }
+                                    } catch {
+                                        alert.error(error)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             } else { // Если в строку поиска уже что-то написали
                 SearchView(

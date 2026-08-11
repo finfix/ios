@@ -14,22 +14,24 @@ enum TransactionsListRoute: Hashable {
 struct TransactionsList: View {
     
     @Environment(AlertManager.self) private var alert
-    @State private var vm: TransactionsListViewModel = TransactionsListViewModel()
-    
+    @Binding var vm: TransactionsListViewModel
+
     var filters: TransactionFilters
-    
+
     @Environment(PathSharedState.self) var path
-    
+
     @State private var offsets = [CGSize](repeating: CGSize.zero, count: 100)
 
-    
+
     let width: CGFloat = UIScreen.main.bounds.width
     let height: CGFloat = UIScreen.main.bounds.height
-    
+
     init(
-        filters: TransactionFilters
+        filters: TransactionFilters,
+        vm: Binding<TransactionsListViewModel>
     ) {
         self.filters = filters
+        self._vm = vm
     }
     
     var body: some View {
@@ -51,7 +53,16 @@ struct TransactionsList: View {
                         }
                     }
                     VStack(spacing: 0) {
-                        NavigationLink(value: TransactionsListRoute.editTransaction(item.transaction)) {
+                        Button {
+                            Task {
+                                do {
+                                    guard let transaction = try await vm.fetchFullTransaction(id: item.id) else { return }
+                                    path.path.append(TransactionsListRoute.editTransaction(transaction))
+                                } catch {
+                                    alert.error(error)
+                                }
+                            }
+                        } label: {
                             TransactionRow(transaction: item.transaction)
                                 .contentShape(Rectangle())
                         }
@@ -72,6 +83,26 @@ struct TransactionsList: View {
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
                     }
+                }
+                // .id() на top-level элементе ForEach — ScrollViewReader.scrollTo и
+                // .scrollPosition(id:) надёжно находят только id, поставленный так.
+                .id(item.id)
+                .onAppear {
+                    Task {
+                        do {
+                            try await vm.loadMoreIfNeeded(currentItem: item)
+                        } catch {
+                            alert.error(error)
+                        }
+                    }
+                }
+            }
+            if vm.isLoadingNextPage {
+                HStack {
+                    Spacer()
+                    ProgressView()
+                        .padding()
+                    Spacer()
                 }
             }
         }
@@ -97,7 +128,8 @@ struct TransactionsList: View {
 
 #Preview {
     TransactionsList(
-        filters: TransactionFilters(accountGroups: [])
+        filters: TransactionFilters(accountGroups: []),
+        vm: .constant(TransactionsListViewModel())
     )
     .environment(AlertManager(handle: {_ in }))
 }

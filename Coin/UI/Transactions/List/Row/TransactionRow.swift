@@ -8,18 +8,18 @@
 import SwiftUI
 
 struct TransactionRow: View {
-        
-    let transaction: Transaction
-        
+
+    let transaction: TransactionListRowData
+
     var prefix: String {
         switch transaction.type {
         case .income: return "+ "
         case .consumption: return "- "
-        case .balancing: return transaction.accountFrom.type == .balancing ? "+ " : "- "
+        case .balancing: return transaction.accountFromType == .balancing ? "+ " : "- "
         default: return ""
         }
     }
-    
+
     var color: Color {
         switch transaction.type {
         case .income: .green
@@ -28,10 +28,14 @@ struct TransactionRow: View {
         default: .primary
         }
     }
-    
+
     // Для балансировочных транзакций всегда показываем не-балансировочный счет
-    var displayAccount: Account {
-        transaction.accountFrom.type == .balancing ? transaction.accountTo : transaction.accountFrom
+    var displayAccountName: String {
+        transaction.accountFromType == .balancing ? transaction.accountToName : transaction.accountFromName
+    }
+
+    var displayAccountCurrency: Currency {
+        transaction.accountFromType == .balancing ? transaction.accountToCurrency : transaction.accountFromCurrency
     }
 
     var body: some View {
@@ -39,22 +43,22 @@ struct TransactionRow: View {
             VStack(alignment: .leading) {
                 if transaction.type != .balancing {
                     HStack {
-                        Text(transaction.accountFrom.name)
+                        Text(transaction.accountFromName)
                     }
                     .font(.footnote)
                 }
                 HStack {
-                    Text(transaction.type == .balancing ? displayAccount.name : transaction.accountTo.name)
+                    Text(transaction.type == .balancing ? displayAccountName : transaction.accountToName)
                 }
             }
             Spacer()
             VStack(alignment: .trailing) {
                 VStack(alignment: .trailing) {
                     if transaction.amountFrom != transaction.amountTo && transaction.type != .balancing {
-                        Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFrom.currency, withUnits: false))
+                        Text(prefix + CurrencyFormatter().string(number: transaction.amountFrom, currency: transaction.accountFromCurrency, withUnits: false))
                             .font(.footnote)
                     }
-                    Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: displayAccount.currency, withUnits: false))
+                    Text(prefix + CurrencyFormatter().string(number: transaction.amountTo, currency: displayAccountCurrency, withUnits: false))
                 }
                 .foregroundStyle(color)
                 if transaction.note != "" {
@@ -64,8 +68,8 @@ struct TransactionRow: View {
                         .multilineTextAlignment(.trailing)
                 }
                 HStack {
-                    ForEach(transaction.tags) { tag in
-                        Text("#\(tag.name)")
+                    ForEach(transaction.tagNames, id: \.self) { tagName in
+                        Text("#\(tagName)")
                             .font(.caption2)
                     }
                 }
@@ -82,7 +86,7 @@ struct TransactionRow: View {
 #Preview {
     List {
         TransactionRow(
-            transaction: 
+            transaction: TransactionListRowData(
                 Transaction(
                     amountFrom: 1000,
                     amountTo: 10,
@@ -113,6 +117,7 @@ struct TransactionRow: View {
                         Tag(name: "tag3 very very long text")
                     ]
                 )
+            )
         )
             .environment(AlertManager(handle: {_ in }))
     }

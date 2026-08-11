@@ -250,7 +250,8 @@ struct SearchView: View {
 
 #Preview {
     TransactionsList(
-        filters: TransactionFilters(accountGroups: [])
+        filters: TransactionFilters(accountGroups: []),
+        vm: .constant(TransactionsListViewModel())
     )
     .environment(AlertManager(handle: {_ in }))
 }

@@ -494,6 +494,7 @@ class Repository {
     func getTransactions(
         limit: Int = 100,
         offset: Int = 0,
+        ids: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         searchText: String = "",
@@ -509,6 +510,15 @@ class Repository {
             var joins: [String] = []
             var filters: [String] = []
             var args: StatementArguments = []
+
+            if !ids.isEmpty {
+                var questions: [String] = []
+                for _ in ids {
+                    questions.append("?")
+                }
+                filters.append("t.id IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(ids))
+            }
 
             if let dateFrom {
                 filters.append("t.dateTransaction >= ?")
@@ -613,7 +623,124 @@ class Repository {
             return try TransactionDB.fetchAll(db, sql: sql, arguments: args)
         }
     }
-    
+
+    // Отдельный лёгкий запрос только за датами (для горизонтального календаря над списком
+    // транзакций) — без него список дней зависел бы от того, сколько страниц транзакций уже
+    // подгружено пагинацией, и календарь показывал бы не всю историю, а только загруженный
+    // хвост.
+    func getTransactionDays(
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
+        accountIDs: [UUID] = [],
+        excludedAccountIDs: [UUID] = [],
+        accountGroupIDs: [UUID] = [],
+        transactionTypes: [TransactionType] = [],
+        currencies: [Currency] = [],
+        tagIDs: [UUID] = []
+    ) async throws -> [Date] {
+        try await sqlite.read { db in
+
+            var joins: [String] = []
+            var filters: [String] = []
+            var args: StatementArguments = []
+
+            if let dateFrom {
+                filters.append("t.dateTransaction >= ?")
+                _ = args.append(contentsOf: [dateFrom])
+            }
+
+            if let dateTo {
+                filters.append("t.dateTransaction <= ?")
+                _ = args.append(contentsOf: [dateTo])
+            }
+
+            if searchText != "" {
+                filters.append("t.note LIKE ?")
+                _ = args.append(contentsOf: ["%"+searchText+"%"])
+            }
+
+            if !accountIDs.isEmpty {
+                var questions: [String] = []
+                for _ in accountIDs {
+                    questions.append("?")
+                }
+
+                filters.append("(t.accountFromId IN (\(questions.joined(separator: ","))) OR t.accountToId IN (\(questions.joined(separator: ","))))")
+                _ = args.append(contentsOf: StatementArguments(accountIDs))
+                _ = args.append(contentsOf: StatementArguments(accountIDs))
+            }
+
+            if !excludedAccountIDs.isEmpty {
+                var questions: [String] = []
+                for _ in excludedAccountIDs {
+                    questions.append("?")
+                }
+
+                filters.append("(t.accountFromId NOT IN (\(questions.joined(separator: ","))) AND t.accountToId NOT IN (\(questions.joined(separator: ","))))")
+                _ = args.append(contentsOf: StatementArguments(excludedAccountIDs))
+                _ = args.append(contentsOf: StatementArguments(excludedAccountIDs))
+            }
+
+            if !accountGroupIDs.isEmpty {
+                var questions: [String] = []
+                for _ in accountGroupIDs {
+                    questions.append("?")
+                }
+
+                filters.append("t.accountGroupId IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(accountGroupIDs))
+            }
+
+            if !tagIDs.isEmpty {
+                var questions: [String] = []
+                for _ in tagIDs {
+                    questions.append("?")
+                }
+
+                joins.append("JOIN tagToTransactionDB tttd ON tttd.transactionId = t.id")
+                joins.append("JOIN tagDB tg ON tttd.tagId = tg.id")
+
+                filters.append("tg.id IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(tagIDs))
+            }
+
+            if !transactionTypes.isEmpty {
+                var questions: [String] = []
+                for _ in transactionTypes {
+                    questions.append("?")
+                }
+
+                filters.append("t.type IN (\(questions.joined(separator: ",")))")
+                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
+            }
+
+            if !currencies.isEmpty {
+                var questions: [String] = []
+                for _ in transactionTypes {
+                    questions.append("?")
+                }
+
+                joins.append("JOIN accountDB a1 ON a1.id = t.accountFromId")
+                joins.append("JOIN accountDB a2 ON a2.id = t.accountToId")
+
+                filters.append("(a1.currency IN (\(questions.joined(separator: ","))) OR a2.currency IN (\(questions.joined(separator: ","))))")
+                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
+                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
+            }
+
+            let sql = """
+                SELECT DISTINCT t.dateTransaction
+                FROM transactionDB t
+                \(joins.joined(separator: "\n"))
+                \(filters.isEmpty ? "" : "WHERE \(filters.joined(separator: "\nAND "))")
+                ORDER BY t.dateTransaction ASC
+            """
+
+            return try Date.fetchAll(db, sql: sql, arguments: args)
+        }
+    }
+
     func getStatisticByMonth(
         chartType: ChartType,
         groupBy: ChartViewGroupBy,
