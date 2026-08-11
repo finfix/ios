@@ -33,7 +33,7 @@ extension Service {
         try await recalculateAccountBalances(accounts: [transaction.accountFrom, transaction.accountTo])
         try await repository.linkTagsToTransaction(transaction.tags, transaction: transaction)
 
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .createTransaction,
             reqModel: CreateTransactionReq(
                 id: transaction.id,
@@ -49,7 +49,9 @@ extension Service {
                 datetimeCreate: transaction.datetimeCreate,
                 accountingInCharts: transaction.accountingInCharts,
                 accountGroupID: transaction.accountGroupID
-            )
+            ),
+            entityID: transaction.id,
+            dependsOnEntityIDs: [transaction.accountFrom.id, transaction.accountTo.id, transaction.accountGroupID] + tagIDs
         )
     }
     
@@ -191,7 +193,7 @@ extension Service {
             try await repository.linkTagsToTransaction(tagsToInsert, transaction: transaction)
         }
         
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .updateTransaction,
             reqModel: UpdateTransactionReq(
             accountFromID: newTransaction.accountFrom.id != oldTransaction.accountFrom.id ? newTransaction.accountFrom.id : nil,
@@ -202,7 +204,10 @@ extension Service {
             note: newTransaction.note != oldTransaction.note ? newTransaction.note : nil,
             tagIDs: oldTransactionTagIDs != newTransactionTagIDs ? newTransactionTagIDs : nil,
             accountingInCharts: newTransaction.accountingInCharts != oldTransaction.accountingInCharts ? newTransaction.accountingInCharts : nil,
-            id: newTransaction.id))
+            id: newTransaction.id),
+            entityID: newTransaction.id,
+            dependsOnEntityIDs: [newTransaction.accountFrom.id, newTransaction.accountTo.id] + newTransactionTagIDs
+        )
     }
     
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
@@ -210,9 +215,10 @@ extension Service {
     func deleteTransaction(_ transaction: Transaction) async throws {
         try await self.repository.deleteTransaction(transaction)
         try await self.recalculateAccountBalances(accounts: [transaction.accountFrom, transaction.accountTo])
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .deleteTransaction,
-            reqModel: DeleteTransactionReq(id: transaction.id)
+            reqModel: DeleteTransactionReq(id: transaction.id),
+            entityID: transaction.id
         )
     }
         

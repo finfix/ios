@@ -22,7 +22,7 @@ extension Service {
         
         // Добавляем таску создания счета до создания балансировочной транзакции,
         // чтобы на сервере счет существовал раньше транзакции
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .createAccount,
             reqModel: CreateAccountReq(
                 id: account.id,
@@ -37,7 +37,9 @@ extension Service {
                 parentAccountID: account.parentAccountID,
                 datetimeCreate: account.datetimeCreate,
                 rank: account.rank
-            )
+            ),
+            entityID: account.id,
+            dependsOnEntityIDs: [account.accountGroup.id] + (account.parentAccountID.map { [$0] } ?? [])
         )
 
         if account.budgetAmount != 0 {
@@ -189,7 +191,12 @@ extension Service {
             rank: oldAccount.rank != newAccount.rank ? newAccount.rank : nil
         )
         if updateReq.hasChanges {
-            taskManager.createTask(actionName: .updateAccount, reqModel: updateReq)
+            try await taskManager.createTask(
+                actionName: .updateAccount,
+                reqModel: updateReq,
+                entityID: newAccount.id,
+                dependsOnEntityIDs: newAccount.parentAccountID.map { [$0] } ?? []
+            )
         }
 
         // Явно отправляем на сервер каскадные изменения родителя (если что-то реально
@@ -202,7 +209,11 @@ extension Service {
                 visible: oldParentAccount.visible != newParentAccount.visible ? newParentAccount.visible : nil
             )
             if parentUpdateReq.hasChanges {
-                taskManager.createTask(actionName: .updateAccount, reqModel: parentUpdateReq)
+                try await taskManager.createTask(
+                    actionName: .updateAccount,
+                    reqModel: parentUpdateReq,
+                    entityID: newParentAccount.id
+                )
             }
         }
 
@@ -214,7 +225,11 @@ extension Service {
                 visible: old.visible != new.visible ? new.visible : nil
             )
             if childUpdateReq.hasChanges {
-                taskManager.createTask(actionName: .updateAccount, reqModel: childUpdateReq)
+                try await taskManager.createTask(
+                    actionName: .updateAccount,
+                    reqModel: childUpdateReq,
+                    entityID: new.id
+                )
             }
         }
 
@@ -261,9 +276,10 @@ extension Service {
             var updated = account
             updated.rank = newRank
             try await repository.updateAccount(updated)
-            taskManager.createTask(
+            try await taskManager.createTask(
                 actionName: .updateAccount,
-                reqModel: UpdateAccountReq(id: updated.id, rank: newRank)
+                reqModel: UpdateAccountReq(id: updated.id, rank: newRank),
+                entityID: updated.id
             )
         }
     }
@@ -282,9 +298,10 @@ extension Service {
         // Удаляем счет
         try await repository.deleteAccount(account)
         
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .deleteAccount,
-            reqModel: DeleteAccountReq(id: account.id)
+            reqModel: DeleteAccountReq(id: account.id),
+            entityID: account.id
         )
     }
     
@@ -352,7 +369,7 @@ extension Service {
         )
         try await repository.createAccount(parentBalancingAccount)
 
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .createAccount,
             reqModel: CreateAccountReq(
                 id: parentBalancingAccount.id,
@@ -367,7 +384,9 @@ extension Service {
                 parentAccountID: parentBalancingAccount.parentAccountID,
                 datetimeCreate: parentBalancingAccount.datetimeCreate,
                 rank: parentBalancingAccount.rank
-            )
+            ),
+            entityID: parentBalancingAccount.id,
+            dependsOnEntityIDs: [parentBalancingAccount.accountGroup.id]
         )
 
         return parentBalancingAccount
@@ -422,7 +441,7 @@ extension Service {
         try await repository.createAccount(balancingAccount)
         
         // Синхронизируем создание балансировочного счета с сервером
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .createAccount,
             reqModel: CreateAccountReq(
                 id: balancingAccount.id,
@@ -437,7 +456,9 @@ extension Service {
                 parentAccountID: balancingAccount.parentAccountID,
                 datetimeCreate: balancingAccount.datetimeCreate,
                 rank: balancingAccount.rank
-            )
+            ),
+            entityID: balancingAccount.id,
+            dependsOnEntityIDs: [balancingAccount.accountGroup.id, parentBalancingAccount.id]
         )
         
         return balancingAccount

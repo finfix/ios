@@ -19,9 +19,7 @@ struct Profile: View {
     @Environment(AlertManager.self) private var alert
     @State var vm = ProfileViewModel()
     
-    @AppStorage("accessToken") private var accessToken: String?
-    @AppStorage("refreshToken") private var refreshToken: String?
-    @AppStorage("isLogin") private var isLogin: Bool = false
+    private var authStorage = AuthStorage.shared
     @State var shouldShowSuccess = false
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
@@ -69,7 +67,7 @@ struct Profile: View {
                     Task {
                         do {
                             try await vm.logout()
-                            isLogin = false
+                            authStorage.isLogin = false
                         } catch {
                             alert.error(error)
                         }

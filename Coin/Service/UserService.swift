@@ -20,7 +20,7 @@ extension Service {
 
         try await repository.updateUser(newUser)
         
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .updateUser,
             reqModel: UpdateUserReq(
                 name: newUser.name != oldUser.name ? newUser.name : nil,
@@ -29,7 +29,8 @@ extension Service {
 //                oldPassword: newUser.oldPassword != oldUser.oldPassword ? newUser.oldPassword : nil,
                 defaultCurrency: newUser.defaultCurrency.code != oldUser.defaultCurrency.code ? newUser.defaultCurrency.code : nil,
                 notificationToken: newUser.notificationToken != oldUser.notificationToken ? newUser.notificationToken : nil
-            )
+            ),
+            entityID: newUser.id
         )
     }
     

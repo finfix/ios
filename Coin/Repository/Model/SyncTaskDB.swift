@@ -2,8 +2,6 @@
 //  SyncTaskDB.swift
 //  Coin
 //
-//  Created by Илья on 29.04.2024.
-//
 
 import Foundation
 import GRDB
@@ -17,6 +15,10 @@ struct SyncTaskDB {
     var completed: Bool
     var fieldsJson: Data
     var datetimeCreate: Date
+    var entityID: UUID
+    /// JSON-массив UUID — GRDB не хранит массивы нативно, а зависимостей у одной таски
+    /// обычно единицы, так что доп. таблица здесь была бы избыточной.
+    var dependsOnTaskIDsJSON: Data
 
     // Инициализатор из бизнес модели
     init(_ model: SyncTask) {
@@ -30,6 +32,8 @@ struct SyncTaskDB {
         self.completed = model.completed
         self.fieldsJson = model.fieldsJSON
         self.datetimeCreate = model.datetimeCreate
+        self.entityID = model.entityID
+        self.dependsOnTaskIDsJSON = (try? JSONEncoder().encode(model.dependsOnTaskIDs)) ?? Data("[]".utf8)
     }
 }
 
@@ -43,5 +47,7 @@ extension SyncTaskDB: Codable, FetchableRecord, PersistableRecord {
         static let completed = Column(CodingKeys.completed)
         static let fieldsJson = Column(CodingKeys.fieldsJson)
         static let datetimeCreate = Column(CodingKeys.datetimeCreate)
+        static let entityID = Column(CodingKeys.entityID)
+        static let dependsOnTaskIDsJSON = Column(CodingKeys.dependsOnTaskIDsJSON)
     }
 }

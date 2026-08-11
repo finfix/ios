@@ -20,10 +20,16 @@ private let logger = Logger(subsystem: "Coin", category: "API")
 class AuthManager {
     
     private var authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>
-    
-    @AppStorage("refreshToken") private var refreshToken: String?
-    @AppStorage("accessToken") private var accessToken: String?
-    
+
+    private var refreshToken: String? {
+        get { AuthStorage.shared.refreshToken }
+        set { AuthStorage.shared.refreshToken = newValue }
+    }
+    private var accessToken: String? {
+        get { AuthStorage.shared.accessToken }
+        set { AuthStorage.shared.accessToken = newValue }
+    }
+
     init(authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>) {
         self.authClient = authClient
     }

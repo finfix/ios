@@ -17,8 +17,7 @@ struct DeveloperTools: View {
     
     @AppStorage("grpcHost") private var grpcHost = defaultGrpcHost
     @AppStorage("grpcPort") private var grpcPort = defaultGrpcPort
-    @AppStorage("accessToken") private var accessToken: String = ""
-    @AppStorage("refreshToken") private var refreshToken: String = ""
+    private var authStorage = AuthStorage.shared
     @AppStorage("debugShowStaticLocations") private var debugShowStaticLocations = false
     @Environment(AlertManager.self) var alert
     
@@ -115,8 +114,14 @@ struct DeveloperTools: View {
                     Toggle("Показывать staticLocations кружками", isOn: $debugShowStaticLocations)
                 }
                 Section {
-                    TextField("Access token", text: $accessToken)
-                    TextField("Refresh token", text: $refreshToken)
+                    TextField("Access token", text: Binding(
+                        get: { authStorage.accessToken ?? "" },
+                        set: { authStorage.accessToken = $0.isEmpty ? nil : $0 }
+                    ))
+                    TextField("Refresh token", text: Binding(
+                        get: { authStorage.refreshToken ?? "" },
+                        set: { authStorage.refreshToken = $0.isEmpty ? nil : $0 }
+                    ))
                     Button("Принудительный рефреш токенов") {
                         Task {
                             shouldDisableUI = true

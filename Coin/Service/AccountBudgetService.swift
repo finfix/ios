@@ -33,7 +33,7 @@ extension Service {
 
         try await repository.createAccountBudget(budget)
 
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .createAccountBudget,
             reqModel: CreateAccountBudgetReq(
                 id: budget.id,
@@ -43,7 +43,9 @@ extension Service {
                 daysOffset: budget.daysOffset,
                 gradualFilling: budget.gradualFilling,
                 effectiveFrom: budget.effectiveFrom
-            )
+            ),
+            entityID: budget.id,
+            dependsOnEntityIDs: [budget.accountID]
         )
     }
 

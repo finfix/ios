@@ -17,14 +17,15 @@ extension Service {
         
         try await  repository.createAccountGroup(accountGroup)
         
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .createAccountGroup,
             reqModel: CreateAccountGroupReq(
                 id: accountGroup.id,
                 name: accountGroup.name,
                 currency: accountGroup.currency.code,
                 datetimeCreate: accountGroup.datetimeCreate
-            )
+            ),
+            entityID: accountGroup.id
         )
     }
     
@@ -45,13 +46,14 @@ extension Service {
         
         try await  repository.updateAccountGroup(newAccountGroup)
         
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .updateAccountGroup,
             reqModel: UpdateAccountGroupReq(
                 id: newAccountGroup.id,
                 name: newAccountGroup.name != oldAccountGroup.name ? newAccountGroup.name : nil,
                 currency: newAccountGroup.currency != oldAccountGroup.currency ? newAccountGroup.currency.code : nil
-            )
+            ),
+            entityID: newAccountGroup.id
         )
     }
     
@@ -59,9 +61,10 @@ extension Service {
     func deleteAccountGroup(_ accountGroup: AccountGroup) async throws {
         try await repository.deleteAccountGroup(accountGroup)
         
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .deleteAccountGroup,
-            reqModel: DeleteAccountGroupReq(id: accountGroup.id)
+            reqModel: DeleteAccountGroupReq(id: accountGroup.id),
+            entityID: accountGroup.id
         )
     }
     

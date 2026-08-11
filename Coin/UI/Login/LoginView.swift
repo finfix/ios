@@ -24,7 +24,7 @@ struct LoginView: View {
     @State private var vm = LoginViewModel()
     
     @AppStorage("isDeveloperMode") var isDevMode = false
-    @AppStorage("isLogin") var isLogin: Bool = false
+    private var authStorage = AuthStorage.shared
     @FocusState var focusedField: Field?
     
     enum Field: Hashable {
@@ -91,7 +91,7 @@ struct LoginView: View {
                         Task {
                             do {
                                 try await vm.auth()
-                                isLogin = true
+                                authStorage.isLogin = true
                             } catch {
                                 alert.error(error)
                             }
@@ -160,6 +160,7 @@ struct LoginView: View {
             .navigationDestination(for: TasksListRoute.self) { screen in
                 switch screen {
                 case .taskDetails(let task): TaskDetails(task: task)
+                case .taskGraph: TaskGraph()
                 }
             }
         }

@@ -472,6 +472,22 @@ extension SQLite {
             }
         }
 
+        // Планировщик синхронизации: таски над независимыми объектами теперь могут
+        // выполняться параллельно, а не строго по одной — entityID/dependsOnTaskIDsJSON дают
+        // планировщику понять, какие таски связаны (одна и та же сущность или явная
+        // межсущностная зависимость, например транзакция → ещё не подтверждённый счёт) и
+        // должны остаться строго последовательными, а какие можно пускать параллельно.
+        migrator.registerMigration("addSyncTaskScheduling") { db in
+            try db.alter(table: "syncTaskDB") { table in
+                table.add(column: "entityID", .blob)
+                    .notNull()
+                    .defaults(to: UUID(uuid: UUID_NULL))
+                table.add(column: "dependsOnTaskIDsJSON", .text)
+                    .notNull()
+                    .defaults(to: "[]")
+            }
+        }
+
         return migrator
     }
 }

@@ -22,45 +22,87 @@ class TaskManager {
     let apiManager: APIManager
     var syncInProgress = false
     
+    // Обрабатывает невыполненные таски волнами: на каждой волне выполняются параллельно
+    // только те таски, все зависимости которых уже обработаны (см. createTask). Связанные
+    // таски (та же сущность или явная межсущностная зависимость) никогда не окажутся в одной
+    // волне — зависимая таска становится "готовой" только после того, как её зависимость
+    // покидает remaining (выполнилась либо провалилась).
     func executeDBTasks() async throws {
-        
+
         if syncInProgress {
             logger.warning("Синхронизация в процессе, ждем ответа от сервера")
             return
         }
-        
+
         syncInProgress = true
         defer { syncInProgress = false }
-        
-        let countTasks = try await repository.getCountTasks()
-        guard countTasks > 0 else {
-            return
-        }
-        logger.log("Количество тасок: \(countTasks)")
-        for i in 0..<countTasks {
-            let tasks = try await repository.getSyncTasks(limit: 1)
-            guard !tasks.isEmpty else {
-                logger.error("Количество тасок \(countTasks), но мы не смогли получить из базы данных \(i) таску")
-                return
+
+        var remaining = try await repository.getSyncTasks()
+        guard !remaining.isEmpty else { return }
+        logger.log("Количество тасок: \(remaining.count)")
+
+        // Таски, чья зависимость в этом цикле провалилась — сама она (и всё, что от неё
+        // зависит) не выполняется в этом проходе, попробуем в следующий раз.
+        var blockedIDs: Set<UUID> = []
+
+        while !remaining.isEmpty {
+            let remainingIDs = Set(remaining.map(\.id))
+
+            let ready = remaining.filter { task in
+                task.dependsOnTaskIDs.allSatisfy { !remainingIDs.contains($0) && !blockedIDs.contains($0) }
             }
-            try await executeTask(tasks[0])
+
+            guard !ready.isEmpty else {
+                logger.warning("Есть незавершённые таски (\(remaining.count)), но ни одна не готова к выполнению — отложены до следующей синхронизации")
+                break
+            }
+
+            await withTaskGroup(of: (id: UUID, success: Bool).self) { group in
+                for task in ready {
+                    group.addTask {
+                        do {
+                            try await self.executeTask(task)
+                            return (task.id, true)
+                        } catch {
+                            return (task.id, false)
+                        }
+                    }
+                }
+                for await result in group where !result.success {
+                    blockedIDs.insert(result.id)
+                }
+            }
+
+            remaining.removeAll { task in ready.contains { $0.id == task.id } }
         }
     }
-    
+
+    /// Создаёт таску синхронизации. `entityID` — объект, который таска создаёт/меняет;
+    /// `dependsOnEntityIDs` — другие сущности, от которых эта таска зависит (например,
+    /// транзакция зависит от обоих счетов, счёт — от своей группы и родителя). Планировщик
+    /// (executeDBTasks) сам находит среди ещё не выполненных тасок те, что относятся к этим
+    /// сущностям, и не даёт текущей таске выполниться раньше них.
     func createTask<T: Encodable>(
         actionName: ActionName,
-        reqModel: T
-    ) {
-        Task {
-            
-            let fieldsJSON = try JSONEncoder().encode(reqModel)
-            
-            try await repository.createTask(SyncTask(
-                actionName: actionName,
-                tryCount: 0,
-                fieldsJSON: fieldsJSON
-            ))
-        }
+        reqModel: T,
+        entityID: UUID,
+        dependsOnEntityIDs: [UUID] = []
+    ) async throws {
+        let fieldsJSON = try JSONEncoder().encode(reqModel)
+
+        let relevantIDs = Set(dependsOnEntityIDs + [entityID])
+        let pendingTasks = try await repository.getSyncTasks()
+        let dependsOnTaskIDs = pendingTasks
+            .filter { relevantIDs.contains($0.entityID) }
+            .map(\.id)
+
+        try await repository.createTask(SyncTask(
+            actionName: actionName,
+            tryCount: 0,
+            fieldsJSON: fieldsJSON,
+            entityID: entityID,
+            dependsOnTaskIDs: dependsOnTaskIDs
+        ))
     }
     
     private func executeTask(_ task: SyncTask) async throws {

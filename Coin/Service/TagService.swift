@@ -17,14 +17,16 @@ extension Service {
                 
         try await repository.createTag(tag)
         
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .createTag,
             reqModel: CreateTagReq(
                 id: tag.id,
                 name: tag.name,
                 accountGroupID: tag.accountGroup.id,
                 datetimeCreate: tag.datetimeCreate
-            )
+            ),
+            entityID: tag.id,
+            dependsOnEntityIDs: [tag.accountGroup.id]
         )
     }
     
@@ -50,21 +52,23 @@ extension Service {
                 
         try await repository.updateTag(newTag)
         
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .updateTag,
             reqModel: UpdateTagReq(
                 id: newTag.id,
                 name: newTag.name != oldTag.name ? newTag.name : nil
-            )
+            ),
+            entityID: newTag.id
         )
     }
     
     // MARK: Delete
     func deleteTag(_ tag: Tag) async throws {
         try await self.repository.deleteTag(tag)
-        taskManager.createTask(
+        try await taskManager.createTask(
             actionName: .deleteTag,
-            reqModel: DeleteTagReq(id: tag.id)
+            reqModel: DeleteTagReq(id: tag.id),
+            entityID: tag.id
         )
     }
 }

@@ -16,6 +16,14 @@ struct SyncTask: Identifiable, Hashable {
     var fieldsJSON: Data
     var completed: Bool
     var datetimeCreate: Date
+    /// id объекта, который создаёт/меняет эта таска — используется планировщиком, чтобы
+    /// несколько тасок над одним и тем же объектом не выполнялись параллельно/не в том
+    /// порядке (см. TaskManager.createTask).
+    var entityID: UUID
+    /// Таски (по id), которые должны быть обработаны раньше этой — либо потому что относятся
+    /// к тому же entityID, либо потому что эта таска явно ссылается на другую сущность,
+    /// которая ещё не подтверждена сервером (например, транзакция на ещё не созданный счёт).
+    var dependsOnTaskIDs: [UUID]
 
     init(
         id: UUID = UUID(),
@@ -24,7 +32,9 @@ struct SyncTask: Identifiable, Hashable {
         error: String? = nil,
         fieldsJSON: Data = Data(),
         completed: Bool = false,
-        datetimeCreate: Date = Date()
+        datetimeCreate: Date = Date(),
+        entityID: UUID = UUID(),
+        dependsOnTaskIDs: [UUID] = []
     ) {
         self.id = id
         self.actionName = actionName
@@ -33,6 +43,8 @@ struct SyncTask: Identifiable, Hashable {
         self.fieldsJSON = fieldsJSON
         self.completed = completed
         self.datetimeCreate = datetimeCreate
+        self.entityID = entityID
+        self.dependsOnTaskIDs = dependsOnTaskIDs
     }
 
     // Инициализатор из модели базы данных
@@ -44,6 +56,8 @@ struct SyncTask: Identifiable, Hashable {
         self.completed = dbModel.completed
         self.fieldsJSON = dbModel.fieldsJson
         self.datetimeCreate = dbModel.datetimeCreate
+        self.entityID = dbModel.entityID
+        self.dependsOnTaskIDs = (try? JSONDecoder().decode([UUID].self, from: dbModel.dependsOnTaskIDsJSON)) ?? []
     }
     
     static func convertFromDBModel(_ tasksDB: [SyncTaskDB]) throws -> [SyncTask] {

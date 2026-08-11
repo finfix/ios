@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftUI
 import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "API")
@@ -20,9 +19,7 @@ class NetworkManager {
     }
     
     let authManager: AuthManager
-    
-    @AppStorage("isLogin") var isLogin: Bool = false
-    
+
     enum Method: String {
         case get = "GET"
         case post = "POST"

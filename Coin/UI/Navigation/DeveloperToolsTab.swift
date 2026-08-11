@@ -22,6 +22,7 @@ struct DeveloperToolsTab: View {
                 .navigationDestination(for: TasksListRoute.self) { screen in
                     switch screen {
                     case .taskDetails(let task): TaskDetails(task: task)
+                    case .taskGraph: TaskGraph()
                     }
                 }
                 .navigationDestination(for: DeveloperObjectRoute.self) { screen in

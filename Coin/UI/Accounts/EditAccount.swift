@@ -97,8 +97,25 @@ struct EditAccount: View {
                                 }
                             }
                         }
+
+                    // Если валюта счета отличается от валюты группы счетов — показываем баланс
+                    // ещё и в валюте группы, для ориентира (сам счёт при этом хранится и
+                    // сохраняется по-прежнему в своей собственной валюте).
+                    if vm.currentAccount.currency != selectedAccountGroup.currency {
+                        HStack {
+                            Text("В валюте группы")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(CurrencyFormatter().string(
+                                number: vm.currentAccount.remainder * (selectedAccountGroup.currency.rate / vm.currentAccount.currency.rate),
+                                currency: selectedAccountGroup.currency
+                            ))
+                                .foregroundStyle(.secondary)
+                        }
+                        .font(.footnote)
+                    }
                 }
-                
+
             }
             
             if vm.permissions.changeBudget {

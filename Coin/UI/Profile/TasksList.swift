@@ -9,6 +9,7 @@ import SwiftUI
 
 enum TasksListRoute: Hashable {
     case taskDetails(SyncTask)
+    case taskGraph
 }
 
 struct TasksList: View {
@@ -53,6 +54,13 @@ struct TasksList: View {
             }
         }
         .toolbar(content: {
+            ToolbarItem {
+                Button {
+                    path.path.append(TasksListRoute.taskGraph)
+                } label: {
+                    Image(systemName: "point.3.connected.trianglepath.dotted")
+                }
+            }
             ToolbarItem {
                 Button(role: .destructive) {
                     Task {

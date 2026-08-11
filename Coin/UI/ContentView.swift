@@ -13,14 +13,14 @@ private let logger = Logger(subsystem: "Coin", category: "ContentView")
 
 struct ContentView: View {
     
-    @AppStorage("isLogin") var isLogin: Bool = false
     @ObservationIgnored
     @Injected(\.service) private var service
     @Environment(AlertManager.self) var alert
-    
+    private var authStorage = AuthStorage.shared
+
     var body: some View {
         Group {
-            if isLogin {
+            if authStorage.isLogin {
                 AppTabView()
                     .task {
                         Timer.scheduledTimer(withTimeInterval: 15, repeats: true) { _ in
