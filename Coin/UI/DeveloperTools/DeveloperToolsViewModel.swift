@@ -24,4 +24,18 @@ class DeveloperToolsViewModel {
     func forceRefreshTokens() async throws {
         try await service.forceRefreshTokens()
     }
+
+    // MARK: - Инкрементальная синхронизация
+
+    var taskManager: TaskManager { service.taskManager }
+
+    func triggerIncrementalSync() async throws {
+        try await service.incrementalSync()
+    }
+
+    /// Сбрасывает локальный чекпоинт синхронизации на 0 — следующий incrementalSync() заново
+    /// перекачает и переприменит всю доступную историю (полезно для отладки applySyncChanges).
+    func resetSyncCheckpoint() {
+        SyncStateStorage.shared.lastSyncedAuditLogID = 0
+    }
 }

@@ -591,6 +591,12 @@ extension Service {
         return try await repository.getCountTasks()
     }
     
+    /// Лёгкая инкрементальная синхронизация (Sync/ConfirmSync) поверх полного sync() ниже —
+    /// см. TaskManager.incrementalSync.
+    func incrementalSync() async throws {
+        try await taskManager.incrementalSync()
+    }
+
     func sync() async throws {
         logger.info("Синхронизируем данные")
                 

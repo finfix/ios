@@ -43,7 +43,7 @@ extension APIManager {
         }
         
         guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
         
         return try response.accounts.map { account in
@@ -96,7 +96,7 @@ extension APIManager {
         }
         
         guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
     }
     
@@ -138,7 +138,7 @@ extension APIManager {
         }
         
         guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
     }
     
@@ -156,7 +156,7 @@ extension APIManager {
         }
         
         guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
     }
 }

@@ -43,7 +43,7 @@ extension APIManager {
         }
 
         guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
 
         return try response.auditLogs.map { auditLog in

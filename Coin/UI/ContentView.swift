@@ -32,6 +32,15 @@ struct ContentView: View {
                                 }
                             }
                         }
+                        Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
+                            Task {
+                                do {
+                                    try await service.incrementalSync()
+                                } catch {
+                                    logger.warning("\(error)")
+                                }
+                            }
+                        }
                         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                             Task {
                                 do {

@@ -49,8 +49,12 @@
 		3AC4C4F9D8B57B241BCC8C13 /* AccountBudgetDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8F37DAECBA4D2E8AF4502B /* AccountBudgetDB.swift */; };
 		BB63C040B6A13EA93C4FA37A /* AccountBudgetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7324308CCA63A679945DCAD7 /* AccountBudgetModels.swift */; };
 		DA989C0C3E51043EB47CADAB /* AccountBudgetModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7324308CCA63A679945DCAD7 /* AccountBudgetModels.swift */; };
+		D617E1795D1F4227CF8F2F19 /* SyncModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7FDFD2FD2D9DA379B3FD5D /* SyncModels.swift */; };
+		D5B57D26444BC66A7467A99E /* SyncModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B7FDFD2FD2D9DA379B3FD5D /* SyncModels.swift */; };
 		128ACB73F5C94366BB099483 /* AccountBudgetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FDC15620F31006A9474561 /* AccountBudgetAPI.swift */; };
 		0294F4D8D5491C00A929848A /* AccountBudgetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63FDC15620F31006A9474561 /* AccountBudgetAPI.swift */; };
+		DFCB3D85D61279CE9446726C /* SyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEBB5DA770BD927EA85FF72 /* SyncAPI.swift */; };
+		9904D611AD5E87FDBCD8BF87 /* SyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEBB5DA770BD927EA85FF72 /* SyncAPI.swift */; };
 		BA7D172DA4D2D3B3F9E03BFD /* AccountBudgetService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B076DE7FB1755457843FA8D /* AccountBudgetService.swift */; };
 		B42D278857CD2A0EB7424DDF /* AccountBudgetService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B076DE7FB1755457843FA8D /* AccountBudgetService.swift */; };
 		B51CE1F22BAC403800682D48 /* AccountGroupDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51CE1F12BAC403800682D48 /* AccountGroupDB.swift */; };
@@ -89,6 +93,8 @@
 		2E42A5B90BE46A953B8FF114 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EC82B6ABEEB8DA8B851923 /* Keychain.swift */; };
 		A83FB963E58BDF6F407FC9A3 /* AuthStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277296F767F584F714670A99 /* AuthStorage.swift */; };
 		02EBFE38806BF03F7710F6F2 /* AuthStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277296F767F584F714670A99 /* AuthStorage.swift */; };
+		F8B61A6B317745644BF37F99 /* SyncStateStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12B86CDAE5F4968424188FCD /* SyncStateStorage.swift */; };
+		8F6726C4CBD37D3B103562BA /* SyncStateStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12B86CDAE5F4968424188FCD /* SyncStateStorage.swift */; };
 		9CCBDBFD4683594A80A07546 /* TextDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4511A853879C02BB2E894A63 /* TextDiff.swift */; };
 		0818FB9AE3BBABAD663F6198 /* TextDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4511A853879C02BB2E894A63 /* TextDiff.swift */; };
 		C8FA42AFFF5E287E12C1DD1A /* DiffView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 861C1330E6CA566399615FD3 /* DiffView.swift */; };
@@ -374,7 +380,9 @@
 		B0C85B81B034440F5F334447 /* AccountBudget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBudget.swift; sourceTree = "<group>"; };
 		FA8F37DAECBA4D2E8AF4502B /* AccountBudgetDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBudgetDB.swift; sourceTree = "<group>"; };
 		7324308CCA63A679945DCAD7 /* AccountBudgetModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBudgetModels.swift; sourceTree = "<group>"; };
+		4B7FDFD2FD2D9DA379B3FD5D /* SyncModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncModels.swift; sourceTree = "<group>"; };
 		63FDC15620F31006A9474561 /* AccountBudgetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBudgetAPI.swift; sourceTree = "<group>"; };
+		7DEBB5DA770BD927EA85FF72 /* SyncAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncAPI.swift; sourceTree = "<group>"; };
 		0B076DE7FB1755457843FA8D /* AccountBudgetService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountBudgetService.swift; sourceTree = "<group>"; };
 		B51CE1F12BAC403800682D48 /* AccountGroupDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroupDB.swift; sourceTree = "<group>"; };
 		B51CE1F32BAC40BB00682D48 /* CurrencyDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyDB.swift; sourceTree = "<group>"; };
@@ -401,6 +409,7 @@
 		B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Hasher.swift; sourceTree = "<group>"; };
 		60EC82B6ABEEB8DA8B851923 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		277296F767F584F714670A99 /* AuthStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStorage.swift; sourceTree = "<group>"; };
+		12B86CDAE5F4968424188FCD /* SyncStateStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateStorage.swift; sourceTree = "<group>"; };
 		4511A853879C02BB2E894A63 /* TextDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextDiff.swift; sourceTree = "<group>"; };
 		861C1330E6CA566399615FD3 /* DiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiffView.swift; sourceTree = "<group>"; };
 		B5610EFC28FC98B50063AFEB /* TransactionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionModels.swift; sourceTree = "<group>"; };
@@ -725,6 +734,7 @@
 				B562CB212C71BE9F00AFB056 /* AuthAPI.swift */,
 				B5D143B72906B4F800875037 /* AccountAPI.swift */,
 				63FDC15620F31006A9474561 /* AccountBudgetAPI.swift */,
+				7DEBB5DA770BD927EA85FF72 /* SyncAPI.swift */,
 				B504B7E42AE46EEB0078643A /* UserAPI.swift */,
 				B5744E9A2BD29267004C9AC7 /* SettingsAPI.swift */,
 				B5FF351D2AEC091F007694F9 /* Defaults.swift */,
@@ -825,6 +835,7 @@
 				B5D143B32906A66400875037 /* AuthModels.swift */,
 				B596E6092A278CC1007D7E6D /* AccountModels.swift */,
 				7324308CCA63A679945DCAD7 /* AccountBudgetModels.swift */,
+				4B7FDFD2FD2D9DA379B3FD5D /* SyncModels.swift */,
 				B529280C2B0614D100C192CA /* UserModels.swift */,
 				B5744E9C2BD29276004C9AC7 /* SettingsModels.swift */,
 				B5744EA72BD2DAC5004C9AC7 /* TagModels.swift */,
@@ -846,6 +857,7 @@
 				B55EF9DC2BE2CFF5003C8882 /* Hasher.swift */,
 				60EC82B6ABEEB8DA8B851923 /* Keychain.swift */,
 				277296F767F584F714670A99 /* AuthStorage.swift */,
+				12B86CDAE5F4968424188FCD /* SyncStateStorage.swift */,
 				4511A853879C02BB2E894A63 /* TextDiff.swift */,
 				B5038AF42C3EC915003FA6C0 /* JWTChecker.swift */,
 			);
@@ -1160,6 +1172,7 @@
 				B5DEFCDF2C07015A001D7E61 /* Hasher.swift in Sources */,
 				14A945F92DD9681B142707E1 /* Keychain.swift in Sources */,
 				A83FB963E58BDF6F407FC9A3 /* AuthStorage.swift in Sources */,
+				F8B61A6B317745644BF37F99 /* SyncStateStorage.swift in Sources */,
 				9CCBDBFD4683594A80A07546 /* TextDiff.swift in Sources */,
 				C8FA42AFFF5E287E12C1DD1A /* DiffView.swift in Sources */,
 				B5DEFCE02C07015A001D7E61 /* AccountModels.swift in Sources */,
@@ -1200,7 +1213,9 @@
 				F73A71E8D6CEB4687FD7C715 /* AccountBudgetDB.swift in Sources */,
 				152CEFB067EED950953D75CA /* AccountBudget.swift in Sources */,
 				DA989C0C3E51043EB47CADAB /* AccountBudgetModels.swift in Sources */,
+				D617E1795D1F4227CF8F2F19 /* SyncModels.swift in Sources */,
 				0294F4D8D5491C00A929848A /* AccountBudgetAPI.swift in Sources */,
+				DFCB3D85D61279CE9446726C /* SyncAPI.swift in Sources */,
 				B42D278857CD2A0EB7424DDF /* AccountBudgetService.swift in Sources */,
 				B5DEFCF92C07015A001D7E61 /* EditAccountGroupViewModel.swift in Sources */,
 				B5DEFCFA2C07015A001D7E61 /* Service.swift in Sources */,
@@ -1323,6 +1338,7 @@
 				B55EF9DD2BE2CFF5003C8882 /* Hasher.swift in Sources */,
 				2E42A5B90BE46A953B8FF114 /* Keychain.swift in Sources */,
 				02EBFE38806BF03F7710F6F2 /* AuthStorage.swift in Sources */,
+				8F6726C4CBD37D3B103562BA /* SyncStateStorage.swift in Sources */,
 				0818FB9AE3BBABAD663F6198 /* TextDiff.swift in Sources */,
 				9B7F46686F4BA766891B24F1 /* DiffView.swift in Sources */,
 				B596E60A2A278CC1007D7E6D /* AccountModels.swift in Sources */,
@@ -1362,7 +1378,9 @@
 				3AC4C4F9D8B57B241BCC8C13 /* AccountBudgetDB.swift in Sources */,
 				B893905D94383333878E9B50 /* AccountBudget.swift in Sources */,
 				BB63C040B6A13EA93C4FA37A /* AccountBudgetModels.swift in Sources */,
+				D5B57D26444BC66A7467A99E /* SyncModels.swift in Sources */,
 				128ACB73F5C94366BB099483 /* AccountBudgetAPI.swift in Sources */,
+				9904D611AD5E87FDBCD8BF87 /* SyncAPI.swift in Sources */,
 				BA7D172DA4D2D3B3F9E03BFD /* AccountBudgetService.swift in Sources */,
 				B5192F952BFF4885004A8BFD /* EditAccountGroupViewModel.swift in Sources */,
 				B51CE1EB2BAC37A000682D48 /* Service.swift in Sources */,

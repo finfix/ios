@@ -18,13 +18,22 @@ struct DeveloperTools: View {
     @AppStorage("grpcHost") private var grpcHost = defaultGrpcHost
     @AppStorage("grpcPort") private var grpcPort = defaultGrpcPort
     private var authStorage = AuthStorage.shared
+    private var syncState = SyncStateStorage.shared
     @AppStorage("debugShowStaticLocations") private var debugShowStaticLocations = false
     @Environment(AlertManager.self) var alert
-    
+
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
     @State var shouldShowAlert = false
     @State var differences: String? = nil
+    @State var shouldShowIncrementalSyncProgress = false
+
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .medium
+        return formatter
+    }()
     
     var isDefaultGRPC: Bool {
         grpcHost == defaultGrpcHost && grpcPort == defaultGrpcPort
@@ -110,6 +119,87 @@ struct DeveloperTools: View {
                 Section {
                     NavigationLink("Показать все задачи", value: DeveloperToolsRoute.tasksList)
                 }
+
+                // MARK: Инкрементальная синхронизация (Sync/ConfirmSync)
+                Section(header: Text("Автосинхронизация"), footer: Text("Тикает раз в минуту (ContentView) и после 409 на мутации. Не путать с \"Сравнить данные с сервером\" выше — это про полный hard sync.")) {
+                    HStack {
+                        Text("Чекпоинт (lastSyncedAuditLogID)")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        CopyableIDText(id: "\(syncState.lastSyncedAuditLogID)")
+                    }
+                    HStack {
+                        Text("Статус")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(vm.taskManager.incrementalSyncInProgress ? "Выполняется…" : "Простаивает")
+                    }
+                    if let startedAt = vm.taskManager.lastIncrementalSyncStartedAt {
+                        HStack {
+                            Text("Последний запуск")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(Self.dateFormatter.string(from: startedAt))
+                        }
+                    }
+                    if let finishedAt = vm.taskManager.lastIncrementalSyncFinishedAt {
+                        HStack {
+                            Text("Последнее завершение")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(Self.dateFormatter.string(from: finishedAt))
+                        }
+                    }
+                    if let summary = vm.taskManager.lastIncrementalSyncSummary {
+                        HStack {
+                            Text("Последний результат")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(summary)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+                    if let conflictAt = vm.taskManager.lastConfirmSyncConflict {
+                        HStack {
+                            Text("Последний конфликт ConfirmSync")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(Self.dateFormatter.string(from: conflictAt))
+                                .foregroundColor(.yellow)
+                        }
+                    }
+                    if let error = vm.taskManager.lastIncrementalSyncError {
+                        HStack {
+                            Text(error)
+                                .foregroundColor(.red)
+                                .copyableOnTap(error)
+                        }
+                    }
+                    Button {
+                        Task {
+                            shouldShowIncrementalSyncProgress = true
+                            defer { shouldShowIncrementalSyncProgress = false }
+                            do {
+                                try await vm.triggerIncrementalSync()
+                            } catch {
+                                alert.error(error)
+                            }
+                        }
+                    } label: {
+                        if shouldShowIncrementalSyncProgress {
+                            ProgressView()
+                        } else {
+                            Text("Синхронизировать сейчас")
+                        }
+                    }
+                    .disabled(shouldShowIncrementalSyncProgress || vm.taskManager.incrementalSyncInProgress)
+                    Button(role: .destructive) {
+                        vm.resetSyncCheckpoint()
+                    } label: {
+                        Text("Сбросить чекпоинт (полная пересинхронизация)")
+                    }
+                }
+                .frame(maxWidth: .infinity)
                 Section(header: Text("Отладка")) {
                     Toggle("Показывать staticLocations кружками", isOn: $debugShowStaticLocations)
                 }

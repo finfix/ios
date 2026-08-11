@@ -28,7 +28,8 @@ class APIManager {
         tagClient: Tag_TagEndpoint.Client<HTTP2ClientTransport.Posix>,
         settingsClient: Settings_SettingsEndpoint.Client<HTTP2ClientTransport.Posix>,
         auditLogClient: AuditLog_AuditLogEndpoint.Client<HTTP2ClientTransport.Posix>,
-        accountBudgetClient: AccountBudget_AccountBudgetEndpoint.Client<HTTP2ClientTransport.Posix>
+        accountBudgetClient: AccountBudget_AccountBudgetEndpoint.Client<HTTP2ClientTransport.Posix>,
+        syncClient: Sync_SyncEndpoint.Client<HTTP2ClientTransport.Posix>
     ) {
         self.networkManager = networkManager
         self.authClient = authClient
@@ -40,6 +41,7 @@ class APIManager {
         self.settingsClient = settingsClient
         self.auditLogClient = auditLogClient
         self.accountBudgetClient = accountBudgetClient
+        self.syncClient = syncClient
     }
 
     let networkManager: NetworkManager
@@ -52,6 +54,7 @@ class APIManager {
     var settingsClient: Settings_SettingsEndpoint.Client<HTTP2ClientTransport.Posix>
     var auditLogClient: AuditLog_AuditLogEndpoint.Client<HTTP2ClientTransport.Posix>
     var accountBudgetClient: AccountBudget_AccountBudgetEndpoint.Client<HTTP2ClientTransport.Posix>
+    var syncClient: Sync_SyncEndpoint.Client<HTTP2ClientTransport.Posix>
 
     private var transportTask: Task<Void, Error>?
 
@@ -80,6 +83,7 @@ class APIManager {
         settingsClient = Settings_SettingsEndpoint.Client(wrapping: grpcClient)
         auditLogClient = AuditLog_AuditLogEndpoint.Client(wrapping: grpcClient)
         accountBudgetClient = AccountBudget_AccountBudgetEndpoint.Client(wrapping: grpcClient)
+        syncClient = Sync_SyncEndpoint.Client(wrapping: grpcClient)
 
         // Обновляем authClient в AuthManager (используется для refresh токенов)
         networkManager.authManager.reconnect(authClient: authClient)

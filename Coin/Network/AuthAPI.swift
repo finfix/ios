@@ -36,7 +36,7 @@ extension APIManager {
         }
         
         guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage)
+            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
 
         return AuthRes(
@@ -72,7 +72,7 @@ extension APIManager {
         }
         
         guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message)
+            throw ErrorModel(humanText: response.error.message, code: response.error.code)
         }
         
         return AuthRes(

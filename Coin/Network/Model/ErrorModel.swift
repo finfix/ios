@@ -11,6 +11,9 @@ import SwiftUI
 struct ErrorModel: LocalizedError, Decodable {
     var humanText: String
     var error: String = ""
+    /// HTTP-код ошибки, пришедший от сервера (error.Error.code в контрактах) — например 409,
+    /// если мутация отклонена из-за отставания локального чекпоинта синхронизации.
+    var code: Int32 = 0
     var path: [String]?
     var userInfo: UserInfo?
     var systemInfo: SystemInfo?

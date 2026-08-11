@@ -86,6 +86,108 @@ class Repository {
         }
     }
 
+    // Применяет дельту инкрементального Sync одной локальной транзакцией (см.
+    // TaskManager.incrementalSync): апсертит изменённые сущности (.save — записи могут уже
+    // существовать), затем удаляет по id. Порядок вставки/удаления соблюдает те же
+    // FK-зависимости, что и deleteAllData/Service.sync (группы → счета → теги → транзакции →
+    // бюджеты, с родительскими счетами раньше дочерних).
+    //
+    // Возвращает id счетов, задействованных в изменённых/удалённых транзакциях — remainder
+    // этих счетов в accountDB после Sync может быть устаревшим (сервер прислал изменённые
+    // счета только если поменялись ИХ поля, а не при каждой транзакции по ним), поэтому вызывающий
+    // код (TaskManager.incrementalSync → Service.recalculateAccountBalances) должен пересчитать
+    // балансы именно этих счетов — точно так же, как при локальном создании/изменении/удалении
+    // транзакции (см. TransactionService.swift).
+    @discardableResult
+    func applySyncChanges(_ res: SyncRes) async throws -> Set<UUID> {
+        try await sqlite.write { db in
+            var affectedAccountIDs: Set<UUID> = []
+            for transaction in res.changedTransactions {
+                affectedAccountIDs.insert(transaction.accountFromID)
+                affectedAccountIDs.insert(transaction.accountToID)
+            }
+            if !res.deletedTransactionIDs.isEmpty {
+                // Счета удаляемых транзакций нужно узнать ДО удаления строк.
+                let deletedTransactions = try TransactionDB
+                    .filter(res.deletedTransactionIDs.contains(TransactionDB.Columns.id))
+                    .fetchAll(db)
+                for transaction in deletedTransactions {
+                    affectedAccountIDs.insert(transaction.accountFromId)
+                    affectedAccountIDs.insert(transaction.accountToId)
+                }
+            }
+
+            if let changedUser = res.changedUser {
+                try UserDB(changedUser).save(db)
+            }
+            for currency in CurrencyDB.convertFromApiModel(res.changedCurrencies) {
+                try currency.save(db)
+            }
+            for accountGroup in AccountGroupDB.convertFromApiModel(res.changedAccountGroups) {
+                try accountGroup.save(db)
+            }
+            for account in AccountDB.convertFromApiModel(res.changedAccounts).sorted(by: { l, _ in l.isParent }) {
+                try account.save(db)
+            }
+            for tag in TagDB.convertFromApiModel(res.changedTags) {
+                try tag.save(db)
+            }
+            for transaction in TransactionDB.convertFromApiModel(res.changedTransactions) {
+                try transaction.save(db)
+            }
+            for budget in AccountBudgetDB.convertFromApiModel(res.changedAccountBudgets) {
+                try budget.save(db)
+            }
+
+            if !res.deletedTransactionIDs.isEmpty {
+                try TransactionDB.filter(res.deletedTransactionIDs.contains(TransactionDB.Columns.id)).deleteAll(db)
+            }
+            if !res.deletedAccountIDs.isEmpty {
+                try AccountDB.filter(res.deletedAccountIDs.contains(AccountDB.Columns.id)).deleteAll(db)
+            }
+            if !res.deletedTagIDs.isEmpty {
+                try TagDB.filter(res.deletedTagIDs.contains(TagDB.Columns.id)).deleteAll(db)
+            }
+            if !res.deletedAccountGroupIDs.isEmpty {
+                try AccountGroupDB.filter(res.deletedAccountGroupIDs.contains(AccountGroupDB.Columns.id)).deleteAll(db)
+            }
+
+            return affectedAccountIDs
+        }
+    }
+
+    // Пересчитывает remainder набора счетов по id — тот же алгоритм, что и
+    // Service.recalculateAccountBalances (expense/earnings/balancing — в рамках текущего
+    // месяца, остальные типы — за всё время), но не зависит от Service, чтобы им мог
+    // пользоваться TaskManager сразу после применения инкрементального Sync.
+    func recalculateBalances(accountIDs: [UUID]) async throws {
+        guard !accountIDs.isEmpty else { return }
+
+        let accounts = try await getAccounts(ids: accountIDs)
+
+        let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        let dateFrom = Calendar.current.date(from: DateComponents(year: today.year, month: today.month, day: 1))
+        let dateTo = Calendar.current.date(from: DateComponents(year: today.year, month: today.month! + 1, day: 1))
+
+        var balances: [UUID: Decimal] = [:]
+
+        let monthWindowIDs = accounts.filter { $0.type == .expense || $0.type == .earnings || $0.type == .balancing }.compactMap(\.id)
+        if !monthWindowIDs.isEmpty {
+            let monthWindowBalances = try await getBalances(accountIDs: monthWindowIDs, dateFrom: dateFrom, dateTo: dateTo)
+            balances = balances.merging(monthWindowBalances) { current, _ in current }
+        }
+
+        let allTimeIDs = accounts.filter { $0.type == .regular || $0.type == .debt }.compactMap(\.id)
+        if !allTimeIDs.isEmpty {
+            let allTimeBalances = try await getBalances(accountIDs: allTimeIDs)
+            balances = balances.merging(allTimeBalances) { current, _ in current }
+        }
+
+        for (accountID, balance) in balances {
+            try await updateBalance(id: accountID, newBalance: balance.round(factor: 7))
+        }
+    }
+
     func deleteAllData() async throws {
         try await sqlite.write { db in
             _ = try TagToTransactionDB.deleteAll(db)

@@ -103,7 +103,7 @@ class AuthManager {
         
         // Обрабатываем ответ
         if response.hasError {
-            throw ErrorModel(humanText: response.error.message)
+            throw ErrorModel(humanText: response.error.message, code: response.error.code)
         }
                 
         // Сохраняем токены

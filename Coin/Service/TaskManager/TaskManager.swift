@@ -21,7 +21,17 @@ class TaskManager {
     let repository: Repository
     let apiManager: APIManager
     var syncInProgress = false
-    
+
+    // MARK: - Отладочная информация об инкрементальной синхронизации (для DeveloperTools)
+    private(set) var incrementalSyncInProgress = false
+    private(set) var lastIncrementalSyncStartedAt: Date?
+    private(set) var lastIncrementalSyncFinishedAt: Date?
+    private(set) var lastIncrementalSyncError: String?
+    /// Человекочитаемая сводка последнего успешного incrementalSync — например
+    /// "изменений нет" или "3 транзакции, 1 счёт".
+    private(set) var lastIncrementalSyncSummary: String?
+    private(set) var lastConfirmSyncConflict: Date?
+
     // Обрабатывает невыполненные таски волнами: на каждой волне выполняются параллельно
     // только те таски, все зависимости которых уже обработаны (см. createTask). Связанные
     // таски (та же сущность или явная межсущностная зависимость) никогда не окажутся в одной
@@ -169,6 +179,15 @@ class TaskManager {
             }
         } catch {
             logger.warning("\(error)")
+
+            // 409 значит, что локальный чекпоинт синхронизации отстал от сервера — подтягиваем
+            // его инкрементальным Sync/ConfirmSync. Саму таску это не решает: она остаётся в
+            // очереди с увеличенным tryCount и просто переиграется на следующем executeDBTasks
+            // (см. incrementalSync ниже) — никакого отдельного UI-сигнала не добавляем.
+            if (error as? ErrorModel)?.code == 409 {
+                try? await incrementalSync()
+            }
+
             var task = task
             task.tryCount += 1
             task.error = "\(error)"
@@ -179,8 +198,73 @@ class TaskManager {
             }
             throw error
         }
-        
+
         try await repository.completeTasks(ids: [task.id])
+    }
+
+    /// Лёгкая инкрементальная синхронизация поверх полного Service.sync() (который остаётся
+    /// нетронутым как путь для бутстрапа/ручного refresh) — подтягивает чужие изменения по
+    /// чекпоинту аудит-лога устройства. Вызывается по таймеру и при получении 409 на мутацию.
+    func incrementalSync() async throws {
+        guard !incrementalSyncInProgress else { return }
+        incrementalSyncInProgress = true
+        lastIncrementalSyncStartedAt = Date.now
+        defer { incrementalSyncInProgress = false }
+
+        do {
+            let res = try await apiManager.Sync(req: SyncReq(sinceID: SyncStateStorage.shared.lastSyncedAuditLogID))
+            guard res.hasChanges, let pendingSyncToken = res.pendingSyncToken else {
+                lastIncrementalSyncSummary = "Изменений нет"
+                lastIncrementalSyncError = nil
+                lastIncrementalSyncFinishedAt = Date.now
+                return
+            }
+
+            let affectedAccountIDs = try await repository.applySyncChanges(res)
+
+            // Сервер присылает изменённый account только если поменялись ЕГО поля — простое
+            // появление/удаление транзакции по счёту не бьёт remainder автоматически, поэтому
+            // досчитываем баланс задействованных счетов сами, как и при локальных мутациях
+            // (см. TransactionService.createTransaction/updateTransaction/deleteTransaction).
+            if !affectedAccountIDs.isEmpty {
+                try await repository.recalculateBalances(accountIDs: Array(affectedAccountIDs))
+            }
+
+            do {
+                try await apiManager.ConfirmSync(req: ConfirmSyncReq(pendingSyncToken: pendingSyncToken))
+                SyncStateStorage.shared.lastSyncedAuditLogID = res.pendingCheckpoint
+                lastIncrementalSyncSummary = incrementalSyncSummary(res)
+                lastIncrementalSyncError = nil
+            } catch let error as ErrorModel where error.code == 409 || error.code == 400 {
+                // Токен устарел — на бэке уже появились более новые изменения поверх этого
+                // pending-чекпоинта. Чекпоинт не двигаем, следующий вызов (таймер/следующий 409 на
+                // мутации) переспросит Sync заново с прежним sinceID.
+                logger.warning("ConfirmSync: устаревший токен, попробуем в следующий раз")
+                lastConfirmSyncConflict = Date.now
+                lastIncrementalSyncSummary = incrementalSyncSummary(res) + " (не подтверждено — устаревший токен)"
+            }
+            lastIncrementalSyncFinishedAt = Date.now
+        } catch {
+            lastIncrementalSyncError = "\(error)"
+            lastIncrementalSyncFinishedAt = Date.now
+            throw error
+        }
+    }
+
+    private func incrementalSyncSummary(_ res: SyncRes) -> String {
+        var parts: [String] = []
+        if !res.changedTransactions.isEmpty { parts.append("\(res.changedTransactions.count) тр.") }
+        if !res.deletedTransactionIDs.isEmpty { parts.append("−\(res.deletedTransactionIDs.count) тр.") }
+        if !res.changedAccounts.isEmpty { parts.append("\(res.changedAccounts.count) счетов") }
+        if !res.deletedAccountIDs.isEmpty { parts.append("−\(res.deletedAccountIDs.count) счетов") }
+        if !res.changedAccountGroups.isEmpty { parts.append("\(res.changedAccountGroups.count) групп") }
+        if !res.deletedAccountGroupIDs.isEmpty { parts.append("−\(res.deletedAccountGroupIDs.count) групп") }
+        if !res.changedTags.isEmpty { parts.append("\(res.changedTags.count) тегов") }
+        if !res.deletedTagIDs.isEmpty { parts.append("−\(res.deletedTagIDs.count) тегов") }
+        if !res.changedAccountBudgets.isEmpty { parts.append("\(res.changedAccountBudgets.count) бюджетов") }
+        if res.changedUser != nil { parts.append("пользователь") }
+        if !res.changedCurrencies.isEmpty { parts.append("\(res.changedCurrencies.count) валют") }
+        return parts.isEmpty ? "Изменений нет" : parts.joined(separator: ", ")
     }
 
     func getSyncTasks(
