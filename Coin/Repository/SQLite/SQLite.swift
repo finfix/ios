@@ -66,19 +66,29 @@ struct SQLite {
     
     private static func makeConfiguration(_ base: Configuration = Configuration()) -> Configuration {
         var config = base
-                
-        if ProcessInfo.processInfo.environment["SQL_TRACE"] != nil {
-            config.prepareDatabase { db in
+
+        config.prepareDatabase { db in
+            // SQLite'ий встроенный LIKE регистронезависим только для ASCII (a-z/A-Z) —
+            // кириллица (и вообще что угодно не-ASCII) сравнивается с учётом регистра.
+            // Swift's String.lowercased() умеет в Unicode правильно, поэтому регистрируем
+            // её как SQL-функцию и используем "lowerUnicode(col) LIKE lowerUnicode(?)"
+            // везде, где раньше был обычный LIKE по названиям/заметкам.
+            db.add(function: DatabaseFunction("lowerUnicode", argumentCount: 1, pure: true) { values in
+                guard let value = String.fromDatabaseValue(values[0]) else { return nil }
+                return value.lowercased()
+            })
+
+            if ProcessInfo.processInfo.environment["SQL_TRACE"] != nil {
                 db.trace {
                     os_log("%{public}@", log: sqlLogger, type: .debug, String(describing: $0))
                 }
             }
         }
-        
+
 #if DEV
         config.publicStatementArguments = true
 #endif
-        
+
         return config
     }
 }

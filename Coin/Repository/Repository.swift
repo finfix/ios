@@ -242,7 +242,8 @@ class Repository {
             var request = CurrencyDB.order(CurrencyDB.Columns.code)
             
             if !searchText.isEmpty {
-                request = request.filter(CurrencyDB.Columns.code.like("%"+searchText+"%") || CurrencyDB.Columns.name.like("%"+searchText+"%"))
+                let pattern = "%\(searchText)%"
+                request = request.filter(sql: "lowerUnicode(code) LIKE lowerUnicode(?) OR lowerUnicode(name) LIKE lowerUnicode(?)", arguments: [pattern, pattern])
             }
 
             return try request.fetchAll(db)
@@ -331,7 +332,7 @@ class Repository {
             var request = AccountGroupDB.order(AccountGroupDB.Columns.serialNumber)
             
             if let name {
-                request = request.filter(AccountGroupDB.Columns.name.like("%"+name+"%"))
+                request = request.filter(sql: "lowerUnicode(name) LIKE lowerUnicode(?)", arguments: ["%\(name)%"])
             }
             
             return try request.fetchAll(db)
@@ -456,7 +457,7 @@ class Repository {
                 request = request.filter(TagDB.Columns.accountGroupID == accountGroupID)
             }
             if let name {
-                request = request.filter(TagDB.Columns.name.like("%"+name+"%"))
+                request = request.filter(sql: "lowerUnicode(name) LIKE lowerUnicode(?)", arguments: ["%\(name)%"])
             }
             return try request.fetchAll(db)
         }
@@ -507,7 +508,7 @@ class Repository {
             }
             
             if let name = name {
-                request = request.filter(AccountDB.Columns.name.like("%"+name+"%"))
+                request = request.filter(sql: "lowerUnicode(name) LIKE lowerUnicode(?)", arguments: ["%\(name)%"])
             }
             
             if let types = types {
@@ -558,7 +559,7 @@ class Repository {
             }
 
             if searchText != "" {
-                filters.append("t.note LIKE ?")
+                filters.append("lowerUnicode(t.note) LIKE lowerUnicode(?)")
                 _ = args.append(contentsOf: ["%"+searchText+"%"])
             }
 
@@ -623,16 +624,16 @@ class Repository {
             
             if !currencies.isEmpty {
                 var questions: [String] = []
-                for _ in transactionTypes {
+                for _ in currencies {
                     questions.append("?")
                 }
-                
+
                 joins.append("JOIN accountDB a1 ON a1.id = t.accountFromId")
                 joins.append("JOIN accountDB a2 ON a2.id = t.accountToId")
 
-                filters.append("(a1.currency IN (\(questions.joined(separator: ","))) OR a2.currency IN (\(questions.joined(separator: ","))))")
-                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
-                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
+                filters.append("(a1.currencyCode IN (\(questions.joined(separator: ","))) OR a2.currencyCode IN (\(questions.joined(separator: ","))))")
+                _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
+                _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
             }
                         
             let sql = """
@@ -683,7 +684,7 @@ class Repository {
             }
 
             if searchText != "" {
-                filters.append("t.note LIKE ?")
+                filters.append("lowerUnicode(t.note) LIKE lowerUnicode(?)")
                 _ = args.append(contentsOf: ["%"+searchText+"%"])
             }
 
@@ -744,16 +745,16 @@ class Repository {
 
             if !currencies.isEmpty {
                 var questions: [String] = []
-                for _ in transactionTypes {
+                for _ in currencies {
                     questions.append("?")
                 }
 
                 joins.append("JOIN accountDB a1 ON a1.id = t.accountFromId")
                 joins.append("JOIN accountDB a2 ON a2.id = t.accountToId")
 
-                filters.append("(a1.currency IN (\(questions.joined(separator: ","))) OR a2.currency IN (\(questions.joined(separator: ","))))")
-                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
-                _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
+                filters.append("(a1.currencyCode IN (\(questions.joined(separator: ","))) OR a2.currencyCode IN (\(questions.joined(separator: ","))))")
+                _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
+                _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
             }
 
             let sql = """
@@ -781,7 +782,9 @@ class Repository {
         excludedAccountIDs: [UUID] = [],
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
-        tagIDs: [UUID] = []
+        tagIDs: [UUID] = [],
+        currencies: [Currency] = [],
+        searchText: String = ""
     ) async throws -> [Series] {
         try await sqlite.read { db in
             
@@ -870,7 +873,19 @@ class Repository {
                 filters.append("tg.id in (\(questions.joined(separator: ", ")))")
                 _ = args.append(contentsOf: StatementArguments(tagIDs))
             }
-                            
+            if !currencies.isEmpty {
+                var questions: [String] = []
+                for _ in currencies {
+                    questions.append("?")
+                }
+                filters.append("a.currencyCode in (\(questions.joined(separator: ", ")))")
+                _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
+            }
+            if searchText != "" {
+                filters.append("lowerUnicode(t.note) LIKE lowerUnicode(?)")
+                _ = args.append(contentsOf: ["%"+searchText+"%"])
+            }
+
             // Мапа ObjectID - Дата - Сумма
             var result: [UUID: [Date: Decimal]] = [:]
             

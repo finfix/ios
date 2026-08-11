@@ -106,6 +106,8 @@ extension Service {
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         tagIDs: [UUID] = [],
+        currencies filterCurrencies: [Currency] = [],
+        searchText: String = "",
         aggregateIntoParents: Bool = true
     ) async throws -> [Series] {
         
@@ -149,7 +151,9 @@ extension Service {
                 excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
-                tagIDs: tagIDs
+                tagIDs: tagIDs,
+                currencies: filterCurrencies,
+                searchText: searchText
             )
             
             //
@@ -171,7 +175,9 @@ extension Service {
                 excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
-                tagIDs: tagIDs
+                tagIDs: tagIDs,
+                currencies: filterCurrencies,
+                searchText: searchText
             )
             
             //
@@ -196,7 +202,9 @@ extension Service {
                 excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
-                tagIDs: tagIDs
+                tagIDs: tagIDs,
+                currencies: filterCurrencies,
+                searchText: searchText
             )
             
         // Если необходимо получить только данные по расходам
@@ -214,7 +222,9 @@ extension Service {
                 excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
-                tagIDs: tagIDs
+                tagIDs: tagIDs,
+                currencies: filterCurrencies,
+                searchText: searchText
             )
             
         // Дельта: совокупный доход минус совокупный расход за период, одной линией
@@ -231,7 +241,9 @@ extension Service {
                 excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
-                tagIDs: tagIDs
+                tagIDs: tagIDs,
+                currencies: filterCurrencies,
+                searchText: searchText
             )
             let earnings = try await repository.getStatisticByMonth(
                 chartType: .earningsAndExpenses,
@@ -244,7 +256,9 @@ extension Service {
                 excludedAccountIDs: excludedAccountIDs,
                 dateFrom: dateFrom,
                 dateTo: dateTo,
-                tagIDs: tagIDs
+                tagIDs: tagIDs,
+                currencies: filterCurrencies,
+                searchText: searchText
             )
 
             var deltaData: [Date: Decimal] = [:]
@@ -288,7 +302,8 @@ extension Service {
                 let groupMatch = accountGroupIDs.isEmpty || accountGroupIDs.contains(account.accountGroup.id)
                 let accountMatch = accountIDs.isEmpty || accountIDs.contains(account.id)
                 let excludedMatch = !excludedAccountIDs.contains(account.id)
-                return groupMatch && accountMatch && excludedMatch
+                let currencyMatch = filterCurrencies.isEmpty || filterCurrencies.contains(account.currency)
+                return groupMatch && accountMatch && excludedMatch && currencyMatch
             }
 
             // Получаем чистые потоки по периодам для каждого счёта
