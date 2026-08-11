@@ -127,29 +127,38 @@ extension Service {
             )
         }
         
-        // Получаем родительский счет
-        var parentAccount: Account?
+        // Получаем родительский счет — сохраняем оригинальное состояние (oldParentAccount),
+        // чтобы ниже явно посчитать диф и отправить на сервер именно то, что реально
+        // изменилось у него, а не только у редактируемого счёта.
+        let oldParentAccount: Account?
         if let parentAccountID = newAccount.parentAccountID {
-            parentAccount = try await getAccounts(ids: [parentAccountID]).first
+            oldParentAccount = try await getAccounts(ids: [parentAccountID]).first
+        } else {
+            oldParentAccount = nil
         }
-        
+        var newParentAccount = oldParentAccount
+
         // Если значение родительского счета отрицательное, а у дочернего счета положительное
-        if parentAccount != nil && !parentAccount!.accountingInHeader && newAccount.accountingInHeader {
-            parentAccount!.accountingInHeader = true
+        if let oldParentAccount, !oldParentAccount.accountingInHeader && newAccount.accountingInHeader {
+            newParentAccount?.accountingInHeader = true
         }
-        
+
         // Если значения дочерних счетов положительные, а значение родительского отрицательное
         for (i, childAccount) in newAccount.childrenAccounts.enumerated() {
             if childAccount.accountingInHeader && !newAccount.accountingInHeader {
                 newAccount.childrenAccounts[i].accountingInHeader = false
             }
         }
-        
+
         // Если значение родительского счета отрицательное, а у дочернего счета положительное
-        if parentAccount != nil && !parentAccount!.visible && newAccount.visible {
-            parentAccount!.visible = true
+        if let oldParentAccount, !oldParentAccount.visible && newAccount.visible {
+            newParentAccount?.visible = true
         }
-        
+
+        // Снимок дочерних счетов ДО каскадных изменений видимости — нужен ниже, чтобы отправить
+        // на сервер explicit-апдейт именно для тех детей, у кого реально что-то поменялось.
+        let oldChildrenAccounts = newAccount.childrenAccounts
+
         // Если значения родительского счета меняется, то значения дочерних счетов меняются на такое же
         for (i, childAccount) in newAccount.childrenAccounts.enumerated() {
             newAccount.childrenAccounts[i].visible = newAccount.visible
@@ -157,15 +166,15 @@ extension Service {
                 newAccount.childrenAccounts[i].accountingInHeader = false
             }
         }
-        
-        if let parentAccount = parentAccount {
-            try await repository.updateAccount(parentAccount)
+
+        if let newParentAccount {
+            try await repository.updateAccount(newParentAccount)
         }
 
         for childAccount in newAccount.childrenAccounts {
             try await repository.updateAccount(childAccount)
         }
-        
+
         try await repository.updateAccount(newAccount)
 
         let updateReq = UpdateAccountReq(
@@ -181,6 +190,32 @@ extension Service {
         )
         if updateReq.hasChanges {
             taskManager.createTask(actionName: .updateAccount, reqModel: updateReq)
+        }
+
+        // Явно отправляем на сервер каскадные изменения родителя (если что-то реально
+        // поменялось) — раньше это только писалось в локальную БД, и бэк о таких изменениях
+        // не узнавал вовсе.
+        if let oldParentAccount, let newParentAccount {
+            let parentUpdateReq = UpdateAccountReq(
+                id: newParentAccount.id,
+                accountingInHeader: oldParentAccount.accountingInHeader != newParentAccount.accountingInHeader ? newParentAccount.accountingInHeader : nil,
+                visible: oldParentAccount.visible != newParentAccount.visible ? newParentAccount.visible : nil
+            )
+            if parentUpdateReq.hasChanges {
+                taskManager.createTask(actionName: .updateAccount, reqModel: parentUpdateReq)
+            }
+        }
+
+        // Явно отправляем на сервер каскадные изменения каждого затронутого дочернего счёта.
+        for (old, new) in zip(oldChildrenAccounts, newAccount.childrenAccounts) {
+            let childUpdateReq = UpdateAccountReq(
+                id: new.id,
+                accountingInHeader: old.accountingInHeader != new.accountingInHeader ? new.accountingInHeader : nil,
+                visible: old.visible != new.visible ? new.visible : nil
+            )
+            if childUpdateReq.hasChanges {
+                taskManager.createTask(actionName: .updateAccount, reqModel: childUpdateReq)
+            }
         }
 
         // Бюджет — отдельная версионируемая сущность: если хоть одно из полей поменялось,
