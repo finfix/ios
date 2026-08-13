@@ -13,39 +13,131 @@ import GRPCProtobuf
 import GRPCNIOTransportHTTP2
 import SwiftProtobuf
 
-extension APIManager {
-    
-    func GetAccounts(req: GetAccountsReq) async throws -> [GetAccountsRes] {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = try Account_GetAccountsRequest.with {
-            $0.accessToken = accessToken
-            if let accountingInHeader = req.accountingInHeader {
-                $0.accountingInHeader = accountingInHeader
-            }
-            if let dateFrom = req.dateFrom {
-                $0.dateFrom = Google_Protobuf_Timestamp(localFilter: dateFrom)
-            }
-            if let dateTo = req.dateTo {
-                $0.dateTo = Google_Protobuf_Timestamp(localFilter: dateTo)
-            }
-            if let type = req.type {
-                guard let accountType = AccountType(rawValue: type) else {
-                    throw ErrorModel(humanText: "Неизвестный тип счета: \(type)")
-                }
-                $0.type = try accountType.toProto()
-            }
+extension Account_GetAccountsRequest {
+    init(
+        accountingInHeader: Bool?,
+        dateFrom: Date?,
+        dateTo: Date?,
+        type: String?
+    ) throws {
+        self.init()
+        if let accountingInHeader {
+            self.accountingInHeader = accountingInHeader
         }
-        
+        if let dateFrom {
+            self.dateFrom = Google_Protobuf_Timestamp(localFilter: dateFrom)
+        }
+        if let dateTo {
+            self.dateTo = Google_Protobuf_Timestamp(localFilter: dateTo)
+        }
+        if let type {
+            guard let accountType = AccountType(rawValue: type) else {
+                throw ErrorModel(humanText: "Неизвестный тип счета: \(type)")
+            }
+            self.type = try accountType.toProto()
+        }
+    }
+}
+
+extension Account_CreateAccountRequest {
+    init(
+        id: UUID,
+        accountGroupID: UUID,
+        accountingInHeader: Bool,
+        accountingInCharts: Bool,
+        currency: String,
+        iconID: UUID,
+        name: String,
+        type: String,
+        isParent: Bool,
+        parentAccountID: UUID?,
+        datetimeCreate: Date,
+        rank: String
+    ) throws {
+        self.init()
+        self.id = id.data
+        self.accountGroupID = accountGroupID.data
+        self.accountingInHeader = accountingInHeader
+        self.accountingInCharts = accountingInCharts
+        self.currency = currency
+        self.iconID = iconID.data
+        self.name = name
+        guard let accountType = AccountType(rawValue: type) else {
+            throw ErrorModel(humanText: "Неизвестный тип счета: \(type)")
+        }
+        self.type = try accountType.toProto()
+        self.isParent = isParent
+        if let parentAccountID {
+            self.parentAccountID = parentAccountID.data
+        }
+        self.datetimeCreate = Google_Protobuf_Timestamp(datetimeCreate)
+        self.rank = rank
+    }
+}
+
+extension Account_UpdateAccountRequest {
+    init(
+        id: UUID,
+        accountingInHeader: Bool?,
+        accountingInCharts: Bool?,
+        name: String?,
+        visible: Bool?,
+        currencyCode: String?,
+        parentAccountID: UUID?,
+        iconID: UUID?,
+        rank: String?
+    ) {
+        self.init()
+        self.id = id.data
+        if let accountingInHeader {
+            self.accountingInHeader = accountingInHeader
+        }
+        if let accountingInCharts {
+            self.accountingInCharts = accountingInCharts
+        }
+        if let name {
+            self.name = name
+        }
+        if let visible {
+            self.visible = visible
+        }
+        if let currencyCode {
+            self.currency = currencyCode
+        }
+        if let parentAccountID {
+            self.parentAccountID = parentAccountID.data
+        }
+        if let iconID {
+            self.iconID = iconID.data
+        }
+        if let rank {
+            self.rank = rank
+        }
+    }
+}
+
+extension Account_DeleteAccountRequest {
+    init(id: UUID) {
+        self.init()
+        self.id = id.data
+    }
+}
+
+extension APIManager {
+
+    func GetAccounts(req: GetAccountsReq) async throws -> [GetAccountsRes] {
+
+        let request = try Account_GetAccountsRequest(
+            accountingInHeader: req.accountingInHeader,
+            dateFrom: req.dateFrom,
+            dateTo: req.dateTo,
+            type: req.type
+        )
+
         let response = try await grpcCall("GetAccounts", request: request) {
             try await accountClient.getAccounts($0)
         }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
-        }
-        
+
         return try response.accounts.map { account in
             GetAccountsRes(
                 id: try account.id.toUUID(),
@@ -65,98 +157,54 @@ extension APIManager {
             )
         }
     }
-    
+
     func CreateAccount(req: CreateAccountReq) async throws {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = try Account_CreateAccountRequest.with {
-            $0.accessToken = accessToken
-            $0.id = req.id.data
-            $0.accountGroupID = req.accountGroupID.data
-            $0.accountingInHeader = req.accountingInHeader
-            $0.accountingInCharts = req.accountingInCharts
-            $0.currency = req.currency
-            $0.iconID = req.iconID.data
-            $0.name = req.name
-            guard let accountType = AccountType(rawValue: req.type) else {
-                throw ErrorModel(humanText: "Неизвестный тип счета: \(req.type)")
-            }
-            $0.type = try accountType.toProto()
-            $0.isParent = req.isParent
-            if let parentAccountID = req.parentAccountID {
-                $0.parentAccountID = parentAccountID.data
-            }
-            $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)
-            $0.rank = req.rank
-        }
-        
-        let response = try await grpcCall("CreateAccount", request: request) {
+
+        let request = try Account_CreateAccountRequest(
+            id: req.id,
+            accountGroupID: req.accountGroupID,
+            accountingInHeader: req.accountingInHeader,
+            accountingInCharts: req.accountingInCharts,
+            currency: req.currency,
+            iconID: req.iconID,
+            name: req.name,
+            type: req.type,
+            isParent: req.isParent,
+            parentAccountID: req.parentAccountID,
+            datetimeCreate: req.datetimeCreate,
+            rank: req.rank
+        )
+
+        _ = try await grpcCall("CreateAccount", request: request) {
             try await accountClient.createAccount($0)
         }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
-        }
     }
-    
+
     func UpdateAccount(req: UpdateAccountReq) async throws {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = Account_UpdateAccountRequest.with {
-            $0.accessToken = accessToken
-            $0.id = req.id.data
-            if let accountingInHeader = req.accountingInHeader {
-                $0.accountingInHeader = accountingInHeader
-            }
-            if let accountingInCharts = req.accountingInCharts {
-                $0.accountingInCharts = accountingInCharts
-            }
-            if let name = req.name {
-                $0.name = name
-            }
-            if let visible = req.visible {
-                $0.visible = visible
-            }
-            if let currencyCode = req.currencyCode {
-                $0.currency = currencyCode
-            }
-            if let parentAccountID = req.parentAccountID {
-                $0.parentAccountID = parentAccountID.data
-            }
-            if let iconID = req.iconID {
-                $0.iconID = iconID.data
-            }
-            if let rank = req.rank {
-                $0.rank = rank
-            }
-        }
-        
-        let response = try await grpcCall("UpdateAccount", request: request) {
+
+        let request = Account_UpdateAccountRequest(
+            id: req.id,
+            accountingInHeader: req.accountingInHeader,
+            accountingInCharts: req.accountingInCharts,
+            name: req.name,
+            visible: req.visible,
+            currencyCode: req.currencyCode,
+            parentAccountID: req.parentAccountID,
+            iconID: req.iconID,
+            rank: req.rank
+        )
+
+        _ = try await grpcCall("UpdateAccount", request: request) {
             try await accountClient.updateAccount($0)
         }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
-        }
     }
-    
+
     func DeleteAccount(req: DeleteAccountReq) async throws {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = Account_DeleteAccountRequest.with {
-            $0.accessToken = accessToken
-            $0.id = req.id.data
-        }
-        
-        let response = try await grpcCall("DeleteAccount", request: request) {
+
+        let request = Account_DeleteAccountRequest(id: req.id)
+
+        _ = try await grpcCall("DeleteAccount", request: request) {
             try await accountClient.deleteAccount($0)
-        }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
     }
 }

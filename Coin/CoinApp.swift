@@ -123,9 +123,8 @@ extension Container {
 
                 // 4. Создаём менеджеры с gRPC клиентами
                 let authManager = AuthManager(authClient: authClient)
-                let networkManager = NetworkManager(authManager: authManager)
                 let apiManager = APIManager(
-                    networkManager: networkManager,
+                    authManager: authManager,
                     authClient: authClient,
                     transactionClient: transactionClient,
                     accountClient: accountClient,

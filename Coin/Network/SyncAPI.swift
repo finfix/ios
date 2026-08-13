@@ -10,23 +10,28 @@ import GRPCProtobuf
 import GRPCNIOTransportHTTP2
 import SwiftProtobuf
 
+extension Sync_SyncRequest {
+    init(sinceID: UInt32) {
+        self.init()
+        self.sinceID = sinceID
+    }
+}
+
+extension Sync_ConfirmSyncRequest {
+    init(pendingSyncToken: UUID) {
+        self.init()
+        self.pendingSyncToken = pendingSyncToken.data
+    }
+}
+
 extension APIManager {
 
     func Sync(req: SyncReq) async throws -> SyncRes {
 
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-
-        let request = Sync_SyncRequest.with {
-            $0.accessToken = accessToken
-            $0.sinceID = req.sinceID
-        }
+        let request = Sync_SyncRequest(sinceID: req.sinceID)
 
         let response = try await grpcCall("Sync", request: request) {
             try await syncClient.sync($0)
-        }
-
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
 
         return SyncRes(
@@ -121,19 +126,10 @@ extension APIManager {
 
     func ConfirmSync(req: ConfirmSyncReq) async throws {
 
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
+        let request = Sync_ConfirmSyncRequest(pendingSyncToken: req.pendingSyncToken)
 
-        let request = Sync_ConfirmSyncRequest.with {
-            $0.accessToken = accessToken
-            $0.pendingSyncToken = req.pendingSyncToken.data
-        }
-
-        let response = try await grpcCall("ConfirmSync", request: request) {
+        _ = try await grpcCall("ConfirmSync", request: request) {
             try await syncClient.confirmSync($0)
-        }
-
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
     }
 }

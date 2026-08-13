@@ -11,16 +11,27 @@ import SwiftUI
 struct ErrorModel: LocalizedError, Decodable {
     var humanText: String
     var error: String = ""
-    /// HTTP-код ошибки, пришедший от сервера (error.Error.code в контрактах) — например 409,
-    /// если мутация отклонена из-за отставания локального чекпоинта синхронизации.
-    var code: Int32 = 0
+    /// Категория ошибки, пришедшая от сервера (error.Error.category в контрактах) — заменяет
+    /// прежний числовой HTTP-код. Именно на неё завязаны действия после ответа (logout,
+    /// need sync), а не на конкретные коды/сообщения.
+    var category: ErrorCategory = .unspecified
     var path: [String]?
     var userInfo: UserInfo?
     var systemInfo: SystemInfo?
     var parameters: [String: String]?
-    
+
     var errorDescription: String? { humanText }
-    
+
+    /// Зеркалит error.ErrorCategory из контрактов (proto/enums/errorCategory.proto).
+    enum ErrorCategory: String, Decodable {
+        case unspecified
+        case internalError
+        case needToLogout
+        case needToSync
+        case other
+        case needToRefreshToken
+    }
+
     struct UserInfo: Decodable {
         let userID: UUID?
         let taskID: String?

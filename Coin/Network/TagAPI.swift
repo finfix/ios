@@ -12,24 +12,49 @@ import GRPCProtobuf
 import GRPCNIOTransportHTTP2
 import SwiftProtobuf
 
-extension APIManager {
-    
-    func GetTags() async throws -> [GetTagsRes] {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = Tag_GetTagsRequest.with {
-            $0.accessToken = accessToken
+extension Tag_CreateTagRequest {
+    init(
+        id: UUID,
+        name: String,
+        accountGroupID: UUID,
+        datetimeCreate: Date
+    ) {
+        self.init()
+        self.id = id.data
+        self.name = name
+        self.accountGroupID = accountGroupID.data
+        self.datetimeCreate = Google_Protobuf_Timestamp(datetimeCreate)
+    }
+}
+
+extension Tag_UpdateTagRequest {
+    init(
+        id: UUID,
+        name: String?
+    ) {
+        self.init()
+        self.id = id.data
+        if let name {
+            self.name = name
         }
-        
-        let response = try await grpcCall("GetTags", request: request) {
+    }
+}
+
+extension Tag_DeleteTagRequest {
+    init(id: UUID) {
+        self.init()
+        self.id = id.data
+    }
+}
+
+extension APIManager {
+
+    func GetTags() async throws -> [GetTagsRes] {
+
+        let response = try await grpcCall("GetTags", request: Tag_GetTagsRequest()) {
             try await tagClient.getTags($0)
         }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
-        }
-        
+
         return try response.tags.map { tag in
             GetTagsRes(
                 id: try tag.id.toUUID(),
@@ -39,23 +64,13 @@ extension APIManager {
             )
         }
     }
-    
+
     func GetTagsToTransaction() async throws -> [GetTagsToTransactionsRes] {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = Tag_GetTagsToTransactionsRequest.with {
-            $0.accessToken = accessToken
-        }
-        
-        let response = try await grpcCall("GetTagsToTransactions", request: request) {
+
+        let response = try await grpcCall("GetTagsToTransactions", request: Tag_GetTagsToTransactionsRequest()) {
             try await tagClient.getTagsToTransactions($0)
         }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
-        }
-        
+
         return try response.tagsToTransactions.map { tagToTransaction in
             GetTagsToTransactionsRes(
                 tagID: try tagToTransaction.tagID.toUUID(),
@@ -63,83 +78,48 @@ extension APIManager {
             )
         }
     }
-    
+
     func CreateTag(req: CreateTagReq) async throws {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = Tag_CreateTagRequest.with {
-            $0.accessToken = accessToken
-            $0.id = req.id.data
-            $0.name = req.name
-            $0.accountGroupID = req.accountGroupID.data
-            $0.datetimeCreate = Google_Protobuf_Timestamp(req.datetimeCreate)
-        }
-        
-        let response = try await grpcCall("CreateTag", request: request) {
+
+        let request = Tag_CreateTagRequest(
+            id: req.id,
+            name: req.name,
+            accountGroupID: req.accountGroupID,
+            datetimeCreate: req.datetimeCreate
+        )
+
+        _ = try await grpcCall("CreateTag", request: request) {
             try await tagClient.createTag($0)
         }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
-        }
     }
-    
+
     func UpdateTag(req: UpdateTagReq) async throws {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = Tag_UpdateTagRequest.with {
-            $0.accessToken = accessToken
-            $0.id = req.id.data
-            if let name = req.name {
-                $0.name = name
-            }
-        }
-        
-        let response = try await grpcCall("UpdateTag", request: request) {
+
+        let request = Tag_UpdateTagRequest(id: req.id, name: req.name)
+
+        _ = try await grpcCall("UpdateTag", request: request) {
             try await tagClient.updateTag($0)
         }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
-        }
     }
-    
+
     func DeleteTag(req: DeleteTagReq) async throws {
-        
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-        
-        let request = Tag_DeleteTagRequest.with {
-            $0.accessToken = accessToken
-            $0.id = req.id.data
-        }
-        
-        let response = try await grpcCall("DeleteTag", request: request) {
+
+        let request = Tag_DeleteTagRequest(id: req.id)
+
+        _ = try await grpcCall("DeleteTag", request: request) {
             try await tagClient.deleteTag($0)
         }
-        
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
-        }
     }
-    
+
     func LinkTagToTransaction(req: LinkTagToTransactionReq) async throws {
-        
-//        let accessToken = try await self.networkManager.authManager.getAccessToken()
-//        
+
 //        let request = Tag_LinkTagToTransactionRequest.with {
-//            $0.accessToken = accessToken
 //            $0.tagID = req.tagID.data
 //            $0.transactionID = req.transactionID.data
 //        }
-//        
-//        let response = try await grpcCall("LinkTagToTransaction", request: request) {
+//
+//        _ = try await grpcCall("LinkTagToTransaction", request: request) {
 //            try await tagClient.linkTagToTransaction($0)
-//        }
-//        
-//        guard !response.hasError else {
-//            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
 //        }
     }
 }

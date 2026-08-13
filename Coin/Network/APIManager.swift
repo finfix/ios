@@ -16,10 +16,26 @@ import SwiftProtobuf
 
 private let logger = Logger(subsystem: "Coin", category: "gRPC")
 
+/// Запросы, у которых есть поле accessToken — grpcCall сам подставляет туда актуальный токен
+/// (см. перегрузку ниже), так что каждому XxxAPI.swift не нужно делать это вручную. Не все
+/// запросы этому соответствуют (SignIn/SignUp/GetVersion — без авторизации), поэтому это
+/// отдельный протокол, а не требование единственной перегрузки grpcCall.
+protocol HasAccessToken {
+    var accessToken: String { get set }
+}
+
+/// Общая форма всех Response-типов контрактов — есть у каждого без исключений (proto: optional
+/// error.Error error = 1). Даёт grpcCall распаковать response.error/hasError не зная конкретного
+/// типа Res.
+protocol HasErrorField {
+    var hasError: Bool { get }
+    var error: Error_Error { get }
+}
+
 class APIManager {
     
     init(
-        networkManager: NetworkManager,
+        authManager: AuthManager,
         authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>,
         transactionClient: Transaction_TransactionEndpoint.Client<HTTP2ClientTransport.Posix>,
         accountClient: Account_AccountEndpoint.Client<HTTP2ClientTransport.Posix>,
@@ -31,7 +47,7 @@ class APIManager {
         accountBudgetClient: AccountBudget_AccountBudgetEndpoint.Client<HTTP2ClientTransport.Posix>,
         syncClient: Sync_SyncEndpoint.Client<HTTP2ClientTransport.Posix>
     ) {
-        self.networkManager = networkManager
+        self.authManager = authManager
         self.authClient = authClient
         self.transactionClient = transactionClient
         self.accountClient = accountClient
@@ -44,7 +60,7 @@ class APIManager {
         self.syncClient = syncClient
     }
 
-    let networkManager: NetworkManager
+    let authManager: AuthManager
     var authClient: Auth_AuthEndpoint.Client<HTTP2ClientTransport.Posix>
     var transactionClient: Transaction_TransactionEndpoint.Client<HTTP2ClientTransport.Posix>
     var accountClient: Account_AccountEndpoint.Client<HTTP2ClientTransport.Posix>
@@ -86,14 +102,55 @@ class APIManager {
         syncClient = Sync_SyncEndpoint.Client(wrapping: grpcClient)
 
         // Обновляем authClient в AuthManager (используется для refresh токенов)
-        networkManager.authManager.reconnect(authClient: authClient)
+        authManager.reconnect(authClient: authClient)
         
         logger.info("gRPC переподключён")
     }
     
-    // MARK: - Логирование gRPC
-    
-    func grpcCall<Req: SwiftProtobuf.Message, Res: SwiftProtobuf.Message>(
+    // MARK: - gRPC-вызовы
+
+    /// Для запросов без авторизации (SignIn/SignUp/GetVersion) — accessToken не подставляется.
+    func grpcCall<Req: SwiftProtobuf.Message, Res: SwiftProtobuf.Message & HasErrorField>(
+        _ method: String,
+        request: Req,
+        perform: (Req) async throws -> Res
+    ) async throws -> Res {
+        try unwrap(try await performCall(method, request: request, perform: perform))
+    }
+
+    /// Для авторизованных запросов — сам подставляет актуальный accessToken перед вызовом. Если
+    /// ответ пришёл с категорией needToRefreshToken, один раз принудительно обновляет токен и
+    /// повторяет вызов — так это не нужно обрабатывать в каждом XxxAPI.swift отдельно.
+    func grpcCall<Req: SwiftProtobuf.Message & HasAccessToken, Res: SwiftProtobuf.Message & HasErrorField>(
+        _ method: String,
+        request: Req,
+        perform: (Req) async throws -> Res
+    ) async throws -> Res {
+        var request = request
+        request.accessToken = try await authManager.getAccessToken()
+
+        let response = try await performCall(method, request: request, perform: perform)
+
+        if response.hasError, ErrorModel.ErrorCategory(response.error.category) == .needToRefreshToken {
+            request.accessToken = try await authManager.forceRefreshTokens()
+            return try unwrap(try await performCall(method, request: request, perform: perform))
+        }
+
+        return try unwrap(response)
+    }
+
+    private func unwrap<Res: HasErrorField>(_ response: Res) throws -> Res {
+        guard !response.hasError else {
+            throw ErrorModel(
+                humanText: response.error.message,
+                error: response.error.systemMessage,
+                category: ErrorModel.ErrorCategory(response.error.category)
+            )
+        }
+        return response
+    }
+
+    private func performCall<Req: SwiftProtobuf.Message, Res: SwiftProtobuf.Message>(
         _ method: String,
         request: Req,
         perform: (Req) async throws -> Res

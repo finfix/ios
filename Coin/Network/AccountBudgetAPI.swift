@@ -10,53 +10,73 @@ import GRPCProtobuf
 import GRPCNIOTransportHTTP2
 import SwiftProtobuf
 
+extension AccountBudget_CreateAccountBudgetRequest {
+    init(
+        id: UUID,
+        accountID: UUID,
+        amount: Decimal,
+        fixedSum: Decimal,
+        daysOffset: Int8,
+        gradualFilling: Bool,
+        effectiveFrom: Date
+    ) {
+        self.init()
+        self.id = id.data
+        self.accountID = accountID.data
+        self.amount = amount.doubleValue
+        self.fixedSum = fixedSum.doubleValue
+        self.daysOffset = UInt32(daysOffset)
+        self.gradualFilling = gradualFilling
+        self.effectiveFrom = Google_Protobuf_Timestamp(effectiveFrom)
+    }
+}
+
+extension AccountBudget_GetAccountBudgetsRequest {
+    init(
+        accountGroupIDs: [UUID],
+        dateFrom: Date?,
+        dateTo: Date?
+    ) {
+        self.init()
+        self.accountGroupIds = accountGroupIDs.map { $0.data }
+        if let dateFrom {
+            self.dateFrom = Google_Protobuf_Timestamp(dateFrom)
+        }
+        if let dateTo {
+            self.dateTo = Google_Protobuf_Timestamp(dateTo)
+        }
+    }
+}
+
 extension APIManager {
 
     func CreateAccountBudget(req: CreateAccountBudgetReq) async throws {
 
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
+        let request = AccountBudget_CreateAccountBudgetRequest(
+            id: req.id,
+            accountID: req.accountID,
+            amount: req.amount,
+            fixedSum: req.fixedSum,
+            daysOffset: req.daysOffset,
+            gradualFilling: req.gradualFilling,
+            effectiveFrom: req.effectiveFrom
+        )
 
-        let request = AccountBudget_CreateAccountBudgetRequest.with {
-            $0.accessToken = accessToken
-            $0.id = req.id.data
-            $0.accountID = req.accountID.data
-            $0.amount = req.amount.doubleValue
-            $0.fixedSum = req.fixedSum.doubleValue
-            $0.daysOffset = UInt32(req.daysOffset)
-            $0.gradualFilling = req.gradualFilling
-            $0.effectiveFrom = Google_Protobuf_Timestamp(req.effectiveFrom)
-        }
-
-        let response = try await grpcCall("CreateAccountBudget", request: request) {
+        _ = try await grpcCall("CreateAccountBudget", request: request) {
             try await accountBudgetClient.createAccountBudget($0)
-        }
-
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
     }
 
     func GetAccountBudgets(req: GetAccountBudgetsReq) async throws -> [GetAccountBudgetsRes] {
 
-        let accessToken = try await self.networkManager.authManager.getAccessToken()
-
-        let request = AccountBudget_GetAccountBudgetsRequest.with {
-            $0.accessToken = accessToken
-            $0.accountGroupIds = req.accountGroupIDs.map { $0.data }
-            if let dateFrom = req.dateFrom {
-                $0.dateFrom = Google_Protobuf_Timestamp(dateFrom)
-            }
-            if let dateTo = req.dateTo {
-                $0.dateTo = Google_Protobuf_Timestamp(dateTo)
-            }
-        }
+        let request = AccountBudget_GetAccountBudgetsRequest(
+            accountGroupIDs: req.accountGroupIDs,
+            dateFrom: req.dateFrom,
+            dateTo: req.dateTo
+        )
 
         let response = try await grpcCall("GetAccountBudgets", request: request) {
             try await accountBudgetClient.getAccountBudgets($0)
-        }
-
-        guard !response.hasError else {
-            throw ErrorModel(humanText: response.error.message, error: response.error.systemMessage, code: response.error.code)
         }
 
         return try response.budgets.map { budget in

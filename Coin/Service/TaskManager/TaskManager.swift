@@ -180,11 +180,11 @@ class TaskManager {
         } catch {
             logger.warning("\(error)")
 
-            // 409 значит, что локальный чекпоинт синхронизации отстал от сервера — подтягиваем
-            // его инкрементальным Sync/ConfirmSync. Саму таску это не решает: она остаётся в
-            // очереди с увеличенным tryCount и просто переиграется на следующем executeDBTasks
-            // (см. incrementalSync ниже) — никакого отдельного UI-сигнала не добавляем.
-            if (error as? ErrorModel)?.code == 409 {
+            // needSync значит, что локальный чекпоинт синхронизации отстал от сервера —
+            // подтягиваем его инкрементальным Sync/ConfirmSync. Саму таску это не решает: она
+            // остаётся в очереди с увеличенным tryCount и просто переиграется на следующем
+            // executeDBTasks (см. incrementalSync ниже) — никакого отдельного UI-сигнала не добавляем.
+            if (error as? ErrorModel)?.category == .needToSync {
                 try? await incrementalSync()
             }
 
@@ -235,10 +235,10 @@ class TaskManager {
                 SyncStateStorage.shared.lastSyncedAuditLogID = res.pendingCheckpoint
                 lastIncrementalSyncSummary = incrementalSyncSummary(res)
                 lastIncrementalSyncError = nil
-            } catch let error as ErrorModel where error.code == 409 || error.code == 400 {
+            } catch let error as ErrorModel where error.category == .needToSync {
                 // Токен устарел — на бэке уже появились более новые изменения поверх этого
-                // pending-чекпоинта. Чекпоинт не двигаем, следующий вызов (таймер/следующий 409 на
-                // мутации) переспросит Sync заново с прежним sinceID.
+                // pending-чекпоинта. Чекпоинт не двигаем, следующий вызов (таймер/следующий
+                // needSync на мутации) переспросит Sync заново с прежним sinceID.
                 logger.warning("ConfirmSync: устаревший токен, попробуем в следующий раз")
                 lastConfirmSyncConflict = Date.now
                 lastIncrementalSyncSummary = incrementalSyncSummary(res) + " (не подтверждено — устаревший токен)"

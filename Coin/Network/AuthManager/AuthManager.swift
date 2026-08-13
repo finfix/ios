@@ -44,30 +44,31 @@ class AuthManager {
         // Проверяем токен
         do {
             try checkJWT(accessToken)
-            
+
         } catch JWTError.tokenExpired(_) { // Если токен протух
             do {
                 accessToken = try await refreshAccessToken() // Пытаемся получить новый токен
-                
-            } catch { // Если не получилось
-                
-                // Выкидываем пользователя
-                logout()
-                throw error
+
+            } catch { // Если не получилось — действие зависит от категории ошибки
+                switch (error as? ErrorModel)?.category {
+                case .needToLogout: // Сервер явно отклонил refresh-токен — разлогиниваем
+                    logout()
+                    throw error
+                case .needToRefreshToken: // Сервер просит повторить обновление токена — пробуем ещё раз
+                    accessToken = try await refreshAccessToken()
+                default:
+                    throw error
+                }
             }
-            
-        } catch { // Если другая ошибка
-            
-            // Выкидываем пользователя
-            logout()
-            throw error
-        }
-        
+
+        } // Локальные ошибки разбора самого токена (не ответ сервера) не разлогинивают — просто пробрасываем дальше
+
         return accessToken
     }
 
-    func forceRefreshTokens() async throws {
-        _ = try await refreshAccessToken()
+    @discardableResult
+    func forceRefreshTokens() async throws -> String {
+        try await refreshAccessToken()
     }
 
     private func refreshAccessToken() async throws -> String {
@@ -103,7 +104,7 @@ class AuthManager {
         
         // Обрабатываем ответ
         if response.hasError {
-            throw ErrorModel(humanText: response.error.message, code: response.error.code)
+            throw ErrorModel(humanText: response.error.message, category: ErrorModel.ErrorCategory(response.error.category))
         }
                 
         // Сохраняем токены
