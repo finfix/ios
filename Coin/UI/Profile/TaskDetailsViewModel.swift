@@ -7,6 +7,7 @@
 
 import Foundation
 import Factory
+import GRDB
 
 @Observable
 class TasksDetailsViewModel {
@@ -14,17 +15,15 @@ class TasksDetailsViewModel {
     @Injected(\.service) private var service
 
     var task: SyncTask
-    
+
     init(task: SyncTask) {
         self.task = task
     }
 
-    func load() async throws {
-        let tasks = try await service.taskManager.getSyncTasks(ids: [task.id], includeCompleted: true)
-        guard !tasks.isEmpty else {
-            throw ErrorModel(humanText: "Задача не найдена")
-        }
-        task = tasks[0]
+    /// Живая подписка на эту конкретную таску — обновляется сама (например, когда таска
+    /// доисполнится в фоне на следующем executeDBTasks, tryCount/error поменяются без pull-to-refresh).
+    func observeTask() -> AsyncValueObservation<SyncTask?> {
+        service.taskManager.observeSyncTask(id: task.id)
     }
 
     func delete() async throws {

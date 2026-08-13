@@ -88,13 +88,20 @@ struct TaskDetails: View {
                 }
             }
         }
-        .refreshable {
-            Task {
-                do {
-                    try await vm.load()
-                } catch {
-                    dismiss()
+        // ValueObservation вместо .refreshable — экран сам обновляется на любое изменение этой
+        // таски (например, если она доисполнится/провалится в фоне). nil в подписке означает,
+        // что таску удалили (completeTasks) — закрываем экран, как раньше делал catch у load().
+        .task {
+            do {
+                for try await task in vm.observeTask() {
+                    guard let task else {
+                        dismiss()
+                        return
+                    }
+                    vm.task = task
                 }
+            } catch {
+                alert.error(error)
             }
         }
         .toolbar(content: {

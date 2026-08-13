@@ -279,6 +279,10 @@ class TaskManager {
         repository.observeSyncTasks(includeCompleted: includeCompleted)
     }
 
+    func observeSyncTask(id: UUID) -> AsyncValueObservation<SyncTask?> {
+        repository.observeSyncTask(id: id)
+    }
+
     func completeTasks(
         ids: [UUID]? = nil
     ) async throws {

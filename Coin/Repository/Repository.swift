@@ -433,6 +433,17 @@ class Repository {
         }
     }
 
+    /// Живая одна таска по id (для TaskDetails) — nil, если таску удалили (completeTasks).
+    /// includeCompleted всегда true: экран должен показать финальное состояние, а не пропасть.
+    func observeSyncTask(id: UUID) -> AsyncValueObservation<SyncTask?> {
+        sqlite.observe { db in
+            guard let taskDB = try SyncTaskDB.filter(SyncTaskDB.Columns.id == id).fetchOne(db) else {
+                return nil
+            }
+            return try SyncTask(taskDB)
+        }
+    }
+
     func getIcons() async throws -> [IconDB] {
         try await sqlite.read { db in
             return try IconDB.fetchAll(db)
