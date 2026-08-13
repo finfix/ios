@@ -23,15 +23,6 @@ struct TasksList: View {
         List {
             Section {
                 Toggle("Показать выполненные", isOn: $vm.showCompleted)
-                    .onChange(of: vm.showCompleted) {
-                        Task {
-                            do {
-                                try await vm.load()
-                            } catch {
-                                alert.error(error)
-                            }
-                        }
-                    }
             }
             Section(footer: Text("Количество: \(vm.tasks.count)")) {
                 ForEach(vm.tasks) { task in
@@ -40,16 +31,6 @@ struct TasksList: View {
                             .foregroundStyle(task.completed ? .secondary : .primary)
                     }
                     .buttonStyle(.plain)
-                }
-            }
-        }
-        .refreshable {
-            Task {
-                do {
-                    try await vm.load()
-                } catch {
-                    alert.error(error)
-                    return
                 }
             }
         }
@@ -79,9 +60,14 @@ struct TasksList: View {
                 .frame(maxWidth: .infinity)
             }
         })
-        .task{
+        // ValueObservation вместо load()/.refreshable — экран сам обновляется на любой коммит в
+        // syncTaskDB. .task(id: vm.showCompleted) — переподписка на новый запрос при смене
+        // тумблера (перезапускает Task, отменяя предыдущую подписку).
+        .task(id: vm.showCompleted) {
             do {
-                try await vm.load()
+                for try await tasks in vm.observeTasks() {
+                    vm.tasks = tasks
+                }
             } catch {
                 alert.error(error)
             }

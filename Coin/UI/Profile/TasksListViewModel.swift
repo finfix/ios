@@ -7,6 +7,7 @@
 
 import Foundation
 import Factory
+import GRDB
 
 @Observable
 class TasksListViewModel {
@@ -17,8 +18,10 @@ class TasksListViewModel {
     var tasks: [SyncTask] = []
     var showCompleted = false
 
-    func load() async throws {
-        tasks = try await service.taskManager.getSyncTasks(includeCompleted: showCompleted)
+    /// Живая подписка вместо ручного load()/.refreshable — экран сам обновляется на любое
+    /// изменение syncTaskDB (executeDBTasks, createTask, incrementalSync), см. Repository.observeSyncTasks.
+    func observeTasks() -> AsyncValueObservation<[SyncTask]> {
+        service.taskManager.observeSyncTasks(includeCompleted: showCompleted)
     }
 
     func deleteAllTasks() async throws {

@@ -7,6 +7,7 @@
 
 import Foundation
 import OSLog
+import GRDB
 
 private let logger = Logger(subsystem: "Coin", category: "TaskManager")
 
@@ -272,6 +273,10 @@ class TaskManager {
         includeCompleted: Bool = false
     ) async throws -> [SyncTask] {
         return try await repository.getSyncTasks(ids: ids, includeCompleted: includeCompleted)
+    }
+
+    func observeSyncTasks(includeCompleted: Bool) -> AsyncValueObservation<[SyncTask]> {
+        repository.observeSyncTasks(includeCompleted: includeCompleted)
     }
 
     func completeTasks(

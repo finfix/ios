@@ -60,8 +60,17 @@ struct SQLite {
     public func read<T>(_ value: @Sendable @escaping (Database) throws -> T) async throws -> T {
         try await db.read(value)
     }
-    
-    
+
+    /// Живой запрос: GRDB сам переисполняет `value` и отдаёт новый результат при каждом коммите,
+    /// затрагивающем таблицы, к которым `value` обращался (через SQLite update hook, а не поллинг) —
+    /// см. Repository.observeSyncTasks для первого использования.
+    public func observe<T: Sendable>(
+        _ value: @escaping @Sendable (Database) throws -> T
+    ) -> AsyncValueObservation<T> {
+        ValueObservation.tracking(value).values(in: db)
+    }
+
+
     private static let sqlLogger = OSLog(subsystem: Bundle.main.bundleIdentifier!, category: "SQL")
     
     private static func makeConfiguration(_ base: Configuration = Configuration()) -> Configuration {

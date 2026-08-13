@@ -419,7 +419,20 @@ class Repository {
             return try SyncTask.convertFromDBModel(syncTaskDBs)
         }
     }
-    
+
+    /// Живой список тасок (см. SQLite.observe) — первый экран, переведённый на ValueObservation
+    /// вместо ручного load()/.task/.refreshable: обновляется сам на любой коммит в syncTaskDB,
+    /// откуда бы он ни пришёл (executeDBTasks, createTask, incrementalSync).
+    func observeSyncTasks(includeCompleted: Bool) -> AsyncValueObservation<[SyncTask]> {
+        sqlite.observe { db in
+            var request = SyncTaskDB.order(SyncTaskDB.Columns.datetimeCreate)
+            if !includeCompleted {
+                request = request.filter(!SyncTaskDB.Columns.completed)
+            }
+            return try SyncTask.convertFromDBModel(request.fetchAll(db))
+        }
+    }
+
     func getIcons() async throws -> [IconDB] {
         try await sqlite.read { db in
             return try IconDB.fetchAll(db)

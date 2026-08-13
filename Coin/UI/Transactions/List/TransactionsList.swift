@@ -113,6 +113,16 @@ struct TransactionsList: View {
                 alert.error(error)
             }
         }
+        // Список больше не перечитывается сам при возврате на экран (см. loadIfNeeded — иначе
+        // сбрасывался скролл), поэтому фоновые изменения (например, incrementalSync) явно
+        // подтягиваются только по жесту "потянуть вниз".
+        .refreshable {
+            do {
+                try await vm.load(filters: filters)
+            } catch {
+                alert.error(error)
+            }
+        }
         .onChange(of: filters) { _, _ in
             Task {
                 do {
