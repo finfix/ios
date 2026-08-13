@@ -33,6 +33,13 @@ class TransactionsListViewModel {
     @ObservationIgnored private var rows: [TransactionListRowData] = []
 
     @ObservationIgnored private var currentFilters = TransactionFilters(accountGroups: [])
+    // .task на TransactionsList выполняется заново при каждом возврате на экран из push'а
+    // (например, после закрытия редактирования транзакции), даже если сам @State не терялся —
+    // это особенность NavigationStack, а не баг конкретно тут. Без этого флага такой повторный
+    // .task безусловно обнулял бы rows/transactionItems и перезагружал первую страницу, сбрасывая
+    // скролл к началу списка. loadIfNeeded ниже — единственная точка входа для .task; на
+    // реальную смену фильтров (.onChange) по-прежнему отвечает load(filters:) напрямую.
+    @ObservationIgnored private var hasLoadedOnce = false
     private let pageSize = 100
 
     private(set) var hasMorePages = true
@@ -78,8 +85,19 @@ class TransactionsListViewModel {
         try await service.getTransactions(ids: [id]).first
     }
 
+    /// Единственная точка входа для .task на TransactionsList — грузит только один раз за время
+    /// жизни этой ViewModel (см. комментарий у hasLoadedOnce), повторные срабатывания .task при
+    /// возврате из push'а игнорируются. Реальные изменения фильтров всё ещё идут через
+    /// load(filters:) напрямую из .onChange.
+    @MainActor
+    func loadIfNeeded(filters: TransactionFilters) async throws {
+        guard !hasLoadedOnce else { return }
+        try await load(filters: filters)
+    }
+
     @MainActor
     func load(filters: TransactionFilters) async throws {
+        hasLoadedOnce = true
         currentFilters = filters
         hasMorePages = true
         rows = []

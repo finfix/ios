@@ -273,7 +273,10 @@ struct AccountCirclesView: View {
     
     @Environment(AlertManager.self) private var alert
     @Environment(AccountGroupSharedState.self) private var selectedAccountGroup
-    @State private var path = PathSharedState()
+    // Не свой NavigationStack — этот экран всегда встроен в NavigationStack, который уже создаёт
+    // AccountCirclesTab (вложенный NavigationStack внутри другого приводил к неустойчивым багам
+    // с навигацией — экраны копились в стеке, dismiss возвращал не туда).
+    @Environment(PathSharedState.self) private var path
     @State private var vm = AccountCirclesViewModel()
     @State private var quickStatisticVM = QuickStatisticViewModel()
     @State private var dragLocation: CGPoint?
@@ -282,8 +285,8 @@ struct AccountCirclesView: View {
     let horizontalSpacing: CGFloat = 10
     
     var body: some View {
-        NavigationStack(path: $path.path) {
-            GeometryReader { geometry in
+        @Bindable var path = path
+        GeometryReader { geometry in
                 ZStack {
                     VStack {
                         QuickStatisticView(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
@@ -511,51 +514,10 @@ struct AccountCirclesView: View {
                     }
                 }
             }
-            .navigationDestination(for: AccountCircleItemRoute.self) { screen in
-                switch screen {
-                case .accountTransactions(let account, let chartType): TransactionsView(
-                    filters: TransactionFilters(
-                        accounts: [account],
-                        accountGroups: [account.accountGroup]
-                    ),
-                    chartType: chartType)
-                case .editAccount(let account): EditAccount(account, selectedAccountGroup: selectedAccountGroup.selectedAccountGroup, isHiddenView: false)
-                }
-            }
-            .navigationDestination(for: PlusNewAccountRoute.self) { screen in
-                switch screen {
-                case .createAccount(let accountType): EditAccount(accountType: accountType, accountGroup: selectedAccountGroup.selectedAccountGroup)
-                }
-            }
-            .navigationDestination(for: TransactionsListRoute.self) { screen in
-                switch screen {
-                case .editTransaction(let transaction): EditTransaction(transaction)
-                }
-            }
-            .navigationDestination(for: EditTransactionRoute.self) { screen in
-                switch screen {
-                case .tagsList:
-                    TagsList(accountGroup: selectedAccountGroup.selectedAccountGroup)
-                case .auditLogHistory(let entityID, let accountGroupID):
-                    AuditLogHistoryView(entity: .transaction, entityID: entityID, accountGroupID: accountGroupID)
-                }
-            }
-            .navigationDestination(for: TagsListRoute.self) { screen in
-                switch screen {
-                case .createTag:
-                    EditTag(selectedAccountGroup: selectedAccountGroup.selectedAccountGroup)
-                case .editTag(let tag):
-                    EditTag(tag)
-                }
-            }
-            .navigationDestination(for: ChartViewRoute.self) { screen in
-                switch screen {
-                case .transactionView(let filters, let chartType):
-                    TransactionsView(filters: filters, chartType: chartType)
-                case .chartDrillDown(let filters, let chartType):
-                    TransactionsView(filters: filters, chartType: chartType)
-                }
-            }
+            // AccountCircleItemRoute/PlusNewAccountRoute/TransactionsListRoute/EditTransactionRoute/
+            // TagsListRoute/ChartViewRoute уже зарегистрированы на NavigationStack в AccountCirclesTab
+            // (этот экран — его root content, отдельного NavigationStack тут больше нет). Здесь
+            // остаётся только DraggableAccountRoute — маршрут, специфичный для этого экрана.
             .navigationDestination(for: DraggableAccountRoute.self) { screen in
                 switch screen {
                 case .createTransaction(let transactionType, let accountFrom, let accountTo): 
@@ -578,12 +540,13 @@ struct AccountCirclesView: View {
                     }
                 }
             }
-        }
-        .environment(path)
     }
 }
 
 #Preview {
-    AccountCirclesView()
-        .environment(AlertManager(handle: {_ in }))
+    NavigationStack {
+        AccountCirclesView()
+            .environment(PathSharedState())
+    }
+    .environment(AlertManager(handle: {_ in }))
 }

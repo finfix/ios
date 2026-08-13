@@ -108,7 +108,7 @@ struct TransactionsList: View {
         }
         .task {
             do {
-                try await vm.load(filters: filters)
+                try await vm.loadIfNeeded(filters: filters)
             } catch {
                 alert.error(error)
             }
