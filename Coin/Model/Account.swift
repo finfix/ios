@@ -50,9 +50,14 @@ struct Account: Identifiable, Hashable {
     
     var accountGroup: AccountGroup
     var currency: Currency
-    
+
     var childrenAccounts: [Account]
-    
+
+    /// Идентификатор счёта-моста, с которым связан этот счёт (1:1). Может принадлежать другому
+    /// пользователю — не гарантирован локально, поэтому не резолвится в объект Account
+    /// автоматически (в отличие от parentAccount).
+    var linkedAccountID: UUID?
+
     init(
         id: UUID = UUID(),
         accountingInHeader: Bool = true,
@@ -75,7 +80,8 @@ struct Account: Identifiable, Hashable {
         parentAccount: Account.Parent = nil,
         accountGroup: AccountGroup = AccountGroup(),
         currency: Currency = Currency(),
-        childrenAccounts: [Account] = []
+        childrenAccounts: [Account] = [],
+        linkedAccountID: UUID? = nil
     ) {
         self.id = id
         self.accountingInHeader = accountingInHeader
@@ -99,6 +105,7 @@ struct Account: Identifiable, Hashable {
         self.accountGroup = accountGroup
         self.currency = currency
         self.childrenAccounts = childrenAccounts
+        self.linkedAccountID = linkedAccountID
     }
     
     // Инициализатор из модели базы данных
@@ -140,6 +147,7 @@ struct Account: Identifiable, Hashable {
         self.currency = currenciesMap?[dbModel.currencyCode] ?? Currency()
 
         self.childrenAccounts = []
+        self.linkedAccountID = dbModel.linkedAccountID
     }
 
     static func convertFromDBModel(

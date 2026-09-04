@@ -71,7 +71,9 @@ struct QuickStatisticView: View {
         }
         .task {
             do {
-                try await vm.load()
+                for try await accounts in vm.observeAccounts() {
+                    vm.accounts = accounts
+                }
             } catch {
                 alert.error(error)
             }

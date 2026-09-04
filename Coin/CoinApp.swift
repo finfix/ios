@@ -120,6 +120,7 @@ extension Container {
                 let auditLogClient = AuditLog_AuditLogEndpoint.Client(wrapping: grpcClient)
                 let accountBudgetClient = AccountBudget_AccountBudgetEndpoint.Client(wrapping: grpcClient)
                 let syncClient = Sync_SyncEndpoint.Client(wrapping: grpcClient)
+                let pendingLinkedTransferClient = PendingLinkedTransfer_PendingLinkedTransferEndpoint.Client(wrapping: grpcClient)
 
                 // 4. Создаём менеджеры с gRPC клиентами
                 let authManager = AuthManager(authClient: authClient)
@@ -134,7 +135,8 @@ extension Container {
                     settingsClient: settingsClient,
                     auditLogClient: auditLogClient,
                     accountBudgetClient: accountBudgetClient,
-                    syncClient: syncClient
+                    syncClient: syncClient,
+                    pendingLinkedTransferClient: pendingLinkedTransferClient
                 )
                 
                 let sqlite = try SQLite()

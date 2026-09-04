@@ -39,6 +39,9 @@ extension Transaction_GetTransactionsRequest: HasAccessToken {}
 extension Transaction_UpdateTransactionRequest: HasAccessToken {}
 extension User_GetUserRequest: HasAccessToken {}
 extension User_UpdateUserRequest: HasAccessToken {}
+extension PendingLinkedTransfer_GetPendingLinkedTransfersRequest: HasAccessToken {}
+extension PendingLinkedTransfer_CreatePendingLinkedTransferRequest: HasAccessToken {}
+extension PendingLinkedTransfer_UpdatePendingLinkedTransferRequest: HasAccessToken {}
 
 // MARK: - HasErrorField Extensions
 // Пустые конформансы на сгенерированные Response-типы — у всех есть error/hasError,
@@ -73,6 +76,9 @@ extension Transaction_GetTransactionsResponse: HasErrorField {}
 extension Transaction_UpdateTransactionResponse: HasErrorField {}
 extension User_GetUserResponse: HasErrorField {}
 extension User_UpdateUserResponse: HasErrorField {}
+extension PendingLinkedTransfer_GetPendingLinkedTransfersResponse: HasErrorField {}
+extension PendingLinkedTransfer_CreatePendingLinkedTransferResponse: HasErrorField {}
+extension PendingLinkedTransfer_UpdatePendingLinkedTransferResponse: HasErrorField {}
 
 // MARK: - UUID Extensions
 
@@ -212,6 +218,35 @@ extension AccountType {
             throw ErrorModel(humanText: "Неизвестный proto тип счета: \(proto)")
         }
         self = type
+    }
+}
+
+// MARK: - PendingLinkedTransferStatus Extensions
+
+extension PendingLinkedTransferStatus {
+
+    private static let protoMap: [PendingLinkedTransferStatus: PendingLinkedTransferStatus_PendingLinkedTransferStatus] = [
+        .pending: .pending,
+        .completed: .completed,
+        .ignored: .ignored
+    ]
+
+    private static var reversedProtoMap: [PendingLinkedTransferStatus_PendingLinkedTransferStatus: PendingLinkedTransferStatus] {
+        return Dictionary(uniqueKeysWithValues: protoMap.map { ($1, $0) })
+    }
+
+    func toProto() throws -> PendingLinkedTransferStatus_PendingLinkedTransferStatus {
+        guard let proto = PendingLinkedTransferStatus.protoMap[self] else {
+            throw ErrorModel(humanText: "Неизвестный статус переноса: \(self.rawValue)")
+        }
+        return proto
+    }
+
+    init(from proto: PendingLinkedTransferStatus_PendingLinkedTransferStatus) throws {
+        guard let status = PendingLinkedTransferStatus.reversedProtoMap[proto] else {
+            throw ErrorModel(humanText: "Неизвестный proto статус переноса: \(proto)")
+        }
+        self = status
     }
 }
 

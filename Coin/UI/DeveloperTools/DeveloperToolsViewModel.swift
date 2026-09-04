@@ -7,6 +7,7 @@
 
 import Foundation
 import Factory
+import GRDB
 
 @Observable
 class DeveloperToolsViewModel {
@@ -37,5 +38,18 @@ class DeveloperToolsViewModel {
     /// перекачает и переприменит всю доступную историю (полезно для отладки applySyncChanges).
     func resetSyncCheckpoint() {
         SyncStateStorage.shared.lastSyncedAuditLogID = 0
+    }
+
+    // MARK: - Счета-мосты (debug)
+
+    /// ВСЕ локальные PendingLinkedTransfer без какого-либо скоупа по группе/счетам — в отличие
+    /// от бейджа/списка (которые фильтруют по выбранной группе), это прямой дамп таблицы, чтобы
+    /// можно было понять, есть ли вообще строка локально, до того как разбираться со скоупингом.
+    func observeAllPendingLinkedTransfers() -> AsyncValueObservation<[PendingLinkedTransfer]> {
+        service.repository.observePendingLinkedTransfers()
+    }
+
+    func allAccountsWithLinks() async throws -> [Account] {
+        try await service.getAccounts().filter { $0.linkedAccountID != nil }
     }
 }

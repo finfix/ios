@@ -70,7 +70,8 @@ extension APIManager {
                     accountGroupID: try account.accountGroupID.toUUID(),
                     rank: account.rank,
                     isParent: account.isParent,
-                    datetimeCreate: account.datetimeCreate.toDate()
+                    datetimeCreate: account.datetimeCreate.toDate(),
+                    linkedAccountID: account.hasLinkedAccountID && account.linkedAccountID != Data() ? try account.linkedAccountID.toUUID() : nil
                 )
             },
             deletedAccountIDs: try response.deletedAccountIds.map { try $0.toUUID() },
@@ -105,6 +106,16 @@ extension APIManager {
                     createdByUserID: try budget.createdByUserID.toUUID(),
                     datetimeCreate: budget.datetimeCreate.toDate(),
                     accountGroupID: try budget.accountGroupID.toUUID()
+                )
+            },
+            changedPendingLinkedTransfers: try response.changedPendingLinkedTransfers.map { transfer in
+                GetPendingLinkedTransfersRes(
+                    id: try transfer.id.toUUID(),
+                    status: try PendingLinkedTransferStatus(from: transfer.status),
+                    sourceTransactionID: try transfer.sourceTransactionID.toUUID(),
+                    sourceAccountID: try transfer.sourceAccountID.toUUID(),
+                    targetAccountID: try transfer.targetAccountID.toUUID(),
+                    accountGroupID: try transfer.accountGroupID.toUUID()
                 )
             },
             changedUser: response.hasChangedUser ? GetUserRes(

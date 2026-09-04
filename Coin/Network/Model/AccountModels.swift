@@ -30,6 +30,7 @@ struct GetAccountsRes: Decodable {
     var rank: String
     var isParent: Bool
     var datetimeCreate: Date
+    var linkedAccountID: UUID?
 }
 
 struct CreateAccountReq: Codable {
@@ -91,11 +92,13 @@ struct UpdateAccountReq: Codable {
     var parentAccountID: UUID?
     var iconID: UUID?
     var rank: String?
+    var linkedAccountID: UUID?
+    var unlinkAccount: Bool
 
     var hasChanges: Bool {
         accountingInHeader != nil || accountingInCharts != nil || name != nil ||
         visible != nil || currencyCode != nil || parentAccountID != nil ||
-        iconID != nil || rank != nil
+        iconID != nil || rank != nil || linkedAccountID != nil || unlinkAccount
     }
 
     init(
@@ -107,7 +110,9 @@ struct UpdateAccountReq: Codable {
         currencyCode: String? = nil,
         parentAccountID: UUID? = nil,
         iconID: UUID? = nil,
-        rank: String? = nil
+        rank: String? = nil,
+        linkedAccountID: UUID? = nil,
+        unlinkAccount: Bool = false
     ) {
         self.id = id
         self.accountingInHeader = accountingInHeader
@@ -118,6 +123,8 @@ struct UpdateAccountReq: Codable {
         self.parentAccountID = parentAccountID
         self.iconID = iconID
         self.rank = rank
+        self.linkedAccountID = linkedAccountID
+        self.unlinkAccount = unlinkAccount
     }
 }
 

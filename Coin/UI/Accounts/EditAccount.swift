@@ -197,6 +197,31 @@ struct EditAccount: View {
                     }
                 }
             }
+            if vm.mode == .update && [.regular, .expense, .earnings].contains(vm.currentAccount.type) {
+                Section(header: Text("Счёт-мост"), footer: Text("Счёт-мост объединяет этот счёт с другим вашим счётом (например, из другой группы) — операции по нему предлагается довнести на той стороне. Связать можно только счета одной валюты.")) {
+                    if let linkedAccountID = vm.currentAccount.linkedAccountID {
+                        let linkedAccount = vm.linkableAccounts.first { $0.id == linkedAccountID }
+                        LabeledContent("Связан со счётом", value: linkedAccount?.name ?? linkedAccountID.uuidString.prefix(8).description)
+                        Button("Отвязать", role: .destructive) {
+                            vm.currentAccount.linkedAccountID = nil
+                        }
+                    } else {
+                        NavigationLink {
+                            LinkAccountPicker(accounts: vm.linkableAccounts) { account in
+                                vm.currentAccount.linkedAccountID = account.id
+                            }
+                        } label: {
+                            if vm.linkableAccounts.isEmpty {
+                                Text("Нет подходящих счетов для связи")
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("Связать со счётом")
+                            }
+                        }
+                        .disabled(vm.linkableAccounts.isEmpty)
+                    }
+                }
+            }
             Section {
                 Button {
                     Task {
@@ -346,6 +371,105 @@ struct EditAccount: View {
     .environment(AlertManager(handle: {_ in }))
 }
 
+
+/// Пикер счёта для связи "счёт-мост" — только среди своих же счетов (см.
+/// EditAccountViewModel.linkableAccounts): совместимый тип, та же валюта, ещё не связан.
+/// Трёхшаговый drill-down: группа счетов → родительский счёт (если есть) → дочерний счёт —
+/// выбрать можно только реальный (дочерний либо не имеющий родителя) счёт, не агрегат.
+struct LinkAccountPicker: View {
+    let accounts: [Account]
+    let onSelect: (Account) -> Void
+
+    private var accountGroups: [AccountGroup] {
+        var seen = Set<UUID>()
+        return accounts.compactMap { account in
+            guard seen.insert(account.accountGroup.id).inserted else { return nil }
+            return account.accountGroup
+        }
+    }
+
+    var body: some View {
+        List(accountGroups) { group in
+            NavigationLink(group.name) {
+                LinkAccountGroupPicker(
+                    accounts: accounts.filter { $0.accountGroup.id == group.id },
+                    onSelect: onSelect
+                )
+            }
+        }
+        .navigationTitle("Выбор группы счетов")
+    }
+}
+
+/// Второй шаг — родительские счета этой группы (ведут к дочерним) и счета без родителя
+/// (выбираются сразу).
+private struct LinkAccountGroupPicker: View {
+    let accounts: [Account]
+    let onSelect: (Account) -> Void
+
+    private var parents: [Account] { accounts.filter { $0.isParent } }
+    private var standalone: [Account] { accounts.filter { !$0.isParent && $0.parentAccountID == nil } }
+
+    var body: some View {
+        List {
+            if !parents.isEmpty {
+                Section {
+                    ForEach(parents) { parent in
+                        NavigationLink(parent.name) {
+                            LinkAccountChildPicker(
+                                parentName: parent.name,
+                                children: accounts.filter { $0.parentAccountID == parent.id },
+                                onSelect: onSelect
+                            )
+                        }
+                    }
+                }
+            }
+            if !standalone.isEmpty {
+                Section {
+                    ForEach(standalone) { account in
+                        SelectableAccountRow(account: account, onSelect: onSelect)
+                    }
+                }
+            }
+        }
+        .navigationTitle("Выбор счёта")
+    }
+}
+
+/// Третий шаг — дочерние счета выбранного родителя, финальный выбор.
+private struct LinkAccountChildPicker: View {
+    let parentName: String
+    let children: [Account]
+    let onSelect: (Account) -> Void
+
+    var body: some View {
+        List(children) { account in
+            SelectableAccountRow(account: account, onSelect: onSelect)
+        }
+        .navigationTitle(parentName)
+    }
+}
+
+private struct SelectableAccountRow: View {
+    @Environment(\.dismiss) var dismiss
+    let account: Account
+    let onSelect: (Account) -> Void
+
+    var body: some View {
+        Button {
+            onSelect(account)
+            dismiss()
+        } label: {
+            HStack {
+                Text(account.name)
+                Spacer()
+                Text(account.currency.code)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
 
 struct IconPicker: View {
     

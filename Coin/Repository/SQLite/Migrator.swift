@@ -488,6 +488,35 @@ extension SQLite {
             }
         }
 
+        // Счета-мосты: linkedAccountID — плоская колонка без belongsTo, счёт может принадлежать
+        // другому пользователю и физически отсутствовать в локальной базе.
+        migrator.registerMigration("addAccountLinkedAccountID") { db in
+            try db.alter(table: "accountDB") { table in
+                table.add(column: "linkedAccountID", .blob)
+            }
+        }
+
+        // Требования довнесения транзакции через счёт-мост — простая таблица-связка.
+        // sourceTransaction — обычный belongsTo (бэкенд гарантирует, что транзакция-инициатор
+        // уже синхронизирована раньше самой связки). targetAccountID — плоская колонка (это МОЙ
+        // счёт, если я получатель, resolve делается на уровне вьюмодели через flatAccountsByID).
+        migrator.registerMigration("addPendingLinkedTransfer") { db in
+            try db.create(table: "pendingLinkedTransferDB") { table in
+                table.primaryKey("id", .blob)
+                table.column("status", .text)
+                    .notNull()
+                table.column("sourceAccountID", .blob)
+                    .notNull()
+                table.column("targetAccountID", .blob)
+                    .notNull()
+                table.column("accountGroupID", .blob)
+                    .notNull()
+
+                table.belongsTo("sourceTransaction", inTable: "transactionDB")
+                    .notNull()
+            }
+        }
+
         return migrator
     }
 }

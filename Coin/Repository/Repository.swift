@@ -7,6 +7,9 @@
 
 import Foundation
 import GRDB
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "Repository")
 
 class Repository {
     
@@ -138,6 +141,9 @@ class Repository {
             for budget in AccountBudgetDB.convertFromApiModel(res.changedAccountBudgets) {
                 try budget.save(db)
             }
+            for transfer in PendingLinkedTransferDB.convertFromApiModel(res.changedPendingLinkedTransfers) {
+                try transfer.save(db)
+            }
 
             if !res.deletedTransactionIDs.isEmpty {
                 try TransactionDB.filter(res.deletedTransactionIDs.contains(TransactionDB.Columns.id)).deleteAll(db)
@@ -246,6 +252,51 @@ class Repository {
         }
     }
     
+    func createPendingLinkedTransfer(_ transfer: PendingLinkedTransfer) async throws {
+        try await sqlite.write { db in
+            try PendingLinkedTransferDB(transfer).insert(db)
+        }
+    }
+
+    func updatePendingLinkedTransfer(_ transfer: PendingLinkedTransfer) async throws {
+        try await sqlite.write { db in
+            _ = try PendingLinkedTransferDB(transfer).update(db)
+        }
+    }
+
+    // accountGroupID хранит группу-ИСТОЧНИК (см. proto-комментарий), поэтому фильтр по своим
+    // группам находит только переносы, где я источник. Чтобы увидеть и те, где я получатель
+    // (мост среди моих счетов, но в чужой группе), нужен ИЛИ по targetAccountID — отсюда OR,
+    // а не последовательные .filter (те дают AND).
+    //
+    // Пустые accountGroupIDs/targetAccountIDs означают "мои — все, что есть локально": локально
+    // синхронизированы только МОИ группы/счета, поэтому подзапрос по всей accountGroupDB/accountDB
+    // корректно означает "любая моя группа"/"любой мой счёт", и остаётся живым при появлении
+    // новых групп/счетов, в отличие от фиксированного списка id на момент вызова.
+    func observePendingLinkedTransfers(accountGroupIDs: [UUID] = [], targetAccountIDs: [UUID] = []) -> AsyncValueObservation<[PendingLinkedTransfer]> {
+        sqlite.observe { db in
+            let request: QueryInterfaceRequest<PendingLinkedTransferDB>
+            if accountGroupIDs.isEmpty && targetAccountIDs.isEmpty {
+                request = PendingLinkedTransferDB.filter(sql: """
+                    accountGroupID IN (SELECT id FROM accountGroupDB)
+                    OR targetAccountID IN (SELECT id FROM accountDB)
+                    """)
+            } else {
+                request = PendingLinkedTransferDB.filter(
+                    accountGroupIDs.contains(PendingLinkedTransferDB.Columns.accountGroupID) ||
+                    targetAccountIDs.contains(PendingLinkedTransferDB.Columns.targetAccountID)
+                )
+            }
+            let all = try PendingLinkedTransferDB.fetchAll(db)
+            let matched = try request.fetchAll(db)
+            logger.debug("observePendingLinkedTransfers: accountGroupIDs=\(accountGroupIDs.map { $0.uuidString.prefix(8).description }, privacy: .public) targetAccountIDs=\(targetAccountIDs.map { $0.uuidString.prefix(8).description }, privacy: .public) totalRowsInTable=\(all.count) matched=\(matched.count)")
+            for row in all {
+                logger.debug("  row: accountGroupID=\(row.accountGroupID.uuidString.prefix(8).description, privacy: .public) targetAccountID=\(row.targetAccountID.uuidString.prefix(8).description, privacy: .public) status=\(row.status.rawValue, privacy: .public)")
+            }
+            return PendingLinkedTransfer.convertFromDBModel(matched)
+        }
+    }
+
     func updateTag(_ tag: Tag) async throws {
         try await sqlite.write { db in
             _ = try TagDB(tag).update(db)
@@ -595,6 +646,57 @@ class Repository {
         }
     }
     
+    /// Строит запрос счетов по фильтрам — общая часть между обычным getAccounts и живым
+    /// observeAccounts. Чисто синхронная (просто собирает QueryInterfaceRequest, ничего не
+    /// исполняет), поэтому годится и для ValueObservation.tracking.
+    private func accountsQuery(
+        ids: [UUID]?,
+        accountGroupIDs: [UUID]?,
+        visible: Bool?,
+        accountingInHeader: Bool?,
+        types: [AccountType]?,
+        currencyCode: String?,
+        isParent: Bool?,
+        name: String?
+    ) -> QueryInterfaceRequest<AccountDB> {
+        var request = AccountDB
+            .order(AccountDB.Columns.rank)
+
+        if let ids {
+            request = request.filter(keys: ids)
+        }
+
+        if let accountGroupIDs {
+            request = request.filter(accountGroupIDs.contains(AccountDB.Columns.accountGroupId))
+        }
+
+        if let visible {
+            request = request.filter(AccountDB.Columns.visible == visible)
+        }
+
+        if let accountingInHeader {
+            request = request.filter(AccountDB.Columns.accountingInHeader == accountingInHeader)
+        }
+
+        if let currencyCode {
+            request = request.filter(AccountDB.Columns.currencyCode == currencyCode)
+        }
+
+        if let isParent {
+            request = request.filter(AccountDB.Columns.isParent == isParent)
+        }
+
+        if let name {
+            request = request.filter(sql: "lowerUnicode(name) LIKE lowerUnicode(?)", arguments: ["%\(name)%"])
+        }
+
+        if let types {
+            request = request.filter(types.map(\.rawValue).contains(AccountDB.Columns.type))
+        }
+
+        return request
+    }
+
     func getAccounts(
         ids: [UUID]? = nil,
         accountGroupIDs: [UUID]? = nil,
@@ -605,63 +707,82 @@ class Repository {
         isParent: Bool? = nil,
         name: String? = nil
     ) async throws -> [AccountDB] {
-        try await sqlite.read { db in
-            var request = AccountDB
-                .order(AccountDB.Columns.rank)
-            
-            if let ids = ids {
-                request = request.filter(keys: ids)
+        try await sqlite.read { [self] db in
+            try accountsQuery(
+                ids: ids, accountGroupIDs: accountGroupIDs, visible: visible,
+                accountingInHeader: accountingInHeader, types: types,
+                currencyCode: currencyCode, isParent: isParent, name: name
+            ).fetchAll(db)
+        }
+    }
+
+    /// Живой список счетов (для AccountCirclesViewModel) — уже с резолвленными
+    /// currency/accountGroup/icon/effective-бюджетом, ровно как AccountService.getAccounts, но
+    /// синхронно внутри ValueObservation.tracking. Группировку родитель/дети (Account.groupAccounts)
+    /// сюда намеренно не тащим — это чистая Swift-агрегация без обращения к БД, ей место в
+    /// вызывающем коде (как и раньше).
+    func observeAccounts(accountGroupIDs: [UUID]?, visible: Bool?, accountingInHeader: Bool? = nil) -> AsyncValueObservation<[Account]> {
+        sqlite.observe { [self] db in
+            let accountsDB = try accountsQuery(
+                ids: nil, accountGroupIDs: accountGroupIDs, visible: visible,
+                accountingInHeader: accountingInHeader, types: nil, currencyCode: nil, isParent: nil, name: nil
+            ).fetchAll(db)
+
+            let iconsMap = Dictionary(uniqueKeysWithValues: try IconDB.fetchAll(db).compactMap { icon -> (UUID, Icon)? in
+                guard let id = icon.id else { return nil }
+                return (id, Icon(icon))
+            })
+            let currenciesDB = try CurrencyDB.fetchAll(db)
+            let currenciesMap = Dictionary(uniqueKeysWithValues: currenciesDB.map { ($0.code, Currency($0)) })
+            let accountGroupsMap = Dictionary(uniqueKeysWithValues: try AccountGroupDB.fetchAll(db).compactMap { group -> (UUID, AccountGroup)? in
+                guard let id = group.id else { return nil }
+                return (id, AccountGroup(group, currenciesMap: currenciesMap))
+            })
+
+            // Резолв действующей версии бюджета — та же логика, что и
+            // AccountBudgetService.effectiveAccountBudgets, только синхронно.
+            let accountIDs = accountsDB.compactMap(\.id)
+            let budgetsDB = try AccountBudgetDB
+                .filter(accountIDs.contains(AccountBudgetDB.Columns.accountId))
+                .order(AccountBudgetDB.Columns.effectiveFrom.desc)
+                .fetchAll(db)
+            let now = Date.now
+            var budgetsMap: [UUID: AccountBudget] = [:]
+            for budgetDB in budgetsDB {
+                let budget = AccountBudget(budgetDB)
+                guard budget.effectiveFrom <= now, budgetsMap[budget.accountID] == nil else { continue }
+                budgetsMap[budget.accountID] = budget
             }
-            
-            if let accountGroupIDs {
-                request = request.filter(accountGroupIDs.contains(AccountDB.Columns.accountGroupId))
-            }
-            
-            if let visible = visible {
-                request = request.filter(AccountDB.Columns.visible == visible)
-            }
-            
-            if let accountingInHeader = accountingInHeader {
-                request = request.filter(AccountDB.Columns.accountingInHeader == accountingInHeader)
-            }
-            
-            if let currencyCode = currencyCode {
-                request = request.filter(AccountDB.Columns.currencyCode == currencyCode)
-            }
-            
-            if let isParent = isParent {
-                request = request.filter(AccountDB.Columns.isParent == isParent)
-            }
-            
-            if let name = name {
-                request = request.filter(sql: "lowerUnicode(name) LIKE lowerUnicode(?)", arguments: ["%\(name)%"])
-            }
-            
-            if let types = types {
-                request = request.filter(types.map(\.rawValue).contains(AccountDB.Columns.type))
-            }
-            
-            return try request.fetchAll(db)
+
+            return Account.convertFromDBModel(
+                accountsDB,
+                currenciesMap: currenciesMap,
+                accountGroupsMap: accountGroupsMap,
+                iconsMap: iconsMap,
+                budgetsMap: budgetsMap
+            )
         }
     }
     
-    func getTransactions(
-        limit: Int = 100,
-        offset: Int = 0,
-        ids: [UUID] = [],
-        dateFrom: Date? = nil,
-        dateTo: Date? = nil,
-        searchText: String = "",
-        accountIDs: [UUID] = [],
-        excludedAccountIDs: [UUID] = [],
-        accountGroupIDs: [UUID] = [],
-        transactionTypes: [TransactionType] = [],
-        currencies: [Currency] = [],
-        tagIDs: [UUID] = []
-    ) async throws -> [TransactionDB] {
-        try await sqlite.read { db in
-
-            var joins: [String] = []
+    /// Строит SQL/аргументы для выборки транзакций по фильтрам — общая часть между обычным
+    /// (async) getTransactions и живым observeTransactionRows, чтобы не дублировать построение
+    /// WHERE/JOIN в двух местах. Чисто синхронная (без обращения к db), чтобы её можно было
+    /// использовать и внутри ValueObservation.tracking.
+    private func transactionsSQL(
+        limit: Int,
+        offset: Int,
+        ids: [UUID],
+        dateFrom: Date?,
+        dateTo: Date?,
+        searchText: String,
+        accountIDs: [UUID],
+        excludedAccountIDs: [UUID],
+        accountGroupIDs: [UUID],
+        transactionTypes: [TransactionType],
+        currencies: [Currency],
+        tagIDs: [UUID]
+    ) -> (sql: String, args: StatementArguments) {
+        var joins: [String] = []
             var filters: [String] = []
             var args: StatementArguments = []
 
@@ -757,24 +878,121 @@ class Repository {
                 joins.append("JOIN accountDB a1 ON a1.id = t.accountFromId")
                 joins.append("JOIN accountDB a2 ON a2.id = t.accountToId")
 
-                filters.append("(a1.currencyCode IN (\(questions.joined(separator: ","))) OR a2.currencyCode IN (\(questions.joined(separator: ","))))")
-                _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
-                _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
-            }
-                        
-            let sql = """
-                SELECT *
-                FROM transactionDB t
-                \(joins.joined(separator: "\n"))
-                \(filters.isEmpty ? "" : "WHERE \(filters.joined(separator: "\nAND "))")
-                ORDER BY t.dateTransaction DESC, t.datetimeCreate DESC
-                LIMIT \(limit) OFFSET \(offset)
-            """
-            
-            print(sql)
-            print(args)
-                    
+            filters.append("(a1.currencyCode IN (\(questions.joined(separator: ","))) OR a2.currencyCode IN (\(questions.joined(separator: ","))))")
+            _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
+            _ = args.append(contentsOf: StatementArguments(currencies.map(\.code)))
+        }
+
+        let sql = """
+            SELECT *
+            FROM transactionDB t
+            \(joins.joined(separator: "\n"))
+            \(filters.isEmpty ? "" : "WHERE \(filters.joined(separator: "\nAND "))")
+            ORDER BY t.dateTransaction DESC, t.datetimeCreate DESC
+            LIMIT \(limit) OFFSET \(offset)
+        """
+
+        return (sql, args)
+    }
+
+    func getTransactions(
+        limit: Int = 100,
+        offset: Int = 0,
+        ids: [UUID] = [],
+        dateFrom: Date? = nil,
+        dateTo: Date? = nil,
+        searchText: String = "",
+        accountIDs: [UUID] = [],
+        excludedAccountIDs: [UUID] = [],
+        accountGroupIDs: [UUID] = [],
+        transactionTypes: [TransactionType] = [],
+        currencies: [Currency] = [],
+        tagIDs: [UUID] = []
+    ) async throws -> [TransactionDB] {
+        try await sqlite.read { [self] db in
+            let (sql, args) = transactionsSQL(
+                limit: limit, offset: offset, ids: ids, dateFrom: dateFrom, dateTo: dateTo,
+                searchText: searchText, accountIDs: accountIDs, excludedAccountIDs: excludedAccountIDs,
+                accountGroupIDs: accountGroupIDs, transactionTypes: transactionTypes,
+                currencies: currencies, tagIDs: tagIDs
+            )
             return try TransactionDB.fetchAll(db, sql: sql, arguments: args)
+        }
+    }
+
+    /// Живое окно списка транзакций (для TransactionsList) — в отличие от пагинации, ничего не
+    /// подгружает само: наблюдает ровно тот диапазон [dateFrom, dateTo], что уже реально загружен
+    /// на экране (нижняя граница — курсор пагинации), и переотдаёт TransactionListRowData сразу
+    /// с именами/валютами счетов и тегами, чтобы вьюмодели не пришлось повторно джойнить их в
+    /// Swift. limit здесь достаточно большой (не пагинация) — просто верхняя защита от аномально
+    /// огромного окна.
+    func observeTransactionRows(
+        dateFrom: Date?,
+        dateTo: Date?,
+        searchText: String,
+        accountIDs: [UUID],
+        excludedAccountIDs: [UUID],
+        accountGroupIDs: [UUID],
+        transactionTypes: [TransactionType],
+        currencies: [Currency],
+        tagIDs: [UUID]
+    ) -> AsyncValueObservation<[TransactionListRowData]> {
+        sqlite.observe { [self] db in
+            let (sql, args) = transactionsSQL(
+                limit: 10000, offset: 0, ids: [], dateFrom: dateFrom, dateTo: dateTo,
+                searchText: searchText, accountIDs: accountIDs, excludedAccountIDs: excludedAccountIDs,
+                accountGroupIDs: accountGroupIDs, transactionTypes: transactionTypes,
+                currencies: currencies, tagIDs: tagIDs
+            )
+            let transactionsDB = try TransactionDB.fetchAll(db, sql: sql, arguments: args)
+
+            let accountIDsNeeded = Set(transactionsDB.flatMap { [$0.accountFromId, $0.accountToId] })
+            let accountsDB = try AccountDB.filter(accountIDsNeeded.contains(AccountDB.Columns.id)).fetchAll(db)
+            let accountMap = Dictionary(uniqueKeysWithValues: accountsDB.compactMap { account -> (UUID, AccountDB)? in
+                guard let id = account.id else { return nil }
+                return (id, account)
+            })
+
+            let currencyCodesNeeded = Set(accountsDB.map(\.currencyCode))
+            let currenciesDB = try CurrencyDB.filter(currencyCodesNeeded.contains(CurrencyDB.Columns.code)).fetchAll(db)
+            let currencyMap = Dictionary(uniqueKeysWithValues: currenciesDB.map { ($0.code, Currency($0)) })
+
+            let transactionIDs = transactionsDB.compactMap(\.id)
+            let tagLinks = try TagToTransactionDB.filter(transactionIDs.contains(TagToTransactionDB.Columns.transactionId)).fetchAll(db)
+            let tagIDsNeeded = Set(tagLinks.map(\.tagId))
+            let tagsDB = try TagDB.filter(tagIDsNeeded.contains(TagDB.Columns.id)).fetchAll(db)
+            let tagNameMap = Dictionary(uniqueKeysWithValues: tagsDB.compactMap { tag -> (UUID, String)? in
+                guard let id = tag.id else { return nil }
+                return (id, tag.name)
+            })
+            var tagNamesByTransaction: [UUID: [String]] = [:]
+            for link in tagLinks {
+                tagNamesByTransaction[link.transactionId, default: []].append(tagNameMap[link.tagId] ?? "")
+            }
+
+            return transactionsDB.compactMap { t -> TransactionListRowData? in
+                guard let id = t.id,
+                      let accountFrom = accountMap[t.accountFromId],
+                      let accountTo = accountMap[t.accountToId],
+                      let accountFromCurrency = currencyMap[accountFrom.currencyCode],
+                      let accountToCurrency = currencyMap[accountTo.currencyCode]
+                else { return nil }
+
+                return TransactionListRowData(
+                    id: id,
+                    dateTransaction: t.dateTransaction,
+                    type: t.type,
+                    accountFromName: accountFrom.name,
+                    accountFromType: accountFrom.type,
+                    accountFromCurrency: accountFromCurrency,
+                    accountToName: accountTo.name,
+                    accountToCurrency: accountToCurrency,
+                    amountFrom: t.amountFrom,
+                    amountTo: t.amountTo,
+                    note: t.note,
+                    tagNames: tagNamesByTransaction[id] ?? []
+                )
+            }
         }
     }
 

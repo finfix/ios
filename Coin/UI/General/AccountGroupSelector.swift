@@ -65,6 +65,9 @@ struct AccountGroupSelector: View {
                 } else {
                     self.selectedAccountGroup.selectedAccountGroup = vm.accountGroups.first ?? AccountGroup()
                 }
+                // Только теперь selectedAccountGroup — реальная группа, а не заглушка из
+                // AccountGroupSharedState.init(). См. isLoaded.
+                self.selectedAccountGroup.isLoaded = true
             } catch {
                 alert.error(error)
             }

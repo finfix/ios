@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GRDB
 
 extension Service {
     
@@ -53,8 +54,70 @@ extension Service {
             entityID: transaction.id,
             dependsOnEntityIDs: [transaction.accountFrom.id, transaction.accountTo.id, transaction.accountGroupID] + tagIDs
         )
+
+        // Транзакция затрагивает счёт-мост — заводим требование довнести для владельца другой
+        // стороны моста (см. Account.linkedAccountID). Независимая задача очереди: если она не
+        // долетит сразу, сама транзакция всё равно уже создана и синхронизируется.
+        if let bridgeAccount = [transaction.accountFrom, transaction.accountTo].first(where: { $0.linkedAccountID != nil }),
+           let targetAccountID = bridgeAccount.linkedAccountID {
+            let pendingTransferID = UUID()
+
+            try await repository.createPendingLinkedTransfer(PendingLinkedTransfer(
+                id: pendingTransferID,
+                status: .pending,
+                sourceTransactionID: transaction.id,
+                sourceAccountID: bridgeAccount.id,
+                targetAccountID: targetAccountID,
+                accountGroupID: transaction.accountGroupID
+            ))
+
+            try await taskManager.createTask(
+                actionName: .createPendingLinkedTransfer,
+                reqModel: CreatePendingLinkedTransferReq(
+                    id: pendingTransferID,
+                    sourceTransactionID: transaction.id,
+                    sourceAccountID: bridgeAccount.id,
+                    targetAccountID: targetAccountID,
+                    accountGroupID: transaction.accountGroupID
+                ),
+                entityID: pendingTransferID,
+                dependsOnEntityIDs: [transaction.id]
+            )
+        }
     }
-    
+
+    // MARK: Pending linked transfers ("счета-мосты")
+
+    /// Живой список требований довнести — и исходящие (я источник, accountGroupID — моя группа),
+    /// и входящие (я получатель, мой счёт-мост как targetAccountID, но группа исходная — чужая).
+    func observePendingLinkedTransfers(accountGroups: [AccountGroup], myAccountIDs: [UUID]) -> AsyncValueObservation<[PendingLinkedTransfer]> {
+        repository.observePendingLinkedTransfers(accountGroupIDs: accountGroups.map(\.id), targetAccountIDs: myAccountIDs)
+    }
+
+    /// "Не переносить" — статус-флаг, исходная транзакция-инициатор не трогается.
+    func ignoreLinkedTransfer(_ transfer: PendingLinkedTransfer) async throws {
+        var updated = transfer
+        updated.status = .ignored
+        try await repository.updatePendingLinkedTransfer(updated)
+        try await taskManager.createTask(
+            actionName: .updatePendingLinkedTransfer,
+            reqModel: UpdatePendingLinkedTransferReq(id: transfer.id, status: .ignored),
+            entityID: transfer.id
+        )
+    }
+
+    /// Довнесение завершено — вызывается после успешного создания довносящей транзакции.
+    func completeLinkedTransfer(_ transfer: PendingLinkedTransfer) async throws {
+        var updated = transfer
+        updated.status = .completed
+        try await repository.updatePendingLinkedTransfer(updated)
+        try await taskManager.createTask(
+            actionName: .updatePendingLinkedTransfer,
+            reqModel: UpdatePendingLinkedTransferReq(id: transfer.id, status: .completed),
+            entityID: transfer.id
+        )
+    }
+
     // MARK: Read
     func getTransactions(
         limit: Int = 100,
@@ -145,6 +208,34 @@ extension Service {
         accountGroupIDs: [UUID] = []
     ) async throws -> [Date] {
         try await repository.getTransactionDays(
+            dateFrom: dateFrom?.stripTime(),
+            dateTo: dateTo?.stripTime(),
+            searchText: searchText,
+            accountIDs: accountIDs,
+            excludedAccountIDs: excludedAccountIDs,
+            accountGroupIDs: accountGroupIDs,
+            transactionTypes: transactionTypes,
+            currencies: currencies,
+            tagIDs: tagIDs
+        )
+    }
+
+    /// Живое окно списка транзакций — см. Repository.observeTransactionRows. dateFrom здесь —
+    /// нижняя граница уже подгруженной пагинацией истории (не фильтр пользователя), поэтому
+    /// вызывающий код (TransactionsListViewModel) должен передавать текущий курсор, а не
+    /// исходный filters.dateFrom.
+    func observeTransactionRows(
+        dateFrom: Date?,
+        dateTo: Date?,
+        searchText: String = "",
+        accountIDs: [UUID] = [],
+        excludedAccountIDs: [UUID] = [],
+        transactionTypes: [TransactionType] = [],
+        currencies: [Currency] = [],
+        tagIDs: [UUID] = [],
+        accountGroupIDs: [UUID] = []
+    ) -> AsyncValueObservation<[TransactionListRowData]> {
+        repository.observeTransactionRows(
             dateFrom: dateFrom?.stripTime(),
             dateTo: dateTo?.stripTime(),
             searchText: searchText,

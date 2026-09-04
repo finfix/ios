@@ -85,7 +85,9 @@ extension Account_UpdateAccountRequest {
         currencyCode: String?,
         parentAccountID: UUID?,
         iconID: UUID?,
-        rank: String?
+        rank: String?,
+        linkedAccountID: UUID?,
+        unlinkAccount: Bool
     ) {
         self.init()
         self.id = id.data
@@ -113,6 +115,10 @@ extension Account_UpdateAccountRequest {
         if let rank {
             self.rank = rank
         }
+        if let linkedAccountID {
+            self.linkedAccountID = linkedAccountID.data
+        }
+        self.unlinkAccount = unlinkAccount
     }
 }
 
@@ -153,7 +159,8 @@ extension APIManager {
                 accountGroupID: try account.accountGroupID.toUUID(),
                 rank: account.rank,
                 isParent: account.isParent,
-                datetimeCreate: account.datetimeCreate.toDate()
+                datetimeCreate: account.datetimeCreate.toDate(),
+                linkedAccountID: account.hasLinkedAccountID && account.linkedAccountID != Data() ? try account.linkedAccountID.toUUID() : nil
             )
         }
     }
@@ -191,7 +198,9 @@ extension APIManager {
             currencyCode: req.currencyCode,
             parentAccountID: req.parentAccountID,
             iconID: req.iconID,
-            rank: req.rank
+            rank: req.rank,
+            linkedAccountID: req.linkedAccountID,
+            unlinkAccount: req.unlinkAccount
         )
 
         _ = try await grpcCall("UpdateAccount", request: request) {

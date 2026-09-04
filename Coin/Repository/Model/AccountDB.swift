@@ -24,6 +24,7 @@ struct AccountDB {
     var currencyCode: String
     var accountGroupId: UUID
     var datetimeCreate: Date
+    var linkedAccountID: UUID?
 
     init(
         id: UUID,
@@ -39,7 +40,8 @@ struct AccountDB {
         isParent: Bool,
         currencyCode: String,
         accountGroupId: UUID,
-        datetimeCreate: Date
+        datetimeCreate: Date,
+        linkedAccountID: UUID? = nil
     ) {
         self.id = id
         self.accountingInHeader = accountingInHeader
@@ -55,6 +57,7 @@ struct AccountDB {
         self.currencyCode = currencyCode
         self.accountGroupId = accountGroupId
         self.datetimeCreate = datetimeCreate
+        self.linkedAccountID = linkedAccountID
     }
 
     // Инициализатор из сетевой модели
@@ -73,6 +76,7 @@ struct AccountDB {
         self.accountGroupId = res.accountGroupID
         self.currencyCode = res.currency
         self.datetimeCreate = res.datetimeCreate
+        self.linkedAccountID = res.linkedAccountID
     }
 
     // Инициализатор из бизнес модели
@@ -94,6 +98,7 @@ struct AccountDB {
         self.currencyCode = model.currency.code
         self.parentAccountId = model.parentAccountID
         self.datetimeCreate = model.datetimeCreate
+        self.linkedAccountID = model.linkedAccountID
     }
 
 
@@ -163,6 +168,9 @@ struct AccountDB {
             if abs(serverModel.datetimeCreate.timeIntervalSince(localModel.datetimeCreate)) > 1 {
                 difference["datetimeCreate"] = (server: serverModel.datetimeCreate, local: localModel.datetimeCreate)
             }
+            if serverModel.linkedAccountID != localModel.linkedAccountID {
+                difference["linkedAccountID"] = (server: serverModel.linkedAccountID as Any, local: localModel.linkedAccountID as Any)
+            }
 
             if !difference.isEmpty {
                 differences[serverModel.id!] = difference
@@ -189,5 +197,6 @@ extension AccountDB: Codable, FetchableRecord, PersistableRecord {
         static let currencyCode = Column(CodingKeys.currencyCode)
         static let accountGroupId = Column(CodingKeys.accountGroupId)
         static let datetimeCreate = Column(CodingKeys.datetimeCreate)
+        static let linkedAccountID = Column(CodingKeys.linkedAccountID)
     }
 }

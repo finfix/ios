@@ -66,7 +66,9 @@ struct TasksList: View {
         .task(id: vm.showCompleted) {
             do {
                 for try await tasks in vm.observeTasks() {
-                    vm.tasks = tasks
+                    withAnimation {
+                        vm.tasks = tasks
+                    }
                 }
             } catch {
                 alert.error(error)

@@ -7,16 +7,20 @@
 
 import Foundation
 import Factory
+import GRDB
 
 @Observable
 class QuickStatisticViewModel {
     @ObservationIgnored
     @Injected(\.service) private var service
-        
+
     var accounts: [Account] = []
-    
-    func load() async throws {
-        accounts = try await service.getAccounts(accountingInHeader: true)
+
+    /// Живой список счетов для шапки (расход/баланс/бюджет) — сама обновляется на любое
+    /// изменение accountDB (создание/редактирование счёта, incrementalSync и т.д.), без ручного
+    /// load()/.refreshable.
+    func observeAccounts() -> AsyncValueObservation<[Account]> {
+        service.observeAccounts(accountingInHeader: true)
     }
     
     func calculateStatistic(accounts a: [Account], targetCurrency: Currency) -> QuickStatistic {

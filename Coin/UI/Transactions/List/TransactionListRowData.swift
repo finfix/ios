@@ -23,6 +23,34 @@ struct TransactionListRowData: Identifiable, Hashable {
     let note: String
     let tagNames: [String]
 
+    init(
+        id: UUID,
+        dateTransaction: Date,
+        type: TransactionType,
+        accountFromName: String,
+        accountFromType: AccountType,
+        accountFromCurrency: Currency,
+        accountToName: String,
+        accountToCurrency: Currency,
+        amountFrom: Decimal,
+        amountTo: Decimal,
+        note: String,
+        tagNames: [String]
+    ) {
+        self.id = id
+        self.dateTransaction = dateTransaction
+        self.type = type
+        self.accountFromName = accountFromName
+        self.accountFromType = accountFromType
+        self.accountFromCurrency = accountFromCurrency
+        self.accountToName = accountToName
+        self.accountToCurrency = accountToCurrency
+        self.amountFrom = amountFrom
+        self.amountTo = amountTo
+        self.note = note
+        self.tagNames = tagNames
+    }
+
     init(_ transaction: Transaction) {
         self.id = transaction.id
         self.dateTransaction = transaction.dateTransaction

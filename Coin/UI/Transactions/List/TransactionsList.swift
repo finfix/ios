@@ -87,6 +87,7 @@ struct TransactionsList: View {
                 // .id() на top-level элементе ForEach — ScrollViewReader.scrollTo и
                 // .scrollPosition(id:) надёжно находят только id, поставленный так.
                 .id(item.id)
+                .transition(.opacity)
                 .onAppear {
                     Task {
                         do {
@@ -113,9 +114,23 @@ struct TransactionsList: View {
                 alert.error(error)
             }
         }
-        // Список больше не перечитывается сам при возврате на экран (см. loadIfNeeded — иначе
-        // сбрасывался скролл), поэтому фоновые изменения (например, incrementalSync) явно
-        // подтягиваются только по жесту "потянуть вниз".
+        // Живая подписка на уже открытое пагинацией окно — фоновые изменения (incrementalSync,
+        // другое устройство) видны сами, без pull-to-refresh. Переподписывается только когда
+        // пагинация реально расширяет историю (см. oldestLoadedDate), не на каждое обновление
+        // строк внутри уже открытого окна.
+        .task(id: vm.oldestLoadedDate) {
+            guard let observation = vm.observeLoadedWindow() else { return }
+            do {
+                for try await rows in observation {
+                    withAnimation {
+                        vm.applyObservedRows(rows)
+                    }
+                }
+            } catch {
+                alert.error(error)
+            }
+        }
+        // pull-to-refresh остаётся как явный полный релоад (в т.ч. transactionDays для календаря).
         .refreshable {
             do {
                 try await vm.load(filters: filters)

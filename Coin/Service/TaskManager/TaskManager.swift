@@ -114,6 +114,25 @@ class TaskManager {
             entityID: entityID,
             dependsOnTaskIDs: dependsOnTaskIDs
         ))
+
+        // Не ждём здесь (createTask не должен блокироваться на сети — локальная запись остаётся
+        // мгновенной), но запускаем отправку сразу, а не ждём следующего тика таймера в
+        // ContentView (15с). Таймер остаётся только на случай ретраев уже проваленных тасок —
+        // executeDBTasks сам безопасен для параллельных/частых вызовов (syncInProgress).
+        //
+        // Если у самой таски уже есть незавершённые зависимости — она в этом проходе всё равно
+        // не готова (см. executeDBTasks: ready-фильтр по dependsOnTaskIDs), поэтому немедленную
+        // попытку не запускаем вовсе: досылка произойдёт либо когда её зависимость сама долетит
+        // и запустит свой собственный немедленный executeDBTasks, либо по таймеру.
+        if dependsOnTaskIDs.isEmpty {
+            Task {
+                do {
+                    try await executeDBTasks()
+                } catch {
+                    logger.warning("createTask: немедленная отправка не удалась — \(error)")
+                }
+            }
+        }
     }
     
     private func executeTask(_ task: SyncTask) async throws {
@@ -177,6 +196,14 @@ class TaskManager {
             case .createAccountBudget:
                 let req = try decoder.decode(CreateAccountBudgetReq.self, from: task.fieldsJSON)
                 try await apiManager.CreateAccountBudget(req: req)
+
+            case .createPendingLinkedTransfer:
+                let req = try decoder.decode(CreatePendingLinkedTransferReq.self, from: task.fieldsJSON)
+                try await apiManager.CreatePendingLinkedTransfer(req: req)
+
+            case .updatePendingLinkedTransfer:
+                let req = try decoder.decode(UpdatePendingLinkedTransferReq.self, from: task.fieldsJSON)
+                try await apiManager.UpdatePendingLinkedTransfer(req: req)
             }
         } catch {
             logger.warning("\(error)")
@@ -301,4 +328,5 @@ enum ActionName: String, Codable {
     case createAccountGroup, updateAccountGroup, deleteAccountGroup
     case updateUser
     case createAccountBudget
+    case createPendingLinkedTransfer, updatePendingLinkedTransfer
 }

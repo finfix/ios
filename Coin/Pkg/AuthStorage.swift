@@ -4,6 +4,9 @@
 //
 
 import Foundation
+import OSLog
+
+private let logger = Logger(subsystem: "Coin", category: "AuthStorage")
 
 /// Единый источник правды для isLogin/accessToken/refreshToken — раньше это были
 /// независимые @AppStorage(...) с одним и тем же ключом, разбросанные по нескольким файлам
@@ -23,6 +26,10 @@ final class AuthStorage {
 
     var isLogin: Bool {
         didSet {
+            // Временный дебаг — проверяем гипотезу, что isLogin мигает false→true сразу после
+            // холодного старта (что сносило бы весь AppTabView(), см. ContentView.swift) и это
+            // причина массового исчезновения static locations на экране счетов.
+            logger.debug("isLogin: \(oldValue) -> \(self.isLogin)")
             if isLogin {
                 Keychain.set("true", forKey: Keys.isLogin)
             } else {

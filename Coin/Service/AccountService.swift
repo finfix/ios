@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import GRDB
 
 extension Service {
     
@@ -100,7 +101,21 @@ extension Service {
             budgetsMap: budgetsMap
         )
     }
-    
+
+    /// Живой список счетов (плоский, без группировки родитель/дети — см. Repository.observeAccounts)
+    /// — вызывающая сторона (AccountCirclesViewModel) сама прогоняет через Account.groupAccounts.
+    func observeAccounts(
+        accountGroups: [AccountGroup]? = nil,
+        visible: Bool? = nil,
+        accountingInHeader: Bool? = nil
+    ) -> AsyncValueObservation<[Account]> {
+        repository.observeAccounts(
+            accountGroupIDs: accountGroups?.map(\.id),
+            visible: visible,
+            accountingInHeader: accountingInHeader
+        )
+    }
+
     // MARK: Update
     func updateAccount(newAccount: Account, oldAccount: Account) async throws {
         var newAccount = newAccount
@@ -188,7 +203,9 @@ extension Service {
             currencyCode: oldAccount.currency.code != newAccount.currency.code ? newAccount.currency.code : nil,
             parentAccountID: parentAccountIDToReq,
             iconID: oldAccount.icon != newAccount.icon ? newAccount.icon.id : nil,
-            rank: oldAccount.rank != newAccount.rank ? newAccount.rank : nil
+            rank: oldAccount.rank != newAccount.rank ? newAccount.rank : nil,
+            linkedAccountID: oldAccount.linkedAccountID != newAccount.linkedAccountID ? newAccount.linkedAccountID : nil,
+            unlinkAccount: oldAccount.linkedAccountID != nil && newAccount.linkedAccountID == nil
         )
         if updateReq.hasChanges {
             try await taskManager.createTask(

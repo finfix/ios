@@ -63,7 +63,8 @@ class TasksDetailsViewModel {
             guard let req = try? JSONDecoder().decode(CreateAccountBudgetReq.self, from: task.fieldsJSON),
                   let account = try await service.getAccounts(ids: [req.accountID]).first else { return nil }
             return .account(account)
-        case .deleteTransaction, .deleteAccount, .deleteTag, .deleteAccountGroup, .updateUser:
+        case .deleteTransaction, .deleteAccount, .deleteTag, .deleteAccountGroup, .updateUser,
+             .createPendingLinkedTransfer, .updatePendingLinkedTransfer:
             return nil
         }
     }

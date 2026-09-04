@@ -120,6 +120,10 @@ class EditTransactionViewModel {
     var accountGroup = AccountGroup()
     var mode: mode
 
+    /// Требование довнесения, которое довершает эта транзакция (см. PendingLinkedTransfer) —
+    /// nil для обычного создания/редактирования. При сохранении помечает перенос завершённым.
+    var sourceTransfer: PendingLinkedTransfer?
+
     var isChanged: Bool {
         mode == .update ? currentTransaction != oldTransaction : true
     }
@@ -178,13 +182,15 @@ class EditTransactionViewModel {
         currentTransaction: Transaction,
         oldTransaction: Transaction = Transaction(),
         accountGroup: AccountGroup,
-        mode: mode
+        mode: mode,
+        sourceTransfer: PendingLinkedTransfer? = nil
     ) {
         self.currentTransaction = currentTransaction
         self.oldTransaction = oldTransaction
         self.accountGroup = accountGroup
         self.mode = mode
-        
+        self.sourceTransfer = sourceTransfer
+
         if currentTransaction.amountFrom != 0 && currentTransaction.amountTo != 0 {
             let formatter = CurrencyFormatter(withUnits: false)
             amountFromString = currentTransaction.amountFrom.currencyString(formatter: formatter)
@@ -210,6 +216,10 @@ class EditTransactionViewModel {
         switch mode {
         case .create: try await service.createTransaction(currentTransaction)
         case .update: try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
+        }
+
+        if let sourceTransfer {
+            try await service.completeLinkedTransfer(sourceTransfer)
         }
     }
     

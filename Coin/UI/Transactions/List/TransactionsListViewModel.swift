@@ -5,6 +5,7 @@
 
 import Foundation
 import Factory
+import GRDB
 
 struct TransactionItem: Identifiable {
     let id: UUID
@@ -44,6 +45,12 @@ class TransactionsListViewModel {
 
     private(set) var hasMorePages = true
     private(set) var isLoadingNextPage = false
+
+    /// Самая старая дата среди уже подгруженных rows — нижняя граница окна, которое можно
+    /// безопасно observe'ить (см. observeLoadedWindow). Меняется только когда пагинация реально
+    /// расширяет историю (loadPage), а не когда в уже открытое окно прилетает новая транзакция —
+    /// поэтому TransactionsList может держать на ней .task(id:), не гоняя подписку по кругу.
+    private(set) var oldestLoadedDate: Date?
 
     /// Все дни, у которых есть транзакции (в рамках фильтров), в хронологическом порядке
     /// (по возрастанию) — используется горизонтальным календарём. Грузится отдельным лёгким
@@ -102,6 +109,7 @@ class TransactionsListViewModel {
         hasMorePages = true
         rows = []
         transactionItems = []
+        oldestLoadedDate = nil
 
         let ids = accountFilterIDs(filters)
 
@@ -194,6 +202,33 @@ class TransactionsListViewModel {
 
         hasMorePages = page.count == pageSize
         rows.append(contentsOf: page.map(TransactionListRowData.init))
+        oldestLoadedDate = rows.last?.dateTransaction
+        rebuildTransactionItems()
+    }
+
+    /// Живая подписка на уже открытое окно [oldestLoadedDate, currentFilters.dateTo] — не
+    /// участвует в пагинации/курсоре (тем занимается loadPage), а только досылает свежий снимок
+    /// поверх того, что уже отрисовано, чтобы фоновые изменения (incrementalSync, другое
+    /// устройство) стали видны без pull-to-refresh. nil, пока не загружена хотя бы одна страница.
+    func observeLoadedWindow() -> AsyncValueObservation<[TransactionListRowData]>? {
+        guard let oldestLoadedDate else { return nil }
+        let ids = accountFilterIDs(currentFilters)
+        return service.observeTransactionRows(
+            dateFrom: oldestLoadedDate,
+            dateTo: currentFilters.dateTo,
+            searchText: currentFilters.searchText,
+            accountIDs: ids.accountIDs,
+            excludedAccountIDs: ids.excludedAccountIDs,
+            transactionTypes: currentFilters.transactionTypes,
+            currencies: currentFilters.currencies,
+            tagIDs: currentFilters.tags.map(\.id),
+            accountGroupIDs: currentFilters.accountGroups.map(\.id)
+        )
+    }
+
+    @MainActor
+    func applyObservedRows(_ observedRows: [TransactionListRowData]) {
+        rows = observedRows
         rebuildTransactionItems()
     }
 

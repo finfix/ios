@@ -112,13 +112,9 @@ struct AccountCircleItemCircle: View {
                     }
                 }
             }
-            .overlay{
-                AsyncImage(url: URL.documentsDirectory.appending(path: account.icon.url)) { image in
-                    image.image?
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 30)
-                }
+            .overlay {
+                CachedIconImage(fileName: account.icon.url)
+                    .frame(width: 30)
             }
             .frame(height: 60)
     }

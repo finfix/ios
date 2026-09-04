@@ -125,18 +125,23 @@ struct EditTransaction: View {
         transactionType: TransactionType,
         accountFrom: Account = Account(),
         accountTo: Account = Account(),
-        accountGroup: AccountGroup
+        accountGroup: AccountGroup,
+        sourceTransfer: PendingLinkedTransfer? = nil,
+        prefillAmount: Decimal = 0
     ) {
         vm = EditTransactionViewModel(
             currentTransaction: Transaction(
-                accountingInCharts: true, 
+                accountingInCharts: true,
+                amountFrom: prefillAmount,
+                amountTo: prefillAmount,
                 type: transactionType,
                 accountFrom: accountFrom,
                 accountTo: accountTo,
                 accountGroupID: accountGroup.id
             ),
             accountGroup: accountGroup,
-            mode: .create
+            mode: .create,
+            sourceTransfer: sourceTransfer
         )
     }
     

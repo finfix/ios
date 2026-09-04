@@ -22,6 +22,7 @@ class EditAccountViewModel {
     var icons: [Icon] = []
     var accountGroups: [AccountGroup] = []
     var accounts: [Account] = []
+    var linkableAccounts: [Account] = []
     
     var currentAccount = Account()
     @ObservationIgnored private var hasLoadedDefaults = false
@@ -77,6 +78,27 @@ class EditAccountViewModel {
             visible = true
         }
         accounts = try await service.getAccounts(visible: visible, types: [currentAccount.type])
+
+        // Кандидаты для связи "счёт-мост" — счёт совместимого типа (см. bridgeCompatibleType),
+        // той же валюты, ещё не связанный ни с чем, из ЛЮБОЙ моей группы (не только текущей —
+        // весь смысл моста в том, чтобы соединять счета из разных групп) и не сам currentAccount.
+        if mode == .update, let compatibleType = Self.bridgeCompatibleType(for: currentAccount.type) {
+            let candidates = try await service.getAccounts(types: [compatibleType], currencyCode: currentAccount.currency.code)
+                .filter { $0.id != currentAccount.id && $0.linkedAccountID == nil }
+
+            // Родительский счёт хранит СВОЮ валюту (обычно валюту группы по умолчанию), которая
+            // может отличаться от валюты конкретного дочернего счёта — если фильтровать
+            // родителей по той же валюте, что и детей, подходящий ребёнок остаётся без узла
+            // родителя в пикере и становится недостижим. Поэтому родителей кандидатов
+            // подгружаем отдельно, без фильтра по валюте.
+            let parentIDs = Set(candidates.compactMap(\.parentAccountID))
+            let parents = parentIDs.isEmpty ? [] : try await service.getAccounts(ids: Array(parentIDs))
+
+            linkableAccounts = candidates + parents.filter { parent in !candidates.contains { $0.id == parent.id } }
+        } else {
+            linkableAccounts = []
+        }
+
         // Валюту/иконку по умолчанию проставляем только при первой загрузке — иначе load()
         // (который заново вызывается из .task при каждом возврате с других экранов формы,
         // например из CurrencyPicker) стирал бы уже выбранную пользователем валюту.
@@ -100,5 +122,15 @@ class EditAccountViewModel {
     
     func deleteAccount() async throws {
         try await service.deleteAccount(currentAccount)
+    }
+
+    /// Разрешённые пары типов для счёта-моста: regular↔regular, expense↔earnings.
+    static func bridgeCompatibleType(for type: AccountType) -> AccountType? {
+        switch type {
+        case .regular: return .regular
+        case .expense: return .earnings
+        case .earnings: return .expense
+        default: return nil
+        }
     }
 }

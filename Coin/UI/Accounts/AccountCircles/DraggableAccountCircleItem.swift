@@ -7,31 +7,44 @@
 
 import SwiftUI
 
-struct AccountLocationPreferenceKey: PreferenceKey {
-    static var defaultValue: [Account: CGPoint] = [:]
-    
-    static func reduce(value: inout [Account: CGPoint], nextValue: () -> [Account: CGPoint]) {
-        value.merge(nextValue()) { current, _ in current }
-    }
-}
-
-struct DragLocationPreferenceKey: PreferenceKey {
-    static var defaultValue: CGPoint?
-    
-    static func reduce(value: inout CGPoint?, nextValue: () -> CGPoint?) {
-        value = nextValue()
-    }
-}
-
 struct DraggableAccountCircleItem: View {
-    
+
     @Binding var vm: AccountCirclesViewModel
-    let accountGroup: AccountGroup
     let account: Account
     @Binding var path: NavigationPath
-    @State var isChildrenOpen = false
-    @Environment(\.dismiss) var dismiss
+    // true для кружков внутри плавающей панели дочерних счетов (см. vm.expandedParentAccount) —
+    // тап/долгий тап там должен ещё и закрыть панель, а не просто выполнить своё обычное действие.
     var isAlreadyOpened: Bool = false
+
+    private func closeIfNested() {
+        if isAlreadyOpened {
+            vm.closeExpandedPanel()
+        }
+    }
+
+    // Задержать перетаскиваемый счёт над другим родительским на 1 секунду при создании
+    // транзакции (не в режиме редактирования) — открывает панель ЭТОГО родителя, чтобы уронить
+    // именно на нужный дочерний счёт (например, по валюте), а не полагаться на авто-выбор
+    // первого ребёнка.
+    @State private var hoverExpandTask: Task<Void, Never>?
+
+    private func handleHoverExpand(targeted: Bool) {
+        hoverExpandTask?.cancel()
+        hoverExpandTask = nil
+        guard targeted, !vm.isEditMode, account.isParent, !account.childrenAccounts.isEmpty else { return }
+        hoverExpandTask = Task {
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            withAnimation {
+                // Открываем на той же высоте, где сейчас палец (ручной драг живьём знает
+                // координаты — в отличие от нативного .draggable, тут это не требует
+                // GeometryReader на том же узле, что и жест, и не рискует крэшем
+                // _UIPlatterView).
+                vm.expandedParentAccountAnchorY = vm.draggableLocation?.y
+                vm.expandedParentAccount = account
+            }
+        }
+    }
 
     // Текущий угол поворота — анимируется императивно через withAnimation(repeatForever),
     // а не через `.animation(_:value:)`: тот запускает переход только один раз при смене
@@ -58,78 +71,91 @@ struct DraggableAccountCircleItem: View {
         }
     }
 
+    // В режиме редактирования тащить (чтобы переставить) можно любой счёт — остаётся на
+    // нативном .draggable/.dropDestination (небольшая задержка перед "поднятием" здесь уместна,
+    // как при перестановке иконок на Home Screen).
+    private var canDrag: Bool {
+        vm.isEditMode
+    }
+
+    // Вне режима редактирования тащить (чтобы создать транзакцию) можно только обычные и
+    // доходные счета — balancing/expense не могут быть источником. Это отдельный, обычный
+    // DragGesture (не .draggable) — см. AccountCirclesViewModel MARK: Создание транзакции —
+    // у .draggable на тач-экране всегда есть системная задержка "прижать-и-подождать" перед
+    // стартом драга (не настраивается публичным API), а транзакцию нужно тащить сразу по
+    // движению пальца, без залипания.
+    private var canManualDrag: Bool {
+        !vm.isEditMode && account.type != .balancing && account.type != .expense
+    }
+
     var body: some View {
 
         VStack {
             AccountCircleItemHeader(account: account)
             ZStack {
                 AccountCircleItemCircle(account: account)
-                    .background(
+                    .opacity(vm.isHighligted(for: account) ? 0.6 : 1)
+                    .contentShape(Circle())
+                    .modifier(DraggableIf(isEnabled: canDrag, account: account))
+                    .dropDestination(for: DraggedAccount.self) { items, _ in
+                        guard let dragged = items.first else { return false }
+                        Task { await vm.handleDrop(dragged, onto: account) }
+                        return true
+                    } isTargeted: { targeted in
+                        vm.setHighlighted(account, targeted: targeted)
+                    }
+                    // Любой счёт (в т.ч. balancing/expense — они могут быть только целью, не
+                    // источником) регистрирует свою позицию для ручного хит-теста создания
+                    // транзакции. .background(GeometryReader) — отдельный слой, а не модификатор
+                    // на этом же узле, что и .draggable: иначе (проверено на практике) ловим крэш
+                    // "_UIPlatterView as a subview of UIHostingController.view is not supported".
+                    //
+                    // Гибрид: пассивный onGeometryChange живьём ловит любое реальное изменение
+                    // фрейма (в т.ч. то, что не предусмотрено явным триггером — например, смену
+                    // ориентации или resize окна), а .onChange(of: vm.geometryRefreshTrigger)
+                    // остаётся как явный, управляемый путь на конкретные события (смена страницы,
+                    // смена набора счетов — см. AccountsTabView/applyObservedAccounts). Раньше
+                    // онGeometryChange одного его было мало (TabView(.page) не всегда сообщал
+                    // SwiftUI о реальном релэйауте), но корень той проблемы — сам TabView(.page) —
+                    // уже заменён на ScrollView, так что пассивный путь снова безопасен.
+                    .background {
                         GeometryReader { proxy in
                             Color.clear
-                                .preference(
-                                    key: AccountLocationPreferenceKey.self,
-                                    value: [account: CGPoint(
-                                        x: proxy.frame(in: .global).midX,
-                                        y: proxy.frame(in: .global).midY
-                                    )]
-                                )
-                        }
-                    )
-                    .onPreferenceChange(AccountLocationPreferenceKey.self) { locations in
-                        if let location = locations[account] {
-                            vm.initializateStaticLocations(
-                                location: location,
-                                for: account,
-                                in: accountGroup
-                            )
+                                .onGeometryChange(for: CGRect.self, of: { $0.frame(in: .global) }) { newValue in
+                                    vm.registerCreateTransactionLocation(
+                                        CGPoint(x: newValue.midX, y: newValue.midY),
+                                        for: account.id
+                                    )
+                                }
+                                .onChange(of: vm.geometryRefreshTrigger) { _, _ in
+                                    let frame = proxy.frame(in: .global)
+                                    vm.registerCreateTransactionLocation(
+                                        CGPoint(x: frame.midX, y: frame.midY),
+                                        for: account.id
+                                    )
+                                }
                         }
                     }
-                    .allowsHitTesting(false)
-                
-                Circle()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.white.opacity(0.001))
-                    .gesture(
-                        DragGesture(coordinateSpace: .global)
-                            .onChanged { state in
-                                if vm.isEditMode {
-                                    // В режиме редактирования тот же жест "отклеивает" счёт
-                                    // и позволяет поменять его местами с другим.
-                                    vm.updateReorderDraggableLocation(location: state.location, for: account)
-                                    return
-                                }
-                                guard account.type != .balancing && account.type != .expense else { return }
-                                vm.updateDraggableLocation(
-                                    location: state.location,
-                                    for: account
-                                )
-                            }
-                            .onEnded { state in
-                                if vm.isEditMode {
-                                    Task { await vm.confirmReorder() }
-                                    return
-                                }
-                                confirmDraggableDrop(for: account)
-                                if isAlreadyOpened {
-                                    dismiss()
-                                }
-                            }
-                    )
-                    .simultaneousGesture(
-                        LongPressGesture(minimumDuration: 0.5)
-                            .onEnded { state in
-                                withAnimation {
-                                    vm.isEditMode = true
-                                }
-                            }
-                    )
+                    .modifier(ManualDragIf(isEnabled: canManualDrag, account: account, vm: $vm, path: $path))
+                    .onChange(of: vm.isHighligted(for: account)) { _, targeted in
+                        handleHoverExpand(targeted: targeted)
+                    }
+                    // Вход в режим редактирования — кнопкой в тулбаре (AccountCirclesView), не
+                    // долгим тапом: LongPressGesture на этом же кружке конкурировал за
+                    // распознавание касания с собственным touch-жестом .draggable (тот тоже
+                    // начинается с удержания), из-за чего перетаскивание пальцем переставало
+                    // запускаться (мышью на Mac не конфликтовало — оттуда разница в поведении).
                     .gesture(
                         TapGesture(count: 2)
                             .onEnded {
                                 guard !vm.isEditMode else { return }
                                 if !account.childrenAccounts.isEmpty {
-                                    isChildrenOpen = true
+                                    withAnimation {
+                                        vm.expandedParentAccount = account
+                                        // Двойной тап — не драг, координировать не с чем, панель
+                                        // просто по центру экрана.
+                                        vm.expandedParentAccountAnchorY = nil
+                                    }
                                 }
                             }
                     )
@@ -141,9 +167,7 @@ struct DraggableAccountCircleItem: View {
                                     return
                                 }
 
-                                if isAlreadyOpened {
-                                    dismiss()
-                                }
+                                closeIfNested()
 
                                 var chartType: ChartType = .earningsAndExpenses
                                 switch account.type {
@@ -173,11 +197,6 @@ struct DraggableAccountCircleItem: View {
                 }
             }
             .rotationEffect(.degrees(jiggleRotation))
-            .opacity(vm.isHighligted(for: account) ? 0.6 : 1)
-            // Сам оригинальный кружок прячем (но не удаляем — жест на нём должен дожить до
-            // конца перетаскивания), пока за пальцем летит его "призрак" в AccountCirclesView.
-            .opacity(vm.reorderDraggableAccount?.id == account.id ? 0 : 1)
-            .animation(.easeOut(duration: 0.15), value: vm.reorderDraggableAccount?.id == account.id)
             AccountCircleItemFooter(account: account)
         }
         .frame(width: 80)
@@ -189,86 +208,53 @@ struct DraggableAccountCircleItem: View {
             startJiggleIfNeeded()
         }
         .onDisappear {
-            // staticLocations раньше только пополнялся и никогда не чистился — когда счёт
-            // уходит со страницы (перелистывание TabView выгружает её из памяти), его
-            // последняя известная позиция навсегда "застревала" в словаре и могла случайно
-            // совпасть по координатам с каким-то другим (реально видимым сейчас) счётом,
-            // из-за чего hit-test при перестановке иногда попадал не туда.
-            vm.staticLocations.removeValue(forKey: account.id)
-        }
-        .popover(isPresented: $isChildrenOpen) {
-            ScrollView(.horizontal) {
-                HStack(spacing: 10) {
-                    ForEach(account.childrenAccounts) { account in
-                        DraggableAccountCircleItem(
-                            vm: $vm,
-                            accountGroup: accountGroup,
-                            account: account,
-                            path: $path,
-                            isAlreadyOpened: true
-                        )
-                        .frame(width: 80)
-                    }
-                    .presentationCompactAdaptation(.popover)
-                }
-                .padding()
-            }
+            hoverExpandTask?.cancel()
+            vm.clearCreateTransactionLocation(for: account.id)
         }
     }
-    
-    func confirmDraggableDrop(for draggableAccount: Account) {
-        
-        // Если какой-то счет подсвечивается (в зоне реагирования)
-        if let staticAccount = vm.highlitedAccount {
-            
-            // Выбираем тип транзакции, который получится по комбинации типов счетов
-            var transactionType: TransactionType? = nil
-            switch (true) {
-            case draggableAccount == staticAccount: break
-            case draggableAccount.type == .earnings && staticAccount.type == .regular: transactionType = .income // Доходный счет в обычный = доход
-            case draggableAccount.type == .regular && staticAccount.type == .regular: transactionType = .transfer // Обычный счет в обычный = перевод
-            case draggableAccount.type == .regular && staticAccount.type == .expense: transactionType = .consumption // Обычный счет в расходный = расход
-            default: break
-            }
-            
-            // Если смогли выбрать тип транзакции
-            if let transactionType {
-                
-                // Получаем счет списания
-                var accountFrom: Account? = draggableAccount
+}
 
-                // Если счет родительский
-                if draggableAccount.isParent {
+/// Обычный DragGesture для создания транзакции (см. AccountCirclesViewModel MARK: Создание
+/// транзакции) — начинается сразу по движению пальца, без задержки .draggable. Не участвует в
+/// .dropDestination напрямую: попадание в цель определяется вручную (updateManualDrag), по
+/// зарегистрированным позициям кружков.
+private struct ManualDragIf: ViewModifier {
+    let isEnabled: Bool
+    let account: Account
+    @Binding var vm: AccountCirclesViewModel
+    @Binding var path: NavigationPath
 
-                    // Получаем первый дочерний счет (первый по serial_number считается preferred)
-                    accountFrom = draggableAccount.childrenAccounts.first
-                }
-
-                // Получаем счет пополнения
-                var accountTo: Account? = staticAccount
-
-                // Если счет родительский
-                if staticAccount.isParent {
-
-                    // Получаем первый дочерний счет с валютой счета списания, иначе просто первый
-                    accountTo = staticAccount.childrenAccounts.first(where: { $0.currency == accountFrom?.currency })
-                        ?? staticAccount.childrenAccounts.first
-                }
-                
-                // Если оба счета есть, независимо от предыдущей логики
-                if let accountFrom = accountFrom, let accountTo = accountTo {
-                    self.path.append(DraggableAccountRoute.createTransaction(transactionType, accountFrom, accountTo))
-                }
-            }
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.gesture(
+                DragGesture(minimumDistance: 8, coordinateSpace: .global)
+                    .onChanged { value in
+                        vm.updateManualDrag(location: value.location, draggedAccount: account)
+                    }
+                    .onEnded { _ in
+                        vm.confirmManualDrag(path: $path)
+                    }
+            )
+        } else {
+            content
         }
-                                     
-        // Сбрасываем подсвечиваемый счет
-        self.vm.highlitedAccount = nil
-                                     
-        // Убираем счет, который дергали
-        withAnimation {
-            self.vm.draggableLocation = nil
-            self.vm.draggableAccount = nil
+    }
+}
+
+/// `.draggable(_:)` не умеет условно отключаться параметром (в отличие от .disabled) — счёт
+/// либо перетаскиваемый, либо нет, поэтому ветвим сборку view целиком.
+private struct DraggableIf: ViewModifier {
+    let isEnabled: Bool
+    let account: Account
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.draggable(DraggedAccount(accountID: account.id)) {
+                AccountCircleItemCircle(account: account)
+                    .frame(width: 60, height: 60)
+            }
+        } else {
+            content
         }
     }
 }
@@ -276,7 +262,6 @@ struct DraggableAccountCircleItem: View {
 #Preview {
     DraggableAccountCircleItem(
         vm: .constant(AccountCirclesViewModel()),
-        accountGroup: AccountGroup(),
         account: Account(),
         path: .constant(NavigationPath()),
         isAlreadyOpened: false

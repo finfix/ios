@@ -27,7 +27,8 @@ struct TaskDetails: View {
              .createAccountGroup, .updateAccountGroup,
              .createAccountBudget:
             return true
-        case .deleteTransaction, .deleteAccount, .deleteTag, .deleteAccountGroup, .updateUser:
+        case .deleteTransaction, .deleteAccount, .deleteTag, .deleteAccountGroup, .updateUser,
+             .createPendingLinkedTransfer, .updatePendingLinkedTransfer:
             return false
         }
     }
