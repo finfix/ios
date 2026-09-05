@@ -216,6 +216,14 @@ extension Service {
             )
         }
 
+        // Связь счёта-моста должна быть зеркальной — иначе "мост" срабатывает только когда
+        // транзакция трогает СТОРОНУ, с которой связывали, а не обе, и защита от повторной
+        // связи (isDisabled в LinkAccountPickerScreen) не видит, что другая сторона уже занята.
+        // Бэкенд — намеренно тупая точка истины без такой логики, поэтому зеркалим на клиенте:
+        // отдельная таска на ДРУГОЙ счёт (может быть в другой группе/принадлежать другому
+        // человеку — тоже долетит через обычную синхронизацию).
+        try await mirrorLinkedAccount(oldAccount: oldAccount, newAccount: newAccount)
+
         // Явно отправляем на сервер каскадные изменения родителя (если что-то реально
         // поменялось) — раньше это только писалось в локальную БД, и бэк о таких изменениях
         // не узнавал вовсе.
@@ -505,6 +513,32 @@ extension Service {
         ))
     }
     
+    // Зеркалит изменение связи "счёт-мост" на ДРУГОЙ стороне — см. вызов в updateAccount.
+    // Не переиспользует сам updateAccount(newAccount:oldAccount:) намеренно: тот тянет за собой
+    // не относящуюся сюда каскадную логику родитель/дети — тут нужна только точечная правка
+    // одного поля на другом счёте, локально и таской в очередь.
+    private func mirrorLinkedAccount(oldAccount: Account, newAccount: Account) async throws {
+        guard oldAccount.linkedAccountID != newAccount.linkedAccountID else { return }
+
+        if let oldTargetID = oldAccount.linkedAccountID, oldTargetID != newAccount.linkedAccountID {
+            try await setMirroredLink(onAccountID: oldTargetID, linkedAccountID: nil, unlink: true)
+        }
+        if let newTargetID = newAccount.linkedAccountID {
+            try await setMirroredLink(onAccountID: newTargetID, linkedAccountID: newAccount.id, unlink: false)
+        }
+    }
+
+    private func setMirroredLink(onAccountID targetID: UUID, linkedAccountID: UUID?, unlink: Bool) async throws {
+        guard var targetAccount = try await getAccounts(ids: [targetID]).first else { return }
+        targetAccount.linkedAccountID = linkedAccountID
+        try await repository.updateAccount(targetAccount)
+        try await taskManager.createTask(
+            actionName: .updateAccount,
+            reqModel: UpdateAccountReq(id: targetID, linkedAccountID: linkedAccountID, unlinkAccount: unlink),
+            entityID: targetID
+        )
+    }
+
     // Вычисляет rank для нового счета — сразу после последнего существующего счета группы
     private func nextRank(in accountGroup: AccountGroup) async throws -> String {
         let lastRank = try await getAccounts(accountGroups: [accountGroup]).map(\.rank).max()

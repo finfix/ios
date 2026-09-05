@@ -577,21 +577,10 @@ struct AccountCirclesView: View {
                 }
             }
             .toolbar {
-                if !vm.isEditMode {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        // .id(...) — иначе @State vm внутри PendingLinkedTransfersBadge
-                        // инициализируется один раз при первом маунте тулбара и навсегда
-                        // застревает с той группой, что была на тот момент (в т.ч. с
-                        // заглушкой AccountGroup(), пока реальная группа ещё не подгрузилась —
-                        // см. .task(id:) ниже с тем же isLoaded-гейтом). .id() форсирует
-                        // пересоздание view (и его @State) при смене реальной группы.
-                        PendingLinkedTransfersBadge(accountGroup: selectedAccountGroup.selectedAccountGroup)
-                            .id(selectedAccountGroup.selectedAccountGroup.id)
-                    }
-                }
-                // Вход в режим редактирования — долгим тапом по любому кружку (см.
-                // DraggableAccountCircleItem.LongPressToEditIf), как на Home Screen iOS. Кнопка
-                // осталась только для выхода — "Готово" симметрично понятнее свайпа/тапа мимо.
+                // Вход в режим редактирования — долгим тапом по фону экрана (см.
+                // .onLongPressGesture ниже), как на Home Screen iOS. Кнопка осталась только для
+                // выхода — "Готово" симметрично понятнее свайпа/тапа мимо. Кнопка "Переносы"
+                // переехала в QuickStatisticView (см. PendingLinkedTransfersQuickStatButton).
                 if vm.isEditMode {
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Готово") {

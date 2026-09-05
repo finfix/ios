@@ -42,6 +42,7 @@ extension User_UpdateUserRequest: HasAccessToken {}
 extension PendingLinkedTransfer_GetPendingLinkedTransfersRequest: HasAccessToken {}
 extension PendingLinkedTransfer_CreatePendingLinkedTransferRequest: HasAccessToken {}
 extension PendingLinkedTransfer_UpdatePendingLinkedTransferRequest: HasAccessToken {}
+extension PendingLinkedTransfer_DeletePendingLinkedTransferRequest: HasAccessToken {}
 
 // MARK: - HasErrorField Extensions
 // Пустые конформансы на сгенерированные Response-типы — у всех есть error/hasError,
@@ -79,6 +80,7 @@ extension User_UpdateUserResponse: HasErrorField {}
 extension PendingLinkedTransfer_GetPendingLinkedTransfersResponse: HasErrorField {}
 extension PendingLinkedTransfer_CreatePendingLinkedTransferResponse: HasErrorField {}
 extension PendingLinkedTransfer_UpdatePendingLinkedTransferResponse: HasErrorField {}
+extension PendingLinkedTransfer_DeletePendingLinkedTransferResponse: HasErrorField {}
 
 // MARK: - UUID Extensions
 

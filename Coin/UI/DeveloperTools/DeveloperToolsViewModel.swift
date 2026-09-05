@@ -26,6 +26,11 @@ class DeveloperToolsViewModel {
         try await service.forceRefreshTokens()
     }
 
+    /// Логин + сохранение новой пары токенов БЕЗ последующего sync() — см. Service.authWithoutSync.
+    func authWithoutSync(login: String, password: String) async throws {
+        try await service.authWithoutSync(login: login, password: password)
+    }
+
     // MARK: - Инкрементальная синхронизация
 
     var taskManager: TaskManager { service.taskManager }

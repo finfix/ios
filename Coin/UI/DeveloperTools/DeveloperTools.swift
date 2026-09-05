@@ -37,6 +37,8 @@ struct DeveloperTools: View {
     @State private var isDataExpanded = false
     @State private var isAutoSyncExpanded = false
     @State private var isAuthExpanded = false
+    @State private var debugAuthLogin = ""
+    @State private var debugAuthPassword = ""
     @State private var isBridgeExpanded = false
     @State private var pendingLinkedTransfers: [PendingLinkedTransfer] = []
     @State private var linkedAccounts: [Account] = []
@@ -227,6 +229,12 @@ struct DeveloperTools: View {
                 // MARK: Авторизация
                 Section {
                     DisclosureGroup("Авторизация", isExpanded: $isAuthExpanded) {
+                        HStack {
+                            Text("Device ID")
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            CopyableIDText(id: getDeviceInformation().deviceID)
+                        }
                         TextField("Access token", text: Binding(
                             get: { authStorage.accessToken ?? "" },
                             set: { authStorage.accessToken = $0.isEmpty ? nil : $0 }
@@ -246,6 +254,30 @@ struct DeveloperTools: View {
                                 }
                             }
                         }
+
+                        Divider()
+
+                        Text("Логин/пароль — получить новую пару токенов, БЕЗ sync()")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        TextField("Логин", text: $debugAuthLogin)
+                            .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                            .textContentType(.username)
+                        SecureField("Пароль", text: $debugAuthPassword)
+                            .textContentType(.password)
+                        Button("Получить токены") {
+                            Task {
+                                shouldDisableUI = true
+                                defer { shouldDisableUI = false }
+                                do {
+                                    try await vm.authWithoutSync(login: debugAuthLogin, password: debugAuthPassword)
+                                } catch {
+                                    alert.error(error)
+                                }
+                            }
+                        }
+                        .disabled(debugAuthLogin.isEmpty || debugAuthPassword.isEmpty)
                     }
                 }
                 .frame(maxWidth: .infinity)

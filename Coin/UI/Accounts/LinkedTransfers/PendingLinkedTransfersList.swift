@@ -75,9 +75,12 @@ class PendingLinkedTransfersViewModel {
     }
 }
 
-/// Кнопка-уведомление в тулбаре AccountCirclesView — видна только если есть хотя бы один
-/// pending-перенос, ведёт на PendingLinkedTransfersList.
-struct PendingLinkedTransfersBadge: View {
+/// Кнопка-статистика "Переносы" в QuickStatisticView (та же колоночная раскладка, что у
+/// "Расход"/"Баланс"/"Бюджет") — ведёт на PendingLinkedTransfersList. В отличие от бывшего бейджа
+/// в тулбаре, держится в дереве постоянно (opacity/allowsHitTesting вместо if — см. историю
+/// отладки: conditional-view ненадёжно вставлялось, когда условие становится true уже после
+/// маунта), но теперь как равноправный элемент статистики, а не отдельная иконка.
+struct PendingLinkedTransfersQuickStatButton: View {
     @State private var vm: PendingLinkedTransfersViewModel
     @Environment(PathSharedState.self) private var path
 
@@ -86,35 +89,27 @@ struct PendingLinkedTransfersBadge: View {
     }
 
     var body: some View {
-        // Кнопка держится в дереве ПОСТОЯННО (не под if !vm.transfers.isEmpty) — SwiftUI
-        // ненадёжно вставляет/убирает conditional-view внутри тулбара при первом появлении,
-        // если условие становится true уже ПОСЛЕ маунта (см. отладку: с `if` бейдж не появлялся
-        // даже когда vm.transfers реально был непустой, пока условие не убрали). Видимость и
-        // интерактивность вместо этого регулируются opacity/allowsHitTesting.
         Button {
             path.path.append(PendingLinkedTransfersRoute.list)
         } label: {
-            Image(systemName: "arrow.left.arrow.right.circle.fill")
-                .foregroundStyle(.orange)
-                .overlay(alignment: .topTrailing) {
-                    Text("\(vm.transfers.count)")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white)
-                        .padding(4)
-                        .background(Circle().fill(.red))
-                        .offset(x: 8, y: -8)
-                }
+            VStack {
+                Text("Переносы")
+                    .bold()
+                Text("\(vm.transfers.count)")
+                    .foregroundStyle(vm.transfers.isEmpty ? Color.secondary : Color.orange)
+                Spacer()
+            }
         }
-        .opacity(vm.transfers.isEmpty ? 0 : 1)
+        .buttonStyle(.plain)
+        .opacity(vm.transfers.isEmpty ? 0.35 : 1)
         .allowsHitTesting(!vm.transfers.isEmpty)
         .task {
-            logger.debug("PendingLinkedTransfersBadge: .task запустился")
             do {
                 for try await transfers in try await vm.observeTransfers() {
                     vm.apply(transfers)
                 }
             } catch {
-                logger.error("PendingLinkedTransfersBadge: \(String(describing: error), privacy: .public)")
+                logger.error("PendingLinkedTransfersQuickStatButton: \(String(describing: error), privacy: .public)")
             }
         }
     }

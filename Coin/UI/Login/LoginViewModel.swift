@@ -24,6 +24,8 @@ class LoginViewModel {
     var isShowPassword = false
     var shouldDisableUI = false
     var shouldShowProgress = false
+    /// Доля выполненного sync() после успешной авторизации (0...1) — см. Service.sync(progress:).
+    var syncProgress: Double = 0
     
     enum Mode {
         case login, register
@@ -33,19 +35,29 @@ class LoginViewModel {
         shouldDisableUI = true
         defer { shouldDisableUI = false }
         shouldShowProgress = true
+        syncProgress = 0
         defer { shouldShowProgress = false }
-        
+
+        // sync() крутится в фоновом Task, колбэк дёргается не на MainActor — сама доля
+        // считается синхронно на стороне Service, поэтому дешёвое обновление @Observable-поля
+        // достаточно просто форкнуть на MainActor, без доп. синхронизации.
+        let onProgress: (Double) -> Void = { [weak self] fraction in
+            Task { @MainActor in self?.syncProgress = fraction }
+        }
+
         switch mode {
         case .login:
             try await service.auth(
                 login: login,
-                password: password
+                password: password,
+                syncProgress: onProgress
             )
         case .register:
             try await service.register(
                 login: login,
                 password: password,
-                name: name
+                name: name,
+                syncProgress: onProgress
             )
         }
     }

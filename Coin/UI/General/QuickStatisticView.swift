@@ -32,8 +32,7 @@ struct QuickStatisticView: View {
     var body: some View {
         HStack {
             Spacer()
-            Spacer()
-                .frame(width: 20) // Ширина иконки пикера счетов
+            PendingLinkedTransfersQuickStatButton(accountGroup: selectedAccountGroup)
             Spacer()
             VStack {
                 Text("Расход")

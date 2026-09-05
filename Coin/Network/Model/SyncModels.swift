@@ -29,6 +29,7 @@ struct SyncRes {
     var changedAccountBudgets: [GetAccountBudgetsRes]
 
     var changedPendingLinkedTransfers: [GetPendingLinkedTransfersRes]
+    var deletedPendingLinkedTransferIDs: [UUID]
 
     var changedUser: GetUserRes?
 

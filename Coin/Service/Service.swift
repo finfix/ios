@@ -604,12 +604,23 @@ extension Service {
         try await taskManager.incrementalSync()
     }
 
-    func sync() async throws {
+    /// progress — доля выполненного (0...1), после каждого крупного шага. Параллельная выгрузка
+    /// с сервера (async let ниже) сама по себе не даёт промежуточных отметок (одна gRPC-пачка
+    /// вызовов без собственного прогресса), поэтому она считается ОДНИМ шагом наравне с
+    /// остальными — грубее, чем хотелось бы, но честнее, чем выдумывать проценты внутри неё.
+    func sync(progress: ((Double) -> Void)? = nil) async throws {
         logger.info("Синхронизируем данные")
-                
+
+        let totalSteps = 14
+        var completedSteps = 0
+        func step() {
+            completedSteps += 1
+            progress?(Double(completedSteps) / Double(totalSteps))
+        }
+
         // Получаем данные текущего месяца для запроса
         let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
-        
+
         // Получаем все данные с сервера
         async let _icons = try await apiManager.GetIcons()
         async let _currencies = try await apiManager.GetCurrencies()
@@ -628,6 +639,17 @@ extension Service {
         )
 
         let (icons, currencies, user, accountGroups, accounts, accountBudgets, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _accountBudgets, _tags, _tagsToTransactions, _transactions)
+        step() // 1/14 — выгрузка с сервера
+
+        // Переносы через счета-мосты — отдельным запросом (не в общей async let-пачке выше),
+        // т.к. фильтр строится из ID уже полученных групп/счетов (клиент сам решает, что "моё" —
+        // сервер, в отличие от остальных сущностей, не ограничивает по владельцу неявно).
+        logger.info("Получаем переносы через счета-мосты")
+        let pendingLinkedTransfers = try await apiManager.GetPendingLinkedTransfers(req: GetPendingLinkedTransfersReq(
+            accountGroupIDs: accountGroups.map(\.id),
+            targetAccountIDs: accounts.map(\.id)
+        ))
+        step() // 2/14
 
         // Сохраняем иконки из gRPC ответа в локальные файлы
         logger.info("Сохраняем иконки из gRPC")
@@ -641,30 +663,45 @@ extension Service {
             try icon.image.write(to: localURL, options: [.atomic, .completeFileProtection])
             iconsDB.append(IconDB(id: icon.id, name: icon.name, url: icon.name))
         }
+        step() // 3/14
 
         // Удаляем все данные в базе данных
         logger.info("Удаляем все данные")
         try await repository.deleteAllData()
+        step() // 4/14
 
         // Сохраняем данные в базу данных
         logger.info("Сохраняем данные по иконкам")
         try await repository.importIcons(iconsDB)
+        step() // 5/14
         logger.info("Сохраняем валюты")
         try await repository.importCurrencies(CurrencyDB.convertFromApiModel(currencies))
+        step() // 6/14
         logger.info("Сохраняем пользователя")
         try await repository.importUser(UserDB(user))
+        step() // 7/14
         logger.info("Сохраняем группы счетов")
         try await repository.importAccountGroups(AccountGroupDB.convertFromApiModel(accountGroups))
+        step() // 8/14
         logger.info("Сохраняем счета")
         try await repository.importAccounts(AccountDB.convertFromApiModel(accounts).sorted { l, _ in l.isParent })
+        step() // 9/14
         logger.info("Сохраняем историю бюджетов счетов")
         try await repository.importAccountBudgets(AccountBudgetDB.convertFromApiModel(accountBudgets))
+        step() // 10/14
         logger.info("Сохраняем подкатегории")
         try await repository.importTags(TagDB.convertFromApiModel(tags))
+        step() // 11/14
         logger.info("Сохраняем транзакции")
         try await repository.importTransactions(TransactionDB.convertFromApiModel(transactions))
+        step() // 12/14
+        // sourceTransactionID — belongsTo FK, поэтому строго ПОСЛЕ importTransactions.
+        logger.info("Сохраняем переносы через счета-мосты")
+        try await repository.importPendingLinkedTransfers(PendingLinkedTransferDB.convertFromApiModel(pendingLinkedTransfers))
+        step() // 13/14
         logger.info("Сохраняем связки между подкатегориями и транзакциями")
         try await repository.importTagsToTransactions(TagToTransactionDB.convertFromApiModel(tagsToTrasnactions))
+        step() // 14/14
     }
 }
 

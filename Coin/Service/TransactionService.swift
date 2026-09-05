@@ -118,6 +118,17 @@ extension Service {
         )
     }
 
+    /// Удаляет перенос целиком (например, вместе с транзакцией-инициатором) — в отличие от
+    /// ignoreLinkedTransfer, это не статус-флаг, а настоящее удаление строки на бэкенде.
+    func deletePendingLinkedTransfer(_ transfer: PendingLinkedTransfer) async throws {
+        try await repository.deletePendingLinkedTransfer(transfer)
+        try await taskManager.createTask(
+            actionName: .deletePendingLinkedTransfer,
+            reqModel: DeletePendingLinkedTransferReq(id: transfer.id),
+            entityID: transfer.id
+        )
+    }
+
     // MARK: Read
     func getTransactions(
         limit: Int = 100,
@@ -310,6 +321,15 @@ extension Service {
     // Удаляет транзакцию из базы данных, получает актуальные счета, считает новые балансы счетов и изменяет их в базе данных
     // MARK: Delete
     func deleteTransaction(_ transaction: Transaction) async throws {
+        // PendingLinkedTransferDB.sourceTransactionID — реальный belongsTo FK на transactionDB
+        // ЛОКАЛЬНО (SQLite с включённым PRAGMA foreign_keys), поэтому жёсткое удаление
+        // транзакции при живой ссылке упадёт с ошибкой. Перенос всё равно теряет смысл без
+        // исходной транзакции, поэтому удаляем его целиком на бэкенде, а не просто помечаем
+        // отменённым.
+        for transfer in try await repository.getPendingLinkedTransfers(sourceTransactionID: transaction.id) {
+            try await deletePendingLinkedTransfer(transfer)
+        }
+
         try await self.repository.deleteTransaction(transaction)
         try await self.recalculateAccountBalances(accounts: [transaction.accountFrom, transaction.accountTo])
         try await taskManager.createTask(

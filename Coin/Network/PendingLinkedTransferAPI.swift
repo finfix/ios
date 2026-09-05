@@ -13,12 +13,12 @@ import SwiftProtobuf
 
 extension PendingLinkedTransfer_GetPendingLinkedTransfersRequest {
     init(
-        accountGroupID: UUID?
+        accountGroupIDs: [UUID],
+        targetAccountIDs: [UUID]
     ) {
         self.init()
-        if let accountGroupID {
-            self.accountGroupIds = [accountGroupID.data]
-        }
+        self.accountGroupIds = accountGroupIDs.map(\.data)
+        self.targetAccountIds = targetAccountIDs.map(\.data)
     }
 }
 
@@ -52,12 +52,20 @@ extension PendingLinkedTransfer_UpdatePendingLinkedTransferRequest {
     }
 }
 
+extension PendingLinkedTransfer_DeletePendingLinkedTransferRequest {
+    init(id: UUID) {
+        self.init()
+        self.id = id.data
+    }
+}
+
 extension APIManager {
 
     func GetPendingLinkedTransfers(req: GetPendingLinkedTransfersReq) async throws -> [GetPendingLinkedTransfersRes] {
 
         let request = PendingLinkedTransfer_GetPendingLinkedTransfersRequest(
-            accountGroupID: req.accountGroupID
+            accountGroupIDs: req.accountGroupIDs,
+            targetAccountIDs: req.targetAccountIDs
         )
 
         let response = try await grpcCall("GetPendingLinkedTransfers", request: request) {
@@ -100,6 +108,15 @@ extension APIManager {
 
         _ = try await grpcCall("UpdatePendingLinkedTransfer", request: request) {
             try await pendingLinkedTransferClient.updatePendingLinkedTransfer($0)
+        }
+    }
+
+    func DeletePendingLinkedTransfer(req: DeletePendingLinkedTransferReq) async throws {
+
+        let request = PendingLinkedTransfer_DeletePendingLinkedTransferRequest(id: req.id)
+
+        _ = try await grpcCall("DeletePendingLinkedTransfer", request: request) {
+            try await pendingLinkedTransferClient.deletePendingLinkedTransfer($0)
         }
     }
 }

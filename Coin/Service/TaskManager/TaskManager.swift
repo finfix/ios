@@ -204,6 +204,10 @@ class TaskManager {
             case .updatePendingLinkedTransfer:
                 let req = try decoder.decode(UpdatePendingLinkedTransferReq.self, from: task.fieldsJSON)
                 try await apiManager.UpdatePendingLinkedTransfer(req: req)
+
+            case .deletePendingLinkedTransfer:
+                let req = try decoder.decode(DeletePendingLinkedTransferReq.self, from: task.fieldsJSON)
+                try await apiManager.DeletePendingLinkedTransfer(req: req)
             }
         } catch {
             logger.warning("\(error)")
@@ -328,5 +332,5 @@ enum ActionName: String, Codable {
     case createAccountGroup, updateAccountGroup, deleteAccountGroup
     case updateUser
     case createAccountBudget
-    case createPendingLinkedTransfer, updatePendingLinkedTransfer
+    case createPendingLinkedTransfer, updatePendingLinkedTransfer, deletePendingLinkedTransfer
 }

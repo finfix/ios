@@ -89,6 +89,15 @@ class Repository {
         }
     }
 
+    // sourceTransactionID — belongsTo FK на transactionDB, поэтому вызывать ПОСЛЕ importTransactions.
+    func importPendingLinkedTransfers(_ transfers: [PendingLinkedTransferDB]) async throws {
+        try await sqlite.write { db in
+            for transfer in transfers {
+                try transfer.insert(db)
+            }
+        }
+    }
+
     // Применяет дельту инкрементального Sync одной локальной транзакцией (см.
     // TaskManager.incrementalSync): апсертит изменённые сущности (.save — записи могут уже
     // существовать), затем удаляет по id. Порядок вставки/удаления соблюдает те же
@@ -145,6 +154,9 @@ class Repository {
                 try transfer.save(db)
             }
 
+            if !res.deletedPendingLinkedTransferIDs.isEmpty {
+                try PendingLinkedTransferDB.filter(res.deletedPendingLinkedTransferIDs.contains(PendingLinkedTransferDB.Columns.id)).deleteAll(db)
+            }
             if !res.deletedTransactionIDs.isEmpty {
                 try TransactionDB.filter(res.deletedTransactionIDs.contains(TransactionDB.Columns.id)).deleteAll(db)
             }
@@ -261,6 +273,24 @@ class Repository {
     func updatePendingLinkedTransfer(_ transfer: PendingLinkedTransfer) async throws {
         try await sqlite.write { db in
             _ = try PendingLinkedTransferDB(transfer).update(db)
+        }
+    }
+
+    /// Переносы, у которых эта транзакция — источник (belongsTo sourceTransaction, реальный
+    /// FK локально) — нужно проверять перед жёстким удалением транзакции, иначе БД откажет.
+    func getPendingLinkedTransfers(sourceTransactionID: UUID) async throws -> [PendingLinkedTransfer] {
+        try await sqlite.read { db in
+            PendingLinkedTransfer.convertFromDBModel(
+                try PendingLinkedTransferDB
+                    .filter(PendingLinkedTransferDB.Columns.sourceTransactionID == sourceTransactionID)
+                    .fetchAll(db)
+            )
+        }
+    }
+
+    func deletePendingLinkedTransfer(_ transfer: PendingLinkedTransfer) async throws {
+        try await sqlite.write { db in
+            _ = try PendingLinkedTransferDB(transfer).delete(db)
         }
     }
 

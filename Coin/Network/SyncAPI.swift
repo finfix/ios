@@ -118,6 +118,7 @@ extension APIManager {
                     accountGroupID: try transfer.accountGroupID.toUUID()
                 )
             },
+            deletedPendingLinkedTransferIDs: try response.deletedPendingLinkedTransferIds.map { try $0.toUUID() },
             changedUser: response.hasChangedUser ? GetUserRes(
                 id: try response.changedUser.id.toUUID(),
                 name: response.changedUser.name,

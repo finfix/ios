@@ -64,7 +64,7 @@ class TasksDetailsViewModel {
                   let account = try await service.getAccounts(ids: [req.accountID]).first else { return nil }
             return .account(account)
         case .deleteTransaction, .deleteAccount, .deleteTag, .deleteAccountGroup, .updateUser,
-             .createPendingLinkedTransfer, .updatePendingLinkedTransfer:
+             .createPendingLinkedTransfer, .updatePendingLinkedTransfer, .deletePendingLinkedTransfer:
             return nil
         }
     }

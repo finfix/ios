@@ -6,7 +6,10 @@
 import Foundation
 
 struct GetPendingLinkedTransfersReq: Codable {
-    var accountGroupID: UUID?
+    /// Мои группы — вернёт переносы, где я источник.
+    var accountGroupIDs: [UUID] = []
+    /// Мои счета — вернёт переносы, где я получатель.
+    var targetAccountIDs: [UUID] = []
 }
 
 struct GetPendingLinkedTransfersRes: Decodable {
@@ -61,4 +64,11 @@ struct UpdatePendingLinkedTransferReq: Codable {
 }
 
 struct UpdatePendingLinkedTransferRes: Decodable {
+}
+
+struct DeletePendingLinkedTransferReq: Codable {
+    var id: UUID
+}
+
+struct DeletePendingLinkedTransferRes: Decodable {
 }
