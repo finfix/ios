@@ -23,19 +23,83 @@ struct SearchView: View {
     let width: CGFloat = UIScreen.main.bounds.width
     let height: CGFloat = UIScreen.main.bounds.height
 
-    // Для исключения счетов подходит любой счёт вне зависимости от того, доходный он,
-    // расходный или балансовый — объединяем все три пула и убираем дубликаты.
-    private var allAccounts: [Account] {
-        var seen: Set<UUID> = []
-        return (vm.earnings + vm.regulars + vm.expenses).filter { seen.insert($0.id).inserted }
-    }
-
     var body: some View {
         List {
             Section {
                 TextField("Поиск", text: $searchText)
             }
-            Section(header: Text("Управление фильтрами")) {
+
+            // Фильтр по счетам — самый частый, поэтому сразу под поиском, наверху.
+            CollapsibleFilterSection(
+                title: "Доходы",
+                count: searchText.isEmpty ? nil : vm.earnings.filter { !filters.accounts.contains($0) && !filters.excludedAccounts.contains($0) }.count
+            ) {
+                if !searchText.isEmpty {
+                    ForEach(vm.earnings.filter { !filters.accounts.contains($0) && !filters.excludedAccounts.contains($0) }) { account in
+                        FilterableAccountRow(account: account, showAccountGroup: filters.accountGroups.count != 1) {
+                            filters.accounts.append(account)
+                            chartType = .earnings
+                        } onExclude: {
+                            filters.excludedAccounts.append(account)
+                        }
+                    }
+                } else {
+                    Text("Начните вводить для поиска доходных счетов")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            CollapsibleFilterSection(
+                title: "Счета",
+                count: searchText.isEmpty ? nil : vm.regulars.filter { !filters.accounts.contains($0) && !filters.excludedAccounts.contains($0) }.count
+            ) {
+                if !searchText.isEmpty {
+                    ForEach(vm.regulars.filter { !filters.accounts.contains($0) && !filters.excludedAccounts.contains($0) }) { account in
+                        FilterableAccountRow(account: account, showAccountGroup: filters.accountGroups.count != 1) {
+                            filters.accounts.append(account)
+                            chartType = .earningsAndExpenses
+                        } onExclude: {
+                            filters.excludedAccounts.append(account)
+                        }
+                    }
+                } else {
+                    Text("Начните вводить для поиска балансовых счетов")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            CollapsibleFilterSection(
+                title: "Расходы",
+                count: searchText.isEmpty ? nil : vm.expenses.filter { !filters.accounts.contains($0) && !filters.excludedAccounts.contains($0) }.count
+            ) {
+                if !searchText.isEmpty {
+                    ForEach(vm.expenses.filter { !filters.accounts.contains($0) && !filters.excludedAccounts.contains($0) }) { account in
+                        FilterableAccountRow(account: account, showAccountGroup: filters.accountGroups.count != 1) {
+                            filters.accounts.append(account)
+                            chartType = .expenses
+                        } onExclude: {
+                            filters.excludedAccounts.append(account)
+                        }
+                    }
+                } else {
+                    Text("Начните вводить для поиска расходных счетов")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            // Группы счетов — доступны всегда, без завязки на строку поиска (их обычно
+            // немного, в отличие от отдельных счетов, так что поиск тут не нужен).
+            CollapsibleFilterSection(
+                title: "Группы счетов",
+                count: vm.accountGroups.filter { !filters.accountGroups.contains($0) }.count
+            ) {
+                ForEach(vm.accountGroups.filter { !filters.accountGroups.contains($0) }) { accountGroup in
+                    Button(accountGroup.name) {
+                        filters.accountGroups.append(accountGroup)
+                        chartType = .earningsAndExpenses
+                    }
+                }
+            }
+
+            CollapsibleFilterSection(title: "Управление фильтрами") {
                 Button {
                     areFiltersLocked.toggle()
                 } label: {
@@ -46,7 +110,7 @@ struct SearchView: View {
                             .foregroundStyle(areFiltersLocked ? .blue : .secondary)
                     }
                 }
-                
+
                 Button {
                     // Сбрасываем все фильтры, кроме текущей группы счетов
                     let currentAccountGroups = filters.accountGroups
@@ -61,27 +125,33 @@ struct SearchView: View {
                 }
             }
 
-            Section(header: Text("Дата")) {
+            CollapsibleFilterSection(title: "Дата") {
                 ExpandableDatePicker(buttonName: "C", isCalendarShowing: $shouldShowDateFrom, date: $filters.dateFrom)
                 // Конец диапазона нормализуем на конец выбранного дня, иначе выбранная
                 // дата фактически исключается из диапазона (фильтр сравнивает по времени,
                 // а из пикера приходит полночь этого дня).
                 ExpandableDatePicker(buttonName: "По", isCalendarShowing: $shouldShowDateTo, date: $filters.dateTo, normalizeToEndOfDay: true)
             }
-            Section(header: Text("Типы транзакций")) {
+            CollapsibleFilterSection(
+                title: "Типы транзакций",
+                count: TransactionType.allCases.filter { !filters.transactionTypes.contains($0) }.count
+            ) {
                 ForEach(TransactionType.allCases.filter { !filters.transactionTypes.contains($0) }, id: \.rawValue) { transactionType in
                     Button(transactionType.name) {
                         filters.transactionTypes.append(transactionType)
                     }
                 }
             }
-            Section(header: Text("Заметки")) {
+            CollapsibleFilterSection(title: "Заметки") {
                 Button("Искать транзакции по заметке по строке: \"\(searchText)\"") {
                     filters.searchText = searchText
                 }
                 .disabled(searchText.isEmpty)
             }
-            Section(header: Text("Валюты")) {
+            CollapsibleFilterSection(
+                title: "Валюты",
+                count: searchText.isEmpty ? nil : vm.currencies.filter { !filters.currencies.contains($0) }.count
+            ) {
                 if !searchText.isEmpty {
                     ForEach(vm.currencies.filter { !filters.currencies.contains($0) }) { currency in
                         Button(currency.name) {
@@ -93,132 +163,17 @@ struct SearchView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Section(header: Text("Группы счетов")) {
+            CollapsibleFilterSection(
+                title: "Подкатегории",
+                count: searchText.isEmpty ? nil : vm.tags.filter { !filters.tags.contains($0) && !filters.excludedTags.contains($0) }.count
+            ) {
                 if !searchText.isEmpty {
-                    ForEach(vm.accountGroups.filter { !filters.accountGroups.contains($0) }) { accountGroup in
-                        Button(accountGroup.name) {
-                            filters.accountGroups.append(accountGroup)
-                            chartType = .earningsAndExpenses
-                        }
-                    }
-                } else {
-                    Text("Начните вводить для поиска групп счетов")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section(header: Text("Доходы")) {
-                if !searchText.isEmpty {
-                    ForEach(vm.earnings.filter { !filters.accounts.contains($0) }) { account in
-                        Button {
-                            filters.accounts.append(account)
-                            chartType = .earnings
-                        } label: {
-                            HStack {
-                                if filters.accountGroups.count != 1 {
-                                    Text(account.accountGroup.name)
-                                    Text("•")
-                                }
-                                if let parentAccount = account.parentAccount.account {
-                                    Text(parentAccount.name)
-                                    Text("•")
-                                }
-                                Text(account.name)
-                            }
-                        }
-                    }
-                } else {
-                    Text("Начните вводить для поиска доходных счетов")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section(header: Text("Счета")) {
-                if !searchText.isEmpty {
-                    ForEach(vm.regulars.filter { !filters.accounts.contains($0) }) { account in
-                        Button {
-                            filters.accounts.append(account)
-                            chartType = .earningsAndExpenses
-                        } label: {
-                            HStack {
-                                if filters.accountGroups.count != 1 {
-                                    Text(account.accountGroup.name)
-                                    Text("•")
-                                }
-                                if let parentAccount = account.parentAccount.account {
-                                    Text(parentAccount.name)
-                                    Text("•")
-                                }
-                                Text(account.name)
-                            }
-                        }
-                    }
-                } else {
-                    Text("Начните вводить для поиска балансовых счетов")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section(header: Text("Расходы")) {
-                if !searchText.isEmpty {
-                    ForEach(vm.expenses.filter { !filters.accounts.contains($0) }) { account in
-                        Button {
-                            filters.accounts.append(account)
-                            chartType = .expenses
-                        } label: {
-                            HStack {
-                                if filters.accountGroups.count != 1 {
-                                    Text(account.accountGroup.name)
-                                    Text("•")
-                                }
-                                if let parentAccount = account.parentAccount.account {
-                                    Text(parentAccount.name)
-                                    Text("•")
-                                }
-                                Text(account.name)
-                            }
-                        }
-                    }
-                } else {
-                    Text("Начните вводить для поиска расходных счетов")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section(header: Text("Исключить счета")) {
-                if !searchText.isEmpty {
-                    ForEach(allAccounts.filter { !filters.excludedAccounts.contains($0) }) { account in
-                        Button {
-                            filters.excludedAccounts.append(account)
-                        } label: {
-                            HStack {
-                                if filters.accountGroups.count != 1 {
-                                    Text(account.accountGroup.name)
-                                    Text("•")
-                                }
-                                if let parentAccount = account.parentAccount.account {
-                                    Text(parentAccount.name)
-                                    Text("•")
-                                }
-                                Text(account.name)
-                            }
-                        }
-                    }
-                } else {
-                    Text("Начните вводить для поиска счетов для исключения")
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section(header: Text("Подкатегории")) {
-                if !searchText.isEmpty {
-                    ForEach(vm.tags.filter { !filters.tags.contains($0) }) { tag in
-                        Button {
+                    ForEach(vm.tags.filter { !filters.tags.contains($0) && !filters.excludedTags.contains($0) }) { tag in
+                        FilterableTagRow(tag: tag, showAccountGroup: filters.accountGroups.count != 1) {
                             filters.tags.append(tag)
                             chartType = .earningsAndExpenses
-                        } label: {
-                            HStack {
-                                if filters.accountGroups.count != 1 {
-                                    Text(tag.accountGroup.name)
-                                    Text("•")
-                                }
-                                Text(tag.name)
-                            }
+                        } onExclude: {
+                            filters.excludedTags.append(tag)
                         }
                     }
                 } else {
@@ -254,6 +209,105 @@ struct SearchView: View {
         vm: .constant(TransactionsListViewModel())
     )
     .environment(AlertManager(handle: {_ in }))
+}
+
+/// Сворачиваемая секция фильтра — по умолчанию свёрнута (весь экран фильтров иначе стена
+/// текста), заголовок раскрывает/прячет содержимое. Справа от заголовка, если передан count —
+/// число доступных вариантов (например, сколько счетов подходит под уже введённую строку
+/// поиска), чтобы было видно, есть ли смысл разворачивать, не разворачивая.
+struct CollapsibleFilterSection<Content: View>: View {
+    let title: String
+    var count: Int? = nil
+    @State private var isExpanded = false
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        Section {
+            DisclosureGroup(isExpanded: $isExpanded) {
+                content()
+            } label: {
+                HStack {
+                    Text(title)
+                    Spacer()
+                    if let count {
+                        Text("\(count)")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Строка счёта в поиске фильтров — вместо отдельной секции "Исключить счета" (тот же счёт,
+/// просто другое действие) прямо тут два действия: зелёный плюс добавляет в filters.accounts
+/// (включить), красный минус — в filters.excludedAccounts (исключить). Выбранные счета (в любой
+/// роли) пропадают из этого списка и появляются чипом в TransactionFiltersRowView — там же и
+/// снимаются.
+struct FilterableAccountRow: View {
+    let account: Account
+    let showAccountGroup: Bool
+    let onInclude: () -> Void
+    let onExclude: () -> Void
+
+    var body: some View {
+        HStack {
+            HStack {
+                if showAccountGroup {
+                    Text(account.accountGroup.name)
+                    Text("•")
+                }
+                if let parentAccount = account.parentAccount.account {
+                    Text(parentAccount.name)
+                    Text("•")
+                }
+                Text(account.name)
+            }
+            Spacer()
+            Button(action: onInclude) {
+                Image(systemName: "plus.circle.fill")
+                    .foregroundStyle(.green)
+            }
+            .buttonStyle(.plain)
+            Button(action: onExclude) {
+                Image(systemName: "minus.circle.fill")
+                    .foregroundStyle(.red)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
+
+/// Строка подкатегории в поиске фильтров — тот же принцип, что и FilterableAccountRow: зелёный
+/// плюс включает (filters.tags), красный минус исключает (filters.excludedTags).
+struct FilterableTagRow: View {
+    let tag: Tag
+    let showAccountGroup: Bool
+    let onInclude: () -> Void
+    let onExclude: () -> Void
+
+    var body: some View {
+        HStack {
+            HStack {
+                if showAccountGroup {
+                    Text(tag.accountGroup.name)
+                    Text("•")
+                }
+                Text(tag.name)
+            }
+            Spacer()
+            Button(action: onInclude) {
+                Image(systemName: "plus.circle.fill")
+                    .foregroundStyle(.green)
+            }
+            .buttonStyle(.plain)
+            Button(action: onExclude) {
+                Image(systemName: "minus.circle.fill")
+                    .foregroundStyle(.red)
+            }
+            .buttonStyle(.plain)
+        }
+    }
 }
 
 struct ExpandableDatePicker: View {

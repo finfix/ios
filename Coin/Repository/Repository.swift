@@ -780,7 +780,8 @@ class Repository {
         accountGroupIDs: [UUID],
         transactionTypes: [TransactionType],
         currencies: [Currency],
-        tagIDs: [UUID]
+        tagIDs: [UUID],
+        excludedTagIDs: [UUID] = []
     ) -> (sql: String, args: StatementArguments) {
         var joins: [String] = []
             var filters: [String] = []
@@ -858,17 +859,36 @@ class Repository {
                 filters.append("tg.id IN (\(questions.joined(separator: ",")))")
                 _ = args.append(contentsOf: StatementArguments(tagIDs))
             }
-            
+
+            if !excludedTagIDs.isEmpty {
+                var questions: [String] = []
+                for _ in excludedTagIDs {
+                    questions.append("?")
+                }
+                // NOT EXISTS, а не JOIN + NOT IN — у транзакции может быть несколько тегов
+                // (many-to-many), а "исключить" должно значить "скрыть транзакцию целиком, если
+                // среди ЛЮБЫХ её тегов есть исключённый", а не просто отфильтровать одну из
+                // строк JOIN'а. Отдельный алиас (ex_tttd), чтобы не столкнуться с tttd/tg,
+                // который использует tagIDs (включающий фильтр) выше.
+                filters.append("""
+                    NOT EXISTS (
+                        SELECT 1 FROM tagToTransactionDB ex_tttd
+                        WHERE ex_tttd.transactionId = t.id AND ex_tttd.tagId IN (\(questions.joined(separator: ",")))
+                    )
+                    """)
+                _ = args.append(contentsOf: StatementArguments(excludedTagIDs))
+            }
+
             if !transactionTypes.isEmpty {
                 var questions: [String] = []
                 for _ in transactionTypes {
                     questions.append("?")
                 }
-                
+
                 filters.append("t.type IN (\(questions.joined(separator: ",")))")
                 _ = args.append(contentsOf: StatementArguments(transactionTypes.map(\.rawValue)))
             }
-            
+
             if !currencies.isEmpty {
                 var questions: [String] = []
                 for _ in currencies {
@@ -907,14 +927,15 @@ class Repository {
         accountGroupIDs: [UUID] = [],
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
-        tagIDs: [UUID] = []
+        tagIDs: [UUID] = [],
+        excludedTagIDs: [UUID] = []
     ) async throws -> [TransactionDB] {
         try await sqlite.read { [self] db in
             let (sql, args) = transactionsSQL(
                 limit: limit, offset: offset, ids: ids, dateFrom: dateFrom, dateTo: dateTo,
                 searchText: searchText, accountIDs: accountIDs, excludedAccountIDs: excludedAccountIDs,
                 accountGroupIDs: accountGroupIDs, transactionTypes: transactionTypes,
-                currencies: currencies, tagIDs: tagIDs
+                currencies: currencies, tagIDs: tagIDs, excludedTagIDs: excludedTagIDs
             )
             return try TransactionDB.fetchAll(db, sql: sql, arguments: args)
         }
@@ -935,14 +956,15 @@ class Repository {
         accountGroupIDs: [UUID],
         transactionTypes: [TransactionType],
         currencies: [Currency],
-        tagIDs: [UUID]
+        tagIDs: [UUID],
+        excludedTagIDs: [UUID] = []
     ) -> AsyncValueObservation<[TransactionListRowData]> {
         sqlite.observe { [self] db in
             let (sql, args) = transactionsSQL(
                 limit: 10000, offset: 0, ids: [], dateFrom: dateFrom, dateTo: dateTo,
                 searchText: searchText, accountIDs: accountIDs, excludedAccountIDs: excludedAccountIDs,
                 accountGroupIDs: accountGroupIDs, transactionTypes: transactionTypes,
-                currencies: currencies, tagIDs: tagIDs
+                currencies: currencies, tagIDs: tagIDs, excludedTagIDs: excludedTagIDs
             )
             let transactionsDB = try TransactionDB.fetchAll(db, sql: sql, arguments: args)
 
@@ -1009,7 +1031,8 @@ class Repository {
         accountGroupIDs: [UUID] = [],
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
-        tagIDs: [UUID] = []
+        tagIDs: [UUID] = [],
+        excludedTagIDs: [UUID] = []
     ) async throws -> [Date] {
         try await sqlite.read { db in
 
@@ -1077,6 +1100,20 @@ class Repository {
                 _ = args.append(contentsOf: StatementArguments(tagIDs))
             }
 
+            if !excludedTagIDs.isEmpty {
+                var questions: [String] = []
+                for _ in excludedTagIDs {
+                    questions.append("?")
+                }
+                filters.append("""
+                    NOT EXISTS (
+                        SELECT 1 FROM tagToTransactionDB ex_tttd
+                        WHERE ex_tttd.transactionId = t.id AND ex_tttd.tagId IN (\(questions.joined(separator: ",")))
+                    )
+                    """)
+                _ = args.append(contentsOf: StatementArguments(excludedTagIDs))
+            }
+
             if !transactionTypes.isEmpty {
                 var questions: [String] = []
                 for _ in transactionTypes {
@@ -1127,6 +1164,7 @@ class Repository {
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         tagIDs: [UUID] = [],
+        excludedTagIDs: [UUID] = [],
         currencies: [Currency] = [],
         searchText: String = ""
     ) async throws -> [Series] {
@@ -1216,6 +1254,22 @@ class Repository {
                 }
                 filters.append("tg.id in (\(questions.joined(separator: ", ")))")
                 _ = args.append(contentsOf: StatementArguments(tagIDs))
+            }
+            if !excludedTagIDs.isEmpty {
+                var questions: [String] = []
+                for _ in excludedTagIDs {
+                    questions.append("?")
+                }
+                // Отдельный алиас (ex_tttd) — не переиспользует tttd/tg, который может быть уже
+                // занят JOIN'ом от byTag/tagIDs выше, и NOT EXISTS (не JOIN+NOT IN), т.к. у
+                // транзакции может быть несколько тегов сразу.
+                filters.append("""
+                    NOT EXISTS (
+                        SELECT 1 FROM tagToTransactionDB ex_tttd
+                        WHERE ex_tttd.transactionId = t.id AND ex_tttd.tagId IN (\(questions.joined(separator: ", ")))
+                    )
+                    """)
+                _ = args.append(contentsOf: StatementArguments(excludedTagIDs))
             }
             if !currencies.isEmpty {
                 var questions: [String] = []

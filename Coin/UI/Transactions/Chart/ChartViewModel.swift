@@ -234,6 +234,7 @@ class ChartViewModel {
             dateFrom: effectiveDateFrom,
             dateTo: filters.dateTo,
             tagIDs: filters.tags.map(\.id),
+            excludedTagIDs: filters.excludedTags.map(\.id),
             currencies: filters.currencies,
             searchText: filters.searchText,
             aggregateIntoParents: aggregateIntoParents && groupBy == .byAccount

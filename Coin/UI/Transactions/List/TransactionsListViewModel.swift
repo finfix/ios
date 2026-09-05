@@ -122,6 +122,7 @@ class TransactionsListViewModel {
             transactionTypes: filters.transactionTypes,
             currencies: filters.currencies,
             tagIDs: filters.tags.map(\.id),
+            excludedTagIDs: filters.excludedTags.map(\.id),
             accountGroupIDs: filters.accountGroups.map(\.id)
         )
 
@@ -195,6 +196,7 @@ class TransactionsListViewModel {
             transactionTypes: currentFilters.transactionTypes,
             currencies: currentFilters.currencies,
             tagIDs: currentFilters.tags.map(\.id),
+            excludedTagIDs: currentFilters.excludedTags.map(\.id),
             accountGroupIDs: currentFilters.accountGroups.map(\.id)
         )
 
@@ -222,6 +224,7 @@ class TransactionsListViewModel {
             transactionTypes: currentFilters.transactionTypes,
             currencies: currentFilters.currencies,
             tagIDs: currentFilters.tags.map(\.id),
+            excludedTagIDs: currentFilters.excludedTags.map(\.id),
             accountGroupIDs: currentFilters.accountGroups.map(\.id)
         )
     }

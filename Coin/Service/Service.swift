@@ -106,6 +106,7 @@ extension Service {
         dateFrom: Date? = nil,
         dateTo: Date? = nil,
         tagIDs: [UUID] = [],
+        excludedTagIDs: [UUID] = [],
         currencies filterCurrencies: [Currency] = [],
         searchText: String = "",
         aggregateIntoParents: Bool = true
@@ -152,6 +153,7 @@ extension Service {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs,
+                excludedTagIDs: excludedTagIDs,
                 currencies: filterCurrencies,
                 searchText: searchText
             )
@@ -176,6 +178,7 @@ extension Service {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs,
+                excludedTagIDs: excludedTagIDs,
                 currencies: filterCurrencies,
                 searchText: searchText
             )
@@ -203,6 +206,7 @@ extension Service {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs,
+                excludedTagIDs: excludedTagIDs,
                 currencies: filterCurrencies,
                 searchText: searchText
             )
@@ -223,6 +227,7 @@ extension Service {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs,
+                excludedTagIDs: excludedTagIDs,
                 currencies: filterCurrencies,
                 searchText: searchText
             )
@@ -242,6 +247,7 @@ extension Service {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs,
+                excludedTagIDs: excludedTagIDs,
                 currencies: filterCurrencies,
                 searchText: searchText
             )
@@ -257,6 +263,7 @@ extension Service {
                 dateFrom: dateFrom,
                 dateTo: dateTo,
                 tagIDs: tagIDs,
+                excludedTagIDs: excludedTagIDs,
                 currencies: filterCurrencies,
                 searchText: searchText
             )

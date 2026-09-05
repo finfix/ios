@@ -131,6 +131,7 @@ extension Service {
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
         tagIDs: [UUID] = [],
+        excludedTagIDs: [UUID] = [],
         accountGroupIDs: [UUID] = []
     ) async throws -> [Transaction] {
 
@@ -155,7 +156,8 @@ extension Service {
                 accountGroupIDs: accountGroupIDs,
                 transactionTypes: transactionTypes,
                 currencies: currencies,
-                tagIDs: tagIDs
+                tagIDs: tagIDs,
+                excludedTagIDs: excludedTagIDs
             ),
             accountsMap: accountsMap,
             tagsToTransactions: tagsToTransactions,
@@ -205,6 +207,7 @@ extension Service {
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
         tagIDs: [UUID] = [],
+        excludedTagIDs: [UUID] = [],
         accountGroupIDs: [UUID] = []
     ) async throws -> [Date] {
         try await repository.getTransactionDays(
@@ -216,7 +219,8 @@ extension Service {
             accountGroupIDs: accountGroupIDs,
             transactionTypes: transactionTypes,
             currencies: currencies,
-            tagIDs: tagIDs
+            tagIDs: tagIDs,
+            excludedTagIDs: excludedTagIDs
         )
     }
 
@@ -233,6 +237,7 @@ extension Service {
         transactionTypes: [TransactionType] = [],
         currencies: [Currency] = [],
         tagIDs: [UUID] = [],
+        excludedTagIDs: [UUID] = [],
         accountGroupIDs: [UUID] = []
     ) -> AsyncValueObservation<[TransactionListRowData]> {
         repository.observeTransactionRows(
@@ -244,7 +249,8 @@ extension Service {
             accountGroupIDs: accountGroupIDs,
             transactionTypes: transactionTypes,
             currencies: currencies,
-            tagIDs: tagIDs
+            tagIDs: tagIDs,
+            excludedTagIDs: excludedTagIDs
         )
     }
 

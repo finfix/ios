@@ -71,6 +71,13 @@ struct TransactionFiltersRowView: View {
                         }
                     }
                 }
+                if !filters.excludedTags.isEmpty {
+                    ForEach(Array(zip(filters.excludedTags.indices, filters.excludedTags)), id: \.0) { i, tag in
+                        TransactionFiltersRowItem(text: "Искл.: \(tag.name)", color: Color.gray) {
+                            filters.excludedTags.remove(at: i)
+                        }
+                    }
+                }
             }
         }
         .padding(.horizontal)
