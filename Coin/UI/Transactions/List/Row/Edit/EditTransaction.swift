@@ -344,7 +344,16 @@ struct EditTransaction: View {
                                     return
                                 }
 
-                                dismiss()
+                                // Довнесение переноса: экран создан через два push'а поверх
+                                // списка переносов (PendingLinkedTransfersList →
+                                // CompleteLinkedTransferPicker → сюда) — обычный dismiss() вернул
+                                // бы только на экран тапа по кружкам, а не туда, откуда реально
+                                // начинали. Убираем оба уровня разом.
+                                if vm.sourceTransfer != nil {
+                                    path.path.removeLast(min(2, path.path.count))
+                                } else {
+                                    dismiss()
+                                }
                             }
                         }
                 }

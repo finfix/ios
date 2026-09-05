@@ -45,6 +45,29 @@ struct PendingLinkedTransfer: Identifiable, Hashable {
     static func convertFromDBModel(_ dbModels: [PendingLinkedTransferDB]) -> [PendingLinkedTransfer] {
         dbModels.map { PendingLinkedTransfer($0) }
     }
+
+    /// Разрешает "куда идут деньги" для довносящей транзакции — общая логика для
+    /// SelectAccountForTransfer (отдельный экран) и режима "коснитесь счёта" на главном экране
+    /// счетов. Направление на моей стороне зеркалит направление у инициатора: если деньги
+    /// ПРИШЛИ в счёт-мост там (он был accountTo), то у меня они продолжают путь ИЗ моста (мост —
+    /// accountFrom), и наоборот. Возвращает nil, если выбранный счёт даёт недопустимую пару типов
+    /// (см. EditAccount: только regular↔regular, expense↔earnings).
+    func resolveCompletion(
+        tappedAccount: Account,
+        myBridgeAccount: Account,
+        sourceTransaction: Transaction
+    ) -> (type: TransactionType, accountFrom: Account, accountTo: Account)? {
+        let bridgeIsSource = sourceTransaction.accountTo.id == sourceAccountID
+        let accountFrom = bridgeIsSource ? myBridgeAccount : tappedAccount
+        let accountTo = bridgeIsSource ? tappedAccount : myBridgeAccount
+
+        switch true {
+        case accountFrom.type == .earnings && accountTo.type == .regular: return (.income, accountFrom, accountTo)
+        case accountFrom.type == .regular && accountTo.type == .regular: return (.transfer, accountFrom, accountTo)
+        case accountFrom.type == .regular && accountTo.type == .expense: return (.consumption, accountFrom, accountTo)
+        default: return nil
+        }
+    }
 }
 
 enum PendingLinkedTransferStatus: String, Codable, CaseIterable {

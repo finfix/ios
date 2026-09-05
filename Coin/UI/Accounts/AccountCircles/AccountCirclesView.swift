@@ -384,9 +384,6 @@ struct AccountCirclesView: View {
                         logger.debug("AccountCirclesView.body: (пере)появился — id=\(String(describing: ObjectIdentifier(vm))), isLogin=\(AuthStorage.shared.isLogin), selectedGroup=\(selectedAccountGroup.selectedAccountGroup.id), isLoaded=\(selectedAccountGroup.isLoaded)")
                     }
                 }
-            PendingLinkedTransfersBadge(accountGroup: selectedAccountGroup.selectedAccountGroup)
-                .id(selectedAccountGroup.selectedAccountGroup.id)
-
             let groupID = selectedAccountGroup.selectedAccountGroup.id
 
             // Балансировочный с showingRemainder < 0 — деньги пришли из ниоткуда (доход)
@@ -434,6 +431,17 @@ struct AccountCirclesView: View {
             .id("\(groupID)-\(vm.reloadToken)")
             .frame(maxHeight: .infinity)
             .frame(minHeight: 360)
+        }
+        // Долгий тап по ФОНУ экрана включает режим редактирования — как на Home Screen iOS, но
+        // НЕ на самом кружке (тот уже пробовали — конкурирует за распознавание касания с
+        // .draggable/ручным DragGesture кружка, см. DraggableAccountCircleItem). Кружки —
+        // дочерние view со своими жестами и .contentShape(Circle()), они забирают касание
+        // первыми в своих границах, так что этот жест реально срабатывает только там, где под
+        // пальцем нет кружка (сама VStack, разделители, пустые ячейки сетки).
+        .contentShape(Rectangle())
+        .onLongPressGesture(minimumDuration: 0.5) {
+            guard !vm.isEditMode else { return }
+            withAnimation { vm.isEditMode = true }
         }
         .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
         .scrollIndicators(.hidden)
@@ -563,8 +571,8 @@ struct AccountCirclesView: View {
                 switch screen {
                 case .list:
                     PendingLinkedTransfersList(accountGroup: selectedAccountGroup.selectedAccountGroup)
-                case .selectAccount(let transfer):
-                    SelectAccountForTransfer(transfer: transfer)
+                case .completeLinkedTransfer(let transfer):
+                    CompleteLinkedTransferPicker(transfer: transfer)
                 }
             }
             .toolbar {
@@ -580,29 +588,18 @@ struct AccountCirclesView: View {
                             .id(selectedAccountGroup.selectedAccountGroup.id)
                     }
                 }
-//                if vm.isEditMode {
-//                    ToolbarItem(placement: .confirmationAction) {
-//                        Button("Готово") {
-//                            withAnimation {
-//                                vm.isEditMode = false
-//                            }
-//                        }
-//                    }
-//                } else {
-//                    // Раньше в режим редактирования входили долгим тапом по кружку — но на
-//                    // тач-устройствах LongPressGesture(0.5s) на том же кружке конкурировал с
-//                    // собственным touch-жестом .draggable ("прижать-и-подождать-потом-тянуть"),
-//                    // из-за чего перетаскивание переставало запускаться (на Mac с мышью не
-//                    // конфликтовало — оттуда и разница в поведении). Кнопка не участвует в
-//                    // жестах кружка вообще, поэтому конкурировать не с чем.
-//                    ToolbarItem(placement: .confirmationAction) {
-//                        Button("Изменить") {
-//                            withAnimation {
-//                                vm.isEditMode = true
-//                            }
-//                        }
-//                    }
-//                }
+                // Вход в режим редактирования — долгим тапом по любому кружку (см.
+                // DraggableAccountCircleItem.LongPressToEditIf), как на Home Screen iOS. Кнопка
+                // осталась только для выхода — "Готово" симметрично понятнее свайпа/тапа мимо.
+                if vm.isEditMode {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Готово") {
+                            withAnimation {
+                                vm.isEditMode = false
+                            }
+                        }
+                    }
+                }
             }
     }
 }

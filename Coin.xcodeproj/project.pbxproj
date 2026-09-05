@@ -48,7 +48,6 @@
 		ECF1E6B5521B15BB2AD7704E /* PendingLinkedTransferModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB16FC3393B8E272A603A55 /* PendingLinkedTransferModels.swift */; };
 		246BF727D9D04255A9BC3903 /* PendingLinkedTransferAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AE712BF8EB30835A054161 /* PendingLinkedTransferAPI.swift */; };
 		F700AFA0ABD5879AAC364705 /* PendingLinkedTransfersList.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB7C0A773FD96942B5D448EA /* PendingLinkedTransfersList.swift */; };
-		AAAA412E12E026769C731289 /* SelectAccountForTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A5F11125A6BA42EA2BD666 /* SelectAccountForTransfer.swift */; };
 		B893905D94383333878E9B50 /* AccountBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C85B81B034440F5F334447 /* AccountBudget.swift */; };
 		152CEFB067EED950953D75CA /* AccountBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C85B81B034440F5F334447 /* AccountBudget.swift */; };
 		F73A71E8D6CEB4687FD7C715 /* AccountBudgetDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8F37DAECBA4D2E8AF4502B /* AccountBudgetDB.swift */; };
@@ -219,6 +218,7 @@
 		93F46323444F78A29F868723 /* TransactionListRowData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A89DDD50E1C56876CB599F1 /* TransactionListRowData.swift */; };
 		B5D6DE282BB1E04000A06D67 /* AccountCirclesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */; };
 		B5DDFD682C05DF52003BD753 /* DraggableAccountCircleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DDFD672C05DF52003BD753 /* DraggableAccountCircleItem.swift */; };
+		7BD6E690B5D87DD54BD54FE9 /* AccountCirclePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17B5A6EB49E152DA70016B /* AccountCirclePicker.swift */; };
 		AC475729A2FF321F7936908E /* DraggedAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1DCE522A7F5E3F3F4F8C35 /* DraggedAccount.swift */; };
 		B5DEFCDB2C07015A001D7E61 /* AccountCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59F0F2028FDC7C000AA33A9 /* AccountCategoryView.swift */; };
 		B5DEFCDC2C07015A001D7E61 /* AccountAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D143B72906B4F800875037 /* AccountAPI.swift */; };
@@ -229,6 +229,7 @@
 		B5DEFCE12C07015A001D7E61 /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50DBAD62BCD8CD900A58B53 /* ChartView.swift */; };
 		B5DEFCE22C07015A001D7E61 /* BudgetsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B562FBFA2ADD63F2005E7C15 /* BudgetsList.swift */; };
 		B5DEFCE32C07015A001D7E61 /* DraggableAccountCircleItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DDFD672C05DF52003BD753 /* DraggableAccountCircleItem.swift */; };
+		33F55DD08775C9434E569D3E /* AccountCirclePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17B5A6EB49E152DA70016B /* AccountCirclePicker.swift */; };
 		E98BE0AD873D5547A37B0AA4 /* DraggedAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1DCE522A7F5E3F3F4F8C35 /* DraggedAccount.swift */; };
 		B5DEFCE42C07015A001D7E61 /* SQLite.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B707232BA59A3700A07DB6 /* SQLite.swift */; };
 		B5DEFCE52C07015A001D7E61 /* TaskDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F4C3F42BDFA233007CCFC9 /* TaskDetails.swift */; };
@@ -254,7 +255,6 @@
 		BE0139BD854E1206FB7AEAF1 /* PendingLinkedTransferModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB16FC3393B8E272A603A55 /* PendingLinkedTransferModels.swift */; };
 		B8BA29EC822AA70BF2427B00 /* PendingLinkedTransferAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73AE712BF8EB30835A054161 /* PendingLinkedTransferAPI.swift */; };
 		89377B6AD1790241C6AB575E /* PendingLinkedTransfersList.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB7C0A773FD96942B5D448EA /* PendingLinkedTransfersList.swift */; };
-		FB4EEC4352884DF90639DCB6 /* SelectAccountForTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48A5F11125A6BA42EA2BD666 /* SelectAccountForTransfer.swift */; };
 		B5DEFCF92C07015A001D7E61 /* EditAccountGroupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5192F942BFF4885004A8BFD /* EditAccountGroupViewModel.swift */; };
 		B5DEFCFA2C07015A001D7E61 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51CE1EA2BAC37A000682D48 /* Service.swift */; };
 		B5DEFCFB2C07015A001D7E61 /* TagDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5744EA92BD2DD7A004C9AC7 /* TagDB.swift */; };
@@ -487,7 +487,6 @@
 		9BB16FC3393B8E272A603A55 /* PendingLinkedTransferModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingLinkedTransferModels.swift; sourceTree = "<group>"; };
 		73AE712BF8EB30835A054161 /* PendingLinkedTransferAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingLinkedTransferAPI.swift; sourceTree = "<group>"; };
 		EB7C0A773FD96942B5D448EA /* PendingLinkedTransfersList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingLinkedTransfersList.swift; sourceTree = "<group>"; };
-		48A5F11125A6BA42EA2BD666 /* SelectAccountForTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAccountForTransfer.swift; sourceTree = "<group>"; };
 		B5B068E52BAC6DEA00AEEC98 /* QuickStatistic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickStatistic.swift; sourceTree = "<group>"; };
 		B5B068E72BAC6E0400AEEC98 /* AccountGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountGroup.swift; sourceTree = "<group>"; };
 		B5B068E92BAC6E1B00AEEC98 /* Currency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Currency.swift; sourceTree = "<group>"; };
@@ -512,6 +511,7 @@
 		5A89DDD50E1C56876CB599F1 /* TransactionListRowData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransactionListRowData.swift; sourceTree = "<group>"; };
 		B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCirclesViewModel.swift; sourceTree = "<group>"; };
 		B5DDFD672C05DF52003BD753 /* DraggableAccountCircleItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraggableAccountCircleItem.swift; sourceTree = "<group>"; };
+		AC17B5A6EB49E152DA70016B /* AccountCirclePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCirclePicker.swift; sourceTree = "<group>"; };
 		9F1DCE522A7F5E3F3F4F8C35 /* DraggedAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraggedAccount.swift; sourceTree = "<group>"; };
 		B5DEFD4F2C07015A001D7E61 /* CoinDev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoinDev.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DEFD502C07015A001D7E61 /* CoinDev-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "CoinDev-Info.plist"; path = "/Users/bonavi/Projects/Coin/App/CoinDev-Info.plist"; sourceTree = "<absolute>"; };
@@ -736,7 +736,6 @@
 			isa = PBXGroup;
 			children = (
 				EB7C0A773FD96942B5D448EA /* PendingLinkedTransfersList.swift */,
-				48A5F11125A6BA42EA2BD666 /* SelectAccountForTransfer.swift */,
 			);
 			path = LinkedTransfers;
 			sourceTree = "<group>";
@@ -905,6 +904,7 @@
 			isa = PBXGroup;
 			children = (
 				B5DDFD672C05DF52003BD753 /* DraggableAccountCircleItem.swift */,
+				AC17B5A6EB49E152DA70016B /* AccountCirclePicker.swift */,
 				9F1DCE522A7F5E3F3F4F8C35 /* DraggedAccount.swift */,
 				B59F0F2528FDD30F00AA33A9 /* AccountCirclesView.swift */,
 				B5D6DE272BB1E04000A06D67 /* AccountCirclesViewModel.swift */,
@@ -1210,6 +1210,7 @@
 				B5DEFCE22C07015A001D7E61 /* BudgetsList.swift in Sources */,
 				B562CB192C71BA6100AFB056 /* AuthManager.swift in Sources */,
 				B5DEFCE32C07015A001D7E61 /* DraggableAccountCircleItem.swift in Sources */,
+				33F55DD08775C9434E569D3E /* AccountCirclePicker.swift in Sources */,
 				AC475729A2FF321F7936908E /* DraggedAccount.swift in Sources */,
 				B5DEFCE42C07015A001D7E61 /* SQLite.swift in Sources */,
 				B5DEFCE52C07015A001D7E61 /* TaskDetails.swift in Sources */,
@@ -1243,7 +1244,6 @@
 				BE0139BD854E1206FB7AEAF1 /* PendingLinkedTransferModels.swift in Sources */,
 				B8BA29EC822AA70BF2427B00 /* PendingLinkedTransferAPI.swift in Sources */,
 				89377B6AD1790241C6AB575E /* PendingLinkedTransfersList.swift in Sources */,
-				FB4EEC4352884DF90639DCB6 /* SelectAccountForTransfer.swift in Sources */,
 				F73A71E8D6CEB4687FD7C715 /* AccountBudgetDB.swift in Sources */,
 				152CEFB067EED950953D75CA /* AccountBudget.swift in Sources */,
 				DA989C0C3E51043EB47CADAB /* AccountBudgetModels.swift in Sources */,
@@ -1382,6 +1382,7 @@
 				B562FBFB2ADD63F2005E7C15 /* BudgetsList.swift in Sources */,
 				B590E62D2FEED287008990E0 /* ReorderAccountsView.swift in Sources */,
 				B5DDFD682C05DF52003BD753 /* DraggableAccountCircleItem.swift in Sources */,
+				7BD6E690B5D87DD54BD54FE9 /* AccountCirclePicker.swift in Sources */,
 				E98BE0AD873D5547A37B0AA4 /* DraggedAccount.swift in Sources */,
 				B562CB1A2C71BA6100AFB056 /* AuthManager.swift in Sources */,
 				B5B707242BA59A3700A07DB6 /* SQLite.swift in Sources */,
@@ -1415,7 +1416,6 @@
 				ECF1E6B5521B15BB2AD7704E /* PendingLinkedTransferModels.swift in Sources */,
 				246BF727D9D04255A9BC3903 /* PendingLinkedTransferAPI.swift in Sources */,
 				F700AFA0ABD5879AAC364705 /* PendingLinkedTransfersList.swift in Sources */,
-				AAAA412E12E026769C731289 /* SelectAccountForTransfer.swift in Sources */,
 				3AC4C4F9D8B57B241BCC8C13 /* AccountBudgetDB.swift in Sources */,
 				B893905D94383333878E9B50 /* AccountBudget.swift in Sources */,
 				BB63C040B6A13EA93C4FA37A /* AccountBudgetModels.swift in Sources */,

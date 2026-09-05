@@ -35,6 +35,15 @@ struct EditAccount: View {
         }
     }
 
+    /// Дочерние счета редактируемого родителя — берём из vm.allAccountsGrouped (уже с
+    /// восстановленной иерархией через Account.groupAccounts), а не напрямую из
+    /// vm.currentAccount.childrenAccounts: тот заполнен только если экран открыт из места,
+    /// которое само уже строило иерархию (например, главного экрана счетов) — здесь источник
+    /// надёжен независимо от того, откуда пришёл currentAccount.
+    var currentAccountChildren: [Account] {
+        vm.allAccountsGrouped.first(where: { $0.id == vm.currentAccount.id })?.childrenAccounts ?? []
+    }
+
     init(_ account: Account, selectedAccountGroup: AccountGroup, isHiddenView: Bool = false) {
         vm = EditAccountViewModel(
             currentAccount: account,
@@ -186,39 +195,73 @@ struct EditAccount: View {
                 }
                 if vm.permissions.changeParentAccountID {
                     Section {
-                        Picker("Родительский счет", selection: $vm.currentAccount.parentAccountID) {
-                            Text("Не выбрано")
-                                .tag(nil as UUID?)
-                            ForEach(accounts.filter{ $0.isParent }) { account in
-                                Text(account.name)
-                                    .tag(account.id as UUID?)
-                            }
+                        NavigationLink {
+                            ParentAccountPickerScreen(
+                                // Родитель должен быть из ТОЙ ЖЕ группы, что и сам редактируемый
+                                // счёт — берём group у currentAccount, а не у selectedAccountGroup
+                                // (глобально выбранной группы экрана счетов): если этот экран
+                                // открыт для счёта из другой группы (например, не через обычный
+                                // AccountCircleItemRoute.editAccount), selectedAccountGroup может
+                                // не совпадать с реальной группой счёта.
+                                accounts: vm.allAccountsGrouped.filter { $0.accountGroup.id == vm.currentAccount.accountGroup.id },
+                                childType: vm.currentAccount.type,
+                                parentAccountID: $vm.currentAccount.parentAccountID
+                            )
+                        } label: {
+                            LabeledContent(
+                                "Родительский счет",
+                                value: accounts.first(where: { $0.id == vm.currentAccount.parentAccountID })?.name ?? "Не выбрано"
+                            )
                         }
                     }
                 }
             }
-            if vm.mode == .update && [.regular, .expense, .earnings].contains(vm.currentAccount.type) {
+            if vm.mode == .update && vm.currentAccount.isParent && !currentAccountChildren.isEmpty {
+                Section(header: Text("Дочерние счета")) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 10)], spacing: 16) {
+                        ForEach(currentAccountChildren) { child in
+                            NavigationLink {
+                                EditAccount(child, selectedAccountGroup: selectedAccountGroup, isHiddenView: vm.isHiddenView)
+                            } label: {
+                                ZStack(alignment: .topTrailing) {
+                                    VStack {
+                                        AccountCircleItemHeader(account: child)
+                                        AccountCircleItemCircle(account: child)
+                                        AccountCircleItemFooter(account: child)
+                                    }
+                                    Image(systemName: "pencil.circle.fill")
+                                        .font(.system(size: 22))
+                                        .symbolRenderingMode(.palette)
+                                        .foregroundStyle(.white, .gray)
+                                        .background(Circle().fill(Color(.systemBackground)))
+                                        .offset(x: 8, y: -8)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+            if vm.mode == .update && !vm.currentAccount.isParent && [.regular, .expense, .earnings].contains(vm.currentAccount.type) {
                 Section(header: Text("Счёт-мост"), footer: Text("Счёт-мост объединяет этот счёт с другим вашим счётом (например, из другой группы) — операции по нему предлагается довнести на той стороне. Связать можно только счета одной валюты.")) {
                     if let linkedAccountID = vm.currentAccount.linkedAccountID {
-                        let linkedAccount = vm.linkableAccounts.first { $0.id == linkedAccountID }
+                        let linkedAccount = vm.allAccountsGrouped.flatMap { [$0] + $0.childrenAccounts }.first { $0.id == linkedAccountID }
                         LabeledContent("Связан со счётом", value: linkedAccount?.name ?? linkedAccountID.uuidString.prefix(8).description)
                         Button("Отвязать", role: .destructive) {
                             vm.currentAccount.linkedAccountID = nil
                         }
                     } else {
                         NavigationLink {
-                            LinkAccountPicker(accounts: vm.linkableAccounts) { account in
-                                vm.currentAccount.linkedAccountID = account.id
-                            }
+                            LinkAccountGroupPickerScreen(
+                                accountGroups: vm.accountGroups.filter { $0.id != vm.currentAccount.accountGroup.id },
+                                allAccountsGrouped: vm.allAccountsGrouped,
+                                currentAccount: vm.currentAccount,
+                                linkedAccountID: $vm.currentAccount.linkedAccountID
+                            )
                         } label: {
-                            if vm.linkableAccounts.isEmpty {
-                                Text("Нет подходящих счетов для связи")
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                Text("Связать со счётом")
-                            }
+                            Text("Связать со счётом")
                         }
-                        .disabled(vm.linkableAccounts.isEmpty)
                     }
                 }
             }
@@ -372,100 +415,93 @@ struct EditAccount: View {
 }
 
 
-/// Пикер счёта для связи "счёт-мост" — только среди своих же счетов (см.
-/// EditAccountViewModel.linkableAccounts): совместимый тип, та же валюта, ещё не связан.
-/// Трёхшаговый drill-down: группа счетов → родительский счёт (если есть) → дочерний счёт —
-/// выбрать можно только реальный (дочерний либо не имеющий родителя) счёт, не агрегат.
-struct LinkAccountPicker: View {
-    let accounts: [Account]
-    let onSelect: (Account) -> Void
-
-    private var accountGroups: [AccountGroup] {
-        var seen = Set<UUID>()
-        return accounts.compactMap { account in
-            guard seen.insert(account.accountGroup.id).inserted else { return nil }
-            return account.accountGroup
-        }
-    }
+/// Первый шаг связи "счёт-мост" — выбор ГРУППЫ счетов (без текущей: мост всегда пересекает
+/// границу группы, связывать со счётом собственной же группы бессмысленно). Обычный список, не
+/// кружки — группы, в отличие от счетов, тут не про "коснитесь", а про явный выбор одной из.
+struct LinkAccountGroupPickerScreen: View {
+    let accountGroups: [AccountGroup]
+    let allAccountsGrouped: [Account]
+    let currentAccount: Account
+    @Binding var linkedAccountID: UUID?
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         List(accountGroups) { group in
             NavigationLink(group.name) {
-                LinkAccountGroupPicker(
-                    accounts: accounts.filter { $0.accountGroup.id == group.id },
-                    onSelect: onSelect
+                LinkAccountPickerScreen(
+                    accounts: allAccountsGrouped.filter { $0.accountGroup.id == group.id },
+                    currentAccount: currentAccount,
+                    linkedAccountID: $linkedAccountID
                 )
             }
         }
         .navigationTitle("Выбор группы счетов")
+        // Экран выбора счёта (следующий шаг) закрывает СЕБЯ через dismiss() при выборе — этот
+        // экран реагирует на тот же сигнал (linkedAccountID стал не nil) и закрывает СЕБЯ тоже.
+        // Каждый шаг убирает только себя, поэтому не важно, на какой реальной глубине стека
+        // (относительно EditAccount) сейчас находится вся цепочка — в отличие от подсчёта
+        // "сколько уровней снять" вручную (path.path.removeLast(N)), который легко разъезжается
+        // с реальной глубиной, если экран открыт не там, где предполагалось.
+        .onChange(of: linkedAccountID) { _, newValue in
+            if newValue != nil { dismiss() }
+        }
     }
 }
 
-/// Второй шаг — родительские счета этой группы (ведут к дочерним) и счета без родителя
-/// (выбираются сразу).
-private struct LinkAccountGroupPicker: View {
+/// Второй шаг — пикер счёта внутри уже выбранной группы, переиспользует общий
+/// AccountCirclePicker (та же сетка, что на главном экране счетов). Деактивирует неподходящие
+/// счета: сам счёт, уже связанные, другой валюты или несовместимого типа (см.
+/// EditAccountViewModel.bridgeCompatibleType) — но не убирает их из сетки.
+struct LinkAccountPickerScreen: View {
     let accounts: [Account]
-    let onSelect: (Account) -> Void
-
-    private var parents: [Account] { accounts.filter { $0.isParent } }
-    private var standalone: [Account] { accounts.filter { !$0.isParent && $0.parentAccountID == nil } }
+    let currentAccount: Account
+    @Binding var linkedAccountID: UUID?
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        List {
-            if !parents.isEmpty {
-                Section {
-                    ForEach(parents) { parent in
-                        NavigationLink(parent.name) {
-                            LinkAccountChildPicker(
-                                parentName: parent.name,
-                                children: accounts.filter { $0.parentAccountID == parent.id },
-                                onSelect: onSelect
-                            )
-                        }
-                    }
-                }
+        AccountCirclePicker(
+            title: "Связать со счётом",
+            accounts: accounts,
+            isDisabled: { candidate in
+                candidate.id == currentAccount.id ||
+                candidate.isParent ||
+                candidate.linkedAccountID != nil ||
+                candidate.currency != currentAccount.currency ||
+                EditAccountViewModel.bridgeCompatibleType(for: currentAccount.type) != candidate.type
             }
-            if !standalone.isEmpty {
-                Section {
-                    ForEach(standalone) { account in
-                        SelectableAccountRow(account: account, onSelect: onSelect)
-                    }
-                }
-            }
-        }
-        .navigationTitle("Выбор счёта")
-    }
-}
-
-/// Третий шаг — дочерние счета выбранного родителя, финальный выбор.
-private struct LinkAccountChildPicker: View {
-    let parentName: String
-    let children: [Account]
-    let onSelect: (Account) -> Void
-
-    var body: some View {
-        List(children) { account in
-            SelectableAccountRow(account: account, onSelect: onSelect)
-        }
-        .navigationTitle(parentName)
-    }
-}
-
-private struct SelectableAccountRow: View {
-    @Environment(\.dismiss) var dismiss
-    let account: Account
-    let onSelect: (Account) -> Void
-
-    var body: some View {
-        Button {
-            onSelect(account)
+        ) { account in
+            linkedAccountID = account.id
             dismiss()
-        } label: {
-            HStack {
-                Text(account.name)
-                Spacer()
-                Text(account.currency.code)
-                    .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// Пикер родительского счёта — тоже переиспользует AccountCirclePicker, но с
+/// selectsParents: true (тап по родителю сразу выбирает его, а не открывает панель детей) и
+/// деактивированными не-родительскими счетами и родителями другого типа (дочерний счёт может
+/// принадлежать только родителю своего же типа).
+struct ParentAccountPickerScreen: View {
+    let accounts: [Account]
+    let childType: AccountType
+    @Binding var parentAccountID: UUID?
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Button("Не выбрано") {
+                parentAccountID = nil
+                dismiss()
+            }
+            .padding()
+            Divider()
+            AccountCirclePicker(
+                title: "Родительский счёт",
+                accounts: accounts,
+                selectsParents: true,
+                isDisabled: { !$0.isParent || $0.type != childType }
+            ) { account in
+                parentAccountID = account.id
+                dismiss()
             }
         }
     }

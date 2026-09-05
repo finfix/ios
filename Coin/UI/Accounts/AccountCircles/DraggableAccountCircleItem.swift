@@ -140,15 +140,18 @@ struct DraggableAccountCircleItem: View {
                     .onChange(of: vm.isHighligted(for: account)) { _, targeted in
                         handleHoverExpand(targeted: targeted)
                     }
-                    // Вход в режим редактирования — кнопкой в тулбаре (AccountCirclesView), не
-                    // долгим тапом: LongPressGesture на этом же кружке конкурировал за
-                    // распознавание касания с собственным touch-жестом .draggable (тот тоже
-                    // начинается с удержания), из-за чего перетаскивание пальцем переставало
-                    // запускаться (мышью на Mac не конфликтовало — оттуда разница в поведении).
+                    // Вход в режим редактирования — долгим тапом по ФОНУ экрана (см.
+                    // AccountCirclesView), не по самому кружку: LongPressGesture прямо на
+                    // кружке уже пробовали и откатывали — конкурирует за распознавание касания
+                    // с собственными touch-жестами кружка (.draggable/ручной DragGesture).
                     .gesture(
                         TapGesture(count: 2)
                             .onEnded {
-                                guard !vm.isEditMode else { return }
+                                // Работает и в режиме редактирования — панель детей полезна и
+                                // там (быстрый доступ к их карандашам, см. isAlreadyOpened ниже),
+                                // а с .draggable (тоже на этом кружке в edit mode) двойной тап не
+                                // конфликтует — тот распознаёт press-and-hold, а не быстрый
+                                // повторный тап.
                                 if !account.childrenAccounts.isEmpty {
                                     withAnimation {
                                         vm.expandedParentAccount = account
@@ -182,8 +185,13 @@ struct DraggableAccountCircleItem: View {
                             }
                     )
 
-                if vm.isEditMode {
+                // Карандаш — в режиме редактирования (любой кружок) и в панели дочерних счетов
+                // родителя (двойной тап), даже вне режима редактирования: панель — это уже
+                // "провалились посмотреть детей", быстрый доступ к их редактированию там уместен
+                // сам по себе, без необходимости отдельно включать редактирование всей сетки.
+                if vm.isEditMode || isAlreadyOpened {
                     Button {
+                        closeIfNested()
                         path.append(AccountCircleItemRoute.editAccount(account))
                     } label: {
                         Image(systemName: "pencil.circle.fill")
