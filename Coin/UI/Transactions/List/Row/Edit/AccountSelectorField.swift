@@ -72,7 +72,7 @@ struct AccountSelectorRowContent: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Text(CurrencyFormatter(currency: account.currency, withUnits: false).string(number: balance))
+            Text(CurrencyFormatter(currency: account.currency, maximumFractionDigits: 7, withUnits: false).string(number: balance))
                 .foregroundStyle(balance < 0 ? .red : .primary)
                 .lineLimit(1)
             if showChevron {
@@ -119,7 +119,7 @@ struct AccountSelectorField: View {
                         Circle().stroke(Color.accentColor, lineWidth: 2)
                     }
                 }
-            Text(isSelected ? CurrencyFormatter(currency: account.currency, withUnits: false).string(number: balance) : " ")
+            Text(isSelected ? CurrencyFormatter(currency: account.currency, maximumFractionDigits: 7, withUnits: false).string(number: balance) : " ")
                 .font(.caption)
                 .foregroundStyle(balance < 0 ? .red : .primary)
                 .lineLimit(1)
@@ -339,7 +339,7 @@ private struct AccountInlinePickerRow: View {
                         Circle().stroke(Color.accentColor, lineWidth: 2)
                     }
                 }
-            Text(CurrencyFormatter(currency: account.currency, withUnits: false).string(
+            Text(CurrencyFormatter(currency: account.currency, maximumFractionDigits: 7, withUnits: false).string(
                 number: account.isParent ? account.showingRemainder : account.remainder
             ))
             .font(.caption)

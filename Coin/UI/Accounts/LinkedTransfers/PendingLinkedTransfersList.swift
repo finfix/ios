@@ -251,7 +251,7 @@ struct CompleteLinkedTransferPicker: View {
                         return
                     }
                     path.path.append(DraggableAccountRoute.completeLinkedTransfer(
-                        type, accountFrom, accountTo, transfer, sourceTransaction.amountFrom
+                        type, accountFrom, accountTo, transfer, sourceTransaction.amountFrom, sourceTransaction.dateTransaction
                     ))
                 }
             } else {

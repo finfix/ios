@@ -33,12 +33,17 @@ enum CalculatorKey: Hashable {
     case moveCursorLeft
     case moveCursorRight
     case done
+    case insertBalance
 }
 
 struct CalculatorKeypad: View {
 
     var allowsOperators: Bool
     var doneTitle: String
+    /// Кнопка "вставить текущий баланс счёта" в верхнем ряду, рядом со стрелками/Готово —
+    /// nil, если для этого поля вставка баланса не имеет смысла (см. вызывающую сторону,
+    /// например EditTransaction: разный счёт в фокусе — разная подпись/значение).
+    var insertBalanceLabel: String? = nil
     var onKey: (CalculatorKey) -> Void
 
     private let extraRow: [String] = ["(", ")", "⌫"]
@@ -68,6 +73,16 @@ struct CalculatorKeypad: View {
                         .contentShape(Rectangle())
                 }
                 Spacer()
+                if let insertBalanceLabel {
+                    Button(insertBalanceLabel) {
+                        onKey(.insertBalance)
+                    }
+                    .font(.footnote)
+                    .lineLimit(1)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                    Spacer()
+                }
                 Button(doneTitle) {
                     onKey(.done)
                 }

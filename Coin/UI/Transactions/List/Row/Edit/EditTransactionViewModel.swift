@@ -39,11 +39,11 @@ class EditTransactionViewModel {
         if amountFrom > amountTo {
             let rate = amountFrom / amountTo
             let symbols = "\(currentTransaction.accountFrom.currency.symbol)/\(currentTransaction.accountTo.currency.symbol)"
-            return CurrencyFormatter().string(number: rate, suffix: symbols)
+            return CurrencyFormatter(maximumFractionDigits: 7).string(number: rate, suffix: symbols)
         } else {
             let rate = amountTo / amountFrom
             let symbols = "\(currentTransaction.accountTo.currency.symbol)/\(currentTransaction.accountFrom.currency.symbol)"
-            return CurrencyFormatter().string(number: rate, suffix: symbols)
+            return CurrencyFormatter(maximumFractionDigits: 7).string(number: rate, suffix: symbols)
         }
     }
     
@@ -75,8 +75,7 @@ class EditTransactionViewModel {
             )
             
             suggestAmountToString = suggestAmount > 0 ? suggestAmount.currencyString(
-                formatter: formatter,
-                maximumFractionDigits: 2
+                formatter: formatter
             ) : nil
         }
     }
@@ -111,8 +110,7 @@ class EditTransactionViewModel {
             )
             
             suggestAmountFromString = suggestAmount > 0 ? suggestAmount.currencyString(
-                formatter: formatter,
-                maximumFractionDigits: 2
+                formatter: formatter
             ) : nil
         }
     }
@@ -192,7 +190,7 @@ class EditTransactionViewModel {
         self.sourceTransfer = sourceTransfer
 
         if currentTransaction.amountFrom != 0 && currentTransaction.amountTo != 0 {
-            let formatter = CurrencyFormatter(withUnits: false)
+            let formatter = CurrencyFormatter(maximumFractionDigits: 7, withUnits: false)
             amountFromString = currentTransaction.amountFrom.currencyString(formatter: formatter)
             amountToString = currentTransaction.amountTo.currencyString(formatter: formatter)
         }

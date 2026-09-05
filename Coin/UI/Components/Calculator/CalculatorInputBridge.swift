@@ -19,6 +19,8 @@ struct CalculatorInputBridge: UIViewRepresentable {
     var placeholder: String
     var font: UIFont = .preferredFont(forTextStyle: .body)
     var textColor: UIColor = .label
+    var insertBalanceLabel: String? = nil
+    var insertBalanceValue: Decimal? = nil
     var onDone: () -> Void
 
     func makeUIView(context: Context) -> UITextField {
@@ -54,9 +56,11 @@ struct CalculatorInputBridge: UIViewRepresentable {
 
     func updateUIView(_ uiView: UITextField, context: Context) {
         context.coordinator.onDone = onDone
+        context.coordinator.insertBalanceValue = insertBalanceValue
         context.coordinator.hostingController.rootView = CalculatorKeypad(
             allowsOperators: allowsOperators,
             doneTitle: doneTitle,
+            insertBalanceLabel: insertBalanceLabel,
             onKey: context.coordinator.handle
         )
 
@@ -92,6 +96,7 @@ struct CalculatorInputBridge: UIViewRepresentable {
         @Binding var text: String
         @Binding var isFocused: Bool
         var onDone: () -> Void = {}
+        var insertBalanceValue: Decimal?
         weak var textField: UITextField?
         let hostingController = UIHostingController(
             rootView: CalculatorKeypad(allowsOperators: true, doneTitle: "Готово", onKey: { _ in })
@@ -141,6 +146,9 @@ struct CalculatorInputBridge: UIViewRepresentable {
             case .done:
                 isFocused = false
                 onDone()
+            case .insertBalance:
+                guard let insertBalanceValue else { return }
+                insert(insertBalanceValue.description, into: field)
             }
         }
 

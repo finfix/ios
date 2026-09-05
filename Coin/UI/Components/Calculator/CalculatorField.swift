@@ -20,6 +20,10 @@ struct CalculatorField: View {
     /// Сообщает наружу, находится ли поле сейчас в "режиме вычисления" (введён арифметический
     /// знак/скобка/процент) — чтобы вызывающий экран мог, например, показывать кнопку копирования.
     var onCalculationModeChange: (Bool) -> Void
+    /// Подпись и значение для кнопки "вставить баланс" в верхнем ряду клавиатуры-калькулятора
+    /// (см. CalculatorKeypad.insertBalanceLabel) — nil, если для этого поля не применимо.
+    var insertBalanceLabel: String? = nil
+    var insertBalanceValue: Decimal? = nil
 
     @State private var rawInput: String = ""
     @State private var didSeedFromBinding = false
@@ -30,6 +34,8 @@ struct CalculatorField: View {
         text: Binding<String>,
         isFocused: Binding<Bool>,
         allowsOperators: Bool = true,
+        insertBalanceLabel: String? = nil,
+        insertBalanceValue: Decimal? = nil,
         onDone: @escaping () -> Void = {},
         onCalculationModeChange: @escaping (Bool) -> Void = { _ in }
     ) {
@@ -37,6 +43,8 @@ struct CalculatorField: View {
         self._text = text
         self.isFocused = isFocused
         self.allowsOperators = allowsOperators
+        self.insertBalanceLabel = insertBalanceLabel
+        self.insertBalanceValue = insertBalanceValue
         self.onDone = onDone
         self.onCalculationModeChange = onCalculationModeChange
     }
@@ -47,6 +55,8 @@ struct CalculatorField: View {
         value: Binding<Double>,
         isFocused: Binding<Bool>,
         allowsOperators: Bool = true,
+        insertBalanceLabel: String? = nil,
+        insertBalanceValue: Decimal? = nil,
         onDone: @escaping () -> Void = {},
         onCalculationModeChange: @escaping (Bool) -> Void = { _ in }
     ) {
@@ -58,6 +68,8 @@ struct CalculatorField: View {
             ),
             isFocused: isFocused,
             allowsOperators: allowsOperators,
+            insertBalanceLabel: insertBalanceLabel,
+            insertBalanceValue: insertBalanceValue,
             onDone: onDone,
             onCalculationModeChange: onCalculationModeChange
         )
@@ -72,7 +84,9 @@ struct CalculatorField: View {
         guard hasOperator else {
             return Double(rawInput.replacingOccurrences(of: ",", with: ".").filter { !$0.isWhitespace })
         }
-        var expressionString = rawInput
+        // Запятая как десятичный разделитель — как и в простом (без операторов) вводе выше;
+        // сам токенайзер ниже понимает только "." (см. parseNumber), поэтому нормализуем здесь.
+        var expressionString = rawInput.replacingOccurrences(of: ",", with: ".")
         for op in CalculatorOperator.allCases {
             expressionString = expressionString.replacingOccurrences(of: op.rawValue, with: op.expressionSymbol)
         }
@@ -102,6 +116,8 @@ struct CalculatorField: View {
                         placeholder: title,
                         font: hasOperator ? .preferredFont(forTextStyle: .footnote) : .preferredFont(forTextStyle: .title3),
                         textColor: hasOperator ? .secondaryLabel : .label,
+                        insertBalanceLabel: insertBalanceLabel,
+                        insertBalanceValue: insertBalanceValue,
                         onDone: onDone
                     )
                     .frame(height: hasOperator ? 18 : 32)

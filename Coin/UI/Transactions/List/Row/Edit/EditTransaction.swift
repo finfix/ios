@@ -127,13 +127,15 @@ struct EditTransaction: View {
         accountTo: Account = Account(),
         accountGroup: AccountGroup,
         sourceTransfer: PendingLinkedTransfer? = nil,
-        prefillAmount: Decimal = 0
+        prefillAmount: Decimal = 0,
+        dateTransaction: Date = Date()
     ) {
         vm = EditTransactionViewModel(
             currentTransaction: Transaction(
                 accountingInCharts: true,
                 amountFrom: prefillAmount,
                 amountTo: prefillAmount,
+                dateTransaction: dateTransaction,
                 type: transactionType,
                 accountFrom: accountFrom,
                 accountTo: accountTo,
@@ -177,6 +179,10 @@ struct EditTransaction: View {
                         if newValue { isAmountToFocused = false }
                     }
                 ),
+                insertBalanceLabel: (vm.currentTransaction.accountFrom.remainder != 0 && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer))
+                    ? "Весь баланс: " + CurrencyFormatter(maximumFractionDigits: 7).string(number: vm.currentTransaction.accountFrom.remainder, currency: vm.currentTransaction.accountFrom.currency)
+                    : nil,
+                insertBalanceValue: vm.currentTransaction.accountFrom.remainder,
                 onDone: {
                     if vm.intercurrency {
                         isAmountToFocused = true
@@ -217,6 +223,10 @@ struct EditTransaction: View {
                         if newValue { isAmountFromFocused = false }
                     }
                 ),
+                insertBalanceLabel: (vm.currentTransaction.accountTo.remainder != 0 && (vm.currentTransaction.type == .income || vm.currentTransaction.type == .transfer))
+                    ? "Весь баланс: " + CurrencyFormatter(maximumFractionDigits: 7).string(number: vm.currentTransaction.accountTo.remainder, currency: vm.currentTransaction.accountTo.currency)
+                    : nil,
+                insertBalanceValue: vm.currentTransaction.accountTo.remainder,
                 onDone: {
                     focusedField = .note
                 },
@@ -314,6 +324,7 @@ struct EditTransaction: View {
                                 .currencyString(
                                     formatter: CurrencyFormatter(
                                         currency: vm.accountGroup.currency,
+                                        maximumFractionDigits: 7,
                                         withUnits: false
                                     )
                                 )
@@ -334,8 +345,22 @@ struct EditTransaction: View {
                 }
 
                 EditCard {
-                    CarouselDatePicker(selectedDate: $vm.currentTransaction.dateTransaction)
+                    CarouselDatePicker(
+                        selectedDate: $vm.currentTransaction.dateTransaction,
+                        // Довнесение переноса — дата уже осмысленна (дата исходной транзакции,
+                        // см. init ниже), показываем её выбранной сразу. А вот у обычной новой
+                        // независимой транзакции дата не должна казаться уже решённой — тап по
+                        // ней и есть момент выбора (и триггер создания, см. onChange ниже).
+                        requiresExplicitSelection: vm.mode == .create && vm.sourceTransfer == nil
+                    )
+                        // В обычном создании "с нуля" тап по дате — последний шаг ввода, поэтому
+                        // сразу создаёт транзакцию (как и раньше). Но при довнесении переноса
+                        // (sourceTransfer != nil) дата уже осмысленно предзаполнена из исходной
+                        // транзакции — тап по ней тут просто правка, как любое другое поле формы,
+                        // применяется явным "Сохранить" ниже (кнопка для этого случая тоже
+                        // показывается, см. ниже). Так же ведёт себя и обычное редактирование.
                         .onChange(of: vm.currentTransaction.dateTransaction) { _, _ in
+                            guard vm.mode == .create, vm.sourceTransfer == nil else { return }
                             Task {
                                 do {
                                     try await vm.save()
@@ -343,17 +368,7 @@ struct EditTransaction: View {
                                     alert.error(error)
                                     return
                                 }
-
-                                // Довнесение переноса: экран создан через два push'а поверх
-                                // списка переносов (PendingLinkedTransfersList →
-                                // CompleteLinkedTransferPicker → сюда) — обычный dismiss() вернул
-                                // бы только на экран тапа по кружкам, а не туда, откуда реально
-                                // начинали. Убираем оба уровня разом.
-                                if vm.sourceTransfer != nil {
-                                    path.path.removeLast(min(2, path.path.count))
-                                } else {
-                                    dismiss()
-                                }
+                                dismiss()
                             }
                         }
                 }
@@ -388,11 +403,11 @@ struct EditTransaction: View {
                                         Text(vm.currentTransaction.accountFrom.name)
                                             .foregroundStyle(.secondary)
                                         Spacer()
-                                        Text(CurrencyFormatter().string(number: vm.currentTransaction.accountFrom.remainder, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                        Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: vm.currentTransaction.accountFrom.remainder, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
                                         Image(systemName: "arrow.right")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
-                                        Text(CurrencyFormatter().string(number: after, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                        Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: after, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
                                             .bold()
                                             .foregroundStyle(after < 0 ? .red : .primary)
                                     }
@@ -403,12 +418,12 @@ struct EditTransaction: View {
                                             .foregroundStyle(.secondary)
                                         Spacer()
                                         if vm.currentTransaction.type != .balancing {
-                                            Text(CurrencyFormatter().string(number: vm.currentTransaction.accountTo.remainder, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                            Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: vm.currentTransaction.accountTo.remainder, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
                                             Image(systemName: "arrow.right")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
                                         }
-                                        Text(CurrencyFormatter().string(number: after, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                        Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: after, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
                                             .bold()
                                     }
                                 }
@@ -424,11 +439,11 @@ struct EditTransaction: View {
                                         Text(vm.currentTransaction.accountFrom.name)
                                             .foregroundStyle(.secondary)
                                         Spacer()
-                                        Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceBeforeFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                        Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: vm.currentTransaction.balanceBeforeFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
                                         Image(systemName: "arrow.right")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
-                                        Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceAfterFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
+                                        Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: vm.currentTransaction.balanceAfterFrom, currency: vm.currentTransaction.accountFrom.currency, withUnits: false))
                                             .bold()
                                     }
                                 }
@@ -436,18 +451,22 @@ struct EditTransaction: View {
                                     Text(vm.currentTransaction.accountTo.name)
                                         .foregroundStyle(.secondary)
                                     Spacer()
-                                    Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceBeforeTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                    Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: vm.currentTransaction.balanceBeforeTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
                                     Image(systemName: "arrow.right")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
-                                    Text(CurrencyFormatter().string(number: vm.currentTransaction.balanceAfterTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
+                                    Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: vm.currentTransaction.balanceAfterTo, currency: vm.currentTransaction.accountTo.currency, withUnits: false))
                                         .bold()
                                 }
                             }
                         }
                     }
                 }
-                if vm.mode == .update {
+                // Показываем явную кнопку "Сохранить" не только при редактировании, но и при
+                // создании транзакции С предзаполненной датой (довнесение переноса,
+                // sourceTransfer != nil) — там тап по дате в карусели больше не сохраняет сам
+                // (см. onChange выше), значит нужен явный способ подтвердить.
+                if vm.mode == .update || vm.sourceTransfer != nil {
                     Button {
                         Task {
                             do {
@@ -457,7 +476,15 @@ struct EditTransaction: View {
                                 return
                             }
 
-                            dismiss()
+                            // Довнесение переноса: экран создан через два push'а поверх списка
+                            // переносов (PendingLinkedTransfersList → CompleteLinkedTransferPicker
+                            // → сюда) — обычный dismiss() вернул бы только на экран тапа по
+                            // кружкам, а не туда, откуда реально начинали. Убираем оба уровня разом.
+                            if vm.sourceTransfer != nil {
+                                path.path.removeLast(min(2, path.path.count))
+                            } else {
+                                dismiss()
+                            }
                         }
                     } label: {
                         Text("Сохранить")
@@ -512,37 +539,14 @@ struct EditTransaction: View {
                     }
                 }
             }
+            // "Весь баланс" для полей суммы теперь встроена в саму клавиатуру-калькулятор
+            // (CalculatorKeypad.insertBalanceLabel, см. amountFromField/amountToField выше) —
+            // .keyboard-тулбар сюда не доходит, т.к. эти поля используют кастомный inputView
+            // (CalculatorInputBridge), а не системную клавиатуру, к которой цепляется .toolbar.
             ToolbarItemGroup(placement: .keyboard) {
                 HStack {
-                    
-                    // Если (выбранное поле = поле ввода суммы списания) И (счет списания имеет ненулевой баланс) И (тип транзакции расход ИЛИ перевод)
-                    if isAmountFromFocused && vm.currentTransaction.accountFrom.remainder != 0 && (vm.currentTransaction.type == .consumption || vm.currentTransaction.type == .transfer)  {
-                        
-                        // Кнопка ввода всего возможного баланса в поле ввода суммы списания
-                        Button("Весь баланс: " + CurrencyFormatter().string(
-                                        number: vm.currentTransaction.accountFrom.remainder,
-                                        currency: vm.currentTransaction.accountFrom.currency
-                                    )
-                        ) {
-                            
-                            // Присваиваем сумме списания весь баланс счета списания
-                            vm.currentTransaction.amountFrom = vm.currentTransaction.accountFrom.remainder
-                            vm.amountFromString = vm.currentTransaction.accountFrom.remainder.description
-                            
-                            // Если транзакция между счетами в разной валюте
-                            if vm.intercurrency {
-                                
-                                // После нажатия переходим к полю ввода суммы пополнения
-                                focusedField = .amountToSelector
-                            } else {
-                                
-                                // После нажатия переходим к полю ввода заметки
-                                focusedField = .note
-                            }
-                        }
-                    }
                     Spacer()
-                    
+
                     // Кнопка Следующее поле / Сохранить над клавиатурой
                     Button(focusedField == .note ? "Готово" : "Следующее поле") {
                         

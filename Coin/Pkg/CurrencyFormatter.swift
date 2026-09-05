@@ -39,6 +39,11 @@ class CurrencyFormatter: NumberFormatter {
     ) {
         super.init()
         self.numberStyle = .currency
+        // .currency сам выставляет minimumFractionDigits (обычно 2, по минимальной единице
+        // валюты) — без явного зануления число вроде 100 отображалось бы как "100,00", а 5.5
+        // как "5,50". maximumFractionDigits ниже задаёт только верхнюю границу, а не то, сколько
+        // нулей ДОБАВЛЯТЬ, если у числа их и так нет.
+        self.minimumFractionDigits = 0
         if let maximumFractionDigits {
             self.maximumFractionDigits = maximumFractionDigits
             self.userMaximumFractionDigits = true

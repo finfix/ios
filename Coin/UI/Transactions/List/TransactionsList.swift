@@ -76,7 +76,7 @@ struct TransactionsList: View {
                         HStack {
                             Text("Расход за день")
                             Spacer()
-                            Text(CurrencyFormatter().string(number: dailyExpenseTotal, currency: dailyExpenseCurrency, withUnits: false))
+                            Text(CurrencyFormatter(maximumFractionDigits: 7).string(number: dailyExpenseTotal, currency: dailyExpenseCurrency, withUnits: false))
                         }
                         .font(.caption)
                         .foregroundStyle(.secondary)

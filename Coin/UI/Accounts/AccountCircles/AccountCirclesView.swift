@@ -13,7 +13,7 @@ private let logger = Logger(subsystem: "Coin", category: "AccountCirclesView")
 
 enum DraggableAccountRoute: Hashable {
 case createTransaction(TransactionType, Account, Account)
-case completeLinkedTransfer(TransactionType, Account, Account, PendingLinkedTransfer, Decimal)
+case completeLinkedTransfer(TransactionType, Account, Account, PendingLinkedTransfer, Decimal, Date)
 }
 
 struct AccountsTabView: View {
@@ -556,14 +556,15 @@ struct AccountCirclesView: View {
                         accountTo: accountTo,
                         accountGroup: selectedAccountGroup.selectedAccountGroup
                     )
-                case .completeLinkedTransfer(let transactionType, let accountFrom, let accountTo, let transfer, let amount):
+                case .completeLinkedTransfer(let transactionType, let accountFrom, let accountTo, let transfer, let amount, let date):
                     EditTransaction(
                         transactionType: transactionType,
                         accountFrom: accountFrom,
                         accountTo: accountTo,
                         accountGroup: accountFrom.accountGroup,
                         sourceTransfer: transfer,
-                        prefillAmount: amount
+                        prefillAmount: amount,
+                        dateTransaction: date
                     )
                 }
             }
