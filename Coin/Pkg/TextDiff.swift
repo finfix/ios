@@ -5,15 +5,7 @@
 
 import Foundation
 
-enum DiffLineKind {
-    case unchanged, added, removed
-}
 
-struct DiffLine: Identifiable {
-    let id = UUID()
-    let kind: DiffLineKind
-    let text: String
-}
 
 enum TextDiff {
 

@@ -9,10 +9,6 @@ import Foundation
 import Factory
 
 
-enum mode {
-    case create, update
-}
-
 @Observable
 class EditAccountViewModel {
     @ObservationIgnored

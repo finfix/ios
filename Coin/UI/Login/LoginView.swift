@@ -12,10 +12,6 @@ import Factory
 
 private let logger = Logger(subsystem: "Coin", category: "Login")
 
-enum LoginRoute {
-    case settings
-    case developerTools
-}
 
 struct LoginView: View {
     

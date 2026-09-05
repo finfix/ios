@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-enum DeveloperToolsRoute {
-    case tasksList
-}
 
 struct DeveloperTools: View {
 

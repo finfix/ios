@@ -5,36 +5,7 @@
 
 import SwiftUI
 
-enum CalculatorOperator: String, CaseIterable {
-    case add = "+"
-    case subtract = "-"
-    case multiply = "×"
-    case divide = "÷"
 
-    var expressionSymbol: String {
-        switch self {
-        case .add: return "+"
-        case .subtract: return "-"
-        case .multiply: return "*"
-        case .divide: return "/"
-        }
-    }
-}
-
-enum CalculatorKey: Hashable {
-    case digit(String)
-    case decimalSeparator
-    case op(CalculatorOperator)
-    case leftParen
-    case rightParen
-    case percent
-    case backspace
-    case clearAll
-    case moveCursorLeft
-    case moveCursorRight
-    case done
-    case insertBalance
-}
 
 struct CalculatorKeypad: View {
 

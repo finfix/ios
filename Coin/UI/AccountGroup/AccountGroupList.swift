@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-enum AccountGroupListRoute: Hashable {
-    case updateAccountGroup(AccountGroup)
-    case createAccountGroup
-}
 
 struct AccountGroupList: View {
     

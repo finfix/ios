@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-enum TransactionsListRoute: Hashable {
-    case editTransaction(Transaction)
-}
 
 struct TransactionsList: View {
     

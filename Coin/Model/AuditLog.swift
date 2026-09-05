@@ -5,13 +5,7 @@
 
 import Foundation
 
-enum AuditLogEntity: String, Codable {
-    case transaction, account, accountGroup, tag, user, currency
-}
 
-enum AuditLogMethod: String, Codable {
-    case create, update, delete
-}
 
 struct AuditLog: Identifiable, Hashable {
     var id: UInt32

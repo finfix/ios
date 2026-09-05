@@ -1460,6 +1460,3 @@ class Repository {
     }
 }
 
-enum ModelType: String, Codable {
-    case account, transaction, tag, icon, user, accountGroup
-}

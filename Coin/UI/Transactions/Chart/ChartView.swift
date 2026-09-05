@@ -8,32 +8,8 @@
 import SwiftUI
 import Charts
 
-enum ChartDisplayType: CaseIterable {
-    case linear, ring
-    
-    var name: String {
-        switch self {
-        case .linear: "Линейный"
-        case .ring: "Кольцевой"
-        }
-    }
-}
 
-enum ChartViewGroupBy: CaseIterable {
-    case byTag, byAccount
-    
-    var name: String {
-        switch self {
-        case .byAccount: "Счет"
-        case .byTag: "Подкатегория"
-        }
-    }
-}
 
-enum ChartViewRoute: Hashable {
-    case transactionView(filters: TransactionFilters, chartType: ChartType)
-    case chartDrillDown(filters: TransactionFilters, chartType: ChartType)
-}
 
 // Баланс всегда рисуется столбцами (см. Graph.swift), а не линией — подписываем
 // кнопку переключения вида соответственно, а не просто "Линейный". Общие для обычного

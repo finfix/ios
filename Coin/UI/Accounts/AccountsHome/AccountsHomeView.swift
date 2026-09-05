@@ -59,62 +59,8 @@ struct AccountsHomeView: View {
     }
 }
 
-enum CirclesCreateTransactionRoute: Hashable {
-    case createTrasnaction(TransactionType)
-}
 
-struct CirclesCreateTransaction: View {
-    
-    @Environment(PathSharedState.self) var path
-    @Binding var chooseBlurIsOpened: Bool
-    
-    var body: some View {
-        Group {
-            Button {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    chooseBlurIsOpened.toggle()
-                }
-            } label: {
-                CircleTypeTransaction(imageName: chooseBlurIsOpened ? "arrow.uturn.backward" : "plus")
-            }
-            if chooseBlurIsOpened {
-                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.consumption)) {
-                    CircleTypeTransaction(imageName: "minus")
-                }
-                .padding(.bottom, 90)
-                
-                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.income)) {
-                    CircleTypeTransaction(imageName: "plus")
-                }
-                .padding(.trailing, 90)
-                
-                NavigationLink(value: CirclesCreateTransactionRoute.createTrasnaction(.transfer)) {
-                    CircleTypeTransaction(imageName: "arrow.left.arrow.right")
-                }
-                .padding(.trailing, 75)
-                .padding(.bottom, 75)
-            }
-        }
-        .onDisappear { chooseBlurIsOpened = false }
-    }
-}
 
-struct CircleTypeTransaction: View {
-    
-    var imageName: String
-    
-    var body: some View {
-        Circle()
-            .frame(width: 50, height: 50)
-            .padding(20)
-            .foregroundColor(.gray)
-            .overlay {
-                Image(systemName: imageName)
-                    .foregroundColor(.black)
-                    .font(.system(size: 20))
-            }
-    }
-}
 
 #Preview {
     AccountsHomeView()

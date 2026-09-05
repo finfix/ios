@@ -10,90 +10,7 @@ import OSLog
 
 private let logger = Logger(subsystem: "Coin", category: "EditTransaction")
 
-enum EditTransactionRoute: Hashable {
-    case tagsList
-    case auditLogHistory(entityID: String, accountGroupID: UUID)
-}
 
-struct Tags: View {
-    
-    var vm: EditTransactionViewModel
-    @Environment(\.dismiss) var dismiss
-    @Environment(AlertManager.self) private var alert
-    @Environment(PathSharedState.self) var path
-    
-    var body: some View {
-        HStack {
-            ScrollView(.horizontal) {
-                VStack(alignment: .leading) {
-                    HStack {
-                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
-                            if i % 2 == 0 {
-                                Button {
-                                    withAnimation {
-                                        if vm.currentTransaction.tags.contains(tag) {
-                                            vm.currentTransaction.tags.removeAll { $0.id == tag.id }
-                                        } else {
-                                            vm.currentTransaction.tags.append(tag)
-                                        }
-                                    }
-                                } label: {
-                                    Text("#\(tag.name)")
-                                        .font(.callout)
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 5)
-                                        .background {
-                                            RoundedRectangle(cornerRadius: 100)
-                                                .foregroundStyle(vm.currentTransaction.tags.contains(tag) ? Color.blue : Color.clear)
-                                                .overlay {
-                                                    RoundedRectangle(cornerRadius: 100)
-                                                        .stroke(.secondary, lineWidth: 1)
-                                                }
-                                        }
-                                }
-                            }
-                        }
-                    }
-                    HStack {
-                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
-                            if i % 2 != 0 {
-                                Button {
-                                    withAnimation {
-                                        if vm.currentTransaction.tags.contains(tag) {
-                                            vm.currentTransaction.tags.removeAll { $0.id == tag.id }
-                                        } else {
-                                            vm.currentTransaction.tags.append(tag)
-                                        }
-                                    }
-                                } label: {
-                                    Text("#\(tag.name)")
-                                        .font(.callout)
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 5)
-                                        .background {
-                                            RoundedRectangle(cornerRadius: 100)
-                                                .foregroundStyle(vm.currentTransaction.tags.contains(tag) ? Color.blue : Color.clear)
-                                                .overlay {
-                                                    RoundedRectangle(cornerRadius: 100)
-                                                        .stroke(.secondary, lineWidth: 1)
-                                                }
-                                        }
-                                }
-                            }
-                        }
-                    }
-                }
-                .padding(1)
-            }
-            Button {
-                path.path.append(EditTransactionRoute.tagsList)
-            } label: {
-                Image(systemName: "ellipsis")
-            }
-        }
-        .buttonStyle(.plain)
-    }
-}
 
 struct EditTransaction: View {
     
@@ -603,40 +520,8 @@ struct EditTransaction: View {
     .environment(AlertManager(handle: {_ in }))
 }
 
-/// Карточка-контейнер, заменяющая гриду Form's Section там, где нужен серый фон
-/// (Form/Section больше не используется на этом экране).
-private struct EditCard<Content: View>: View {
-    var padding: CGFloat = 16
-    @ViewBuilder var content: Content
 
-    var body: some View {
-        content
-            .padding(padding)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(UIColor.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-    }
-}
 
-/// Заголовок группы (аналог заголовка Section("...") у Form).
-private struct EditSectionHeader: View {
-    var title: String
-
-    init(_ title: String) {
-        self.title = title
-    }
-
-    var body: some View {
-        Text(title.uppercased())
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 4)
-    }
-}
-
-enum Position {
-    case up, down
-}
 
 func getAccountsForShowingInCreate(accounts: [Account], position: Position, transactionType: TransactionType, excludedAccount: Account?, preferredCurrency: Currency? = nil) -> [Account] {
     var subfiltered = accounts.filter { $0.visible && $0.id != excludedAccount?.id ?? UUID(uuid: UUID_NULL) }

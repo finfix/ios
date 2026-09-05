@@ -222,50 +222,7 @@ struct DraggableAccountCircleItem: View {
     }
 }
 
-/// Обычный DragGesture для создания транзакции (см. AccountCirclesViewModel MARK: Создание
-/// транзакции) — начинается сразу по движению пальца, без задержки .draggable. Не участвует в
-/// .dropDestination напрямую: попадание в цель определяется вручную (updateManualDrag), по
-/// зарегистрированным позициям кружков.
-private struct ManualDragIf: ViewModifier {
-    let isEnabled: Bool
-    let account: Account
-    @Binding var vm: AccountCirclesViewModel
-    @Binding var path: NavigationPath
 
-    func body(content: Content) -> some View {
-        if isEnabled {
-            content.gesture(
-                DragGesture(minimumDistance: 8, coordinateSpace: .global)
-                    .onChanged { value in
-                        vm.updateManualDrag(location: value.location, draggedAccount: account)
-                    }
-                    .onEnded { _ in
-                        vm.confirmManualDrag(path: $path)
-                    }
-            )
-        } else {
-            content
-        }
-    }
-}
-
-/// `.draggable(_:)` не умеет условно отключаться параметром (в отличие от .disabled) — счёт
-/// либо перетаскиваемый, либо нет, поэтому ветвим сборку view целиком.
-private struct DraggableIf: ViewModifier {
-    let isEnabled: Bool
-    let account: Account
-
-    func body(content: Content) -> some View {
-        if isEnabled {
-            content.draggable(DraggedAccount(accountID: account.id)) {
-                AccountCircleItemCircle(account: account)
-                    .frame(width: 60, height: 60)
-            }
-        } else {
-            content
-        }
-    }
-}
 
 #Preview {
     DraggableAccountCircleItem(

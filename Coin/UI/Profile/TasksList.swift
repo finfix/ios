@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-enum TasksListRoute: Hashable {
-    case taskDetails(SyncTask)
-    case taskGraph
-}
 
 struct TasksList: View {
     

@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-enum TagsListRoute: Hashable {
-    case editTag(Tag)
-    case createTag
-}
 
 struct TagsList: View {
     

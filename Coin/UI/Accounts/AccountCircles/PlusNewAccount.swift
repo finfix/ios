@@ -7,9 +7,6 @@
 
 import SwiftUI
 
-enum PlusNewAccountRoute: Hashable {
-    case createAccount(AccountType)
-}
 
 struct PlusNewAccount: View {
     

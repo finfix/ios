@@ -70,6 +70,3 @@ struct PendingLinkedTransfer: Identifiable, Hashable {
     }
 }
 
-enum PendingLinkedTransferStatus: String, Codable, CaseIterable {
-    case pending, completed, ignored
-}

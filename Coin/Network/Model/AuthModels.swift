@@ -9,34 +9,9 @@ import Foundation
 import SwiftUI
 import DeviceKit
 
-struct AuthReq: Encodable {
-    var email: String
-    var password: String
-    let application: ApplicationInformation
-    let device: DeviceInformation
-}
 
-struct ApplicationInformation: Encodable {
-    let bundleID: String
-    let version: String
-    let build: String
-}
 
-struct DeviceInformation: Encodable {
-    let nameOS: String
-    let versionOS: String
-    let deviceName: String
-    let modelName: String
-    let deviceID: String
-}
 
-struct RegisterReq: Encodable {
-    var email: String
-    var password: String
-    var name: String
-    let application: ApplicationInformation
-    let device: DeviceInformation
-}
 
 func getDeviceInformation() -> DeviceInformation {
     return DeviceInformation(
@@ -65,23 +40,6 @@ func getApplicationInformation() throws -> ApplicationInformation {
     )
 }
 
-struct AuthRes: Decodable {
-    var id: UUID
-    var token: Token
-}
 
-struct Token: Decodable {
-    var accessToken: String
-    var refreshToken: String
-}
 
-struct RefreshTokensRes: Decodable {
-    var accessToken: String
-    var refreshToken: String
-}
 
-struct RefreshTokensReq: Encodable {
-    var token: String
-    let application: ApplicationInformation
-    let device: DeviceInformation
-}
