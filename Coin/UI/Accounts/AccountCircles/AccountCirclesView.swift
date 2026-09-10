@@ -111,22 +111,27 @@ struct AccountCirclesView: View {
             // для сравнения координат в hasRegisteredAccount(near:) в onEnded ниже.
             DragGesture(minimumDistance: 0, coordinateSpace: .global)
                 .onChanged { value in
-                    guard !vm.isEditMode else { return }
-
-                    // Первое событие жеста (касание) — взводим таймер.
+                    // Первое событие жеста (касание) — фиксируем старт и сбрасываем флаги.
+                    // Делаем это и в режиме редактирования: onEnded по этим же флагам решает,
+                    // был ли это одиночный тап по фону для ВЫХОДА из режима — иначе они
+                    // оставались протухшими от предыдущего жеста (вход в режим оставляет
+                    // editModeLongPressFired = true) и выход не срабатывал.
                     if editModeLongPressStart == nil {
                         editModeLongPressStart = value.startLocation
                         editModeLongPressMoved = false
                         editModeLongPressFired = false
-                        editModeLongPressTask = Task {
-                            try? await Task.sleep(for: .milliseconds(500))
-                            // Не входим в режим, если: жест отменён; палец уже уехал (скролл/
-                            // перелистывание — тоже держит палец >500мс, но двигается); или в
-                            // это время идёт ручной драг счёта (.simultaneousGesture получает
-                            // события параллельно с жестом кружка).
-                            guard !Task.isCancelled, !editModeLongPressMoved, vm.draggableAccount == nil else { return }
-                            editModeLongPressFired = true
-                            withAnimation { vm.isEditMode = true }
+                        // Таймер ВХОДА в режим взводим, только когда режима ещё нет.
+                        if !vm.isEditMode {
+                            editModeLongPressTask = Task {
+                                try? await Task.sleep(for: .milliseconds(500))
+                                // Не входим в режим, если: жест отменён; палец уже уехал (скролл/
+                                // перелистывание — тоже держит палец >500мс, но двигается); или в
+                                // это время идёт ручной драг счёта (.simultaneousGesture получает
+                                // события параллельно с жестом кружка).
+                                guard !Task.isCancelled, !editModeLongPressMoved, vm.draggableAccount == nil else { return }
+                                editModeLongPressFired = true
+                                withAnimation { vm.isEditMode = true }
+                            }
                         }
                         return
                     }

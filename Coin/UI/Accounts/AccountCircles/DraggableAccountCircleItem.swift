@@ -71,7 +71,12 @@ struct DraggableAccountCircleItem: View {
 
     private func startJiggleIfNeeded() {
         guard vm.isEditMode else {
-            jiggleRotation = 0
+            // Перебиваем бесконечную repeatForever-анимацию конечной — иначе кружки
+            // продолжают качаться после выхода из режима (просто jiggleRotation = 0 её не
+            // останавливает, свойство остаётся привязанным к repeatForever).
+            withAnimation(.easeOut(duration: 0.15)) {
+                jiggleRotation = 0
+            }
             return
         }
         withAnimation(.easeInOut(duration: 0.14).repeatForever(autoreverses: true).delay(jiggleDelay)) {

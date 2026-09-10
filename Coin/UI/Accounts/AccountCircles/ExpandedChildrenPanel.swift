@@ -30,6 +30,11 @@ struct ExpandedChildrenPanel: View {
     // же, где был родитель в основной сетке, а эта точка теперь накрыта задником (он поверх
     // всего), и задник немедленно посчитал бы это "вышли за пределы панели".
     @State private var backdropCanClose = false
+
+    // Таймер удержания карточки для входа в режим редактирования — фиксируем момент, когда
+    // прошло 0.5с ещё во время нажатия, а не ждём отпускания (см. .onLongPressGesture ниже).
+    @State private var editModeHoldTask: Task<Void, Never>?
+
     // Размер самой карточки панели (ДО .padding/.position) — из него в body аналитически
     // вычисляется panelGlobalFrame. Раньше пытались измерить итоговый глобальный фрейм через
     // .onGeometryChange, повешенный ПОСЛЕ .position(x:y:) — но .position() превращает view в
@@ -65,6 +70,9 @@ struct ExpandedChildrenPanel: View {
             Color.black.opacity(0.25)
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
+                // Тап по затемнённому заднику (вне карточки) — закрыть панель. Карточка сверху
+                // накрыта .contentShape, её касания сюда не проваливаются (там свой жест —
+                // вход/выход из режима редактирования).
                 .onTapGesture {
                     close(reason: "tap on backdrop", panelGlobalFrame: panelGlobalFrame)
                 }
@@ -143,6 +151,34 @@ struct ExpandedChildrenPanel: View {
                     }
                     .frame(height: 140)
                     .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    // .contentShape — чтобы пустые места карточки (между/вокруг кружков) ловили
+                    // касания, а не пропускали их на задник. Жесты вешаем ПРЯМО на карточку.
+                    .contentShape(Rectangle())
+                    // Долгое удержание карточки → вход в режим редактирования (панель остаётся
+                    // открытой). Со ScrollView под пальцем сам long-press распознаётся только
+                    // ПО ОТПУСКАНИЮ, поэтому вход делаем по своему таймеру в onPressingChanged
+                    // (взводится в момент касания, срабатывает через 0.5с ЕЩЁ во время
+                    // удержания). maximumDistance: 10 — встроенная защита: при слайде/скролле
+                    // press отменяется → onPressingChanged(false) → таймер снимается.
+                    // perform оставляем пустым: вход уже сделан таймером.
+                    .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10) {
+                        // no-op
+                    } onPressingChanged: { pressing in
+                        editModeHoldTask?.cancel()
+                        guard pressing else { editModeHoldTask = nil; return }
+                        editModeHoldTask = Task {
+                            try? await Task.sleep(for: .milliseconds(500))
+                            guard !Task.isCancelled, !vm.isEditMode, vm.draggableAccount == nil else { return }
+                            withAnimation { vm.isEditMode = true }
+                        }
+                    }
+                    // Одиночный тап по пустому месту карточки → выход из режима. Тап по кружку
+                    // сюда не доходит — его TapGesture (дочерний) разрешается первым.
+                    .onTapGesture {
+                        if vm.isEditMode {
+                            withAnimation { vm.isEditMode = false }
+                        }
+                    }
                     .padding(.horizontal, 24)
                     // Измеряем размер карточки ЗДЕСЬ — до .position(). GeometryReader/
                     // onGeometryChange, повешенный ПОСЛЕ .position(x:y:), мерил бы не реальный
