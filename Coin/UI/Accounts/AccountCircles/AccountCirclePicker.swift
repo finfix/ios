@@ -44,6 +44,10 @@ struct AccountCirclePicker: View {
     /// передавайте "отсюда", если подсвеченный счёт будет ИСТОЧНИКОМ денег, а не получателем.
     var highlightedAccountLabel: String = "сюда"
 
+    /// Пояснение под заголовком — что именно выбирает пользователь в этом сценарии (например,
+    /// "счёт, с которого спишутся деньги"). nil — без пояснения.
+    var subtitle: String? = nil
+
     let onSelect: (Account) -> Void
 
     @State private var expandedParent: Account?
@@ -115,6 +119,14 @@ struct AccountCirclePicker: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal)
+                }
                 if !earningsAccounts.isEmpty {
                     row(earningsAccounts)
                 }

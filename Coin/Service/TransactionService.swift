@@ -11,7 +11,12 @@ import GRDB
 extension Service {
     
     // MARK: Create
-    func createTransaction(_ transaction: Transaction) async throws {
+    /// createLinkedTransfers: false — когда транзакция САМА является довнесением переноса
+    /// (см. EditTransactionViewModel.save, sourceTransfer != nil). Такая транзакция затрагивает
+    /// зеркальный счёт-мост, и без этого флага createPendingLinkedTransfersIfNeeded завёл бы по
+    /// нему НОВЫЙ перенос — на другой стороне появилось бы требование довнести уже это
+    /// довнесение, и так по кругу.
+    func createTransaction(_ transaction: Transaction, createLinkedTransfers: Bool = true) async throws {
         var transaction = transaction
         
         transaction.amountFrom = transaction.amountFrom.round(factor: 7)
@@ -61,7 +66,9 @@ extension Service {
         // свой человек на другом конце), это создаёт ДВА независимых переноса, по одному на
         // каждую сторону. Независимые задачи очереди: если одна не долетит сразу, сама
         // транзакция и другой перенос всё равно уже созданы и синхронизируются.
-        try await createPendingLinkedTransfersIfNeeded(for: transaction)
+        if createLinkedTransfers {
+            try await createPendingLinkedTransfersIfNeeded(for: transaction)
+        }
     }
 
     /// Создаёт требования довнесения для транзакции, затрагивающей счёт(а)-мост — тот же путь,

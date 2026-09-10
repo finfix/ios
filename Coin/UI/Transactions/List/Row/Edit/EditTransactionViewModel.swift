@@ -300,7 +300,10 @@ class EditTransactionViewModel {
         }
         
         switch mode {
-        case .create: try await service.createTransaction(currentTransaction)
+        case .create:
+            // sourceTransfer != nil — эта транзакция сама довносит перенос, поэтому НЕ должна
+            // порождать новый перенос по зеркальному счёту-мосту (иначе цикл довнесений).
+            try await service.createTransaction(currentTransaction, createLinkedTransfers: sourceTransfer == nil)
         case .update: try await service.updateTransaction(newTransaction: currentTransaction, oldTransaction: oldTransaction)
         }
 

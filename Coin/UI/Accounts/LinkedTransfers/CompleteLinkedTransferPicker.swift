@@ -25,6 +25,11 @@ struct CompleteLinkedTransferPicker: View {
     var body: some View {
         Group {
             if let myBridgeAccount, let sourceTransaction {
+                // Тот же критерий, что и highlightedAccountLabel / resolveCompletion: если мост
+                // был счётом-получателем исходной транзакции, у меня он ОТДАЁТ деньги, а
+                // выбранный счёт их получает (пополнение); иначе выбранный счёт — источник
+                // (списание).
+                let tappedAccountReceives = sourceTransaction.accountTo.id == transfer.sourceAccountID
                 AccountCirclePicker(
                     title: "Коснитесь счёта",
                     accounts: accounts,
@@ -41,7 +46,10 @@ struct CompleteLinkedTransferPicker: View {
                     // проверка, что и внутри resolveCompletion (sourceTransaction.accountTo ==
                     // sourceAccountID ⟹ у меня мост продолжает путь ИЗ себя, деньги уходят
                     // "отсюда", а не приходят "сюда").
-                    highlightedAccountLabel: sourceTransaction.accountTo.id == transfer.sourceAccountID ? "отсюда" : "сюда"
+                    highlightedAccountLabel: tappedAccountReceives ? "отсюда" : "сюда",
+                    subtitle: tappedAccountReceives
+                        ? "Выберите счёт, НА который нужно зачислить деньги переноса"
+                        : "Выберите счёт, С которого нужно списать деньги переноса"
                 ) { tappedAccount in
                     guard let (type, accountFrom, accountTo) = transfer.resolveCompletion(
                         tappedAccount: tappedAccount,
