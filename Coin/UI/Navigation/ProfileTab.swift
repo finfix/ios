@@ -18,7 +18,6 @@ struct ProfileTab: View {
                 .navigationDestination(for: ProfileViews.self) { screen in
                     switch screen {
                     case .hidedAccounts: HidedAccountsList()
-                    case .currencyConverter: CurrencyConverter()
                     case .settings: Settings()
                     case .accountGroupsList: AccountGroupList()
                     }

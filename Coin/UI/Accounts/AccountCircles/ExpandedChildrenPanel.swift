@@ -9,10 +9,13 @@ import SwiftUI
 import OSLog
 import Factory
 
-/// Плавающая панель дочерних счетов — см. AccountCirclesViewModel.expandedParentAccount.
+/// Плавающая панель дочерних счетов — один из двух слотов, см.
+/// AccountCirclesViewModel.ExpandedPanelSlot. Рендерится в AccountCirclesView дважды (primary +
+/// secondary), каждый экземпляр закрывает/открывает ИМЕННО свой слот.
 struct ExpandedChildrenPanel: View {
     @Binding var vm: AccountCirclesViewModel
     @Binding var path: NavigationPath
+    let slot: AccountCirclesViewModel.ExpandedPanelSlot
     let parentAccount: Account
     let anchorY: CGFloat?
 
@@ -39,7 +42,7 @@ struct ExpandedChildrenPanel: View {
         if debugPanelClose {
             accountCirclesViewLogger.debug("ExpandedChildrenPanel closing: \(reason) — panelGlobalFrame=\(String(describing: panelGlobalFrame)) draggableLocation=\(String(describing: vm.draggableLocation)) backdropCanClose=\(backdropCanClose)")
         }
-        withAnimation { vm.closeExpandedPanel() }
+        withAnimation { vm.closeExpandedPanel(slot: slot) }
     }
 
     var body: some View {
@@ -79,8 +82,16 @@ struct ExpandedChildrenPanel: View {
                     backdropCanClose = true
                 }
                 .onChange(of: vm.draggableLocation) { _, newLocation in
+                    // Закрытие (скрытие) панели при выходе пальца за её границы — ожидаемое
+                    // поведение и для чужого счёта, наведённого снаружи (hover-expand), и для
+                    // собственного ребёнка панели, которого тащат наружу (создание транзакции).
+                    // Панель при этом не разрушается физически — оба слота всегда в дереве (см.
+                    // AccountCirclesView/AccountCirclesViewModel.ExpandedPanelSlot), тут только opacity/allowsHitTesting,
+                    // поэтому DragGesture ребёнка не обрывается и "призрак" продолжает следовать
+                    // за пальцем даже после того, как панель визуально спряталась.
                     guard backdropCanClose, let newLocation, panelGlobalFrame != .zero,
-                          !panelGlobalFrame.contains(newLocation) else { return }
+                          !panelGlobalFrame.contains(newLocation)
+                    else { return }
                     close(reason: "manual draggableLocation outside panelGlobalFrame", panelGlobalFrame: panelGlobalFrame)
                 }
                 .overlay {
@@ -122,7 +133,8 @@ struct ExpandedChildrenPanel: View {
                                     vm: $vm,
                                     account: child,
                                     path: $path,
-                                    isAlreadyOpened: true
+                                    isAlreadyOpened: true,
+                                    panelSlot: slot
                                 )
                                 .frame(width: 80)
                             }

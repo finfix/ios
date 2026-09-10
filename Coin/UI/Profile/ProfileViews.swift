@@ -9,7 +9,6 @@ import SwiftUI
 
 enum ProfileViews: Hashable {
     case hidedAccounts
-    case currencyConverter
     case settings
     case accountGroupsList
 }

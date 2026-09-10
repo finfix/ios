@@ -96,10 +96,7 @@ struct LoginView: View {
                         if !vm.shouldShowProgress {
                             Text(vm.mode == .login ? "Войти" : "Зарегистрироваться")
                         } else {
-                            // value == 0 — ещё сам запрос авторизации (до старта sync()),
-                            // определённого прогресса тут нет, поэтому indeterminate.
-                            ProgressView(value: vm.syncProgress == 0 ? nil : vm.syncProgress)
-                                .frame(maxWidth: 120)
+                            PieProgressView(progress: vm.syncProgress, diameter: 22)
                         }
                     }
                 } footer: {

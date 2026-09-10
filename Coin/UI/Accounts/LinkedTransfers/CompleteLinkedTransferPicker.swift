@@ -51,8 +51,15 @@ struct CompleteLinkedTransferPicker: View {
                         alert.error(ErrorModel(humanText: "Этот счёт нельзя использовать для довнесения"))
                         return
                     }
+                    // Сумма, реально прошедшая через счёт-мост у инициатора (в валюте моста):
+                    // amountTo, если мост был счётом-получателем исходной транзакции, иначе
+                    // amountFrom. Раньше всегда бралась amountFrom — для межвалютной исходной
+                    // транзакции это давало сумму в чужой валюте.
+                    let bridgeSideAmount = sourceTransaction.accountTo.id == transfer.sourceAccountID
+                        ? sourceTransaction.amountTo
+                        : sourceTransaction.amountFrom
                     path.path.append(DraggableAccountRoute.completeLinkedTransfer(
-                        type, accountFrom, accountTo, transfer, sourceTransaction.amountFrom, sourceTransaction.dateTransaction
+                        type, accountFrom, accountTo, transfer, bridgeSideAmount, sourceTransaction.dateTransaction, sourceTransaction.note
                     ))
                 }
             } else {

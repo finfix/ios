@@ -604,6 +604,15 @@ extension Service {
         try await taskManager.incrementalSync()
     }
 
+    /// Мгновенные уведомления "есть что засинкать" — держит gRPC-стрим открытым, пока вызывающий
+    /// код итерирует результат (отмена Task/выход из for-await рвёт сам стрим). Сам сигнал не
+    /// несёт payload — на каждое событие нужно вызвать incrementalSync() самостоятельно (см.
+    /// ContentView, где стрим живёт только пока приложение на переднем плане — как fallback на
+    /// случай обрыва/фона остаётся периодический таймер incrementalSync()).
+    func subscribeToSyncNotifications() -> AsyncThrowingStream<Void, Error> {
+        apiManager.SubscribeToSync()
+    }
+
     /// progress — доля выполненного (0...1), после каждого крупного шага. Параллельная выгрузка
     /// с сервера (async let ниже) сама по себе не даёт промежуточных отметок (одна gRPC-пачка
     /// вызовов без собственного прогресса), поэтому она считается ОДНИМ шагом наравне с
@@ -611,7 +620,7 @@ extension Service {
     func sync(progress: ((Double) -> Void)? = nil) async throws {
         logger.info("Синхронизируем данные")
 
-        let totalSteps = 14
+        let totalSteps = 22
         var completedSteps = 0
         func step() {
             completedSteps += 1
@@ -621,7 +630,13 @@ extension Service {
         // Получаем данные текущего месяца для запроса
         let (dateFrom, dateTo) = getMonthPeriodFromDate(Date.now)
 
-        // Получаем все данные с сервера
+        // Получаем все данные с сервера — запросы стартуют параллельно (async let), но
+        // await'им и тикаем progress по каждому ОТДЕЛЬНО, а не одним общим await на кортеж:
+        // раньше progress вообще не менялся, пока не отвечали ВСЕ 9 запросов разом — а именно
+        // сетевой round-trip обычно и есть основная часть времени sync(), так что бар почти всё
+        // время просто крутился как indeterminate, а потом все 14 шагов проскакивали мгновенно.
+        // Раздельный await не теряет параллелизм (запросы уже запущены), но даёт прогресс по
+        // мере того, как каждый из них реально отвечает.
         async let _icons = try await apiManager.GetIcons()
         async let _currencies = try await apiManager.GetCurrencies()
         async let _user = try await apiManager.GetUser()
@@ -638,8 +653,26 @@ extension Service {
             )
         )
 
-        let (icons, currencies, user, accountGroups, accounts, accountBudgets, tags, tagsToTrasnactions, transactions) = try await (_icons, _currencies, _user, _accountGroups, _accounts, _accountBudgets, _tags, _tagsToTransactions, _transactions)
-        step() // 1/14 — выгрузка с сервера
+        let icons = try await _icons
+        step() // 1/22
+        let currencies = try await _currencies
+        step() // 2/22
+        let user = try await _user
+        step() // 3/22
+        let accountGroups = try await _accountGroups
+        step() // 4/22
+        let accounts = try await _accounts
+        step() // 5/22
+        let accountBudgets = try await _accountBudgets
+        step() // 6/22
+        let tags = try await _tags
+        step() // 7/22
+        let tagsToTrasnactions = try await _tagsToTransactions
+        step() // 8/22
+        // Обычно самый тяжёлый запрос (вся история транзакций) — идёт последним, чтобы
+        // остальные тики успели показать прогресс, пока он ещё грузится.
+        let transactions = try await _transactions
+        step() // 9/22
 
         // Переносы через счета-мосты — отдельным запросом (не в общей async let-пачке выше),
         // т.к. фильтр строится из ID уже полученных групп/счетов (клиент сам решает, что "моё" —
@@ -649,7 +682,7 @@ extension Service {
             accountGroupIDs: accountGroups.map(\.id),
             targetAccountIDs: accounts.map(\.id)
         ))
-        step() // 2/14
+        step() // 10/22
 
         // Сохраняем иконки из gRPC ответа в локальные файлы
         logger.info("Сохраняем иконки из gRPC")

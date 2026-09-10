@@ -24,6 +24,14 @@ struct AccountCirclesView: View {
     @Environment(PathSharedState.self) private var path
     @State private var vm = AccountCirclesViewModel()
     @AppStorage("debugShowStaticLocations") private var debugShowStaticLocations = false
+    // Долгое удержание фона → вход в режим редактирования; см. .simultaneousGesture ниже.
+    @State private var editModeLongPressTask: Task<Void, Never>?
+    @State private var editModeLongPressFired = false
+    // Точка касания в момент старта жеста и флаг "палец поехал" — чтобы отличить настоящее
+    // удержание на месте от перелистывания/скролла (тот жест тоже держит палец дольше 500мс,
+    // но при этом двигается).
+    @State private var editModeLongPressStart: CGPoint?
+    @State private var editModeLongPressMoved = false
 
     let horizontalSpacing: CGFloat = 10
 
@@ -90,28 +98,102 @@ struct AccountCirclesView: View {
         // дочерние view со своими жестами и .contentShape(Circle()), они забирают касание
         // первыми в своих границах, так что этот жест реально срабатывает только там, где под
         // пальцем нет кружка (сама VStack, разделители, пустые ячейки сетки).
+        //
+        // Свой DragGesture(minimumDistance: 0) вместо .onLongPressGesture — тот на практике
+        // срабатывал только по ОТПУСКАНИЮ пальца (конкурирует за распознавание с горизонтальными
+        // ScrollView внутри AccountsTabView, и итог "кто победил" разрешался только когда палец
+        // уже поднят), а нужно, чтобы режим включался ПРЯМО ВО ВРЕМЯ удержания — тот же паттерн
+        // (Task.sleep + isCancelled), что уже используется в handleHoverExpand. .simultaneousGesture,
+        // а не .gesture — чтобы не перехватывать touch у горизонтальных ScrollView строк.
         .contentShape(Rectangle())
-        .onLongPressGesture(minimumDuration: 0.5) {
-            guard !vm.isEditMode else { return }
-            withAnimation { vm.isEditMode = true }
-        }
+        .simultaneousGesture(
+            // .global — тем же coordinateSpace, что и registerCreateTransactionLocation, нужен
+            // для сравнения координат в hasRegisteredAccount(near:) в onEnded ниже.
+            DragGesture(minimumDistance: 0, coordinateSpace: .global)
+                .onChanged { value in
+                    guard !vm.isEditMode else { return }
+
+                    // Первое событие жеста (касание) — взводим таймер.
+                    if editModeLongPressStart == nil {
+                        editModeLongPressStart = value.startLocation
+                        editModeLongPressMoved = false
+                        editModeLongPressFired = false
+                        editModeLongPressTask = Task {
+                            try? await Task.sleep(for: .milliseconds(500))
+                            // Не входим в режим, если: жест отменён; палец уже уехал (скролл/
+                            // перелистывание — тоже держит палец >500мс, но двигается); или в
+                            // это время идёт ручной драг счёта (.simultaneousGesture получает
+                            // события параллельно с жестом кружка).
+                            guard !Task.isCancelled, !editModeLongPressMoved, vm.draggableAccount == nil else { return }
+                            editModeLongPressFired = true
+                            withAnimation { vm.isEditMode = true }
+                        }
+                        return
+                    }
+
+                    // Палец поехал дальше системного slop'а (~10pt) — это скролл/перелистывание,
+                    // а не удержание. Отменяем таймер и запоминаем, что было движение.
+                    if let start = editModeLongPressStart,
+                       hypot(value.location.x - start.x, value.location.y - start.y) > 10 {
+                        editModeLongPressMoved = true
+                        editModeLongPressTask?.cancel()
+                        editModeLongPressTask = nil
+                    }
+                }
+                .onEnded { value in
+                    editModeLongPressTask?.cancel()
+                    editModeLongPressTask = nil
+                    let start = editModeLongPressStart
+                    editModeLongPressStart = nil
+                    let moved = editModeLongPressMoved || (start.map { hypot(value.location.x - $0.x, value.location.y - $0.y) > 10 } ?? false)
+
+                    // Однократный тап (жест завершился раньше 500мс, без движения) по ФОНУ, пока
+                    // режим редактирования уже включён, — выход из него. Долгое удержание уже само
+                    // включило режим внутри onChanged. Если тап попал по кружку (а не по пустому
+                    // фону) — выход не делаем: у кружка свой TapGesture, который в edit mode сам
+                    // решает, что делать (открыть редактирование счёта), и делать это должен он,
+                    // а не гаснуть isEditMode здесь ДО того, как отработает его обработчик.
+                    if !editModeLongPressFired, !moved, vm.isEditMode, !vm.hasRegisteredAccount(near: value.location) {
+                        withAnimation { vm.isEditMode = false }
+                    }
+                }
+        )
         .contentMargins(.horizontal, horizontalSpacing, for: .scrollContent)
         .scrollIndicators(.hidden)
         // Плавающая панель дочерних счетов родителя (двойной тап, либо секундная задержка драга
         // над родителем) — в той же view-иерархии, что и основная сетка, поэтому дочерний счёт
         // можно перетащить отсюда на любой счёт основной сетки, в отличие от старого .popover.
-        // Появляется на той же высоте, где был палец в момент открытия (expandedParentAccountAnchorY),
-        // либо по центру при открытии двойным тапом.
+        // Появляется на той же высоте, где был палец в момент открытия, либо по центру при
+        // открытии двойным тапом. Слотов ДВА (primary/secondary) — оба ВСЕГДА в дереве (скрыты
+        // opacity/allowsHitTesting, а не условным `if`): если тащат ребёнка ИЗ панели наружу, а
+        // затем наводят на ДРУГОГО родителя, второй слот открывает ЕГО панель, не трогая первый —
+        // тот продолжает держать живой view исходного ребёнка вместе с его DragGesture (иначе
+        // жест обрывается и "призрак" замирает на месте — см. AccountCirclesViewModel.
+        // ExpandedPanelSlot). account берём "липкий" — при первом скрытии показывать нечего,
+        // используем последний известный, чтобы контент не дёргался на закрытии.
         .overlay {
-            if let expandedParentAccount = vm.expandedParentAccount {
-                ExpandedChildrenPanel(
-                    vm: $vm,
-                    path: $path.path,
-                    parentAccount: expandedParentAccount,
-                    anchorY: vm.expandedParentAccountAnchorY
-                )
-                .transition(.opacity)
-            }
+            ExpandedChildrenPanel(
+                vm: $vm,
+                path: $path.path,
+                slot: .primary,
+                parentAccount: vm.primaryPanelAccount ?? Account(),
+                anchorY: vm.primaryPanelAnchorY
+            )
+            .opacity(vm.primaryPanelVisible ? 1 : 0)
+            .allowsHitTesting(vm.primaryPanelVisible)
+            .animation(.default, value: vm.primaryPanelVisible)
+        }
+        .overlay {
+            ExpandedChildrenPanel(
+                vm: $vm,
+                path: $path.path,
+                slot: .secondary,
+                parentAccount: vm.secondaryPanelAccount ?? Account(),
+                anchorY: vm.secondaryPanelAnchorY
+            )
+            .opacity(vm.secondaryPanelVisible ? 1 : 0)
+            .allowsHitTesting(vm.secondaryPanelVisible)
+            .animation(.default, value: vm.secondaryPanelVisible)
         }
         // Призрак перетаскиваемого счёта для ручного драга (создание транзакции) — в отличие от
         // режима редактирования (там .draggable сам рисует системное превью), здесь его нужно
@@ -208,7 +290,7 @@ struct AccountCirclesView: View {
                         accountTo: accountTo,
                         accountGroup: selectedAccountGroup.selectedAccountGroup
                     )
-                case .completeLinkedTransfer(let transactionType, let accountFrom, let accountTo, let transfer, let amount, let date):
+                case .completeLinkedTransfer(let transactionType, let accountFrom, let accountTo, let transfer, let amount, let date, let note):
                     EditTransaction(
                         transactionType: transactionType,
                         accountFrom: accountFrom,
@@ -216,7 +298,8 @@ struct AccountCirclesView: View {
                         accountGroup: accountFrom.accountGroup,
                         sourceTransfer: transfer,
                         prefillAmount: amount,
-                        dateTransaction: date
+                        dateTransaction: date,
+                        note: note
                     )
                 }
             }
@@ -226,21 +309,6 @@ struct AccountCirclesView: View {
                     PendingLinkedTransfersList(accountGroup: selectedAccountGroup.selectedAccountGroup)
                 case .completeLinkedTransfer(let transfer):
                     CompleteLinkedTransferPicker(transfer: transfer)
-                }
-            }
-            .toolbar {
-                // Вход в режим редактирования — долгим тапом по фону экрана (см.
-                // .onLongPressGesture ниже), как на Home Screen iOS. Кнопка осталась только для
-                // выхода — "Готово" симметрично понятнее свайпа/тапа мимо. Кнопка "Переносы"
-                // переехала в QuickStatisticView (см. PendingLinkedTransfersQuickStatButton).
-                if vm.isEditMode {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Готово") {
-                            withAnimation {
-                                vm.isEditMode = false
-                            }
-                        }
-                    }
                 }
             }
     }

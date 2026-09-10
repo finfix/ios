@@ -23,6 +23,51 @@ class EditTransactionViewModel {
     var accounts: [Account] = []
     var tags: [Tag] = []
     var currentTransaction = Transaction()
+
+    // MARK: - Подсказанные теги (см. Tags.swift)
+    //
+    // Вместо всего списка тегов группы, чипы в Tags.swift показывают только теги, реально
+    // "замеченные" в похожих транзакциях — по счёту(ам) ЭТОЙ транзакции и их соседям (другим
+    // детям того же родителя-категории). Расход — по accountTo (это и есть категория расхода),
+    // доход — по accountFrom (категория дохода), перевод — по обеим сторонам сразу (обе —
+    // обычные счета, категории как таковой нет). Балансировка не участвует — для неё нет
+    // естественного "счёта-категории", подсказка не показывается.
+
+    @ObservationIgnored private var usedTagIDs: Set<UUID> = []
+
+    /// Счета, чьи теги считаются релевантными: сам счёт + остальные дети того же родителя
+    /// ("соседние дочерние счета"). Если у счёта нет родителя — сравнивать не с кем, только он сам.
+    private func relevantAccountIDs(for account: Account) -> [UUID] {
+        guard let parentAccountID = account.parentAccountID else { return [account.id] }
+        let siblingIDs = accounts.filter { $0.parentAccountID == parentAccountID }.map(\.id)
+        return siblingIDs.isEmpty ? [account.id] : siblingIDs
+    }
+
+    private var relevantAccountIDsForCurrentTransaction: [UUID] {
+        switch currentTransaction.type {
+        case .consumption: relevantAccountIDs(for: currentTransaction.accountTo)
+        case .income: relevantAccountIDs(for: currentTransaction.accountFrom)
+        case .transfer: relevantAccountIDs(for: currentTransaction.accountFrom) + relevantAccountIDs(for: currentTransaction.accountTo)
+        case .balancing: []
+        }
+    }
+
+    /// Подгружает usedTagIDs заново под ТЕКУЩИЕ accountFrom/accountTo/type — нужно перевызывать
+    /// при их смене (см. Tags.swift .task(id:)).
+    func loadUsedTags() async throws {
+        let accountIDs = relevantAccountIDsForCurrentTransaction
+        usedTagIDs = accountIDs.isEmpty ? [] : try await service.getUsedTagIDs(accountIDs: accountIDs)
+    }
+
+    /// Теги для показа чипами — ВСЕГДА полный список группы (иначе для счёта без истории чипы
+    /// пропадали бы совсем), просто отсортированный так, что "замеченные" в релевантных счетах
+    /// (см. выше) идут первыми — это и есть сама подсказка.
+    var suggestedTags: [Tag] {
+        guard !usedTagIDs.isEmpty else { return tags }
+        let suggested = tags.filter { usedTagIDs.contains($0.id) }
+        let rest = tags.filter { !usedTagIDs.contains($0.id) }
+        return suggested + rest
+    }
     
     var showRateString: String? {
         guard (currentTransaction.amountFrom != 0 && (currentTransaction.amountTo != 0 || suggestAmountToString != nil)) ||
@@ -122,6 +167,42 @@ class EditTransactionViewModel {
     /// nil для обычного создания/редактирования. При сохранении помечает перенос завершённым.
     var sourceTransfer: PendingLinkedTransfer?
 
+    /// Счёт списания/пополнения этой транзакции связан с чужим (linkedAccountID) — только тогда
+    /// имеет смысл кнопка "Создать перенос" на экране уже существующей транзакции.
+    var isBridgeTransaction: Bool {
+        currentTransaction.accountFrom.linkedAccountID != nil || currentTransaction.accountTo.linkedAccountID != nil
+    }
+
+    /// Уже существующие переносы для ЭТОЙ транзакции (в любом статусе) — до двух, по одному на
+    /// каждую сторону-мост (accountFrom/accountTo), если мосты обе. Заполняется
+    /// loadPendingLinkedTransfer().
+    var existingPendingLinkedTransfers: [PendingLinkedTransfer] = []
+
+    /// Стороны (accountFrom/accountTo), которые сами мосты, но переноса для них ещё нет — именно
+    /// по ним кнопка "Создать перенос" остаётся видна (обрабатываются независимо, поэтому если
+    /// одна сторона уже покрыта переносом, а другая — нет, кнопка всё равно нужна для второй).
+    var missingPendingLinkedTransferSides: [Account] {
+        [currentTransaction.accountFrom, currentTransaction.accountTo].filter { account in
+            account.linkedAccountID != nil && !existingPendingLinkedTransfers.contains(where: { $0.sourceAccountID == account.id })
+        }
+    }
+
+    /// Только для mode == .update и связанного счёта — подгружает существующие переносы, если
+    /// они уже есть, чтобы решить, показывать ли кнопку "Создать перенос".
+    func loadPendingLinkedTransfer() async throws {
+        guard mode == .update, isBridgeTransaction else { return }
+        existingPendingLinkedTransfers = try await service.getPendingLinkedTransfers(sourceTransactionID: currentTransaction.id)
+    }
+
+    /// Вручную создаёт недостающие переносы для уже существующей транзакции (см. Service.
+    /// createPendingLinkedTransfersIfNeeded) — на случай, если авто-создание при сохранении
+    /// транзакции не сработало (например, счёт стал мостом уже ПОСЛЕ её создания). Обрабатывает
+    /// обе стороны — если обе мосты и без переноса, создаст сразу два.
+    func createPendingLinkedTransfer() async throws {
+        let created = try await service.createPendingLinkedTransfersIfNeeded(for: currentTransaction)
+        existingPendingLinkedTransfers.append(contentsOf: created)
+    }
+
     var isChanged: Bool {
         mode == .update ? currentTransaction != oldTransaction : true
     }
@@ -189,9 +270,16 @@ class EditTransactionViewModel {
         self.mode = mode
         self.sourceTransfer = sourceTransfer
 
+        let formatter = CurrencyFormatter(maximumFractionDigits: 7, withUnits: false)
         if currentTransaction.amountFrom != 0 && currentTransaction.amountTo != 0 {
-            let formatter = CurrencyFormatter(maximumFractionDigits: 7, withUnits: false)
             amountFromString = currentTransaction.amountFrom.currencyString(formatter: formatter)
+            amountToString = currentTransaction.amountTo.currencyString(formatter: formatter)
+        } else if currentTransaction.amountFrom != 0 {
+            // Известна только сумма списания (напр. довнесение МЕЖВАЛЮТНОГО трансфера — там
+            // предзаполняется лишь сторона счёта-моста) — выставляем её, didSet сам посчитает
+            // подсказку для суммы пополнения по курсам валют.
+            amountFromString = currentTransaction.amountFrom.currencyString(formatter: formatter)
+        } else if currentTransaction.amountTo != 0 {
             amountToString = currentTransaction.amountTo.currencyString(formatter: formatter)
         }
     }

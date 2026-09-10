@@ -112,23 +112,82 @@ class AccountCirclesViewModel {
     var geometryRefreshTrigger = 0
 
     /// Режим редактирования счетов ("трясущиеся" кружки с карандашиками, как на главном
-    /// экране iOS) — общий для всех AccountsTabView на экране, включается долгим тапом на
-    /// любой кружок и выключается кнопкой "Готово".
+    /// экране iOS) — общий для всех AccountsTabView на экране, включается долгим удержанием фона
+    /// экрана (см. AccountCirclesView) и выключается однократным тапом на фон.
     var isEditMode = false
 
-    /// Родительский счёт, чьи дочерние сейчас показаны плавающей панелью (двойной тап, или
-    /// секундная задержка драга над родителем — см. DraggableAccountCircleItem.handleHoverExpand).
-    /// Раньше это был системный .popover — убрали, потому что popover оказывается в отдельном
-    /// presentation-контексте, куда нативный drag-and-drop не дотягивается (нельзя было
-    /// перетащить дочерний счёт из popover на счёт основной сетки). Панель в той же иерархии,
-    /// что и вся остальная сетка.
-    var expandedParentAccount: Account? = nil
+    // MARK: - Плавающая панель дочерних счетов (два слота)
+    //
+    // Панель открывается двойным тапом или секундной задержкой драга над родителем (см.
+    // DraggableAccountCircleItem.handleHoverExpand). Раньше это был системный .popover — убрали,
+    // потому что popover оказывается в отдельном presentation-контексте, куда нативный
+    // drag-and-drop не дотягивается. Панель в той же иерархии, что и вся остальная сетка, и
+    // ОБА её слота ВСЕГДА смонтированы в AccountCirclesView (скрываются через
+    // opacity/allowsHitTesting, а не условным `if`) — см. AccountCirclesView.
+    //
+    // Слотов два, а не один, из-за конфликта двух сценариев:
+    //  1) тащат ребёнка ИЗ уже открытой панели наружу (создание транзакции) — view этого ребёнка
+    //     обязана пережить весь драг, иначе оборвётся её DragGesture и "призрак" замрёт на месте;
+    //  2) во время ЭТОГО же драга наведение на ДРУГОГО родителя должно суметь открыть ЕГО панель
+    //     (легитимный сценарий — precise-drop в конкретного ребёнка другого родителя).
+    // Если бы слот был один, событие (2) подменяло бы его счёт и разрушало view из (1). Поэтому:
+    // когда драг начинается от ребёнка текущего активного слота, этот слот "запирается"
+    // (pinnedPanelSlot) — его account больше не меняется до конца драга, а новые открытия
+    // (двойной тап/hover-expand на другого родителя) уходят во ВТОРОЙ, свободный слот.
+    enum ExpandedPanelSlot { case primary, secondary }
 
-    /// Y-координата (в глобальных координатах экрана) счёта, над которым держали палец, когда
-    /// открылась панель — используется, чтобы панель появлялась примерно на той же высоте, где
-    /// сейчас палец, а не всегда по центру экрана. nil при открытии двойным тапом (там нет
-    /// "текущего драга", появляется по центру).
-    var expandedParentAccountAnchorY: CGFloat? = nil
+    var primaryPanelAccount: Account? = nil
+    var primaryPanelVisible = false
+    var primaryPanelAnchorY: CGFloat? = nil
+
+    var secondaryPanelAccount: Account? = nil
+    var secondaryPanelVisible = false
+    var secondaryPanelAnchorY: CGFloat? = nil
+
+    /// Слот, который сейчас нельзя переиспользовать под другой счёт — держит живым ребёнка,
+    /// которого прямо сейчас тащат наружу (см. updateManualDrag).
+    var pinnedPanelSlot: ExpandedPanelSlot? = nil
+
+    /// Слот, который в данный момент считается "текущим" для действий без явного указания слота
+    /// (closeExpandedPanel() без параметра, обычное открытие).
+    private var activePanelSlot: ExpandedPanelSlot = .primary
+
+    var anyExpandedPanelVisible: Bool { primaryPanelVisible || secondaryPanelVisible }
+
+    func account(for slot: ExpandedPanelSlot) -> Account? {
+        slot == .primary ? primaryPanelAccount : secondaryPanelAccount
+    }
+
+    private func isVisible(_ slot: ExpandedPanelSlot) -> Bool {
+        slot == .primary ? primaryPanelVisible : secondaryPanelVisible
+    }
+
+    private func setSlot(_ slot: ExpandedPanelSlot, account: Account, anchorY: CGFloat?) {
+        switch slot {
+        case .primary:
+            primaryPanelAccount = account
+            primaryPanelAnchorY = anchorY
+            primaryPanelVisible = true
+        case .secondary:
+            secondaryPanelAccount = account
+            secondaryPanelAnchorY = anchorY
+            secondaryPanelVisible = true
+        }
+        activePanelSlot = slot
+    }
+
+    @MainActor
+    func openExpandedPanel(for account: Account, anchorY: CGFloat?) {
+        // Возврат в границы уже когда-то открытого (запертого) слота — просто обновляем его.
+        if let pinnedPanelSlot, self.account(for: pinnedPanelSlot)?.id == account.id {
+            setSlot(pinnedPanelSlot, account: account, anchorY: anchorY)
+            return
+        }
+        // Запертый слот занят другим счётом — новое открытие уходит во ВТОРОЙ слот, чтобы не
+        // разрушить его. Иначе (обычный случай, ничего не заперто) — используем primary.
+        let targetSlot: ExpandedPanelSlot = (pinnedPanelSlot == .primary) ? .secondary : .primary
+        setSlot(targetSlot, account: account, anchorY: anchorY)
+    }
 
     // MARK: - Drag-and-drop (нативный .draggable/.dropDestination)
     //
@@ -146,10 +205,15 @@ class AccountCirclesViewModel {
         highlitedAccount == account
     }
 
+    /// Прячет слот (opacity/allowsHitTesting в AccountCirclesView) — НЕ разрушает его account,
+    /// поэтому безопасно вызывать даже для запертого (pinnedPanelSlot) слота: view его ребёнка
+    /// остаётся в дереве, DragGesture не обрывается. `slot` по умолчанию — текущий активный.
     @MainActor
-    func closeExpandedPanel() {
-        expandedParentAccount = nil
-        expandedParentAccountAnchorY = nil
+    func closeExpandedPanel(slot: ExpandedPanelSlot? = nil) {
+        switch slot ?? activePanelSlot {
+        case .primary: primaryPanelVisible = false
+        case .secondary: secondaryPanelVisible = false
+        }
     }
 
     @MainActor
@@ -161,11 +225,15 @@ class AccountCirclesViewModel {
             // каждый кадр, хотя цель не менялась.
             guard highlitedAccount != account else { return }
             highlitedAccount = account
-            // Драг зашёл на какой-то счёт — прячем открытую панель дочерних счетов, если это не
-            // собственный ребёнок этой же панели (иначе она закрывалась бы сама на себе, стоило
-            // бы навести на любого её ребёнка).
-            if let expandedParentAccount, !expandedParentAccount.childrenAccounts.contains(where: { $0.id == account.id }) {
-                closeExpandedPanel()
+            // Драг зашёл на какой-то счёт — прячем любой ВИДИМЫЙ слот панели, если это не
+            // собственный ребёнок этого слота (иначе он закрывался бы сам на себе, стоило бы
+            // навести на любого его ребёнка). Прячем именно скрытием (opacity), а не сбросом
+            // account — безопасно для обоих слотов, включая запертый.
+            if primaryPanelVisible, let primaryPanelAccount, !primaryPanelAccount.childrenAccounts.contains(where: { $0.id == account.id }) {
+                primaryPanelVisible = false
+            }
+            if secondaryPanelVisible, let secondaryPanelAccount, !secondaryPanelAccount.childrenAccounts.contains(where: { $0.id == account.id }) {
+                secondaryPanelVisible = false
             }
         } else if highlitedAccount == account {
             highlitedAccount = nil
@@ -178,7 +246,8 @@ class AccountCirclesViewModel {
     @MainActor
     func handleDrop(_ dragged: DraggedAccount, onto targetAccount: Account) async {
         highlitedAccount = nil
-        closeExpandedPanel()
+        primaryPanelVisible = false
+        secondaryPanelVisible = false
         guard let draggedAccount = flatAccountsByID[dragged.accountID] else { return }
         await confirmReorder(dragged: draggedAccount, target: targetAccount)
     }
@@ -255,18 +324,48 @@ class AccountCirclesViewModel {
         createTransactionLocations.removeValue(forKey: accountID)
     }
 
+    /// Есть ли зарегистрированный счёт рядом с точкой — используется фоновым жестом выхода из
+    /// режима редактирования (см. AccountCirclesView), чтобы не гасить isEditMode, если тап на
+    /// самом деле попал по кружку: .simultaneousGesture фона получает события параллельно с
+    /// TapGesture кружка, и без этой проверки могла возникнуть гонка, где isEditMode гасился
+    /// раньше, чем срабатывал собственный обработчик тапа кружка.
+    func hasRegisteredAccount(near location: CGPoint) -> Bool {
+        createTransactionLocations.values.contains {
+            abs($0.x - location.x) < createTransactionTriggerZone && abs($0.y - location.y) < createTransactionTriggerZone
+        }
+    }
+
     @MainActor
     func updateManualDrag(location: CGPoint, draggedAccount: Account) {
         if draggableAccount?.id != draggedAccount.id {
             draggableAccount = draggedAccount
+            // Новый драг начался — если тащат ребёнка ТЕКУЩЕГО активного (видимого) слота панели,
+            // запираем этот слот: наведение на другого родителя (hover-expand) больше не сможет
+            // подменить его account и разрушить эту view вместе с живым DragGesture — такое
+            // открытие уйдёт во второй слот (см. openExpandedPanel).
+            if isVisible(activePanelSlot), let activeAccount = account(for: activePanelSlot),
+               activeAccount.childrenAccounts.contains(where: { $0.id == draggedAccount.id }) {
+                pinnedPanelSlot = activePanelSlot
+            }
         }
         if draggableLocation != location {
             draggableLocation = location
         }
 
+        // Пока хотя бы один слот панели виден, целями дропа могут быть ТОЛЬКО дети видимых
+        // слотов — иначе счета основной сетки, физически скрытые под полупрозрачным задником
+        // панели, всё равно могли бы поймать дроп при отпускании пальца (для пользователя это
+        // выглядело бы как "отпустил в пустоту, а транзакция создалась не туда"). Когда оба слота
+        // скрыты — обычная логика, целью может быть любой зарегистрированный счёт.
+        var allowedTargetIDs: Set<UUID> = []
+        if primaryPanelVisible, let primaryPanelAccount { allowedTargetIDs.formUnion(primaryPanelAccount.childrenAccounts.map(\.id)) }
+        if secondaryPanelVisible, let secondaryPanelAccount { allowedTargetIDs.formUnion(secondaryPanelAccount.childrenAccounts.map(\.id)) }
+        let hasRestriction = primaryPanelVisible || secondaryPanelVisible
+
         var best: (account: Account, distance: CGFloat)?
         for (id, point) in createTransactionLocations {
             guard id != draggedAccount.id,
+                  !hasRestriction || allowedTargetIDs.contains(id),
                   abs(point.x - location.x) < createTransactionTriggerZone,
                   abs(point.y - location.y) < createTransactionTriggerZone,
                   let candidate = flatAccountsByID[id],
@@ -302,12 +401,16 @@ class AccountCirclesViewModel {
         defer {
             draggableAccount = nil
             draggableLocation = nil
+            // Драг закончен — оба слота больше не нужны, снимаем "замок" и прячем оба безусловно
+            // (и при успешном дропе, и при промахе — палец отпущен не над целью).
+            pinnedPanelSlot = nil
+            primaryPanelVisible = false
+            secondaryPanelVisible = false
         }
         guard let draggedAccount = draggableAccount, let target = highlitedAccount else {
             highlitedAccount = nil
             return
         }
-        closeExpandedPanel()
         confirmDraggableDrop(from: draggedAccount, onto: target, path: path)
         highlitedAccount = nil
     }

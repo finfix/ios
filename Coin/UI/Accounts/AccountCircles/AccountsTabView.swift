@@ -164,14 +164,14 @@ struct AccountsTabView: View {
     //
     // vm.draggableLocation — общее состояние на весь экран, и ВСЕ AccountsTabView (earnings/
     // regular/expense) слушают его одновременно, независимо от того, видна ли сейчас эта
-    // конкретная строка. Если открыта панель дочерних счетов (vm.expandedParentAccount != nil) и
+    // конкретная строка. Если открыта панель дочерних счетов (vm.anyExpandedPanelVisible) и
     // x пальца случайно попадает в edge-зону строки, СКРЫТОЙ за панелью, та начинала листать
     // страницы вслепую (кружки скрытой строки регистрировали новые позиции, хотя палец
     // физически двигался только по панели) — отсюда и нестабильное поведение панели. Пока
     // панель открыта, авто-листание краёв полностью отключено: тащить между страницами имеет
     // смысл только когда панель закрыта и видна сама сетка.
     private func updateManualEdgePaging(location: CGPoint?, pagesCount: Int) {
-        guard let location, globalFrame != .zero, vm.expandedParentAccount == nil else {
+        guard let location, globalFrame != .zero, !vm.anyExpandedPanelVisible else {
             if edgePagingDirection != nil {
                 stopEdgePaging()
             }

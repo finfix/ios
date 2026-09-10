@@ -22,7 +22,6 @@ struct Profile: View {
         Form {
             Section {
                 NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
-                NavigationLink("Конвертер валют", value: ProfileViews.currencyConverter)
                 NavigationLink("Группы счетов", value: ProfileViews.accountGroupsList)
             }
             .buttonStyle(.plain)
@@ -51,7 +50,7 @@ struct Profile: View {
                     if !shouldShowProgress {
                         Text("Синхронизировать")
                     } else {
-                        ProgressView()
+                        PieProgressView(progress: vm.syncProgress, diameter: 22)
                     }
                 }
             }

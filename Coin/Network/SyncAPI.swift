@@ -4,11 +4,14 @@
 //
 
 import Foundation
+import OSLog
 import ProtoDefinitions
 import GRPCCore
 import GRPCProtobuf
 import GRPCNIOTransportHTTP2
 import SwiftProtobuf
+
+private let logger = Logger(subsystem: "Coin", category: "gRPC")
 
 extension Sync_SyncRequest {
     init(sinceID: UInt32) {
@@ -21,6 +24,13 @@ extension Sync_ConfirmSyncRequest {
     init(pendingSyncToken: UUID) {
         self.init()
         self.pendingSyncToken = pendingSyncToken.data
+    }
+}
+
+extension Sync_SubscribeToSyncRequest {
+    init(accessToken: String) {
+        self.init()
+        self.accessToken = accessToken
     }
 }
 
@@ -142,6 +152,38 @@ extension APIManager {
 
         _ = try await grpcCall("ConfirmSync", request: request) {
             try await syncClient.confirmSync($0)
+        }
+    }
+
+    /// Держит server-streaming RPC открытым и присылает событие в стрим на каждый
+    /// SyncNotification от бэкенда — чисто сигнал "дёрни Sync/incrementalSync", без payload (см.
+    /// SubscribeToSync в sync-endpoint.proto). Живёт, пока вызывающий код итерирует
+    /// AsyncThrowingStream — отмена (Task.cancel()/выход из for-await) рвёт сам gRPC-стрим через
+    /// continuation.onTermination.
+    func SubscribeToSync() -> AsyncThrowingStream<Void, Error> {
+        AsyncThrowingStream { continuation in
+            let task = Task {
+                logger.debug("→ SubscribeToSync")
+                do {
+                    let accessToken = try await authManager.getAccessToken()
+                    let request = Sync_SubscribeToSyncRequest(accessToken: accessToken)
+                    try await syncClient.subscribeToSync(request) { response in
+                        for try await _ in response.messages {
+                            logger.debug("← SubscribeToSync: получено уведомление")
+                            continuation.yield(())
+                        }
+                        logger.debug("SubscribeToSync: стрим сервера закрылся штатно")
+                    }
+                    continuation.finish()
+                } catch {
+                    logger.error("✗ SubscribeToSync: \(String(describing: error), privacy: .public)")
+                    continuation.finish(throwing: error)
+                }
+            }
+            continuation.onTermination = { reason in
+                logger.debug("SubscribeToSync: onTermination — \(String(describing: reason), privacy: .public)")
+                task.cancel()
+            }
         }
     }
 }

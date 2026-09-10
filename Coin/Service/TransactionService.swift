@@ -55,21 +55,47 @@ extension Service {
             dependsOnEntityIDs: [transaction.accountFrom.id, transaction.accountTo.id, transaction.accountGroupID] + tagIDs
         )
 
-        // Транзакция затрагивает счёт-мост — заводим требование довнести для владельца другой
-        // стороны моста (см. Account.linkedAccountID). Независимая задача очереди: если она не
-        // долетит сразу, сама транзакция всё равно уже создана и синхронизируется.
-        if let bridgeAccount = [transaction.accountFrom, transaction.accountTo].first(where: { $0.linkedAccountID != nil }),
-           let targetAccountID = bridgeAccount.linkedAccountID {
-            let pendingTransferID = UUID()
+        // Транзакция затрагивает счёт(а)-мост — заводим требование довнести для владельца
+        // другой стороны каждого моста (см. Account.linkedAccountID). Если оба accountFrom и
+        // accountTo — мосты (например, перевод между двумя своими "общими" счетами, у каждого
+        // свой человек на другом конце), это создаёт ДВА независимых переноса, по одному на
+        // каждую сторону. Независимые задачи очереди: если одна не долетит сразу, сама
+        // транзакция и другой перенос всё равно уже созданы и синхронизируются.
+        try await createPendingLinkedTransfersIfNeeded(for: transaction)
+    }
 
-            try await repository.createPendingLinkedTransfer(PendingLinkedTransfer(
+    /// Создаёт требования довнесения для транзакции, затрагивающей счёт(а)-мост — тот же путь,
+    /// что автоматически срабатывает при создании транзакции (см. createTransaction выше), но
+    /// вызывается и вручную: кнопка "Создать перенос" на экране УЖЕ СУЩЕСТВУЮЩЕЙ транзакции,
+    /// например если счёт стал мостом уже ПОСЛЕ того, как транзакция была создана, и авто-путь
+    /// её не подхватил. Обрабатывает accountFrom и accountTo НЕЗАВИСИМО — если мосты оба, будет
+    /// создано до двух переносов. Дедуп — по отдельности для каждой стороны (sourceAccountID),
+    /// не по транзакции целиком, иначе для пары мост+мост создался бы только один перенос.
+    @discardableResult
+    func createPendingLinkedTransfersIfNeeded(for transaction: Transaction) async throws -> [PendingLinkedTransfer] {
+        let bridgeAccounts = [transaction.accountFrom, transaction.accountTo].filter { $0.linkedAccountID != nil }
+        guard !bridgeAccounts.isEmpty else { return [] }
+
+        let existingTransfers = try await repository.getPendingLinkedTransfers(sourceTransactionID: transaction.id)
+
+        var createdTransfers: [PendingLinkedTransfer] = []
+        for bridgeAccount in bridgeAccounts {
+            guard let targetAccountID = bridgeAccount.linkedAccountID,
+                  !existingTransfers.contains(where: { $0.sourceAccountID == bridgeAccount.id }) else {
+                continue
+            }
+
+            let pendingTransferID = UUID()
+            let transfer = PendingLinkedTransfer(
                 id: pendingTransferID,
                 status: .pending,
                 sourceTransactionID: transaction.id,
                 sourceAccountID: bridgeAccount.id,
                 targetAccountID: targetAccountID,
                 accountGroupID: transaction.accountGroupID
-            ))
+            )
+
+            try await repository.createPendingLinkedTransfer(transfer)
 
             try await taskManager.createTask(
                 actionName: .createPendingLinkedTransfer,
@@ -83,7 +109,11 @@ extension Service {
                 entityID: pendingTransferID,
                 dependsOnEntityIDs: [transaction.id]
             )
+
+            createdTransfers.append(transfer)
         }
+
+        return createdTransfers
     }
 
     // MARK: Pending linked transfers ("счета-мосты")
@@ -92,6 +122,13 @@ extension Service {
     /// и входящие (я получатель, мой счёт-мост как targetAccountID, но группа исходная — чужая).
     func observePendingLinkedTransfers(accountGroups: [AccountGroup], myAccountIDs: [UUID]) -> AsyncValueObservation<[PendingLinkedTransfer]> {
         repository.observePendingLinkedTransfers(accountGroupIDs: accountGroups.map(\.id), targetAccountIDs: myAccountIDs)
+    }
+
+    /// Переносы, у которых эта транзакция — источник (0, 1 или 2 — по одному на каждую сторону-
+    /// мост) — используется, чтобы понять на экране транзакции, какие уже есть, а какие ещё
+    /// можно создать вручную (см. createPendingLinkedTransfersIfNeeded).
+    func getPendingLinkedTransfers(sourceTransactionID: UUID) async throws -> [PendingLinkedTransfer] {
+        try await repository.getPendingLinkedTransfers(sourceTransactionID: sourceTransactionID)
     }
 
     /// "Не переносить" — статус-флаг, исходная транзакция-инициатор не трогается.

@@ -11,5 +11,5 @@ import Factory
 
 enum DraggableAccountRoute: Hashable {
 case createTransaction(TransactionType, Account, Account)
-case completeLinkedTransfer(TransactionType, Account, Account, PendingLinkedTransfer, Decimal, Date)
+case completeLinkedTransfer(TransactionType, Account, Account, PendingLinkedTransfer, Decimal, Date, String)
 }

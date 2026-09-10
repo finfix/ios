@@ -16,7 +16,34 @@ struct ContentView: View {
     @ObservationIgnored
     @Injected(\.service) private var service
     @Environment(AlertManager.self) var alert
+    @Environment(\.scenePhase) private var scenePhase
     private var authStorage = AuthStorage.shared
+
+    // Держит SubscribeToSync-стрим открытым ТОЛЬКО пока приложение на переднем плане — в фоне
+    // iOS всё равно рвёт сокет за секунды, так что смысла в нём там нет, а periodic-таймер ниже
+    // не работает в фоне точно так же. Мгновенный отклик — бонус активного использования, не
+    // замена периодическому incrementalSync() (остаётся как fallback на случай обрыва стрима).
+    @State private var syncSubscriptionTask: Task<Void, Never>?
+
+    private func startSyncSubscription() {
+        logger.debug("startSyncSubscription: запускаем")
+        syncSubscriptionTask?.cancel()
+        syncSubscriptionTask = Task {
+            do {
+                for try await _ in service.subscribeToSyncNotifications() {
+                    do {
+                        try await service.incrementalSync()
+                    } catch {
+                        logger.warning("SubscribeToSync → incrementalSync: \(error)")
+                    }
+                }
+            } catch is CancellationError {
+                // Обычное завершение при уходе в фон/переподключении — не ошибка.
+            } catch {
+                logger.warning("SubscribeToSync: обрыв стрима — \(error)")
+            }
+        }
+    }
 
     var body: some View {
         Group {
@@ -49,6 +76,17 @@ struct ContentView: View {
                                     logger.warning("\(error)")
                                 }
                             }
+                        }
+                        if scenePhase == .active {
+                            startSyncSubscription()
+                        }
+                    }
+                    .onChange(of: scenePhase) { _, newPhase in
+                        if newPhase == .active {
+                            startSyncSubscription()
+                        } else {
+                            syncSubscriptionTask?.cancel()
+                            syncSubscriptionTask = nil
                         }
                     }
             } else {

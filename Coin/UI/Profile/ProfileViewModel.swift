@@ -15,12 +15,19 @@ class ProfileViewModel {
     @ObservationIgnored
     @Injected(\.alertManager) var alert
     
+    /// Доля выполненного sync() (0...1) — см. Service.sync(progress:).
+    var syncProgress: Double = 0
+
     func sync() async throws {
+        syncProgress = 0
+        defer { syncProgress = 0 }
         do {
             guard try await service.getCountTasks() == 0 else {
                 throw ErrorModel(humanText: "Вам необходимо дождаться выполнения всех фоновых задач")
             }
-            try await service.sync()
+            try await service.sync(progress: { [weak self] fraction in
+                Task { @MainActor in self?.syncProgress = fraction }
+            })
         } catch {
             throw error
         }

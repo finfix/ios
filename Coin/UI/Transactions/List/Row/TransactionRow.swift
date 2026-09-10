@@ -58,7 +58,7 @@ struct TransactionRow: View {
                         Text(prefix + CurrencyFormatter(maximumFractionDigits: 7).string(number: transaction.amountFrom, currency: transaction.accountFromCurrency, withUnits: false))
                             .font(.footnote)
                     }
-                    Text(prefix + CurrencyFormatter(maximumFractionDigits: 7).string(number: transaction.amountTo, currency: displayAccountCurrency, withUnits: false))
+                    Text(prefix + CurrencyFormatter(maximumFractionDigits: 7).string(number: transaction.amountTo, currency: transaction.type == .balancing ? displayAccountCurrency : transaction.accountToCurrency, withUnits: false))
                 }
                 .foregroundStyle(color)
                 if transaction.note != "" {

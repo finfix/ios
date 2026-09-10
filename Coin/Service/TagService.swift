@@ -42,6 +42,13 @@ extension Service {
         ), accountGroupsMap: accountGroupsMap)
     }
     
+    /// ID тегов, хотя бы раз использованных в транзакции на одном из переданных счетов — см.
+    /// EditTransactionViewModel.suggestedTags (теги, "замеченные" на счёте транзакции и его
+    /// соседях по родителю).
+    func getUsedTagIDs(accountIDs: [UUID]) async throws -> Set<UUID> {
+        try await repository.getTagIDs(usedInAccountIDs: accountIDs)
+    }
+
     // MARK: Update
     func updateTag(newTag tag: Tag, oldTag: Tag) async throws {
         var newTag = tag

@@ -57,8 +57,9 @@ extension Service {
         let budgets = AccountBudget.convertFromDBModel(try await repository.getAccountBudgets(accountIDs: accountIDs))
         var result: [UUID: AccountBudget] = [:]
         for budget in budgets where budget.effectiveFrom <= date {
-            // budgets уже отсортированы по effectiveFrom по убыванию (Repository.getAccountBudgets),
-            // поэтому первое подходящее значение на счёт — самое свежее.
+            // budgets отсортированы по (effectiveFrom desc, datetimeCreate desc) —
+            // Repository.getAccountBudgets, поэтому первое подходящее значение на счёт — самое
+            // свежее, в т.ч. среди нескольких версий, созданных в один день.
             if result[budget.accountID] == nil {
                 result[budget.accountID] = budget
             }

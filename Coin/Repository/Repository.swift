@@ -209,6 +209,8 @@ class Repository {
     func deleteAllData() async throws {
         try await sqlite.write { db in
             _ = try TagToTransactionDB.deleteAll(db)
+            // sourceTransactionID — belongsTo FK на transactionDB, поэтому строго ДО удаления транзакций.
+            _ = try PendingLinkedTransferDB.deleteAll(db)
             _ = try TransactionDB.deleteAll(db)
             _ = try AccountBudgetDB.deleteAll(db)
             _ = try AccountDB.deleteAll(db)
@@ -250,7 +252,14 @@ class Repository {
     // поскольку версий на счёт обычно немного.
     func getAccountBudgets(accountIDs: [UUID]? = nil) async throws -> [AccountBudgetDB] {
         try await sqlite.read { db in
-            var request = AccountBudgetDB.order(AccountBudgetDB.Columns.effectiveFrom.desc)
+            // effectiveFrom теперь несёт полное время (на сервере колонка стала TIMESTAMPTZ, см.
+            // миграцию 20260910000000) — версии одного дня различимы по нему. datetimeCreate.desc
+            // остаётся детерминированным тай-брейком для СТАРЫХ строк, созданных когда колонка
+            // была DATE и время обрезалось до 00:00:00.
+            var request = AccountBudgetDB.order(
+                AccountBudgetDB.Columns.effectiveFrom.desc,
+                AccountBudgetDB.Columns.datetimeCreate.desc
+            )
             if let accountIDs {
                 request = request.filter(accountIDs.contains(AccountBudgetDB.Columns.accountId))
             }
@@ -675,6 +684,26 @@ class Repository {
             return try TagToTransactionDB.fetchAll(db)
         }
     }
+
+    /// ID тегов, хотя бы раз использованных в транзакции, где accountFrom или accountTo — один
+    /// из переданных счетов — см. TagsList/Tags.swift ("теги, замеченные в этом счёте и
+    /// соседних дочерних").
+    func getTagIDs(usedInAccountIDs accountIDs: [UUID]) async throws -> Set<UUID> {
+        guard !accountIDs.isEmpty else { return [] }
+        return try await sqlite.read { db in
+            let transactionIDs = try TransactionDB
+                .filter(accountIDs.contains(TransactionDB.Columns.accountFromId) || accountIDs.contains(TransactionDB.Columns.accountToId))
+                .select(TransactionDB.Columns.id, as: UUID.self)
+                .fetchAll(db)
+            guard !transactionIDs.isEmpty else { return [] }
+            let tagIDs = try TagToTransactionDB
+                .filter(transactionIDs.contains(TagToTransactionDB.Columns.transactionId))
+                .select(TagToTransactionDB.Columns.tagId, as: UUID.self)
+                .distinct()
+                .fetchAll(db)
+            return Set(tagIDs)
+        }
+    }
     
     /// Строит запрос счетов по фильтрам — общая часть между обычным getAccounts и живым
     /// observeAccounts. Чисто синхронная (просто собирает QueryInterfaceRequest, ничего не
@@ -774,7 +803,12 @@ class Repository {
             let accountIDs = accountsDB.compactMap(\.id)
             let budgetsDB = try AccountBudgetDB
                 .filter(accountIDs.contains(AccountBudgetDB.Columns.accountId))
-                .order(AccountBudgetDB.Columns.effectiveFrom.desc)
+                // effectiveFrom несёт полное время; datetimeCreate.desc — тай-брейк для старых
+                // строк, где оно было обрезано до даты (см. getAccountBudgets).
+                .order(
+                    AccountBudgetDB.Columns.effectiveFrom.desc,
+                    AccountBudgetDB.Columns.datetimeCreate.desc
+                )
                 .fetchAll(db)
             let now = Date.now
             var budgetsMap: [UUID: AccountBudget] = [:]

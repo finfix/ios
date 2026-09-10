@@ -45,14 +45,25 @@ struct EditTransaction: View {
         accountGroup: AccountGroup,
         sourceTransfer: PendingLinkedTransfer? = nil,
         prefillAmount: Decimal = 0,
-        dateTransaction: Date = Date()
+        dateTransaction: Date = Date(),
+        note: String = ""
     ) {
+        // prefillAmount — сумма, прошедшая через счёт-мост у инициатора, в валюте моста (мост и
+        // его пара всегда одной валюты). Для довнесения трансфера предзаполняем ТОЛЬКО сторону
+        // моста (targetAccountID); вторую сторону — той же суммой лишь при совпадении валют,
+        // иначе 0: EditTransactionViewModel сам подскажет конвертированную сумму / пользователь
+        // введёт. Раньше обе стороны слепо получали prefillAmount, и межвалютное довнесение
+        // создавало транзакцию с одинаковыми числами в списании и пополнении.
+        let prefillBothSides = sourceTransfer == nil || accountFrom.currency == accountTo.currency
+        let bridgeIsFrom = sourceTransfer?.targetAccountID == accountFrom.id
+
         vm = EditTransactionViewModel(
             currentTransaction: Transaction(
                 accountingInCharts: true,
-                amountFrom: prefillAmount,
-                amountTo: prefillAmount,
+                amountFrom: (prefillBothSides || bridgeIsFrom) ? prefillAmount : 0,
+                amountTo: (prefillBothSides || !bridgeIsFrom) ? prefillAmount : 0,
                 dateTransaction: dateTransaction,
+                note: note,
                 type: transactionType,
                 accountFrom: accountFrom,
                 accountTo: accountTo,
@@ -424,6 +435,26 @@ struct EditTransaction: View {
                     }
                     .padding()
 
+                    // Счёт этой транзакции связан с чужим (мост), но переноса для неё почему-то
+                    // ещё нет — например, счёт стал мостом уже ПОСЛЕ создания транзакции, и
+                    // авто-путь при сохранении (см. Service.createTransaction) её не подхватил.
+                    // Ручной способ поправить это без пересоздания транзакции.
+                    if vm.isBridgeTransaction && !vm.missingPendingLinkedTransferSides.isEmpty {
+                        Button {
+                            Task {
+                                do {
+                                    try await vm.createPendingLinkedTransfer()
+                                } catch {
+                                    alert.error(error)
+                                }
+                            }
+                        } label: {
+                            Text("Создать перенос")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .padding()
+                    }
+
                     VStack(alignment: .leading) {
                         CopyableIDText(id: vm.currentTransaction.id.uuidString)
                         Text("Дата и время создания: \(vm.currentTransaction.datetimeCreate, format: .dateTime)")
@@ -505,6 +536,7 @@ struct EditTransaction: View {
             }
             do {
                 try await vm.load()
+                try await vm.loadPendingLinkedTransfer()
             } catch {
                 alert.error(error)
             }

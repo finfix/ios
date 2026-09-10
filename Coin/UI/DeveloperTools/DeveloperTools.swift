@@ -20,7 +20,6 @@ struct DeveloperTools: View {
     private var authStorage = AuthStorage.shared
     private var syncState = SyncStateStorage.shared
     @Environment(AlertManager.self) var alert
-    @Environment(AccountGroupSharedState.self) var selectedAccountGroup
 
     @State var shouldDisableUI = false
     @State var shouldShowProgress = false
@@ -32,13 +31,11 @@ struct DeveloperTools: View {
     // текста; разворачивается только тот инструмент, который сейчас реально нужен.
     @State private var isGRPCExpanded = false
     @State private var isDataExpanded = false
+    @State private var isVisualDebugExpanded = false
     @State private var isAutoSyncExpanded = false
     @State private var isAuthExpanded = false
     @State private var debugAuthLogin = ""
     @State private var debugAuthPassword = ""
-    @State private var isBridgeExpanded = false
-    @State private var pendingLinkedTransfers: [PendingLinkedTransfer] = []
-    @State private var linkedAccounts: [Account] = []
 
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -129,7 +126,18 @@ struct DeveloperTools: View {
                         if let differences {
                             ShareLink("Скачать несовпадения", item: differences)
                         }
-                        NavigationLink("Показать все задачи", value: DeveloperToolsRoute.tasksList)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+
+                // MARK: Таски (очередь фоновой синхронизации)
+                Section {
+                    NavigationLink("Показать все задачи", value: DeveloperToolsRoute.tasksList)
+                }
+
+                // MARK: Визуальный дебаг
+                Section {
+                    DisclosureGroup("Визуальный дебаг", isExpanded: $isVisualDebugExpanded) {
                         Toggle("Дебаг закрытия панели счетов", isOn: $debugPanelClose)
                         Toggle("Дебаг ручного драга счетов", isOn: $debugManualDrag)
                         Toggle("Показывать static locations", isOn: $debugShowStaticLocations)
@@ -140,9 +148,6 @@ struct DeveloperTools: View {
                 // MARK: Инкрементальная синхронизация (Sync/ConfirmSync)
                 Section {
                     DisclosureGroup("Автосинхронизация", isExpanded: $isAutoSyncExpanded) {
-                        Text("Тикает раз в минуту (ContentView) и после 409 на мутации. Не путать со \"Сравнить данные с сервером\" выше — это про полный hard sync.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
                         HStack {
                             Text("Чекпоинт (lastSyncedAuditLogID)")
                                 .foregroundColor(.secondary)
@@ -278,62 +283,6 @@ struct DeveloperTools: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-
-                // MARK: Счета-мосты (без скоупа по группе — прямой дамп локальных таблиц)
-                Section {
-                    DisclosureGroup("Счета-мосты (дебаг)", isExpanded: $isBridgeExpanded) {
-                        HStack {
-                            Text("Текущая выбранная группа")
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text("\(selectedAccountGroup.selectedAccountGroup.name) — \(selectedAccountGroup.selectedAccountGroup.id.uuidString.prefix(8))")
-                        }
-                        .font(.caption)
-                        Text("Связанные счета (linkedAccountID != nil)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        if linkedAccounts.isEmpty {
-                            Text("Нет ни одного связанного счёта")
-                                .foregroundColor(.orange)
-                        } else {
-                            ForEach(linkedAccounts) { account in
-                                HStack {
-                                    Text(account.name)
-                                    Spacer()
-                                    Text(account.linkedAccountID?.uuidString.prefix(8) ?? "")
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                        }
-                        Text("Все PendingLinkedTransfer (без фильтра по группе)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        if pendingLinkedTransfers.isEmpty {
-                            Text("Локально нет ни одной записи")
-                                .foregroundColor(.orange)
-                        } else {
-                            ForEach(pendingLinkedTransfers) { transfer in
-                                VStack(alignment: .leading) {
-                                    Text("status: \(transfer.status.rawValue)")
-                                    Text("accountGroupID: \(transfer.accountGroupID.uuidString.prefix(8))")
-                                        .foregroundColor(.secondary)
-                                    Text("targetAccountID: \(transfer.targetAccountID.uuidString.prefix(8))")
-                                        .foregroundColor(.secondary)
-                                }
-                                .font(.caption)
-                            }
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .task {
-                    do {
-                        linkedAccounts = try await vm.allAccountsWithLinks()
-                        for try await transfers in vm.observeAllPendingLinkedTransfers() {
-                            pendingLinkedTransfers = transfers
-                        }
-                    } catch {}
-                }
 
                 .alert(isPresented: $shouldShowAlert) {
                     Alert(title:

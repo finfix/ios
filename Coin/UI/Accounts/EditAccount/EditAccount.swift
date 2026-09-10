@@ -16,6 +16,11 @@ struct EditAccount: View {
     @State private var vm: EditAccountViewModel
 
     @FocusState private var isNameFocused: Bool
+    /// Дочерний счёт, в редактирование которого проваливаемся из списка "Дочерние счета".
+    /// Собственный @State + .navigationDestination(item:) вместо closure-based NavigationLink:
+    /// внутри LazyVGrid+ForEach тот баговал и открывал редактирование сразу ВСЕХ дочерних
+    /// счетов (SwiftUI пушил все destination'ы разом).
+    @State private var childToEdit: Account?
     @State private var isRemainderFocused = false
     @State private var isRemainderCalcMode = false
     @State private var isBudgetAmountFocused = false
@@ -220,8 +225,8 @@ struct EditAccount: View {
                 Section(header: Text("Дочерние счета")) {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 10)], spacing: 16) {
                         ForEach(currentAccountChildren) { child in
-                            NavigationLink {
-                                EditAccount(child, selectedAccountGroup: selectedAccountGroup, isHiddenView: vm.isHiddenView)
+                            Button {
+                                childToEdit = child
                             } label: {
                                 ZStack(alignment: .topTrailing) {
                                     VStack {
@@ -335,6 +340,9 @@ struct EditAccount: View {
             if !newValue {
                 vm.currentAccount.accountingInHeader = false
             }
+        }
+        .navigationDestination(item: $childToEdit) { child in
+            EditAccount(child, selectedAccountGroup: selectedAccountGroup, isHiddenView: vm.isHiddenView)
         }
         .navigationTitle(vm.mode == .create ? "Cоздание счета" : "Изменение счета")
         .onAppear {

@@ -12,26 +12,35 @@ struct DraggableAccountCircleItem: View {
     @Binding var vm: AccountCirclesViewModel
     let account: Account
     @Binding var path: NavigationPath
-    // true для кружков внутри плавающей панели дочерних счетов (см. vm.expandedParentAccount) —
-    // тап/долгий тап там должен ещё и закрыть панель, а не просто выполнить своё обычное действие.
+    // true для кружков внутри плавающей панели дочерних счетов — тап/долгий тап там должен ещё и
+    // закрыть панель, а не просто выполнить своё обычное действие.
     var isAlreadyOpened: Bool = false
+    // Какой именно слот панели (см. AccountCirclesViewModel.ExpandedPanelSlot) сейчас показывает
+    // этот кружок — nil для кружков основной сетки. Нужен, чтобы closeIfNested() закрывал именно
+    // СВОЙ слот, а не слот "по умолчанию", который во время конфликта двух панелей может быть
+    // уже не тем.
+    var panelSlot: AccountCirclesViewModel.ExpandedPanelSlot?
 
     private func closeIfNested() {
         if isAlreadyOpened {
-            vm.closeExpandedPanel()
+            vm.closeExpandedPanel(slot: panelSlot)
         }
     }
 
-    // Задержать перетаскиваемый счёт над другим родительским на 1 секунду при создании
-    // транзакции (не в режиме редактирования) — открывает панель ЭТОГО родителя, чтобы уронить
-    // именно на нужный дочерний счёт (например, по валюте), а не полагаться на авто-выбор
-    // первого ребёнка.
+    /// Задержать перетаскиваемый счёт над другим родительским на 1 секунду при создании
+    /// транзакции (не в режиме редактирования) — открывает панель ЭТОГО родителя, чтобы уронить
+    /// именно на нужный дочерний счёт (например, по валюте), а не полагаться на авто-выбор
+    /// первого ребёнка.
     @State private var hoverExpandTask: Task<Void, Never>?
 
     private func handleHoverExpand(targeted: Bool) {
         hoverExpandTask?.cancel()
         hoverExpandTask = nil
         guard targeted, !vm.isEditMode, account.isParent, !account.childrenAccounts.isEmpty else { return }
+        // openExpandedPanel сам разрулит конфликт слотов: если сейчас тащат ребёнка ИЗ ДРУГОГО,
+        // уже открытого родителя, этот вызов автоматически уйдёт во второй (свободный) слот
+        // панели, не трогая тот, что держит живым исходного ребёнка — см.
+        // AccountCirclesViewModel.ExpandedPanelSlot.
         hoverExpandTask = Task {
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled else { return }
@@ -40,8 +49,7 @@ struct DraggableAccountCircleItem: View {
                 // координаты — в отличие от нативного .draggable, тут это не требует
                 // GeometryReader на том же узле, что и жест, и не рискует крэшем
                 // _UIPlatterView).
-                vm.expandedParentAccountAnchorY = vm.draggableLocation?.y
-                vm.expandedParentAccount = account
+                vm.openExpandedPanel(for: account, anchorY: vm.draggableLocation?.y)
             }
         }
     }
@@ -154,10 +162,9 @@ struct DraggableAccountCircleItem: View {
                                 // повторный тап.
                                 if !account.childrenAccounts.isEmpty {
                                     withAnimation {
-                                        vm.expandedParentAccount = account
                                         // Двойной тап — не драг, координировать не с чем, панель
                                         // просто по центру экрана.
-                                        vm.expandedParentAccountAnchorY = nil
+                                        vm.openExpandedPanel(for: account, anchorY: nil)
                                     }
                                 }
                             }
@@ -185,11 +192,9 @@ struct DraggableAccountCircleItem: View {
                             }
                     )
 
-                // Карандаш — в режиме редактирования (любой кружок) и в панели дочерних счетов
-                // родителя (двойной тап), даже вне режима редактирования: панель — это уже
-                // "провалились посмотреть детей", быстрый доступ к их редактированию там уместен
-                // сам по себе, без необходимости отдельно включать редактирование всей сетки.
-                if vm.isEditMode || isAlreadyOpened {
+                // Карандаш — только в режиме редактирования, одинаково для любого кружка
+                // (основной сетки или панели дочерних счетов).
+                if vm.isEditMode {
                     Button {
                         closeIfNested()
                         path.append(AccountCircleItemRoute.editAccount(account))

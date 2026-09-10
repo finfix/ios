@@ -32,7 +32,12 @@ struct QuickStatisticView: View {
     var body: some View {
         HStack {
             Spacer()
+            // .id принудительно пересоздаёт view (и её @State vm) при смене группы — иначе
+            // @State-инициализация внутри PendingLinkedTransfersQuickStatButton.init(accountGroup:)
+            // отрабатывает только один раз за всю жизнь этого слота в дереве, и счётчик навсегда
+            // остаётся привязан к группе, с которой кнопка появилась впервые.
             PendingLinkedTransfersQuickStatButton(accountGroup: selectedAccountGroup)
+                .id(selectedAccountGroup.id)
             Spacer()
             VStack {
                 Text("Расход")

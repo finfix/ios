@@ -20,7 +20,7 @@ struct Tags: View {
             ScrollView(.horizontal) {
                 VStack(alignment: .leading) {
                     HStack {
-                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
+                        ForEach(Array(vm.suggestedTags.enumerated()), id: \.offset) { (i, tag) in
                             if i % 2 == 0 {
                                 Button {
                                     withAnimation {
@@ -48,7 +48,7 @@ struct Tags: View {
                         }
                     }
                     HStack {
-                        ForEach(Array(vm.tags.enumerated()), id: \.offset) { (i, tag) in
+                        ForEach(Array(vm.suggestedTags.enumerated()), id: \.offset) { (i, tag) in
                             if i % 2 != 0 {
                                 Button {
                                     withAnimation {
@@ -85,5 +85,14 @@ struct Tags: View {
             }
         }
         .buttonStyle(.plain)
+        // Пересчитываем "замеченные" теги при смене счетов/типа транзакции — id склеен из всех
+        // трёх, чтобы .task перезапускался на изменение любого из них.
+        .task(id: "\(vm.currentTransaction.accountFrom.id)-\(vm.currentTransaction.accountTo.id)-\(vm.currentTransaction.type.rawValue)") {
+            do {
+                try await vm.loadUsedTags()
+            } catch {
+                alert.error(error)
+            }
+        }
     }
 }
