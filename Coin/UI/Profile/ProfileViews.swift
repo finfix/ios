@@ -11,4 +11,5 @@ enum ProfileViews: Hashable {
     case hidedAccounts
     case settings
     case accountGroupsList
+    case changePassword
 }

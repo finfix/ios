@@ -23,6 +23,7 @@ struct Profile: View {
             Section {
                 NavigationLink("Cкрытые счета", value: ProfileViews.hidedAccounts)
                 NavigationLink("Группы счетов", value: ProfileViews.accountGroupsList)
+                NavigationLink("Сменить пароль", value: ProfileViews.changePassword)
             }
             .buttonStyle(.plain)
             Section {
