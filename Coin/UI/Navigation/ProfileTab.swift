@@ -20,6 +20,7 @@ struct ProfileTab: View {
                     case .hidedAccounts: HidedAccountsList()
                     case .settings: Settings()
                     case .accountGroupsList: AccountGroupList()
+                    case .changePassword: ChangePassword()
                     }
                 }
                 .navigationDestination(for: AccountGroupListRoute.self) { screen in

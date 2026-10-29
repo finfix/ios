@@ -75,11 +75,13 @@
 		2DB3AD0E992E1EBE52DFE9A9 /* CreatePendingLinkedTransferReq.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8756A72952DB36FCA29FDC8 /* CreatePendingLinkedTransferReq.swift */; };
 		2E42A5B90BE46A953B8FF114 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EC82B6ABEEB8DA8B851923 /* Keychain.swift */; };
 		2F4DD2C1A6B6C76BA9F6ACEE /* Rank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB2AB01AFE2D8CE38A0A20A /* Rank.swift */; };
+		3023D9E9F88AE216E7214B22 /* ChangePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76EB45AF3E8193EBDF10BEB6 /* ChangePassword.swift */; };
 		30F275BF7B08F8A0C6D4EFCD /* CreateTagRes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE6D4ED4EDC918703356B9A4 /* CreateTagRes.swift */; };
 		3248E6098516CEC7411EEC62 /* TransactionCalendarStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D55CE8F555C05BA20B7656 /* TransactionCalendarStrip.swift */; };
 		33C3C6CC77117C3A16EF951A /* ModelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA5A375145CBF73998DCFF7 /* ModelType.swift */; };
 		33F55DD08775C9434E569D3E /* AccountCirclePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17B5A6EB49E152DA70016B /* AccountCirclePicker.swift */; };
 		362655447F676322D9FDD83C /* GetAccountBudgetsReq.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EF8DD6C07A519153597D3F /* GetAccountBudgetsReq.swift */; };
+		369881F42A0C694A3321D150 /* ChangePassword.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76EB45AF3E8193EBDF10BEB6 /* ChangePassword.swift */; };
 		36BBEB9B331C647F4AEDF744 /* AuditLogHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72B38360B994BA0C15656381 /* AuditLogHistoryViewModel.swift */; };
 		37DA85F3DDA6AC8C79450B23 /* UpdateUserReq.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A27540FB91C2F6686D9B850 /* UpdateUserReq.swift */; };
 		394675ED28D76B37D5AD1CE0 /* UpdateTagReq.swift in Sources */ = {isa = PBXBuildFile; fileRef = B85701E281D2B6C3D97AC3C0 /* UpdateTagReq.swift */; };
@@ -114,6 +116,7 @@
 		517E5613396B23A0DD6C8AC3 /* EditTransactionRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645736C7198012F1815D1335 /* EditTransactionRoute.swift */; };
 		51E8139C833D887E55347D34 /* ChartType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49CA77054A0108137DC97A3 /* ChartType.swift */; };
 		51F0538C9E3F83147969BB3A /* StaticLocationsDebugBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1015ED95DA6EF03B60B1E40 /* StaticLocationsDebugBadge.swift */; };
+		526B890FCBC357AA7B14F6D1 /* ChangePasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEA7BFCAE55C93C5F617BEE /* ChangePasswordViewModel.swift */; };
 		52AFF0003A53E408BBC65193 /* ChartFullScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9906CB2308AAEDDA966D1CB4 /* ChartFullScreenView.swift */; };
 		52DA355D4EAFAEC36FD1BBA8 /* CachedIconImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F5EAA39401E50165148506C /* CachedIconImage.swift */; };
 		535CD8E224A70212180F2C3F /* AuditLogDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75CDEC5EB36257D71A5060E9 /* AuditLogDetails.swift */; };
@@ -573,6 +576,7 @@
 		DEB5A2174F086ABC5C4DD652 /* AlertModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89872A9D8DF3188CB40C7583 /* AlertModel.swift */; };
 		DFCB3D85D61279CE9446726C /* SyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEBB5DA770BD927EA85FF72 /* SyncAPI.swift */; };
 		DFEAAC1B3E53EBB4C3C027F0 /* CreateAccountRes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25DF1A4E4BD84860C960B28A /* CreateAccountRes.swift */; };
+		E17ACB3ABD6ED8DD55A25C56 /* ChangePasswordViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEA7BFCAE55C93C5F617BEE /* ChangePasswordViewModel.swift */; };
 		E1A94294D8CA21886C2F020C /* AuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD0DB3B9E7782C7CFA231B1 /* AuditLog.swift */; };
 		E2B0DF984D0E1A2B2E41A325 /* GetAccountBudgetsRes.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF0EC0857B2E34F8898E2C4 /* GetAccountBudgetsRes.swift */; };
 		E2EF50999472AF669783FCBB /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 090ED3EB9A2F7D9F600D1E92 /* Token.swift */; };
@@ -689,6 +693,7 @@
 		64E4B2FED72B7E75FFB5B6C6 /* Tags.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Tags.swift; sourceTree = "<group>"; };
 		69C8CC0F468892B1CDF9D82B /* TasksListRoute.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TasksListRoute.swift; sourceTree = "<group>"; };
 		6CC35C8E561377DE79763BE4 /* CreateTransactionRes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreateTransactionRes.swift; sourceTree = "<group>"; };
+		6CEA7BFCAE55C93C5F617BEE /* ChangePasswordViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChangePasswordViewModel.swift; sourceTree = "<group>"; };
 		6EB070AEF47EB663AE828F89 /* Position.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
 		7149BAF53E828E48123DC33A /* RefreshTokensRes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RefreshTokensRes.swift; sourceTree = "<group>"; };
 		72B38360B994BA0C15656381 /* AuditLogHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogHistoryViewModel.swift; sourceTree = "<group>"; };
@@ -697,6 +702,7 @@
 		73AE712BF8EB30835A054161 /* PendingLinkedTransferAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingLinkedTransferAPI.swift; sourceTree = "<group>"; };
 		75CDEC5EB36257D71A5060E9 /* AuditLogDetails.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuditLogDetails.swift; sourceTree = "<group>"; };
 		7641052D03D650311712670F /* UpdatePendingLinkedTransferRes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UpdatePendingLinkedTransferRes.swift; sourceTree = "<group>"; };
+		76EB45AF3E8193EBDF10BEB6 /* ChangePassword.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ChangePassword.swift; sourceTree = "<group>"; };
 		785D6A8DF8B9E71780A323FB /* PendingLinkedTransfersRoute.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PendingLinkedTransfersRoute.swift; sourceTree = "<group>"; };
 		7BD0DB3B9E7782C7CFA231B1 /* AuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLog.swift; sourceTree = "<group>"; };
 		7BFADF66859E1EAE4178F65E /* TransactionType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TransactionType.swift; sourceTree = "<group>"; };
@@ -1450,6 +1456,8 @@
 				B5F595912B56D35F004D57A4 /* Settings.swift */,
 				B5744E972BD29180004C9AC7 /* SettingsViewModel.swift */,
 				13E86DEC8B4CA449218A60AB /* ProfileViews.swift */,
+				76EB45AF3E8193EBDF10BEB6 /* ChangePassword.swift */,
+				6CEA7BFCAE55C93C5F617BEE /* ChangePasswordViewModel.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -2026,6 +2034,8 @@
 				900DB6B38376A0D2AFA4856E /* NumberFormatters.swift in Sources */,
 				8F61B22B1F418482AD53B9D6 /* LoginRoute.swift in Sources */,
 				E7AA725F62F9F2B6219066D0 /* PieProgressView.swift in Sources */,
+				3023D9E9F88AE216E7214B22 /* ChangePassword.swift in Sources */,
+				E17ACB3ABD6ED8DD55A25C56 /* ChangePasswordViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2328,6 +2338,8 @@
 				A9D85731F0F8D6361A1AB9DD /* NumberFormatters.swift in Sources */,
 				0789B3E0240DE84FB58DA37E /* LoginRoute.swift in Sources */,
 				10C27B25AED13C72FEE8BB19 /* PieProgressView.swift in Sources */,
+				369881F42A0C694A3321D150 /* ChangePassword.swift in Sources */,
+				526B890FCBC357AA7B14F6D1 /* ChangePasswordViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

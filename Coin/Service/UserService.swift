@@ -25,13 +25,19 @@ extension Service {
             reqModel: UpdateUserReq(
                 name: newUser.name != oldUser.name ? newUser.name : nil,
                 email: newUser.email != oldUser.email ? newUser.email : nil,
-//                password: newUser.password != oldUser.password ? newUser.password : nil,
-//                oldPassword: newUser.oldPassword != oldUser.oldPassword ? newUser.oldPassword : nil,
                 defaultCurrency: newUser.defaultCurrency.code != oldUser.defaultCurrency.code ? newUser.defaultCurrency.code : nil,
                 notificationToken: newUser.notificationToken != oldUser.notificationToken ? newUser.notificationToken : nil
             ),
             entityID: newUser.id
         )
+    }
+    
+    /// Смена пароля идёт напрямую на сервер, минуя очередь фоновых задач — нужен ответ сервера (например, неверный старый пароль)
+    func changePassword(oldPassword: String, newPassword: String) async throws {
+        try await apiManager.UpdateUser(req: UpdateUserReq(
+            password: newPassword,
+            oldPassword: oldPassword
+        ))
     }
     
     // MARK: Other
